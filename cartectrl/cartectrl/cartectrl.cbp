@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="cartectrl" />
+		<Option pch_mode="2" />
+		<Option compiler="armnoneeabi_gnu_gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin\Debug\cartectrl.elf" prefix_auto="0" extension_auto="0" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="armnoneeabi_gnu_gcc" />
+			</Target>
+			<Target title="Release">
+				<Option output="bin\Release\cartectrl.elf" prefix_auto="0" extension_auto="0" />
+				<Option object_output="obj\Release\" />
+				<Option type="1" />
+				<Option compiler="armnoneeabi_gnu_gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-g" />
+			<Add option="-mcpu=cortex-m4" />
+			<Add option="-mfloat-abi=hard" />
+			<Add option="-mfpu=fpv4-sp-d16" />
+			<Add option="-gdwarf-2" />
+			<Add option="-mthumb" />
+			<Add option="-Wstrict-prototypes" />
+			<Add option="-fverbose-asm" />
+			<Add option="-DSTM32F4XX" />
+			<Add option="-DUSE_STDPERIPH_DRIVER" />
+			<Add option="-DRUN_FROM_FLASH=1" />
+			<Add directory="include" />
+			<Add directory="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\CMSIS\Include" />
+			<Add directory="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\CMSIS\ST\STM32F4xx\Include" />
+			<Add directory="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\STM32F4xx_StdPeriph_Driver\inc" />
+		</Compiler>
+		<Linker>
+			<Add option="-mcpu=cortex-m4" />
+			<Add option="-mthumb" />
+			<Add option="-nostartfiles" />
+			<Add option="-T./linker/stm32f4_linker.ld" />
+			<Add option="-Wl,--no-warn-mismatch" />
+			<Add option="-mfloat-abi=hard" />
+			<Add option="-mfpu=fpv4-sp-d16" />
+		</Linker>
+		<Unit filename="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_gpio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_rcc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src\main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="startup\startup_stm32f4xx.s">
+			<Option compiler="armnoneeabi_gnu_gcc" use="1" buildCommand="$compiler -xassembler-with-cpp $options $includes -c $file -o $object" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger>
+				<remote_debugging>
+					<options conn_type="0" serial_baud="115200" additional_cmds_before="target remote localhost:3333&#x0A;monitor reset halt&#x0A;load" />
+				</remote_debugging>
+			</debugger>
+			<lib_finder disable_auto="1" />
+			<mcu>
+				<device family="STM32" device="STM32F101C4" />
+			</mcu>
+			<gdbremote>
+				<hardware interface="parport" option="wiggler" jtagspeed="" gdbport="2000" configfile="config.cfg" auto="false" telnetport="4444" tclport="6666" />
+				<advintopts />
+			</gdbremote>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
