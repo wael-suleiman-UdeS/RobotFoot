@@ -1,1 +1,4 @@
-*.layout
+# Ignorer fichiers layout et depend 
+*\.layout
+*\.depend
+
