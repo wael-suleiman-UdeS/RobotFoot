@@ -94,17 +94,19 @@ int main(int argc, char* argv[])
     cvNamedWindow( "EdgeDetection", CV_WINDOW_NORMAL );
 
 	// Minimum value for the filter
-	int Hvalue = 159;
-	int Svalue = 51;
-	int Vvalue = 173;
+	int Hvalue = 151;
+	int Svalue = 80;
+	int Vvalue = 181;
 
 	// Maximum value for the filter
-	int Hvalue2 = 255;
+	int Hvalue2 = 172;
 	int Svalue2 = 255;
 	int Vvalue2 = 255;
 
 	// Value for the erosion
-	int erosion = 1;
+	int erosion = 100;
+	// Value for the dilatation
+	int dilatation = 255;
 
 	// Trackball created for the calibration
 	cvCreateTrackbar("H minimum","EdgeDetection",&Hvalue,255);
@@ -118,6 +120,8 @@ int main(int argc, char* argv[])
 
 	// Trackball created for the erosion
 	cvCreateTrackbar("Erosion","EdgeDetection",&erosion,255);
+	// Trackball created for the erosion
+	cvCreateTrackbar("Dilatation","EdgeDetection",&dilatation,255);
 
 	// Image
     IplImage*  hsv_frame    = cvCreateImage(size, IPL_DEPTH_8U, 3);
@@ -145,6 +149,7 @@ int main(int argc, char* argv[])
         cvInRangeS(hsv_frame, hsv_min, hsv_max, thresholded);
 
 		cvErode(thresholded,thresholded,NULL,erosion/25.5);
+		cvDilate(thresholded,thresholded,NULL,dilatation/25.5);
         // Memory for hough circles
         CvMemStorage* storage = cvCreateMemStorage(0);
         // hough detector works better with some smoothing of the image

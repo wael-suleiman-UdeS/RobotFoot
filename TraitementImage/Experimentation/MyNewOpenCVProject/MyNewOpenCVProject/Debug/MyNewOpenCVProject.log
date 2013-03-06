@@ -1,14 +1,15 @@
-﻿La génération a démarré 2013-02-21 09:47:24.
-     1>Projet "C:\Users\David\Documents\Visual Studio 2012\Projects\MyNewOpenCVProject\MyNewOpenCVProject\MyNewOpenCVProject.vcxproj" sur le nœud 2 (Build cible(s)).
+﻿La génération a démarré 2013-03-06 15:12:20.
+     1>Projet "C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\MyNewOpenCVProject\MyNewOpenCVProject.vcxproj" sur le nœud 2 (Build cible(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IC:\opencv243\build\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
          main.cpp
-     1>c:\users\david\documents\visual studio 2012\projects\mynewopencvproject\mynewopencvproject\main.cpp(147): warning C4244: 'argument' : conversion de 'double' en 'int', perte possible de données
+     1>c:\users\david\documents\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\main.cpp(151): warning C4244: 'argument' : conversion de 'double' en 'int', perte possible de données
+     1>c:\users\david\documents\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\main.cpp(152): warning C4244: 'argument' : conversion de 'double' en 'int', perte possible de données
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\David\Documents\Visual Studio 2012\Projects\MyNewOpenCVProject\Debug\MyNewOpenCVProject.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\opencv243\build\x86\vc10\lib opencv_core243d.lib opencv_imgproc243d.lib opencv_highgui243d.lib opencv_ml243d.lib opencv_video243d.lib opencv_features2d243d.lib opencv_calib3d243d.lib opencv_objdetect243d.lib opencv_contrib243d.lib opencv_legacy243d.lib opencv_flann243d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\David\Documents\Visual Studio 2012\Projects\MyNewOpenCVProject\Debug\MyNewOpenCVProject.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\David\Documents\Visual Studio 2012\Projects\MyNewOpenCVProject\Debug\MyNewOpenCVProject.lib" /MACHINE:X86 Debug\main.obj
-         MyNewOpenCVProject.vcxproj -> C:\Users\David\Documents\Visual Studio 2012\Projects\MyNewOpenCVProject\Debug\MyNewOpenCVProject.exe
-     1>Génération du projet "C:\Users\David\Documents\Visual Studio 2012\Projects\MyNewOpenCVProject\MyNewOpenCVProject\MyNewOpenCVProject.vcxproj" terminée (Build cible(s)).
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\opencv243\build\x86\vc10\lib opencv_core243d.lib opencv_imgproc243d.lib opencv_highgui243d.lib opencv_ml243d.lib opencv_video243d.lib opencv_features2d243d.lib opencv_calib3d243d.lib opencv_objdetect243d.lib opencv_contrib243d.lib opencv_legacy243d.lib opencv_flann243d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.lib" /MACHINE:X86 Debug\main.obj
+         MyNewOpenCVProject.vcxproj -> C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.exe
+     1>Génération du projet "C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\MyNewOpenCVProject\MyNewOpenCVProject.vcxproj" terminée (Build cible(s)).
 
 La génération a réussi.
 
-Temps écoulé 00:00:04.69
+Temps écoulé 00:00:04.33
