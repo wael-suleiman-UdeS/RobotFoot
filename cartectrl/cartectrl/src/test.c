@@ -2,7 +2,7 @@
 #include <misc.h>			 // I recommend you have a look at these in the ST firmware folder
 #include <stm32f4xx_usart.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 
-#define MAX_STRLEN 12 // this is the maximum string length of our string in characters
+#define MAX_STRLEN 13 // this is the maximum string length of our string in characters
 volatile char received_string[MAX_STRLEN+1]; // this will hold the recieved string
 
 void Delay(__IO uint32_t nCount) {
@@ -111,16 +111,13 @@ void USART_puts(USART_TypeDef* USARTx, volatile char *s){
 
 int main(void) {
 
-  init_USART1(115200); // initialize USART1 @ 9600 baud
+  init_USART1(115200); // initialize USART1 @ 115200 baud
 
+  USART_puts(USART1, "Hello World!!");
 
   while (1){
-    USART_puts(USART1, "Hello World!");
-
-    // just send a message to indicate that it works
-    /*
-     * You can do whatever you want in here
-     */
+     /* Delay(9000000);
+      USART_puts(USART1, "Hello World!!");*/
   }
 }
 
@@ -136,7 +133,7 @@ void USART1_IRQHandler(void){
 		/* check if the received character is not the LF character (used to determine end of string)
 		 * or the if the maximum string length has been been reached
 		 */
-		if( (t != 'n') && (cnt < MAX_STRLEN) ){
+		if( cnt < MAX_STRLEN ){
 			received_string[cnt] = t;
 			cnt++;
 		}
