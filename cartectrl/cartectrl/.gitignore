@@ -3,3 +3,5 @@
 *.depend
 
 
+#ignorer log
+*.log
