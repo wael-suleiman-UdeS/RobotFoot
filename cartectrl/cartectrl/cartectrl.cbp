@@ -7,14 +7,14 @@
 		<Option compiler="armnoneeabi_gnu_gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin\Debug\cartectrl.elf" prefix_auto="0" extension_auto="0" />
-				<Option object_output="obj\Debug\" />
+				<Option output="bin/Debug/cartectrl.elf" prefix_auto="0" extension_auto="0" />
+				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="armnoneeabi_gnu_gcc" />
 			</Target>
 			<Target title="Release">
-				<Option output="bin\Release\cartectrl.elf" prefix_auto="0" extension_auto="0" />
-				<Option object_output="obj\Release\" />
+				<Option output="bin/Release/cartectrl.elf" prefix_auto="0" extension_auto="0" />
+				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="armnoneeabi_gnu_gcc" />
 				<Compiler>
@@ -39,9 +39,9 @@
 			<Add option="-DUSE_STDPERIPH_DRIVER" />
 			<Add option="-DRUN_FROM_FLASH=1" />
 			<Add directory="include" />
-			<Add directory="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\CMSIS\Include" />
-			<Add directory="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\CMSIS\ST\STM32F4xx\Include" />
-			<Add directory="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\STM32F4xx_StdPeriph_Driver\inc" />
+			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/Include" />
+			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/ST/STM32F4xx/Include" />
+			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/inc" />
 		</Compiler>
 		<Linker>
 			<Add option="-mcpu=cortex-m4" />
@@ -52,19 +52,23 @@
 			<Add option="-mfloat-abi=hard" />
 			<Add option="-mfpu=fpv4-sp-d16" />
 		</Linker>
-		<Unit filename="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c">
+		<ExtraCommands>
+			<Add after="arm-none-eabi-size $(TARGET_OUTPUT_FILE)" />
+			<Mode after="always" />
+		</ExtraCommands>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_flash.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_gpio.c">
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="extlib\STM32F4-Discovery_FW_V1.1.0\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_rcc.c">
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="src\main.c">
+		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="startup\startup_stm32f4xx.s">
+		<Unit filename="startup/startup_stm32f4xx.s">
 			<Option compiler="armnoneeabi_gnu_gcc" use="1" buildCommand="$compiler -xassembler-with-cpp $options $includes -c $file -o $object" />
 		</Unit>
 		<Extensions>
@@ -72,7 +76,7 @@
 			<envvars />
 			<debugger>
 				<remote_debugging>
-					<options conn_type="0" serial_baud="115200" additional_cmds_before="target remote localhost:3333&#x0A;monitor reset halt&#x0A;load" />
+					<options conn_type="0" serial_baud="115200" additional_cmds_before='target remote | openocd -c &quot;gdb_port pipe&quot; -f config.cfg&#x0A;monitor reset halt&#x0A;load' />
 				</remote_debugging>
 			</debugger>
 			<lib_finder disable_auto="1" />
