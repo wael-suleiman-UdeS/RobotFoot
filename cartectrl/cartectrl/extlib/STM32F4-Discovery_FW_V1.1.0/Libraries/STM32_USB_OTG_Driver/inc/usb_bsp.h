@@ -25,51 +25,50 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usb_core.h"
-#include "stm32f4_discovery.h"
 
 /** @addtogroup USB_OTG_DRIVER
   * @{
   */
-  
+
 /** @defgroup USB_BSP
-  * @brief This file is the 
+  * @brief This file is the
   * @{
-  */ 
+  */
 
 
 /** @defgroup USB_BSP_Exported_Defines
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
+  */
 
 
 /** @defgroup USB_BSP_Exported_Types
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
+  */
 
 
 /** @defgroup USB_BSP_Exported_Macros
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup USB_BSP_Exported_Variables
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup USB_BSP_Exported_FunctionsPrototype
   * @{
-  */ 
+  */
 void BSP_Init(void);
 
 void USB_OTG_BSP_Init (USB_OTG_CORE_HANDLE *pdev);
@@ -82,16 +81,16 @@ void USB_OTG_BSP_DriveVBUS(USB_OTG_CORE_HANDLE *pdev,uint8_t state);
 #endif
 /**
   * @}
-  */ 
+  */
 
 #endif //__USB_BSP__H__
 
 /**
   * @}
-  */ 
+  */
 
 /**
   * @}
-  */ 
+  */
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
 
