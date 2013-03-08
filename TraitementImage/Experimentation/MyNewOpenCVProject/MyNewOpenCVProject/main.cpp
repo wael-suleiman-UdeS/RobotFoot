@@ -1,11 +1,11 @@
 #include <iostream>
 #include "test.h"
 
-using namespace std;
-
-int main() {
+int main(int argc, char* argv[]) {
+	int cReturn = EXIT_SUCCESS;
+	
 	test conception;
-	conception.trackBall();
+	cReturn = conception.cameraClibration(argc,argv);
 
-	return EXIT_FAILURE;
+	return cReturn;
 }

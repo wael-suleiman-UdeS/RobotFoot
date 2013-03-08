@@ -1,28 +1,40 @@
 #include "test.h"
 
 using namespace cv;
+using namespace std;
 
 void test::testPrimaire(){
 
-	//create Matrix to store image
-	Mat image;
-
 	// initialize capture
-	VideoCapture cap;
-
-	cap.open(0);
-
+    CvCapture* capture = cvCaptureFromCAM( 0 );
+    if(!capture)
+    {
+        fprintf( stderr, "ERROR: capture is NULL \n" );
+        getchar();
+		exit;
+    }
 	// create window to show image namedWindow(“window”, CV_WINDOW_AUTOSIZE);
-	while(1){
+	cvNamedWindow( "window", CV_WINDOW_AUTOSIZE );
 
-	// copy webcam stream to image
-	cap>>image;
+	while(true){
+		// Get one frame
+        IplImage* frame = cvQueryFrame(capture);
+        if( !frame )
+        {
+                fprintf( stderr, "ERROR: frame is null...\n" );
+                getchar();
+                break;
+        }
 	//print image to screen 
-	imshow("window", image);
+	cvShowImage("window", frame);
 	//delay 33ms 
 	waitKey(33);
 
+	if( (cvWaitKey(10) & 255) == 27 ) break;
+
 	}
+	cvReleaseCapture(&capture);
+	cvDestroyWindow("window");
 
 }
 
@@ -56,7 +68,6 @@ void test::testPrimaire(){
 *          : along with this program.  If not, see <http://www.gnu.org/licenses/>        *
 ******************************************************************************************/
 
-
 // Global Localisation Algorithm : Detection of a Sphere aka (GlADoS)
 
 void test::trackBall()
@@ -69,7 +80,7 @@ void test::trackBall()
     {
             fprintf( stderr, "ERROR: capture is NULL \n" );
             getchar();
-            return -1;
+			exit;
     }
     // Create a window in which the captured images will be presented
     cvNamedWindow( "Camera", CV_WINDOW_AUTOSIZE );
@@ -149,19 +160,6 @@ void test::trackBall()
                                     cvRound(p[2]), CV_RGB(255,0,0), 3, 8, 0 );
 		}
 
-		/*
-		//
-		//  For testing purpose only
-		//
-		CvPoint pt1 = cvPoint(0,0);
-		CvPoint pt2 = cvPoint(100,100);
-		CvPoint pt3 = cvPoint(0,100);
-		CvPoint pt4 = cvPoint(100,200);
-
-		cvRectangle(hsv_frame, pt1, pt2, hsv_min, CV_FILLED);
-		cvRectangle(hsv_frame, pt3, pt4, hsv_max, CV_FILLED);
-		*/
-
         cvShowImage( "Camera", frame ); // Original stream with detected ball overlay
         cvShowImage( "HSV", hsv_frame); // Original stream in the HSV color space
         cvShowImage( "After Color Filtering", thresholded ); // The stream after color filtering
@@ -173,5 +171,171 @@ void test::trackBall()
     }
      // Release the capture device housekeeping
      cvReleaseCapture( &capture );
-     cvDestroyWindow( "mywindow" );
+     cvDestroyAllWindows();
+   }
+
+   int test::cameraClibration(int argc, char* argv[]) {
+	help();
+	Settings s;
+    const string inputSettingsFile = argc > 1 ? argv[1] : "default.xml";
+    FileStorage fs(inputSettingsFile, FileStorage::READ); // Read the settings
+    if (!fs.isOpened())
+    {
+        cout << "Could not open the configuration file: \"" << inputSettingsFile << "\"" << endl;
+        return -1;
+    }
+    fs["Settings"] >> s;
+    fs.release();                                         // close Settings file
+
+    if (!s.goodInput)
+    {
+        cout << "Invalid input detected. Application stopping. " << endl;
+        return -1;
+    }
+
+    vector<vector<Point2f> > imagePoints;
+    Mat cameraMatrix, distCoeffs;
+    Size imageSize;
+    int mode = s.inputType == Settings::IMAGE_LIST ? CAPTURING : DETECTION;
+    clock_t prevTimestamp = 0;
+    const Scalar RED(0,0,255), GREEN(0,255,0);
+    const char ESC_KEY = 27;
+
+    for(int i = 0;;++i)
+    {
+      Mat view;
+      bool blinkOutput = false;
+
+      view = s.nextImage();
+
+      //-----  If no more image, or got enough, then stop calibration and show result -------------
+      if( mode == CAPTURING && imagePoints.size() >= (unsigned)s.nrFrames )
+      {
+          if( runCalibrationAndSave(s, imageSize,  cameraMatrix, distCoeffs, imagePoints))
+              mode = CALIBRATED;
+          else
+              mode = DETECTION;
+      }
+      if(view.empty())          // If no more images then run calibration, save and stop loop.
+      {
+            if( imagePoints.size() > 0 )
+                runCalibrationAndSave(s, imageSize,  cameraMatrix, distCoeffs, imagePoints);
+            break;
+      }
+
+
+        imageSize = view.size();  // Format input image.
+        if( s.flipVertical )    flip( view, view, 0 );
+
+        vector<Point2f> pointBuf;
+		//Mat pointBuf;
+
+        bool found;
+        switch( s.calibrationPattern ) // Find feature points on the input format
+        {
+        case Settings::CHESSBOARD:
+            found = findChessboardCorners( view, s.boardSize, pointBuf,
+                CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
+            break;
+        case Settings::CIRCLES_GRID:
+            found = findCirclesGrid( view, s.boardSize, pointBuf );
+            break;
+        case Settings::ASYMMETRIC_CIRCLES_GRID:
+            found = findCirclesGrid( view, s.boardSize, pointBuf, CALIB_CB_ASYMMETRIC_GRID );
+            break;
+        default:
+            found = false;
+            break;
+        }
+
+        if ( found)                // If done with success,
+		{
+                // improve the found corners' coordinate accuracy for chessboard
+                if( s.calibrationPattern == Settings::CHESSBOARD)
+                {
+                    Mat viewGray;
+                    cvtColor(view, viewGray, CV_BGR2GRAY);
+                    cornerSubPix( viewGray, pointBuf, Size(11,11),
+                        Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+                }
+
+                if( mode == CAPTURING &&  // For camera only take new samples after delay time
+                    (!s.inputCapture.isOpened() || clock() - prevTimestamp > s.delay*1e-3*CLOCKS_PER_SEC) )
+                {
+                    imagePoints.push_back(pointBuf);
+                    prevTimestamp = clock();
+                    blinkOutput = s.inputCapture.isOpened();
+                }
+
+                // Draw the corners.
+                drawChessboardCorners( view, s.boardSize, Mat(pointBuf), found );
+        }
+
+        //----------------------------- Output Text ------------------------------------------------
+        string msg = (mode == CAPTURING) ? "100/100" :
+                      mode == CALIBRATED ? "Calibrated" : "Press 'g' to start";
+        int baseLine = 0;
+        Size textSize = getTextSize(msg, 1, 1, 1, &baseLine);
+        Point textOrigin(view.cols - 2*textSize.width - 10, view.rows - 2*baseLine - 10);
+
+        if( mode == CAPTURING )
+        {
+            if(s.showUndistorsed)
+                msg = format( "%d/%d Undist", (int)imagePoints.size(), s.nrFrames );
+            else
+                msg = format( "%d/%d", (int)imagePoints.size(), s.nrFrames );
+        }
+
+        putText( view, msg, textOrigin, 1, 1, mode == CALIBRATED ?  GREEN : RED);
+
+        if( blinkOutput )
+            bitwise_not(view, view);
+
+        //------------------------- Video capture  output  undistorted ------------------------------
+        if( mode == CALIBRATED && s.showUndistorsed )
+        {
+            Mat temp = view.clone();
+            undistort(temp, view, cameraMatrix, distCoeffs);
+        }
+
+        //------------------------------ Show image and check for input commands -------------------
+        imshow("Image View", view);
+        char key = (char)waitKey(s.inputCapture.isOpened() ? 50 : s.delay);
+
+        if( key  == ESC_KEY )
+            break;
+
+        if( key == 'u' && mode == CALIBRATED )
+           s.showUndistorsed = !s.showUndistorsed;
+
+        if( s.inputCapture.isOpened() && key == 'g' )
+        {
+            mode = CAPTURING;
+            imagePoints.clear();
+        }
+    }
+
+    // -----------------------Show the undistorted image for the image list ------------------------
+    if( s.inputType == Settings::IMAGE_LIST && s.showUndistorsed )
+    {
+        Mat view, rview, map1, map2;
+        initUndistortRectifyMap(cameraMatrix, distCoeffs, Mat(),
+            getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, 0),
+            imageSize, CV_16SC2, map1, map2);
+
+        for(int i = 0; i < (int)s.imageList.size(); i++ )
+        {
+            view = imread(s.imageList[i], 1);
+            if(view.empty())
+                continue;
+            remap(view, rview, map1, map2, INTER_LINEAR);
+            imshow("Image View", rview);
+            char c = (char)waitKey();
+            if( c  == ESC_KEY || c == 'q' || c == 'Q' )
+                break;
+        }
+    }
+
+
+    return 0;
    }

@@ -11,12 +11,14 @@
 #include <limits.h>
 #include <time.h>
 #include <ctype.h>
+#include"Settings.h"
 
 class test {
 
 public:
 	void testPrimaire();
 	void trackBall();
+	int cameraClibration(int argc, char* argv[]);
 private:
 
 };
