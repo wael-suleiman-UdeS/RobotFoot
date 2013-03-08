@@ -8,7 +8,6 @@ void Delay(volatile uint32_t nCount) {
   }
 }
 
-
 #define DELAYELEM 2000000L
 
 /* This funcion shows how to initialize

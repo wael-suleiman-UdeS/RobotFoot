@@ -38,10 +38,16 @@
 			<Add option="-DSTM32F4XX" />
 			<Add option="-DUSE_STDPERIPH_DRIVER" />
 			<Add option="-DRUN_FROM_FLASH=1" />
+			<Add option="-DUSE_USB_OTG_FS=1" />
+			<Add option="-DHSE_VALUE=8000000u" />
 			<Add directory="include" />
 			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/Include" />
 			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/ST/STM32F4xx/Include" />
 			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/inc" />
+			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_Device_Library/Class/cdc/inc" />
+			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_Device_Library/Core/inc" />
+			<Add directory="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_OTG_Driver/inc" />
+			<Add directory="include/usb" />
 		</Compiler>
 		<Linker>
 			<Add option="-mcpu=cortex-m4" />
@@ -56,6 +62,9 @@
 			<Add after="arm-none-eabi-size ${TARGET_OUTPUT_FILE}" />
 			<Mode after="always" />
 		</ExtraCommands>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_flash.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -65,7 +74,49 @@
 		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_Device_Library/Class/cdc/src/usbd_cdc_core.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_Device_Library/Core/src/usbd_core.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_Device_Library/Core/src/usbd_ioreq.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_Device_Library/Core/src/usbd_req.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_OTG_Driver/src/usb_dcd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_OTG_Driver/src/usb_dcd_int.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="include/stm32f4xx_conf.h" />
+		<Unit filename="include/stm32f4xx_it.h" />
+		<Unit filename="include/usb/usb_conf.h" />
+		<Unit filename="include/usb/usbd_cdc_vcp.h" />
+		<Unit filename="include/usb/usbd_conf.h" />
+		<Unit filename="include/usb/usbd_desc.h" />
 		<Unit filename="src/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/usb/usb_bsp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/usb/usb_core.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/usb/usbd_cdc_vcp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/usb/usbd_desc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/usb/usbd_usr.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="startup/startup_stm32f4xx.s">
