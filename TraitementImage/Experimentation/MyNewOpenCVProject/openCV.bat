@@ -1,5 +1,5 @@
 echo off
-SET OPENCV_BUILD=C:\opencv243\build
-SET PATH=%PATH%;%OPENCV_BUILD%\x86\vc10\bin
+SET OPENCV_BUILD=C:\opencv244\build
+SET PATH=%PATH%;%OPENCV_BUILD%\x86\vc11\bin
 
 MyNewOpenCVProject.sln

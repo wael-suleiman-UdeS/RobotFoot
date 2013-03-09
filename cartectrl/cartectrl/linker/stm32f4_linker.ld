@@ -59,7 +59,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
-  } >flash 
+  } >flash
 
   .text : {
       *(.text*)				/* Program code */
@@ -78,7 +78,7 @@ SECTIONS
 
   .data : ALIGN(16) {
       __data_beg__ = .;			/* Used in crt0.S */
-      *(.data)				/* Initialized data */
+      *(.data .data.* .gnu.linkonce.d.*)				/* Initialized data */
       __data_end__ = .;			/* Used in crt0.S */
   } >ram AT > flash
 
