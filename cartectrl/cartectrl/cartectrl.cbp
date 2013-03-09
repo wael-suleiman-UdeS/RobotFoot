@@ -101,6 +101,7 @@
 		<Unit filename="include/usb/usbd_cdc_vcp.h" />
 		<Unit filename="include/usb/usbd_conf.h" />
 		<Unit filename="include/usb/usbd_desc.h" />
+		<Unit filename="linker/stm32f4_linker.ld" />
 		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
