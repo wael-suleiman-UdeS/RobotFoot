@@ -61,6 +61,18 @@ SECTIONS
     . = ALIGN(4);
   } >flash
 
+  .fastcode : {
+     __fastcode_load = LOADADDR (.fastcode);
+	 __fastcode_start = .;
+
+	 *(.glue_7t) *(.glue_7) /* is it used at all on cortex M targets ? */
+
+	/* __attribute__ ((section (".text.fastcode"))) */
+	*(.text.fastcode)
+	. = ALIGN (4);
+    __fastcode_end = .;
+  } >ram AT>flash
+
   .text : {
       *(.text*)				/* Program code */
       KEEP(*(.rodata*))			/* Read only data */

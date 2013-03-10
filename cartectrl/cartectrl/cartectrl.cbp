@@ -102,6 +102,9 @@
 		<Unit filename="include/usb/usbd_conf.h" />
 		<Unit filename="include/usb/usbd_desc.h" />
 		<Unit filename="linker/stm32f4_linker.ld" />
+		<Unit filename="src/interrupts/stm32fxxx_it.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>

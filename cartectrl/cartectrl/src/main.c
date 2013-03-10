@@ -2,6 +2,14 @@
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_flash.h>
 #include <stm32f4xx_rcc.h>
+#include <misc.h>
+#include "usbd_cdc_core.h"
+#include "usbd_usr.h"
+#include "usbd_desc.h"
+#include "usbd_cdc_vcp.h"
+
+
+USB_OTG_CORE_HANDLE  USB_OTG_dev __attribute__ ((aligned (4)));
 
 void Delay(volatile uint32_t nCount) {
   while(nCount--) {
@@ -80,30 +88,29 @@ void init_GPIO(void){
 
 void initClock(void)
 {
-  __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
-
   /* SYSCLK, HCLK, PCLK configuration ----------------------------------------*/
   /* At this stage the HSI is already enabled */
 
   /* Enable Prefetch Buffer and set Flash Latency */
 
-  //FLASH->ACR = FLASH_ACR_PRFTBE | FLASH_ACR_LATENCY;
   FLASH_SetLatency(FLASH_Latency_5);
   FLASH_PrefetchBufferCmd(ENABLE);
 
   FLASH_InstructionCacheCmd(ENABLE);
+  #if 1
 
-  #if 0
-  /* HCLK = SYSCLK */
-  RCC->CFGR |= (uint32_t)RCC_CFGR_HPRE_DIV1;
 
-  /* PCLK = HCLK */
-  RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE1_DIV2;
+  RCC_DeInit();
+  RCC_HSEConfig(RCC_HSE_ON);
+  RCC_WaitForHSEStartUp(); // NOTE: return value discarded!
+  RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
+  RCC_PLLCmd(ENABLE);
+  RCC_PCLK1Config(RCC_HCLK_Div4);   // APB1 = 42MHz
+  RCC_PCLK2Config(RCC_HCLK_Div2);   // APB2 = 84MHz
 
-  /* PLL configuration = (HSI/2) * 12 = ~48 MHz */
-  RCC->CFGR &= (uint32_t)((uint32_t) ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLMULL));
-  RCC->CFGR |= (uint32_t)(RCC_CFGR_PLLSRC_HSI_Div2 | RCC_CFGR_PLLXTPRE_PREDIV1 | RCC_CFGR_PLLMULL12);
-  #endif
+  RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+
+    #else
   RCC->CFGR = 0x00009400;
 
   RCC->PLLCFGR = 0x04005410;
@@ -124,7 +131,7 @@ void initClock(void)
   while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != (uint32_t)RCC_CFGR_SWS_PLL)
   {
   }
-
+    #endif
 }
 
 int main(void){
@@ -143,16 +150,29 @@ int main(void){
    * A logical 1 in BSRRL will set the pin and a logical 1 in BSRRH will
    * reset the pin. A logical 0 in either register has no effect
    */
+  int i=0;
+  for (;i<4;++i)
+  {
+      GPIOD->BSRRL = 0xF000; // set PD12 thru PD15
+      Delay(10000000L);		 // wait a short period of time
+      GPIOD->BSRRH = 0xF000; // reset PD12 thru PD15
+      Delay(10000000L);
+  }
 
-  GPIOD->BSRRL = 0xF000; // set PD12 thru PD15
-  Delay(10000000L);		 // wait a short period of time
-  GPIOD->BSRRH = 0xF000; // reset PD12 thru PD15
+   USBD_Init(&USB_OTG_dev,
+            USB_OTG_FS_CORE_ID,
+            &USR_desc,
+            &USBD_CDC_cb,
+            &USR_cb);
+  GPIOD->BSRRL = 0x2000;
 
-  // this counter is used to count the number of button presses
-  uint8_t i = 0;
-
-  while (1){
-
+  for (;;)
+  {
+      VCP_send_str("It is working!\n");
+      GPIOD->ODR ^= 0x8000;
+      Delay(100000);
+  }
+/*
 		GPIOD->BSRRL = 0x1000; // this sets LED1 (green)
 		Delay(DELAYELEM);
 		GPIOD->BSRRL = 0x2000; // this sets LED2 (orange)
@@ -171,4 +191,5 @@ int main(void){
 		GPIOD->BSRRH = 0x8000; // this resets LED4 (blue)
 		Delay(DELAYELEM);
 	}
+	*/
 }
