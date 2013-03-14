@@ -103,7 +103,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="startup/startup_stm32f4xx.s">
-			<Option compiler="armnoneeabi_gnu_gcc" use="1" buildCommand="$compiler -x assembler-with-cpp $options $includes -c $file -o $object" />
+			<Option compiler="armnoneeabi_gnu_gcc" use="1" buildCommand="$compiler -x assembler-with-cpp $includes -c $file -o $object" />
 		</Unit>
 		<Extensions>
 			<code_completion />
