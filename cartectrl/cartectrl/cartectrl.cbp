@@ -101,7 +101,7 @@
 		<Unit filename="src/interrupts/stm32fxxx_it.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="src/main.cpp">
+		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/syscall.c">
