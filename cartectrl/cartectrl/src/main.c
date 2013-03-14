@@ -126,12 +126,12 @@ void initClock(void)
   /* Select PLL as system clock source */
   RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
   RCC->CFGR |= (uint32_t)RCC_CFGR_SW_PLL;
-
+    #endif
   /* Wait till PLL is used as system clock source */
   while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != (uint32_t)RCC_CFGR_SWS_PLL)
   {
   }
-    #endif
+
 }
 
 int main(void){
