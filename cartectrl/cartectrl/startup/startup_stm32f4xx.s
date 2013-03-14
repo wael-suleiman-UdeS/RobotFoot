@@ -38,10 +38,12 @@
         .global        Default_Handler
 
 // Import these symbols
-
         .extern     __data_start__
         .extern     __data_load__
         .extern     __data_size__
+        .extern     __fastcode_start__
+        .extern     __fastcode_load__
+        .extern     __fastcode_size__
         .extern     __bss_start__
         .extern     __bss_size__
         .extern     __stack_end__
@@ -191,35 +193,22 @@ Default_Handler: bx        lr
 Reset_Handler:
 
 // Copy initialized data from flash to RAM
-
-copy_data:      ldr         r0, DATA_LOAD
-                ldr         r1, DATA_START
+                ldr         r0, DATA_START
+                ldr         r1, DATA_LOAD
                 ldr         r2, DATA_SIZE
-                sub         r2, r2, r1           // Length of initialized data
                 bl          memcpy
-//                beq        zero_bss             // Skip if none
-/*
-copy_data_loop: ldrb        r4, [r2], #1        // Read byte from flash
-                strb        r4, [r1], #1        // Store byte to RAM
-                subs        r3, r3, #1          // Decrement counter
-                bgt         copy_data_loop      // Repeat until done
-*/
-// Zero uninitialized data (bss)
+// Copy fastcode from flash to RAM
+                ldr         r0, FASTC_START
+                ldr         r1, FASTC_LOAD
+                ldr         r2, FASTC_SIZE
+                bl          memcpy
 
-zero_bss:       ldr         r0, BSS_START
+// Zero uninitialized data (bss)
+                ldr         r0, BSS_START
                 mov         r1, #0
                 ldr         r2, BSS_SIZE
                 bl          memset
-/*
-                subs        r3, r3, r1          // Length of uninitialized data
-                beq         call_ctors          // Skip if none
 
-                mov         r2, #0
-
-zero_bss_loop:  strb        r2, [r1], #1        // Store zero
-                subs        r3, r3, #1          // Decrement counter
-                bgt         zero_bss_loop       // Repeat until done
-*/
 // Call C++ constructors.  The compiler and linker together populate the .ctors
 // code section with the addresses of the constructor functions.
 
@@ -254,13 +243,16 @@ call_main:      mov         r0, #0              // argc=0
 // These are filled in by the linker
 
         .align        4
-DATA_LOAD:      .word        __data_load__
-DATA_START:     .word        __data_start__
-DATA_SIZE:      .word        __data_size__
-BSS_START:      .word        __bss_start__
-BSS_SIZE:       .word        __bss_size__
-CTORS_START:    .word        __ctors_start__
-CTORS_END:      .word        __ctors_end__
+DATA_LOAD:      .word       __data_load__
+DATA_START:     .word       __data_start__
+DATA_SIZE:      .word       __data_size__
+FASTC_LOAD:     .word       __fastcode_load__
+FASTC_START:    .word       __fastcode_start__
+FASTC_SIZE:     .word       __fastcode_size__
+BSS_START:      .word       __bss_start__
+BSS_SIZE:       .word       __bss_size__
+CTORS_START:    .word       __ctors_start__
+CTORS_END:      .word       __ctors_end__
 
 //=============================================================================
 

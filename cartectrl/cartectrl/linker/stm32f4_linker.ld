@@ -66,9 +66,11 @@ __rom_size__	= LENGTH(flash);
 __rom_end__	    = __rom_start__ + __rom_size__;
 __ram_start__	= ORIGIN(ram);
 __ram_size__	= LENGTH(ram);
-__ram_end__	= __ram_start__ + __ram_size__;
+__ram_end__	    = __ram_start__ + __ram_size__;
 
-__stack_size__      = C_STACK_SIZE;
+__stack_size__      =   C_STACK_SIZE + IRQ_STACK_SIZE +
+                        FIQ_STACK_SIZE + SVC_STACK_SIZE +
+                        ABT_STACK_SIZE + UND_STACK_SIZE;
 
 __stack_end__	= __ram_end__;		/* Top of RAM */
 __stack_start__	= __stack_end__ - __stack_size__;
@@ -79,6 +81,15 @@ __heap_end__	= __stack_start__;
 /* Ensure that the heap is large enough, bail out if it is not */
 ASSERT(((__heap_end__ - __heap_min_size__) >= __heap_start__),
     "Insufficent heap size.");
+
+/* Other useful constants. Note that symbols are defined latter. */
+/* Vector table size */
+__vector_size__         = __vector_end__    - __vector_start__;
+__fastcode_size__       = __fastcode_end__  - __fastcode_start__;
+__text_size__           = __text_end__      - __text_start__;
+__data_size__           = __data_end__      - __data_start__;
+__bss_size__            = __bss_end__       - __bss_start__;
+
 /*--------------------------------------------------------------------------*/
 SECTIONS
 {
@@ -91,9 +102,6 @@ SECTIONS
         KEEP(*(.isr_vector)) /* Startup code */
         . = ALIGN(4);
         __vector_end__ = .;
-
-        /* Vector size */
-        __vector_size__ = __vector_end__ - __vector_start__;
     } >flash
 
     .fastcode : {
@@ -113,6 +121,7 @@ SECTIONS
 
     .text : {
         . = ALIGN (4);
+        __text_start__ = .;
         *(.text)                /* Program code */
         *(.text*)
         *(.rodata)              /* Read only data */
@@ -137,7 +146,6 @@ SECTIONS
         __data_start__  = .;
         *(.data .data.* .gnu.linkonce.d.*)
         __data_end__    = .;
-        __data_size__   = __data_end__ - __data_start__;
     } >ram AT> flash
 
     .bss :
@@ -151,7 +159,6 @@ SECTIONS
         . = ALIGN(4);
         _ebss = .;         /* define a global symbol at bss end */
         __bss_end__     = _ebss;
-        __bss_size__    = __bss_end__ - __bss_start__;
     } >ram
 
 /* C++ exception unwinding stuff--needed by some toolchains */
@@ -161,5 +168,6 @@ SECTIONS
   __exidx_start = .;
   .ARM.exidx : { *(.ARM.exidx* .gnu.linkonce.armexidx.*) } >flash
   __exidx_end = .;
+  .ARM.attributes 0 : { *(.ARM.attributes) }
 }
 
