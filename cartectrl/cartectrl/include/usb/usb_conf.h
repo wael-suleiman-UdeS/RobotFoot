@@ -3,7 +3,7 @@
   * @file    usb_conf.h
   * @author  MCD Application Team
   * @version V1.0.0
-  * @date    19-September-2011
+  * @date    22-July-2011
   * @brief   General low level driver configuration
   ******************************************************************************
   * @attention
@@ -25,6 +25,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
+
 
 
 /** @addtogroup USB_OTG_DRIVER
@@ -49,8 +50,29 @@
  //#define USE_USB_OTG_FS
 #endif /* USE_USB_OTG_FS */
 
+#ifndef USE_USB_OTG_HS
+ //#define USE_USB_OTG_HS
+#endif /* USE_USB_OTG_HS */
+
+#ifndef USE_ULPI_PHY
+ //#define USE_ULPI_PHY
+#endif /* USE_ULPI_PHY */
+
+#ifndef USE_EMBEDDED_PHY
+ //#define USE_EMBEDDED_PHY
+#endif /* USE_EMBEDDED_PHY */
+
+#ifndef USE_I2C_PHY
+ //#define USE_I2C_PHY
+#endif /* USE_I2C_PHY */
+
+  
 #ifdef USE_USB_OTG_FS 
  #define USB_OTG_FS_CORE
+#endif
+
+#ifdef USE_USB_OTG_HS 
+ #define USB_OTG_HS_CORE
 #endif
 
 /*******************************************************************************
@@ -87,15 +109,44 @@
 *       of the FIFO.Ex: use EP1 and EP2 as IN instead of EP1 and EP3 as IN ones.
 *******************************************************************************/
  
+/****************** USB OTG HS CONFIGURATION **********************************/
+#ifdef USB_OTG_HS_CORE
+ #define RX_FIFO_HS_SIZE                          512
+ #define TX0_FIFO_HS_SIZE                          64
+ #define TX1_FIFO_HS_SIZE                         384
+ #define TX2_FIFO_HS_SIZE                          64
+ #define TX3_FIFO_HS_SIZE                           0
+ #define TX4_FIFO_HS_SIZE                           0
+ #define TX5_FIFO_HS_SIZE                           0
 
+ //#define USB_OTG_HS_SOF_OUTPUT_ENABLED
+
+ #ifdef USE_ULPI_PHY
+  #define USB_OTG_ULPI_PHY_ENABLED
+ #endif
+ #ifdef USE_EMBEDDED_PHY 
+   #define USB_OTG_EMBEDDED_PHY_ENABLED
+   /* wakeup is working only when HS core is configured in FS mode */
+   #define USB_OTG_HS_LOW_PWR_MGMT_SUPPORT
+ #endif
+ #ifdef USE_I2C_PHY
+  #define USB_OTG_I2C_PHY_ENABLED
+ #endif
+ /* #define USB_OTG_HS_INTERNAL_DMA_ENABLED */ /* Be aware that enabling DMA mode will result in data being sent only by
+                                                  multiple of 4 packet sizes. This is due to the fact that USB DMA does
+                                                  not allow sending data from non word-aligned addresses.
+                                                  For this specific application, it is advised to not enable this option
+                                                  unless required. */
+ #define USB_OTG_HS_DEDICATED_EP1_ENABLED
+#endif
 
 /****************** USB OTG FS CONFIGURATION **********************************/
 #ifdef USB_OTG_FS_CORE
  #define RX_FIFO_FS_SIZE                          128
- #define TX0_FIFO_FS_SIZE                          64
+ #define TX0_FIFO_FS_SIZE                          32
  #define TX1_FIFO_FS_SIZE                         128
- #define TX2_FIFO_FS_SIZE                          0
- #define TX3_FIFO_FS_SIZE                          0
+ #define TX2_FIFO_FS_SIZE                          32 
+ #define TX3_FIFO_FS_SIZE                           0
 
  //#define USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
  //#define USB_OTG_FS_SOF_OUTPUT_ENABLED
@@ -168,38 +219,6 @@
   #define __packed    __unaligned
 #endif /* __CC_ARM */
 
-/****************** C Compilers dependant keywords ****************************/
-/* In HS mode and when the DMA is used, all variables and data structures dealing
-   with the DMA during the transaction process should be 4-bytes aligned */    
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined   (__GNUC__)        /* GNU Compiler */
-    #define __ALIGN_END    __attribute__ ((aligned (4)))
-    #define __ALIGN_BEGIN         
-  #else                           
-    #define __ALIGN_END
-    #if defined   (__CC_ARM)      /* ARM Compiler */
-      #define __ALIGN_BEGIN    __align(4)  
-    #elif defined (__ICCARM__)    /* IAR Compiler */
-      #define __ALIGN_BEGIN 
-    #elif defined  (__TASKING__)  /* TASKING Compiler */
-      #define __ALIGN_BEGIN    __align(4) 
-    #endif /* __CC_ARM */  
-  #endif /* __GNUC__ */ 
-#else
-  #define __ALIGN_BEGIN
-  #define __ALIGN_END   
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
-
-/* __packed keyword used to decrease the data type alignment to 1-byte */
-#if defined (__CC_ARM)         /* ARM Compiler */
-  #define __packed    __packed
-#elif defined (__ICCARM__)     /* IAR Compiler */
-  #define __packed    __packed
-#elif defined   ( __GNUC__ )   /* GNU Compiler */                        
-  #define __packed    __attribute__ ((__packed__))
-#elif defined   (__TASKING__)  /* TASKING Compiler */
-  #define __packed    __unaligned
-#endif /* __CC_ARM */
 
 
 /**

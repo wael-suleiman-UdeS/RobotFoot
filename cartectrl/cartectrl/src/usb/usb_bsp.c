@@ -3,7 +3,7 @@
   * @file    usb_bsp.c
   * @author  MCD Application Team
   * @version V1.0.0
-  * @date    19-September-2011
+  * @date    22-July-2011
   * @brief   This file is responsible to offer board support package and is
   *          configurable by user.
   ******************************************************************************
@@ -23,11 +23,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usb_bsp.h"
 #include "usbd_conf.h"
-//#include "stm32f4_discovery.h"
-
-//Library config for this project!!!!!!!!!!!
-#include "stm32f4xx_conf.h"
-
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
 * @{
@@ -93,18 +88,14 @@
 
 void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 {
+#ifdef USE_STM3210C_EVAL
+
+  RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, ENABLE) ;
+
+#else // USE_STM32F4_DISCOVERY
   GPIO_InitTypeDef GPIO_InitStructure;
-
-#ifndef USE_ULPI_PHY
-#ifdef USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
-  EXTI_InitTypeDef EXTI_InitStructure;
-  NVIC_InitTypeDef NVIC_InitStructure;
-#endif
-#endif
-
-
  #ifdef USE_USB_OTG_FS
-
   RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_GPIOA , ENABLE);
 
   /* Configure SOF VBUS ID DM DP Pins */
@@ -119,10 +110,10 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  GPIO_PinAFConfig(GPIOA,GPIO_PinSource8,GPIO_AF_OTG1_FS) ;
-  GPIO_PinAFConfig(GPIOA,GPIO_PinSource9,GPIO_AF_OTG1_FS) ;
-  GPIO_PinAFConfig(GPIOA,GPIO_PinSource11,GPIO_AF_OTG1_FS) ;
-  GPIO_PinAFConfig(GPIOA,GPIO_PinSource12,GPIO_AF_OTG1_FS) ;
+  GPIO_PinAFConfig(GPIOA,GPIO_PinSource8,GPIO_AF_OTG_FS) ;
+  GPIO_PinAFConfig(GPIOA,GPIO_PinSource9,GPIO_AF_OTG_FS) ;
+  GPIO_PinAFConfig(GPIOA,GPIO_PinSource11,GPIO_AF_OTG_FS) ;
+  GPIO_PinAFConfig(GPIOA,GPIO_PinSource12,GPIO_AF_OTG_FS) ;
 
   /* this for ID line debug */
 
@@ -132,10 +123,11 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
-  GPIO_PinAFConfig(GPIOA,GPIO_PinSource10,GPIO_AF_OTG1_FS) ;
+  GPIO_PinAFConfig(GPIOA,GPIO_PinSource10,GPIO_AF_OTG_FS) ;
 
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
   RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_OTG_FS, ENABLE) ;
+
  #else // USE_USB_OTG_HS
 
   #ifdef USE_ULPI_PHY // ULPI
@@ -210,6 +202,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
                          RCC_AHB1Periph_OTG_HS_ULPI, ENABLE) ;
 
   #else
+
    #ifdef USE_I2C_PHY
   RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_GPIOB , ENABLE);
   /* Configure RESET INTN SCL SDA (Phy/I2C) Pins */
@@ -247,9 +240,9 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
   GPIO_PinAFConfig(GPIOB,GPIO_PinSource15,GPIO_AF_OTG2_FS) ;
   RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_OTG_HS, ENABLE) ;
    #endif
-  #endif // USE_ULPI_PHY
-
+  #endif
  #endif //USB_OTG_HS
+#endif //USE_STM322xG_EVAL
 
 
   /* enable the PWR clock */
@@ -257,6 +250,9 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 
 
 #ifdef USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
+  /* Configure the Key button in EXTI mode */
+  STM32F4_Discovery_PBInit(BUTTON_USER, BUTTON_MODE_EXTI);
+
   EXTI_ClearITPendingBit(EXTI_Line18);
 
   EXTI_InitStructure.EXTI_Line = EXTI_Line18;
@@ -277,6 +273,9 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 #endif
 
 #ifdef USB_OTG_HS_LOW_PWR_MGMT_SUPPORT
+  /* Configure the Key button in EXTI mode */
+  STM32F4_Discovery_PBInit(BUTTON_USER, BUTTON_MODE_EXTI);
+
   EXTI_ClearITPendingBit(EXTI_Line20);
 
   EXTI_InitStructure.EXTI_Line = EXTI_Line20;
@@ -296,7 +295,8 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
   EXTI_ClearITPendingBit(EXTI_Line20);
 #endif
 
-  //EXTI_ClearITPendingBit(USER_BUTTON_EXTI_LINE);
+
+
 }
 /**
 * @brief  USB_OTG_BSP_EnableInterrupt

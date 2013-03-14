@@ -3,7 +3,7 @@
   * @file    usbd_usr.c
   * @author  MCD Application Team
   * @version V1.0.0
-  * @date    19-September-2011
+  * @date    22-July-2011
   * @brief   This file includes the user application layer
   ******************************************************************************
   * @attention
@@ -22,7 +22,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_usr.h"
 #include "usbd_ioreq.h"
-
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
 * @{
@@ -68,14 +67,11 @@ USBD_Usr_cb_TypeDef USR_cb =
   USBD_USR_DeviceConfigured,
   USBD_USR_DeviceSuspended,
   USBD_USR_DeviceResumed,
-
+  /*
   USBD_USR_DeviceConnected,
   USBD_USR_DeviceDisconnected,
-
-
+  */
 };
-
-
 
 /**
 * @}
@@ -111,13 +107,7 @@ USBD_Usr_cb_TypeDef USR_cb =
 */
 void USBD_USR_Init(void)
 {
-  /* Setup SysTick Timer for 40 msec interrupts
-  This interrupt is used to probe the joystick */
-  if (SysTick_Config(168000000 / 24))
-  {
-    /* Capture error */
-    while (1);
-  }
+
 }
 
 /**
@@ -128,17 +118,21 @@ void USBD_USR_Init(void)
 */
 void USBD_USR_DeviceReset(uint8_t speed )
 {
+	/*
  switch (speed)
  {
    case USB_OTG_SPEED_HIGH:
+     LCD_LOG_SetFooter ("     USB Device Library v1.0.0 [HS]" );
      break;
 
   case USB_OTG_SPEED_FULL:
+     LCD_LOG_SetFooter ("     USB Device Library v1.0.0 [FS]" );
      break;
  default:
-     break;
-
+     LCD_LOG_SetFooter ("     USB Device Library v1.0.0 [??]" );
  }
+ */
+
 }
 
 
@@ -150,28 +144,7 @@ void USBD_USR_DeviceReset(uint8_t speed )
 */
 void USBD_USR_DeviceConfigured (void)
 {
-}
-
-
-/**
-* @brief  USBD_USR_DeviceConnected
-*         Displays the message on LCD on device connection Event
-* @param  None
-* @retval Staus
-*/
-void USBD_USR_DeviceConnected (void)
-{
-}
-
-
-/**
-* @brief  USBD_USR_DeviceDisonnected
-*         Displays the message on LCD on device disconnection Event
-* @param  None
-* @retval Staus
-*/
-void USBD_USR_DeviceDisconnected (void)
-{
+	/* LCD_UsrLog("> VCP Interface configured.\n"); */
 }
 
 /**
@@ -182,7 +155,8 @@ void USBD_USR_DeviceDisconnected (void)
 */
 void USBD_USR_DeviceSuspended(void)
 {
-  /* Users can do their application actions here for the USB-Reset */
+	/*   LCD_UsrLog("> USB Device in Suspend Mode.\n"); */
+	/* Users can do their application actions here for the USB-Reset */
 }
 
 
@@ -194,7 +168,8 @@ void USBD_USR_DeviceSuspended(void)
 */
 void USBD_USR_DeviceResumed(void)
 {
-  /* Users can do their application actions here for the USB-Reset */
+    /* LCD_UsrLog("> USB Device in Idle Mode.\n"); */
+    /* Users can do their application actions here for the USB-Reset */
 }
 
 /**
@@ -206,33 +181,3 @@ void USBD_USR_DeviceResumed(void)
 */
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

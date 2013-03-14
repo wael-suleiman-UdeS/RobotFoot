@@ -24,7 +24,6 @@
 #define __USBD_CONF__H__
 
 /* Includes ------------------------------------------------------------------*/
-//#include "stm32f4_discovery.h"
 
 /** @defgroup USB_CONF_Exported_Defines
   * @{
@@ -57,7 +56,7 @@
                                                 APP_RX_DATA_SIZE*8/MAX_BAUDARATE*1000 should be > CDC_IN_FRAME_INTERVAL */
 #endif /* USE_USB_OTG_HS */
 
-#define APP_FOPS                        VCP_fops
+#define APP_FOPS                        cdc_fops
 /**
   * @}
   */
