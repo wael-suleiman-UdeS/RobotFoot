@@ -205,13 +205,6 @@ static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
 }
 
 
-//this function is run when the user button is pushed
-void DISCOVERY_EXTI_IRQHandler(void)
-{
-	uint8_t buffer[] = "terve"; // "terve" is hello in finnish :)
-	cdc_DataTx (buffer, (uint32_t) 5);
-}
-
 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
