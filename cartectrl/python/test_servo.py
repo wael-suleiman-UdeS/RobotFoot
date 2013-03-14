@@ -10,6 +10,8 @@ def writeUART(L, debug=False):
         ser.write( s )
         
         if debug :
+                for i in range(1,len(s)):
+                        print(hex(ord(s[i])))
                 print("Sending on UART : " + s)                
         
 #-----------------------------------------------------
@@ -39,17 +41,19 @@ def sendCommand( id, cmd, data=[], debug=False ):
 # pos : Position of servomotor (min = 21 max = 1002)
 # time : Time of mouvement
 def goPos(id, pos, time=60):
-        sendCommand(id,6, [time,(pos & 0xFF),((pos >> 8) & 0xFF),0x0,id])
+        sendCommand(id,6, [time,(pos & 0xFF),((pos >> 8) & 0xFF),0x0,id],True)
 	
 #-----------------------------------------------------
 # Read data of UART port
 # strLength : Message length
 # debug : Activate debug
-def readData(strLength=13,debug=False):
+def readData(strLength=12,debug=False):
 
         s = ser.read(strLength)
         if debug:
-                print("Receiving on UART : " + s)
+                for i in range(1,len(s)):
+                        print(hex(ord(s[i])))
+                print("Receiving on UART : " + s)                        
         return s
 #-----------------------------------------------------
 # Ask servomotor position
@@ -99,27 +103,27 @@ if 'ser' not in globals() or ser.isOpen() == False:
         # Configuration of UART : http://pyserial.sourceforge.net/pyserial_api.html
         # Timeout time is 100 second.
         ser = serial.Serial(2,115200,serial.EIGHTBITS,
-                            serial.PARITY_NONE, serial.STOPBITS_ONE, 100);
+                            serial.PARITY_NONE, serial.STOPBITS_ONE, 15);
 
-pos = 21#min = 21 max = 1002
+pos = 1002#min = 21 max = 1002
 id = 0xFD
 
 #Servomotor led test
 #flashLed(id)
         
 #Servomotor position test
-sendCommand(id,3,[0x34,0x01,0x60]) #??
-#sendCommand(id,3,[22,2,0xAA, 0]) #??
+#sendCommand(id,3,[0x34,0x01,0x60]) #??
+##sendCommand(id,3,[22,2,0xAA, 0]) #??
 goPos(id, pos)
-time.sleep(1)
-readPosition(id)
+#time.sleep(1)
+#readPosition(id)
 
 #Servomotor clear error message
 #clearErrorMsg(id)
 
 #Microcontroller test
-#writeUART([3,3,3,3,3,3,3,3,3,3,3,3,3], True)
-#readData(13,True)
+#writeUART([97,98,99,100,101,102,103,104,105,106,107,108,109], True)
+#readData(12,True)
 
 
 ser.close()

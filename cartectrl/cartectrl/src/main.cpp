@@ -3,6 +3,8 @@
 #include <stm32f4xx_flash.h>
 #include <stm32f4xx_rcc.h>
 
+#include "herkulex.h"
+
 void Delay(volatile uint32_t nCount) {
   while(nCount--) {
   }
@@ -144,13 +146,10 @@ int main(void){
    * A logical 1 in BSRRL will set the pin and a logical 1 in BSRRH will
    * reset the pin. A logical 0 in either register has no effect
    */
-
+/*
   GPIOD->BSRRL = 0xF000; // set PD12 thru PD15
   Delay(10000000L);		 // wait a short period of time
   GPIOD->BSRRH = 0xF000; // reset PD12 thru PD15
-
-  // this counter is used to count the number of button presses
-  uint8_t i = 0;
 
   while (1){
 
@@ -172,4 +171,22 @@ int main(void){
 		GPIOD->BSRRH = 0x8000; // this resets LED4 (blue)
 		Delay(DELAYELEM);
 	}
+*/
+
+  while (1){
+
+      Herkulex servomotor = Herkulex();
+
+      //servomotor.setTorque(0xFD, TORQUE_ON);
+      while(1)
+      {
+          servomotor.positionControl(0xFD, 1002, 100, 0x00);
+          Delay(9000000);
+
+          //servomotor.positionControl(0xFD, 21, 100, 0x00);
+          //Delay(9000000);
+      }
+     //Delay(9000000);
+     //UARTUtility::USART_puts(USART1, "Hello World!!");
+  }
 }
