@@ -1,10 +1,10 @@
 #include "usbd_cdc_core.h"
 #include "usbd_usr.h"
 #include "usbd_desc.h"
-#include "usbd_cdc_vcp.h"
+#include "usbd_cdc.h"
 
-//Library config for this project!!!!!!!!!!!
 #include "stm32f4xx_conf.h"
+
 
 USB_OTG_CORE_HANDLE  USB_OTG_dev __attribute__ ((aligned (4)));
 
@@ -86,51 +86,73 @@ void init_GPIO(void)
     GPIO_Init(GPIOA, &GPIO_InitStruct);			  // this passes the configuration to the Init function which takes care of the low level stuff
 }
 
+//void initClock(void) __attribute__((section (".text.fastcode")));
+
 void initClock(void)
 {
-    /* SYSCLK, HCLK, PCLK configuration ----------------------------------------*/
-    /* At this stage the HSI is already enabled */
+    enum {
+        RCC_SYSCLK_HSI = 0,
+        RCC_SYSCLK_HSE = 4,
+        RCC_SYSCLK_PLL = 8
+    };
+    // SYSCLK, HCLK, PCLK configuration ----------------------------------------*/
+    // At this stage the HSI is already enabled */
 
-    /* Enable Prefetch Buffer and set Flash Latency */
-    FLASH_SetLatency(FLASH_Latency_5);
+    // Deinit the RCC registers
+    RCC_DeInit();
+
+    // Enable Prefetch Buffer and set Flash Latency
+    FLASH_SetLatency(FLASH_Latency_6);
     FLASH_PrefetchBufferCmd(ENABLE);
 
+    // Enable instruction and data cache
     FLASH_InstructionCacheCmd(ENABLE);
     FLASH_DataCacheCmd(ENABLE);
 
+    // Put internal regulator to hi performance mode.
     RCC_APB1PeriphClockCmd(RCC_APB1ENR_PWREN, ENABLE);
     RCC_APB1PeriphResetCmd(RCC_APB1ENR_PWREN, DISABLE);
     PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
 
-    RCC_DeInit();
+    // Enable HSE
     RCC_HSEConfig(RCC_HSE_ON);
     RCC_WaitForHSEStartUp(); // NOTE: return value discarded!
+
+    // Configure PLL
+    // TODO: put names to symbols.
     RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
     RCC_PLLCmd(ENABLE);
-    RCC_HCLKConfig(RCC_HCLK_Div1);   // APB1 = 42MHz
-    RCC_PCLK1Config(RCC_HCLK_Div4);   // APB1 = 42MHz
-    RCC_PCLK2Config(RCC_HCLK_Div2);   // APB2 = 84MHz
 
-    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-
-    while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != (uint32_t)RCC_CFGR_SWS_PLL)
+    while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == 0)
     {
+        // wait until PLL clock is stable and can be used as system clock source
+        // TODO: put a timout so it can error out.
     }
 
+    // Set up clock division for the differents buses
+    RCC_HCLKConfig(RCC_HCLK_Div1);      // APB1 = 42MHz
+    RCC_PCLK1Config(RCC_HCLK_Div4);     // APB1 = 42MHz
+    RCC_PCLK2Config(RCC_HCLK_Div2);     // APB2 = 84MHz
 
+    // Use PLL clock as system clock
+    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+
+    // Wait till PLL is used as system clock source
+    // (Yeah, that's right. There's no define/enum for this.)
+    // TODO: put a timout so it can error out.
+    while(RCC_GetSYSCLKSource() != RCC_SYSCLK_PLL)
+    {}
 }
 
 int main(void)
 {
-    int len;
-    uint8_t buf[255];
     // initialize the GPIO pins we need
     initClock();
     init_GPIO();
 
-    GPIOD->BSRRL = 0xF000; // set PD12 thru PD15
-    Delay(10000000L);		 // wait a short period of time
-    GPIOD->BSRRH = 0xF000; // reset PD12 thru PD15
+    GPIOD->BSRRL = 0xF000;  // set PD12 thru PD15
+    Delay(10000000L);		// wait a short period of time
+    GPIOD->BSRRH = 0xF000;  // reset PD12 thru PD15
     Delay(10000000L);
 
     USBD_Init(&USB_OTG_dev,
@@ -139,27 +161,15 @@ int main(void)
               &USBD_CDC_cb,
               &USR_cb);
 
-    int i = 0;
+
+    volatile int i = 0;
     for (;;)
     {
-        if (i++ > 100000)
+        if (i++ > 1000000)
         {
             GPIOD->ODR ^= 0xF000;
             i = 0;
         }
-        len = VCP_get_string(buf);
-        if(len)
-            VCP_send_str(buf);
     }
 }
 
-void assert_failed(uint8_t* file, uint32_t line)
-{
-    /* User can add his own implementation to report the file name and line number,
-       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-
-    /* Infinite loop */
-    while (1)
-    {
-    }
-}
