@@ -9,7 +9,7 @@ namespace UARTUtility
     //void USART_puts(USART_TypeDef* USARTx, const volatile char *s);
 
     // Temporary test function
-    void SendTest(USART_TypeDef* USARTx, uint8_t *s);
+    void SendTest(USART_TypeDef* USARTx, uint8_t packetSize, uint8_t *s);
 
 }
 

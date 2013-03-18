@@ -3,8 +3,8 @@
 #include <stm32f4xx.h>
 #include <misc.h>			 // I recommend you have a look at these in the ST firmware folder
 
-#define MAX_STRLEN 13 // this is the maximum string length of our string in characters
-volatile char received_string[MAX_STRLEN+1]; // this will hold the recieved string
+//#define MAX_STRLEN 13 // this is the maximum string length of our string in characters
+//volatile char received_string[MAX_STRLEN+1]; // this will hold the recieved string
 /*
 void Delay(__IO uint32_t nCount) {
   while(nCount--) {
@@ -112,17 +112,18 @@ void UARTUtility::USART_puts(USART_TypeDef* USARTx, const volatile char *s){
 }
 */
 
-void UARTUtility::SendTest(USART_TypeDef* USARTx, uint8_t *s){
+void UARTUtility::SendTest(USART_TypeDef* USARTx, uint8_t packetSize, uint8_t *s){
 
-	while(*s){
+	for(uint8_t i = 0; i < packetSize ; i++)
+	{
 		// wait until data register is empty
 		while( !(USARTx->SR & 0x00000040) );
-		USART_SendData(USARTx, *s);
+            USART_SendData(USARTx, *s);
 		*s++;
 	}
-}
+}/*
+namespace{
 
-/*
 // this is the interrupt request handler (IRQ) for ALL USART1 interrupts
 extern "C" void USART1_IRQHandler(void){
 
@@ -142,9 +143,11 @@ extern "C" void USART1_IRQHandler(void){
 		}
 		else{ // otherwise reset the character counter and print the received string
 			cnt = 0;
-			UARTUtility::USART_puts(USART1, received_string);
+			//UARTUtility::USART_puts(USART1, received_string);
 		}
 	}
 }
 
+
+}
 */

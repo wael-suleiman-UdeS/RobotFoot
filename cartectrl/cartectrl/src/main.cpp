@@ -4,12 +4,7 @@
 #include <stm32f4xx_rcc.h>
 
 #include "herkulex.h"
-
-void Delay(volatile uint32_t nCount) {
-  while(nCount--) {
-  }
-}
-
+#include "Tools.h"
 
 #define DELAYELEM 2000000L
 
@@ -148,28 +143,28 @@ int main(void){
    */
 /*
   GPIOD->BSRRL = 0xF000; // set PD12 thru PD15
-  Delay(10000000L);		 // wait a short period of time
+  Tools::Delay(10000000L);		 // wait a short period of time
   GPIOD->BSRRH = 0xF000; // reset PD12 thru PD15
 
   while (1){
 
 		GPIOD->BSRRL = 0x1000; // this sets LED1 (green)
-		Delay(DELAYELEM);
+		Tools::Delay(DELAYELEM);
 		GPIOD->BSRRL = 0x2000; // this sets LED2 (orange)
-		Delay(DELAYELEM);
+		Tools::Delay(DELAYELEM);
 		GPIOD->BSRRL = 0x4000; // this sets LED3 (red)
-		Delay(DELAYELEM);
+		Tools::Delay(DELAYELEM);
 		GPIOD->BSRRL = 0x8000; // this sets LED4
-		Delay(DELAYELEM);
+		Tools::Delay(DELAYELEM);
 
 		GPIOD->BSRRH = 0x1000; // this resets LED1
-		Delay(DELAYELEM);
+		Tools::Delay(DELAYELEM);
 		GPIOD->BSRRH = 0x2000; // this resets LED2
-		Delay(DELAYELEM);
+		Tools::Delay(DELAYELEM);
 		GPIOD->BSRRH = 0x4000; // this resets LED3
-		Delay(DELAYELEM);
+		Tools::Delay(DELAYELEM);
 		GPIOD->BSRRH = 0x8000; // this resets LED4 (blue)
-		Delay(DELAYELEM);
+		Tools::Delay(DELAYELEM);
 	}
 */
 
@@ -177,15 +172,22 @@ int main(void){
 
       Herkulex servomotor = Herkulex();
 
-      //servomotor.setTorque(0xFD, TORQUE_ON);
+      servomotor.clear(0xFD);
+
+      servomotor.setTorque(0xFD, TORQUE_ON);
+      uint16_t position(0);
       while(1)
       {
-          servomotor.positionControl(0xFD, 1002, 100, 0x00);
-          Delay(9000000);
+          position = servomotor.getPos(0xFD);
+          servomotor.positionControl(0xFD, 1000, 60, 0x00);
+          Tools::Delay(90000000);
 
-          //servomotor.positionControl(0xFD, 21, 100, 0x00);
-          //Delay(9000000);
+          position = servomotor.getPos(0xFD);
+          servomotor.positionControl(0xFD, 23, 60, 0x00);
+          Tools::Delay(90000000);
+
       }
+
      //Delay(9000000);
      //UARTUtility::USART_puts(USART1, "Hello World!!");
   }

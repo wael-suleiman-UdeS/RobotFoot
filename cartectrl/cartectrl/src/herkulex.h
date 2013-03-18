@@ -260,14 +260,14 @@ public:
      */
     ~Herkulex();
 
-    /**@brief Transmit packet datas
+    /**@brief Transmit packet datas with UART
      *
      * @param packetSize The packet size.
      * @param data The transmit packet data array.
      */
     void txPacket(uint8_t packetSize, uint8_t* data);
 
-    /** Receive packet datas
+    /** Receive packet datas with UART
      *
      * @param packetSize The packet size.
      * @param data The receive packet data array.
@@ -320,13 +320,12 @@ public:
 
 private :
 
-    /** PC serial connection used in debug mode.
-    */
-    //Serial *pc;
-
-    /** Serial connection (mbed <-> herkulex).
-    */
-    //Serial *txd, *rxd;
+    /**@brief This funcion initializes the USART1 peripheral
+     *
+     * @param baudrate The baudrate at which the USART is
+     * 				   supposed to operate
+     */
+    void init_USART1(uint32_t baudrate);
 };
 
 //------------------------------------------------------------------------------
