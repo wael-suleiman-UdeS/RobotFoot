@@ -88,61 +88,61 @@ void init_GPIO(void)
 
 //void initClock(void) __attribute__((section (".text.fastcode")));
 
-void initClock(void)
-{
-    enum {
-        RCC_SYSCLK_HSI = 0,
-        RCC_SYSCLK_HSE = 4,
-        RCC_SYSCLK_PLL = 8
-    };
-    // SYSCLK, HCLK, PCLK configuration ----------------------------------------*/
-    // At this stage the HSI is already enabled */
-
-    // Deinit the RCC registers
-    RCC_DeInit();
-
-    // Enable Prefetch Buffer and set Flash Latency
-    FLASH_SetLatency(FLASH_Latency_6);
-    FLASH_PrefetchBufferCmd(ENABLE);
-
-    // Enable instruction and data cache
-    FLASH_InstructionCacheCmd(ENABLE);
-    FLASH_DataCacheCmd(ENABLE);
-
-    // Put internal regulator to hi performance mode.
-    RCC_APB1PeriphClockCmd(RCC_APB1ENR_PWREN, ENABLE);
-    RCC_APB1PeriphResetCmd(RCC_APB1ENR_PWREN, DISABLE);
-    PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
-
-    // Enable HSE
-    RCC_HSEConfig(RCC_HSE_ON);
-    RCC_WaitForHSEStartUp(); // NOTE: return value discarded!
-
-    // Configure PLL
-    // TODO: put names to symbols.
-    RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
-    RCC_PLLCmd(ENABLE);
-
-    while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == 0)
-    {
-        // wait until PLL clock is stable and can be used as system clock source
-        // TODO: put a timout so it can error out.
-    }
-
-    // Set up clock division for the differents buses
-    RCC_HCLKConfig(RCC_HCLK_Div1);      // APB1 = 42MHz
-    RCC_PCLK1Config(RCC_HCLK_Div4);     // APB1 = 42MHz
-    RCC_PCLK2Config(RCC_HCLK_Div2);     // APB2 = 84MHz
-
-    // Use PLL clock as system clock
-    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-
-    // Wait till PLL is used as system clock source
-    // (Yeah, that's right. There's no define/enum for this.)
-    // TODO: put a timout so it can error out.
-    while(RCC_GetSYSCLKSource() != RCC_SYSCLK_PLL)
-    {}
-}
+//void initClock(void)
+//{
+//    enum {
+//        RCC_SYSCLK_HSI = 0,
+//        RCC_SYSCLK_HSE = 4,
+//        RCC_SYSCLK_PLL = 8
+//    };
+//    // SYSCLK, HCLK, PCLK configuration ----------------------------------------*/
+//    // At this stage the HSI is already enabled */
+//
+//    // Deinit the RCC registers
+//    RCC_DeInit();
+//
+//    // Enable Prefetch Buffer and set Flash Latency
+//    FLASH_SetLatency(FLASH_Latency_6);
+//    FLASH_PrefetchBufferCmd(ENABLE);
+//
+//    // Enable instruction and data cache
+//    FLASH_InstructionCacheCmd(ENABLE);
+//    FLASH_DataCacheCmd(ENABLE);
+//
+//    // Put internal regulator to hi performance mode.
+//    RCC_APB1PeriphClockCmd(RCC_APB1ENR_PWREN, ENABLE);
+//    RCC_APB1PeriphResetCmd(RCC_APB1ENR_PWREN, DISABLE);
+//    PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
+//
+//    // Enable HSE
+//    RCC_HSEConfig(RCC_HSE_ON);
+//    RCC_WaitForHSEStartUp(); // NOTE: return value discarded!
+//
+//    // Configure PLL
+//    // TODO: put names to symbols.
+//    RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
+//    RCC_PLLCmd(ENABLE);
+//
+//    while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == 0)
+//    {
+//        // wait until PLL clock is stable and can be used as system clock source
+//        // TODO: put a timout so it can error out.
+//    }
+//
+//    // Set up clock division for the differents buses
+//    RCC_HCLKConfig(RCC_HCLK_Div1);      // APB1 = 42MHz
+//    RCC_PCLK1Config(RCC_HCLK_Div4);     // APB1 = 42MHz
+//    RCC_PCLK2Config(RCC_HCLK_Div2);     // APB2 = 84MHz
+//
+//    // Use PLL clock as system clock
+//    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+//
+//    // Wait till PLL is used as system clock source
+//    // (Yeah, that's right. There's no define/enum for this.)
+//    // TODO: put a timout so it can error out.
+//    while(RCC_GetSYSCLKSource() != RCC_SYSCLK_PLL)
+//    {}
+//}
 
 int main(void)
 {
