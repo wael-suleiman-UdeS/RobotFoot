@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    usbd_cdc_vcp.h
+  * @file    usbd_cdc.h
   * @author  MCD Application Team
   * @version V1.0.0
   * @date    22-July-2011
-  * @brief   Header for usbd_cdc_vcp.c file.
+  * @brief   Header for usbd_cdc.c file.
   ******************************************************************************
   * @attention
   *

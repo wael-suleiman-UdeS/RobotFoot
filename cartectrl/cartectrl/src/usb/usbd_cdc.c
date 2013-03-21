@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    usbd_cdc_vcp.c
+  * @file    usbd_cdc.c
   * @author  MCD Application Team
   * @version V1.0.0
   * @date    22-July-2011
