@@ -183,22 +183,7 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
 static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
 {
 	uint32_t i;
-	//loop through buffer
-	for (i = 0; i < Len; i++)
-	{
-		//if there is an 'a' in buffer
-		if (*(Buf + i) == 'a' || *(Buf + i) == 'A' )
-		{
-			//turn on the blue led
-//			STM32F4_Discovery_LEDOn(LED6);
-		}
-		//if there is an 's' in buffer
-		else if (*(Buf + i) == 's' || *(Buf + i) == 'S' )
-		{
-			//turn off the blue led
-//			STM32F4_Discovery_LEDOff(LED6);
-		}
-	}
+
 	//send received data back to sender
 	cdc_DataTx( Buf, Len );
 	return USBD_OK;
