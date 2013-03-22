@@ -1,13 +1,22 @@
+
 #include "usbd_cdc_core.h"
 #include "usbd_usr.h"
 #include "usbd_desc.h"
 #include "usbd_cdc.h"
+#include <stm32f4xx.h>
+#include <stm32f4xx_gpio.h>
+#include <stm32f4xx_flash.h>
+#include <stm32f4xx_rcc.h>
+#include "initClock.h"
 
+#include "herkulex.h"
+#include "Tools.h"
 #include "stm32f4xx_conf.h"
 
 
 USB_OTG_CORE_HANDLE  USB_OTG_dev __attribute__ ((aligned (4)));
 
+// Maybe not needed anymore?
 void Delay(volatile uint32_t nCount)
 {
     while(nCount--)
@@ -21,6 +30,7 @@ void Delay(volatile uint32_t nCount)
  * the GPIO pins on GPIOD and how to configure
  * them as inputs and outputs
  */
+
 void init_GPIO(void)
 {
 
@@ -86,80 +96,79 @@ void init_GPIO(void)
     GPIO_Init(GPIOA, &GPIO_InitStruct);			  // this passes the configuration to the Init function which takes care of the low level stuff
 }
 
-//void initClock(void) __attribute__((section (".text.fastcode")));
+int main(void){
 
-//void initClock(void)
-//{
-//    enum {
-//        RCC_SYSCLK_HSI = 0,
-//        RCC_SYSCLK_HSE = 4,
-//        RCC_SYSCLK_PLL = 8
-//    };
-//    // SYSCLK, HCLK, PCLK configuration ----------------------------------------*/
-//    // At this stage the HSI is already enabled */
-//
-//    // Deinit the RCC registers
-//    RCC_DeInit();
-//
-//    // Enable Prefetch Buffer and set Flash Latency
-//    FLASH_SetLatency(FLASH_Latency_6);
-//    FLASH_PrefetchBufferCmd(ENABLE);
-//
-//    // Enable instruction and data cache
-//    FLASH_InstructionCacheCmd(ENABLE);
-//    FLASH_DataCacheCmd(ENABLE);
-//
-//    // Put internal regulator to hi performance mode.
-//    RCC_APB1PeriphClockCmd(RCC_APB1ENR_PWREN, ENABLE);
-//    RCC_APB1PeriphResetCmd(RCC_APB1ENR_PWREN, DISABLE);
-//    PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
-//
-//    // Enable HSE
-//    RCC_HSEConfig(RCC_HSE_ON);
-//    RCC_WaitForHSEStartUp(); // NOTE: return value discarded!
-//
-//    // Configure PLL
-//    // TODO: put names to symbols.
-//    RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
-//    RCC_PLLCmd(ENABLE);
-//
-//    while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == 0)
-//    {
-//        // wait until PLL clock is stable and can be used as system clock source
-//        // TODO: put a timout so it can error out.
-//    }
-//
-//    // Set up clock division for the differents buses
-//    RCC_HCLKConfig(RCC_HCLK_Div1);      // APB1 = 42MHz
-//    RCC_PCLK1Config(RCC_HCLK_Div4);     // APB1 = 42MHz
-//    RCC_PCLK2Config(RCC_HCLK_Div2);     // APB2 = 84MHz
-//
-//    // Use PLL clock as system clock
-//    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-//
-//    // Wait till PLL is used as system clock source
-//    // (Yeah, that's right. There's no define/enum for this.)
-//    // TODO: put a timout so it can error out.
-//    while(RCC_GetSYSCLKSource() != RCC_SYSCLK_PLL)
-//    {}
-//}
+  // initialize the GPIO pins we need
+  initClock();
+  init_GPIO();
 
-int main(void)
-{
-    // initialize the GPIO pins we need
-    initClock();
-    init_GPIO();
+  /* This flashed the LEDs on the board once
+   * Two registers are used to set the pins (pin level is VCC)
+   * or to reset the pins (pin level is GND)
+   *
+   * BSRR stands for bit set/reset register
+   * it is seperated into a high and a low word (each of 16 bit size)
+   *
+   * A logical 1 in BSRRL will set the pin and a logical 1 in BSRRH will
+   * reset the pin. A logical 0 in either register has no effect
+   */
+/*
+  GPIOD->BSRRL = 0xF000; // set PD12 thru PD15
+  Tools::Delay(10000000L);		 // wait a short period of time
+  GPIOD->BSRRH = 0xF000; // reset PD12 thru PD15
 
+  while (1){
+
+		GPIOD->BSRRL = 0x1000; // this sets LED1 (green)
+		Tools::Delay(DELAYELEM);
+		GPIOD->BSRRL = 0x2000; // this sets LED2 (orange)
+		Tools::Delay(DELAYELEM);
+		GPIOD->BSRRL = 0x4000; // this sets LED3 (red)
+		Tools::Delay(DELAYELEM);
+		GPIOD->BSRRL = 0x8000; // this sets LED4
+		Tools::Delay(DELAYELEM);
+
+		GPIOD->BSRRH = 0x1000; // this resets LED1
+		Tools::Delay(DELAYELEM);
+		GPIOD->BSRRH = 0x2000; // this resets LED2
+		Tools::Delay(DELAYELEM);
+		GPIOD->BSRRH = 0x4000; // this resets LED3
+		Tools::Delay(DELAYELEM);
+		GPIOD->BSRRH = 0x8000; // this resets LED4 (blue)
+		Tools::Delay(DELAYELEM);
+	}
+*/
+
+  for(;;){
+
+      Herkulex servomotor = Herkulex();
+
+      USBD_Init(&USB_OTG_dev,
+                USB_OTG_FS_CORE_ID,
+                &USR_desc,
+                &USBD_CDC_cb,
+                &USR_cb);
+
+      servomotor.clear(0xFD);
+
+      servomotor.setTorque(0xFD, TORQUE_ON);
+      uint16_t position(0);
+      while(1)
+      {
+          position = servomotor.getPos(0xFD);
+          servomotor.positionControl(0xFD, 1000, 60, 0x00);
+          Tools::Delay(90000000);
+
+          position = servomotor.getPos(0xFD);
+          servomotor.positionControl(0xFD, 23, 60, 0x00);
+          Tools::Delay(90000000);
+
+      }
+      /*
     GPIOD->BSRRL = 0xF000;  // set PD12 thru PD15
     Delay(10000000L);		// wait a short period of time
     GPIOD->BSRRH = 0xF000;  // reset PD12 thru PD15
     Delay(10000000L);
-
-    USBD_Init(&USB_OTG_dev,
-              USB_OTG_FS_CORE_ID,
-              &USR_desc,
-              &USBD_CDC_cb,
-              &USR_cb);
 
 
     volatile int i = 0;
@@ -171,5 +180,10 @@ int main(void)
             i = 0;
         }
     }
+      */
+
+     //Delay(9000000);
+     //UARTUtility::USART_puts(USART1, "Hello World!!");
+  }
 }
 

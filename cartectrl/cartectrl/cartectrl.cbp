@@ -75,6 +75,9 @@
 		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_Device_Library/Class/cdc/src/usbd_cdc_core.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -99,13 +102,16 @@
 		<Unit filename="include/usb/usbd_conf.h" />
 		<Unit filename="include/usb/usbd_desc.h" />
 		<Unit filename="linker/stm32f4_linker.ld" />
+		<Unit filename="src/Tools.h" />
+		<Unit filename="src/herkulex.cpp" />
+		<Unit filename="src/herkulex.h" />
 		<Unit filename="src/initClock.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/interrupts/stm32fxxx_it.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="src/main.c">
+		<Unit filename="src/main.cpp">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/syscall.c">

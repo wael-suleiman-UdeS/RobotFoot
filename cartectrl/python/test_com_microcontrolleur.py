@@ -38,13 +38,6 @@ def sendCommand( id, cmd, data=[] ):
         L[6] = ~CheckSum1 & 0xFE
         
         writeUART(L)
-#-----------------------------------------------------
-# Set servomotor position
-# id : ID of servomotor
-# pos : Position of servomotor (min = 21 max = 1002)
-# time : Time of mouvement
-def goPos(id, pos, time=60):
-        sendCommand(id,6, [time,(pos & 0xFF),((pos >> 8) & 0xFF),0x0,id])
 	
 #-----------------------------------------------------
 # Read data of UART port
@@ -80,26 +73,6 @@ def readPosition(id):
         pos = ord(s[9]) | (ord(s[10]) << 8);
 
         print('pos = ' + str(pos))
-
-#-----------------------------------------------------
-# Flash led of servormotor test
-# id : ID of servomotor
-def flashLed(id):
-        while 1:
-        	sendCommand(id,3, [0x35,0x01,0x01])
-        	time.sleep(0.5)
-        	sendCommand(id,3, [0x35,0x01,0x02])
-        	time.sleep(0.5)
-        	sendCommand(id,3, [0x35,0x01,0x04])
-        	time.sleep(0.5)
-
-#-----------------------------------------------------
-# Clear error message
-# id : ID of servomotor
-def clearErrorMsg(id):
-        sendCommand(id,3, [0x30,0x02,0x00,0x00])
-        sendCommand(id,3, [0x35,0x01,0x00])
-        	
 #-----------------------------------------------------
 # Main        	
 if 'ser' not in globals() or ser.isOpen() == False:
@@ -108,25 +81,13 @@ if 'ser' not in globals() or ser.isOpen() == False:
         ser = serial.Serial(2,115200,serial.EIGHTBITS,
                             serial.PARITY_NONE, serial.STOPBITS_ONE, 15);
 
-pos = 21#min = 21 max = 1002
-id = 0xFD
+id = 0xFD 
 
-#Servomotor led test
-#flashLed(id)
-        
-#Servomotor position test
-#sendCommand(id,3,[0x34,0x01,0x60]) #??
-##sendCommand(id,3,[22,2,0xAA, 0]) #??
-#goPos(id, pos)
-#time.sleep(1)
-readPosition(id)
-
- 
-#Servomotor clear error message
-#clearErrorMsg(id)
+#askPosition(id)
 
 #Microcontroller test
-#writeUART([97,98,99,100,101,102,103,104,105,106,107,108,109], True)
+writeUART([0xff,0xff,0xd,0xfd,0x44,0x60,0x9e,0x3c,0x2,0xe8,0x3,0x0,0x0])
+#writeUART([0xff,0xff,0x0D,0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6A,0x6B,0x6C,0x6D,0x6E,0x0D,0x0A])
 #readData(12)
 
 
