@@ -10,25 +10,27 @@ void _exit(int status)
     {}
 }
 
-void* _sbrk(int incr) {
-/*
-    extern char _end;		// Defined by the linker
+void *_sbrk(int incr) {
+
+    // Defined by the linker
+    extern char __heap_start__;
+    extern char __heap_end__;
+
     static char *heap_end;
     char *prev_heap_end;
 
     if (heap_end == 0) {
-      heap_end = &_end;
+      heap_end = &__heap_start__;
     }
     prev_heap_end = heap_end;
-    if (heap_end + incr > stack_ptr) {
+    if (heap_end + incr > &__heap_end__) {
       write (1, "Heap and stack collision\n", 25);
       abort ();
     }
 
     heap_end += incr;
-    return (caddr_t) prev_heap_end;
-    */
-    return 0;
+    return (void *) prev_heap_end;
+
 }
 
 int _kill(int pid, int sig) {
