@@ -4,6 +4,10 @@
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_flash.h>
 
+#include "UnitTestOutput.h"
+#include "UnitTest.h"
+#include "UnitTestHerkulex.h"
+
 /* This funcion shows how to initialize
  * the GPIO pins on GPIOD and how to configure
  * them as inputs and outputs
@@ -186,14 +190,15 @@ int main(void)
     // initialize the GPIO pins we need
     initClock();
     init_GPIO();
-
     init_USART2(115200);
+
+    UnitTestHerkulex test1;
+    test1.Run();
 
     while(1)
     {
-        while( !(USART2->SR & 0x00000040) );
-            USART_SendData(USART2, 0x55 );
+        UnitTestOutput::SendMessage( "Test\n" );
     }
 
-    return 1;
+    return 0;
 }
