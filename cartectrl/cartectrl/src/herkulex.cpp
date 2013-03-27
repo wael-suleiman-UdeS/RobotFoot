@@ -24,8 +24,8 @@
 #include "Tools.h"
 
 #include <stm32f4xx.h>
-#include <stm32f4xx_usart.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
-#include <misc.h>			 // I recommend you have a look at these in the ST firmware folder
+#include <stm32f4xx_usart.h>
+#include <misc.h>
 
 
 namespace{
@@ -63,7 +63,7 @@ void Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
 {
     waitingForData = true;
 
-    Tools::Timeout( 10000, &waitingForData );
+    Tools::Timeout( 10000, waitingForData );
 
     for (uint8_t i=0; i < packetSize; i++)
     {

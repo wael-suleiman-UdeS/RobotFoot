@@ -1,17 +1,14 @@
-#include <stm32f4xx.h>
+#include <stm32f4xx_usart.h>
+#include <misc.h>
+
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_flash.h>
-#include <stm32f4xx_rcc.h>
-
-#include "herkulex.h"
-#include "Tools.h"
-
-#define DELAYELEM 2000000L
 
 /* This funcion shows how to initialize
  * the GPIO pins on GPIOD and how to configure
  * them as inputs and outputs
  */
+/// @todo Should be deleted (temporary)
 void init_GPIO(void){
 
 	/* This TypeDef is a structure defined in the
@@ -76,6 +73,7 @@ void init_GPIO(void){
 	GPIO_Init(GPIOA, &GPIO_InitStruct);			  // this passes the configuration to the Init function which takes care of the low level stuff
 }
 
+/// @todo Should be deleted (temporary)
 void initClock(void)
 {
   __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
@@ -125,70 +123,77 @@ void initClock(void)
 
 }
 
-int main(void){
+namespace
+{
 
-  // initialize the GPIO pins we need
-  initClock();
-  init_GPIO();
+void init_USART2(uint32_t baudrate){
 
-  /* This flashed the LEDs on the board once
-   * Two registers are used to set the pins (pin level is VCC)
-   * or to reset the pins (pin level is GND)
-   *
-   * BSRR stands for bit set/reset register
-   * it is seperated into a high and a low word (each of 16 bit size)
-   *
-   * A logical 1 in BSRRL will set the pin and a logical 1 in BSRRH will
-   * reset the pin. A logical 0 in either register has no effect
-   */
-/*
-  GPIOD->BSRRL = 0xF000; // set PD12 thru PD15
-  Tools::Delay(10000000L);		 // wait a short period of time
-  GPIOD->BSRRH = 0xF000; // reset PD12 thru PD15
+	/* This is a concept that has to do with the libraries provided by ST
+	 * to make development easier the have made up something similar to
+	 * classes, called TypeDefs, which actually just define the common
+	 * parameters that every peripheral needs to work correctly
+	 *
+	 * They make our life easier because we don't have to mess around with
+	 * the low level stuff of setting bits in the correct registers
+	 */
+	GPIO_InitTypeDef GPIO_InitStruct; // this is for the GPIO pins used as TX and RX
+	USART_InitTypeDef USART_InitStruct; // this is for the USART1 initilization
 
-  while (1){
+	// Enable APB1 peripheral clock for USART2
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
-		GPIOD->BSRRL = 0x1000; // this sets LED1 (green)
-		Tools::Delay(DELAYELEM);
-		GPIOD->BSRRL = 0x2000; // this sets LED2 (orange)
-		Tools::Delay(DELAYELEM);
-		GPIOD->BSRRL = 0x4000; // this sets LED3 (red)
-		Tools::Delay(DELAYELEM);
-		GPIOD->BSRRL = 0x8000; // this sets LED4
-		Tools::Delay(DELAYELEM);
+	// Enable the peripheral clock for the pins used by
+	// USART2, PD5 for TX and PD6 for RX
 
-		GPIOD->BSRRH = 0x1000; // this resets LED1
-		Tools::Delay(DELAYELEM);
-		GPIOD->BSRRH = 0x2000; // this resets LED2
-		Tools::Delay(DELAYELEM);
-		GPIOD->BSRRH = 0x4000; // this resets LED3
-		Tools::Delay(DELAYELEM);
-		GPIOD->BSRRH = 0x8000; // this resets LED4 (blue)
-		Tools::Delay(DELAYELEM);
-	}
-*/
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
-  while (1){
+	// This sequence sets up the TX and RX pins
+	// so they work correctly with the USART1 peripheral
 
-      Herkulex servomotor = Herkulex();
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6; // Pins 5 (TX) and 6 (RX) are used
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF; 			// the pins are configured as alternate function so the USART peripheral has access to them
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;		// this defines the IO speed and has nothing to do with the baudrate!
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;			// this defines the output type as push pull mode (as opposed to open drain)
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;			// this activates the pullup resistors on the IO pins
+	GPIO_Init(GPIOD, &GPIO_InitStruct);					// now all the values are passed to the GPIO_Init() function which sets the GPIO registers
 
-      servomotor.clear(0xFD);
+	/* The RX and TX pins are now connected to their AF
+	 * so that the USART2 can take over control of the
+	 * pins
+	 */
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource5, GPIO_AF_USART2);
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource6, GPIO_AF_USART2);
 
-      servomotor.setTorque(0xFD, TORQUE_ON);
-      uint16_t position(0);
-      while(1)
-      {
-          position = servomotor.getPos(0xFD);
-          servomotor.positionControl(0xFD, 999, 60, 0x00);
-          Tools::Delay(40000000);
+	/* Now the USART_InitStruct is used to define the
+	 * properties of USART2
+	 */
+	USART_InitStruct.USART_BaudRate = baudrate;				// the baudrate is set to the value we passed into this init function
+	USART_InitStruct.USART_WordLength = USART_WordLength_8b;// we want the data frame size to be 8 bits (standard)
+	USART_InitStruct.USART_StopBits = USART_StopBits_1;		// we want 1 stop bit (standard)
+	USART_InitStruct.USART_Parity = USART_Parity_No;		// we don't want a parity bit (standard)
+	USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // we don't want flow control (standard)
+	USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx; // we want to enable the transmitter and the receiver
+	USART_Init(USART2, &USART_InitStruct);					// again all the properties are passed to the USART_Init function which takes care of all the bit setting
 
-          position = servomotor.getPos(0xFD);
-          servomotor.positionControl(0xFD, 25, 60, 0x00);
-          Tools::Delay(40000000);
+	// finally this enables the complete USART2 peripheral
+	USART_Cmd(USART2, ENABLE);
+}
 
-      }
+}
 
-     //Delay(9000000);
-     //UARTUtility::USART_puts(USART1, "Hello World!!");
-  }
+int main(void)
+{
+    // initialize the GPIO pins we need
+    initClock();
+    init_GPIO();
+
+    init_USART2(115200);
+
+    while(1)
+    {
+        while( !(USART2->SR & 0x00000040) );
+            USART_SendData(USART2, 0x55 );
+    }
+
+    return 1;
 }

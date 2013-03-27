@@ -7,10 +7,10 @@ public:
     Tools(){}
     ~Tools(){}
 
-    static void Timeout( unsigned int maxDelay, const volatile bool* waitFlag )
+    static void Timeout( unsigned int maxDelay, const volatile bool& waitFlag )
     {
         unsigned int nb1(0),nb2(1);
-        while( *waitFlag && nb2 < maxDelay )
+        while( waitFlag && nb2 < maxDelay )
         {
             int tmp = nb2;
             nb2 += nb1;
