@@ -195,10 +195,7 @@ int main(void)
     UnitTestHerkulex test1;
     test1.Run();
 
-    while(1)
-    {
-        UnitTestOutput::SendMessage( "Test\n" );
-    }
+
 
     return 0;
 }

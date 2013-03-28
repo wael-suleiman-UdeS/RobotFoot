@@ -16,30 +16,34 @@ class UnitTest
 
 public:
     UnitTest(){}
-    UnitTest( const std::string testName )
+
+    UnitTest( char* testName )
     {
         TestName = testName;
     }
+
 
     virtual ~UnitTest(){};
 
     void Run()
     {
-        UnitTestOutput::SendMessage( "\n\nBegining " );
-        //UnitTestOutput::SendMessage( TestName.c_str() );
-        UnitTestOutput::SendMessage( " Unit Test. \n" );
+        UnitTestOutput::SendMessage( "\nBegining " );
+        UnitTestOutput::SendMessage( TestName );
+        UnitTestOutput::SendMessage( " Unit Test." );
 
         if ( Test() )
         {
-            //UnitTestOutput::SendMessage( TestName.c_str() );
-            UnitTestOutput::SendMessage( " = " );
-            //UnitTestOutput::SendMessage( UnitTestString::UNIT_TEST_PASSED );
+            UnitTestOutput::SendMessage( "\n" );
+            UnitTestOutput::SendMessage( TestName );
+            UnitTestOutput::SendMessage( " : " );
+            UnitTestOutput::SendMessage( UnitTestString::UNIT_TEST_PASSED );
         }
         else
         {
-            //UnitTestOutput::SendMessage( TestName.c_str() );
-            UnitTestOutput::SendMessage( " = " );
-            //UnitTestOutput::SendMessage( UnitTestString::UNIT_TEST_FAILED );
+            UnitTestOutput::SendMessage( "\n" );
+            UnitTestOutput::SendMessage( TestName );
+            UnitTestOutput::SendMessage( " : " );
+            UnitTestOutput::SendMessage( UnitTestString::UNIT_TEST_FAILED );
         }
     }
 
@@ -47,7 +51,7 @@ public:
 
 private:
 
-    std::string TestName;
+    char* TestName;
 
 };
 
