@@ -92,6 +92,26 @@ def flashLed(id):
         	time.sleep(0.5)
         	sendCommand(id,3, [0x35,0x01,0x04])
         	time.sleep(0.5)
+        	
+ #-----------------------------------------------------
+# Arbre de Noel
+# id1 : ID of servomotor 1
+# id2 : ID of servomotor 2
+# id3 : ID of servomotor 3
+def arbreDeNoel(id1,id2,id3):
+        while 1:
+        	sendCommand(id1,3, [0x35,0x01,0x01])
+        	sendCommand(id2,3, [0x35,0x01,0x02])
+        	sendCommand(id3,3, [0x35,0x01,0x04])
+        	time.sleep(0.5)
+        	sendCommand(id1,3, [0x35,0x01,0x02])
+        	sendCommand(id2,3, [0x35,0x01,0x04])
+        	sendCommand(id3,3, [0x35,0x01,0x01])
+        	time.sleep(0.5)
+        	sendCommand(id1,3, [0x35,0x01,0x04])
+        	sendCommand(id2,3, [0x35,0x01,0x01])
+        	sendCommand(id3,3, [0x35,0x01,0x02])
+        	time.sleep(0.5)
 
 #-----------------------------------------------------
 # Clear error message
@@ -99,7 +119,13 @@ def flashLed(id):
 def clearErrorMsg(id):
         sendCommand(id,3, [0x30,0x02,0x00,0x00])
         sendCommand(id,3, [0x35,0x01,0x00])
-        	
+
+#-----------------------------------------------------
+# Change motor ID
+# id : ID of servomotor
+def changeID(currentID, wantedID):
+        sendCommand(currentID,1, [0x06,0x01,wantedID])
+      	
 #-----------------------------------------------------
 # Main        	
 if 'ser' not in globals() or ser.isOpen() == False:
@@ -107,19 +133,23 @@ if 'ser' not in globals() or ser.isOpen() == False:
         # Timeout time is 100 second.
         ser = serial.Serial(2,115200,serial.EIGHTBITS,
                             serial.PARITY_NONE, serial.STOPBITS_ONE, 15);
-
-pos = 21#min = 21 max = 1002
+#pos (min = 21 max = 1002)
+pos = 200
+pos = 900
+id = 0x02
+id = 0x0C
 id = 0xFD
 
 #Servomotor led test
 #flashLed(id)
         
-#Servomotor position test
-#sendCommand(id,3,[0x34,0x01,0x60]) #??
-##sendCommand(id,3,[22,2,0xAA, 0]) #??
+#Servomotor position set
+#sendCommand(id,3,[0x34,0x01,0x60])
 #goPos(id, pos)
+
+#Servomotor position read
 #time.sleep(1)
-readPosition(id)
+#readPosition(id)
 
  
 #Servomotor clear error message
@@ -129,6 +159,11 @@ readPosition(id)
 #writeUART([97,98,99,100,101,102,103,104,105,106,107,108,109], True)
 #readData(12)
 
+#ChangeID
+#changeID(id,0x01);
+
+#Arbre de Noel
+#arbreDeNoel( 0x02, 0x0C, 0xFD )
 
 ser.close()
 
