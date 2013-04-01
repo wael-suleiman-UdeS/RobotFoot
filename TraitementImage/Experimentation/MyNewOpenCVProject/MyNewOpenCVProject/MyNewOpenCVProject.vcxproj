@@ -84,11 +84,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CameraCapture.cpp" />
+    <ClCompile Include="ColorFinder.cpp" />
+    <ClCompile Include="ImageProcessing.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraCapture.h" />
+    <ClInclude Include="ColorFinder.h" />
+    <ClInclude Include="ImageProcessing.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="test.h" />
   </ItemGroup>

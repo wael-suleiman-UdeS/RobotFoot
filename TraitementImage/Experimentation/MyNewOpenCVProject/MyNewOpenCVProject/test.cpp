@@ -1,4 +1,6 @@
 #include "test.h"
+#include "CameraCapture.h"
+#include "ColorFinder.h"
 
 using namespace cv;
 using namespace std;
@@ -70,12 +72,52 @@ void test::testPrimaire(){
 
 // Global Localisation Algorithm : Detection of a Sphere aka (GlADoS)
 
+void test::testModularite(){
+	bool debug = true;
+
+	CameraCapture *camera = CameraCapture::GetInstance();
+	CvPoint* ballPosition;
+	ColorFinder *finder = new ColorFinder(215, 40, 163, 103);
+
+	if (debug)
+	{
+		cvNamedWindow("RGB", CV_WINDOW_AUTOSIZE);
+		cvNamedWindow("HSV", CV_WINDOW_AUTOSIZE);
+	}
+
+	while(true)
+	{
+		camera->CaptureFrame();
+
+		if (debug)
+		{
+			cvShowImage("RGB", camera->GetFrame(CameraCapture::RGB_SPACE));
+			cvShowImage("HSV", camera->GetFrame(CameraCapture::HSV_SPACE));
+		}
+
+		ballPosition = finder->GetCirclePosition(camera->GetFrame(CameraCapture::HSV_SPACE));
+
+		if (debug)
+		{
+			cvCircle(camera->GetFrame(CameraCapture::RGB_SPACE), cvPoint(cvRound(ballPosition->x), ballPosition->y),
+				3, CV_RGB(0,255,0), -1, 8, 0 );
+
+			cvShowImage("RGB", camera->GetFrame(CameraCapture::RGB_SPACE));
+			cvShowImage("HSV", camera->GetFrame(CameraCapture::HSV_SPACE));
+		}
+
+		if( (cvWaitKey(10) & 255) == 27) break;
+	}
+
+	cvDestroyAllWindows();
+}
+
 void test::trackBall()
 {
     // Default capture size - 640x480
     CvSize size = cvSize(640,480);
     // Open capture device. 0 is /dev/video0, 1 is /dev/video1, etc.
-    CvCapture* capture = cvCaptureFromCAM( 0 );
+    CvCapture* capture = cvCaptureFromCAM( 1 );
     if( !capture )
     {
             fprintf( stderr, "ERROR: capture is NULL \n" );

@@ -1,30 +1,29 @@
-﻿La génération a démarré 2013-03-08 13:54:22.
-     1>Projet "C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\MyNewOpenCVProject\MyNewOpenCVProject.vcxproj" sur le nœud 2 (Rebuild cible(s)).
+﻿La génération a démarré 2013-04-01 18:23:41.
+     1>Projet "C:\Users\Mitchel\Desktop\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\MyNewOpenCVProject\MyNewOpenCVProject.vcxproj" sur le nœud 2 (Build cible(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IC:\opencv244\build\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Settings.cpp main.cpp test.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IC:\opencv244\build\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt ImageProcessing.cpp main.cpp test.cpp
          test.cpp
-     1>c:\users\david\documents\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\test.cpp(14): warning C4551: liste d'arguments manquante dans l'appel de fonction
-     1>c:\users\david\documents\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\test.cpp(83): warning C4551: liste d'arguments manquante dans l'appel de fonction
-     1>c:\users\david\documents\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\test.cpp(145): warning C4244: 'argument' : conversion de 'double' en 'int', perte possible de données
-     1>c:\users\david\documents\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\test.cpp(146): warning C4244: 'argument' : conversion de 'double' en 'int', perte possible de données
+     1>c:\users\mitchel\desktop\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\test.cpp(16): warning C4551: liste d'arguments manquante dans l'appel de fonction
+     1>c:\users\mitchel\desktop\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\test.cpp(125): warning C4551: liste d'arguments manquante dans l'appel de fonction
+     1>c:\users\mitchel\desktop\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\test.cpp(187): warning C4244: 'argument' : conversion de 'double' en 'int', perte possible de données
+     1>c:\users\mitchel\desktop\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\test.cpp(188): warning C4244: 'argument' : conversion de 'double' en 'int', perte possible de données
          main.cpp
      1>c:\opencv244\build\include\opencv2\legacy\blobtrack.hpp(187): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 11.0\vc\include\string.h(110) : voir la déclaration de 'strcpy'
      1>c:\opencv244\build\include\opencv2\legacy\blobtrack.hpp(256): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 11.0\vc\include\string.h(115) : voir la déclaration de 'strcat'
-         Settings.cpp
-     1>c:\users\david\documents\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\settings.cpp(247): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\time.inl(112) : voir la déclaration de 'localtime'
-     1>c:\users\david\documents\github\robotfoot\traitementimage\experimentation\mynewopencvproject\mynewopencvproject\settings.cpp(270): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\stdio.h(357) : voir la déclaration de 'sprintf'
+         ImageProcessing.cpp
          Génération de code en cours...
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\opencv244\build\x86\vc11\lib opencv_core244d.lib opencv_imgproc244d.lib opencv_highgui244d.lib opencv_ml244d.lib opencv_video244d.lib opencv_features2d244d.lib opencv_calib3d244d.lib opencv_objdetect244d.lib opencv_contrib244d.lib opencv_legacy244d.lib opencv_flann244d.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.lib" /MACHINE:X86 Debug\Settings.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Mitchel\Desktop\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\opencv244\build\x86\vc11\lib opencv_core244d.lib opencv_imgproc244d.lib opencv_highgui244d.lib opencv_ml244d.lib opencv_video244d.lib opencv_features2d244d.lib opencv_calib3d244d.lib opencv_objdetect244d.lib opencv_contrib244d.lib opencv_legacy244d.lib opencv_flann244d.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Mitchel\Desktop\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Mitchel\Desktop\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.lib" /MACHINE:X86 Debug\CameraCapture.obj
+         Debug\ColorFinder.obj
+         Debug\ImageProcessing.obj
+         Debug\Settings.obj
          Debug\main.obj
          Debug\test.obj
-         MyNewOpenCVProject.vcxproj -> C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.exe
-     1>Génération du projet "C:\Users\David\Documents\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\MyNewOpenCVProject\MyNewOpenCVProject.vcxproj" terminée (Rebuild cible(s)).
+         MyNewOpenCVProject.vcxproj -> C:\Users\Mitchel\Desktop\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\Debug\MyNewOpenCVProject.exe
+     1>Génération du projet "C:\Users\Mitchel\Desktop\GitHub\RobotFoot\TraitementImage\Experimentation\MyNewOpenCVProject\MyNewOpenCVProject\MyNewOpenCVProject.vcxproj" terminée (Build cible(s)).
 
 La génération a réussi.
 
-Temps écoulé 00:00:07.30
+Temps écoulé 00:00:09.71

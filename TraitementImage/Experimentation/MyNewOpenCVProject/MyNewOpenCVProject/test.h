@@ -19,6 +19,9 @@ public:
 	void testPrimaire();
 	void trackBall();
 	int cameraClibration(int argc, char* argv[]);
+
+	void testModularite();
+
 private:
 
 };

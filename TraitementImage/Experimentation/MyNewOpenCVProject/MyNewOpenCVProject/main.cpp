@@ -5,7 +5,7 @@ int main(int argc, char* argv[]) {
 	int cReturn = EXIT_SUCCESS;
 	
 	test conception;
-	cReturn = conception.cameraClibration(argc,argv);
+	conception.testModularite();
 
-	return cReturn;
+	return 0;
 }
