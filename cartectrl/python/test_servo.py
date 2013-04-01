@@ -44,6 +44,10 @@ def sendCommand( id, cmd, data=[] ):
 # pos : Position of servomotor (min = 21 max = 1002)
 # time : Time of mouvement
 def goPos(id, pos, time=60):
+        #pos (min = 21 max = 1002)
+        #Set Torque
+        sendCommand(id,3,[0x34,0x01,0x60])
+        #Go pos
         sendCommand(id,6, [time,(pos & 0xFF),((pos >> 8) & 0xFF),0x0,id])
 	
 #-----------------------------------------------------
@@ -122,9 +126,25 @@ def clearErrorMsg(id):
 
 #-----------------------------------------------------
 # Change motor ID
-# id : ID of servomotor
+# currentID : ID of servomotor
+# wantedID : Will set servomotor to this ID
 def changeID(currentID, wantedID):
         sendCommand(currentID,1, [0x06,0x01,wantedID])
+
+#-----------------------------------------------------
+# Change motor ID
+# id : ID of servomotor
+def readStatus(id):
+        sendCommand(id,7, [])
+        readData(9)
+
+#-----------------------------------------------------
+# Read RAM adress
+# id : ID of servomotor
+# adr : adress to read
+def readRAM(id, adress):
+        sendCommand(id,4, [adress, 0x01])
+        readData(12) 
       	
 #-----------------------------------------------------
 # Main        	
@@ -133,37 +153,17 @@ if 'ser' not in globals() or ser.isOpen() == False:
         # Timeout time is 100 second.
         ser = serial.Serial(2,115200,serial.EIGHTBITS,
                             serial.PARITY_NONE, serial.STOPBITS_ONE, 15);
-#pos (min = 21 max = 1002)
-pos = 200
-pos = 900
-id = 0x02
-id = 0x0C
-id = 0xFD
 
-#Servomotor led test
-#flashLed(id)
-        
-#Servomotor position set
-#sendCommand(id,3,[0x34,0x01,0x60])
-#goPos(id, pos)
 
-#Servomotor position read
-#time.sleep(1)
-#readPosition(id)
+readStatus(4)
+#id = 1;
+#end = 15;
+#pos = 900;
 
- 
-#Servomotor clear error message
-#clearErrorMsg(id)
-
-#Microcontroller test
-#writeUART([97,98,99,100,101,102,103,104,105,106,107,108,109], True)
-#readData(12)
-
-#ChangeID
-#changeID(id,0x01);
-
-#Arbre de Noel
-#arbreDeNoel( 0x02, 0x0C, 0xFD )
+#while id < end :
+#        goPos( id, pos)
+#        time.sleep(0.5)
+#        id = id + 1
 
 ser.close()
 

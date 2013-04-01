@@ -27,20 +27,20 @@ public:
 
     void Run()
     {
-        UnitTestOutput::SendMessage( "\nBegining " );
+        UnitTestOutput::SendMessage( "\r\nBegining " );
         UnitTestOutput::SendMessage( TestName );
         UnitTestOutput::SendMessage( " Unit Test." );
 
         if ( Test() )
         {
-            UnitTestOutput::SendMessage( "\n" );
+            UnitTestOutput::SendMessage( "\r\n" );
             UnitTestOutput::SendMessage( TestName );
             UnitTestOutput::SendMessage( " : " );
             UnitTestOutput::SendMessage( UnitTestString::UNIT_TEST_PASSED );
         }
         else
         {
-            UnitTestOutput::SendMessage( "\n" );
+            UnitTestOutput::SendMessage( "\r\n" );
             UnitTestOutput::SendMessage( TestName );
             UnitTestOutput::SendMessage( " : " );
             UnitTestOutput::SendMessage( UnitTestString::UNIT_TEST_FAILED );

@@ -279,20 +279,6 @@ public:
      */
     ~Herkulex();
 
-    /**@brief Transmit packet datas with UART
-     *
-     * @param packetSize The packet size.
-     * @param data The transmit packet data array.
-     */
-    void txPacket(uint8_t packetSize, uint8_t* data);
-
-    /** Receive packet datas with UART
-     *
-     * @param packetSize The packet size.
-     * @param data The receive packet data array.
-     */
-    void rxPacket(uint8_t packetSize, uint8_t* data);
-
     /**@brief Clear error status
      *
      * @param id The herkulex servo ID.
@@ -338,6 +324,20 @@ public:
     int16_t getPos(uint8_t id);
 
 private :
+
+    /**@brief Transmit packet datas with UART
+     *
+     * @param packetSize The packet size.
+     * @param data The transmit packet data array.
+     */
+    void txPacket(uint8_t packetSize, uint8_t* data);
+
+    /** Receive packet datas with UART
+     *
+     * @param packetSize The packet size.
+     * @param data The receive packet data array.
+     */
+    bool rxPacket(uint8_t packetSize, uint8_t* data);
 
     /**@brief This funcion initializes the USART1 peripheral
      *

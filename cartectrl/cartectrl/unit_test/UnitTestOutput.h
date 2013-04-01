@@ -4,6 +4,8 @@
 namespace UnitTestOutput
 {
     void SendMessage( const char* data );
+
+    void SendMessage( int value );
 }
 
 
