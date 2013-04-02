@@ -24,14 +24,6 @@ ColorFinder::~ColorFinder()
 {
 }
 
-void ColorFinder::filter(IplImage* sourceFrame)
-{
-	CvScalar minHSV = cvScalar(_hue - _hueTolerance, _saturation, _brightness, MIN_VALUE);
-	CvScalar maxHSV = cvScalar(_hue + _hueTolerance, MAX_VALUE, MAX_VALUE, MAX_VALUE);
-
-	cvInRangeS(sourceFrame, minHSV, maxHSV, _resultFrame);
-}
-
 CvPoint* ColorFinder::getCirclePosition(IplImage* frame)
 {
 	filter(frame);
@@ -59,4 +51,12 @@ CvPoint* ColorFinder::getCirclePosition(IplImage* frame)
 	}
 
 	return circlePosition;
+}
+
+void ColorFinder::filter(IplImage* sourceFrame)
+{
+	CvScalar minHSV = cvScalar(_hue - _hueTolerance, _saturation, _brightness, MIN_VALUE);
+	CvScalar maxHSV = cvScalar(_hue + _hueTolerance, MAX_VALUE, MAX_VALUE, MAX_VALUE);
+
+	cvInRangeS(sourceFrame, minHSV, maxHSV, _resultFrame);
 }

@@ -5,6 +5,13 @@
 
 class ColorFinder
 {
+public:
+	ColorFinder();
+	ColorFinder(int hue, int hueTolerance, int saturation, int brightness);
+	~ColorFinder();
+
+	CvPoint* getCirclePosition(IplImage* frame);
+
 private:
 	static const int MIN_VALUE = 0;
 	static const int MAX_VALUE = 255;
@@ -20,12 +27,5 @@ private:
 	IplImage* _resultFrame;
 
 	void filter(IplImage* frame);
-
-public:
-	ColorFinder();
-	ColorFinder(int hue, int hueTolerance, int saturation, int brightness);
-	~ColorFinder();
-
-	CvPoint* getCirclePosition(IplImage* frame);
 };
 
