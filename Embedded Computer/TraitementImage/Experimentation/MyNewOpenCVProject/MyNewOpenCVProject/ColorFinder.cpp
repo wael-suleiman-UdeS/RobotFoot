@@ -2,12 +2,6 @@
 
 using namespace cv;
 
-ColorFinder::ColorFinder()
-{
-	// todo : Configurer d'une autre façon. Retirer ce constructeur?
-	ColorFinder(160, 10, 80, 180);
-}
-
 ColorFinder::ColorFinder(int hue, int hueTolerance, int saturation, int brightness)
 {
 	//todo : forcer les valeurs de 0 à 255. Classe IntRange ou fonction SetInRange? Nécessaire?
