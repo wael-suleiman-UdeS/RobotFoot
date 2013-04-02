@@ -1,5 +1,5 @@
 #include "test.h"
-#include "CameraCapture.h"
+#include "Camera.h"
 #include "ColorFinder.h"
 
 using namespace cv;
@@ -76,6 +76,8 @@ void test::testModularite(){
 	bool debug = true;
 
 	CvPoint* ballPosition;
+	if (!Camera::getInstance().initialize())
+	{return;}
 	ColorFinder *finder = new ColorFinder(215, 40, 163, 103);
 
 	if (debug)
@@ -86,23 +88,23 @@ void test::testModularite(){
 
 	while(true)
 	{
-		CameraCapture::getInstance().captureFrame();
+		Camera::getInstance().captureFrame();
 
 		if (debug)
 		{
-			cvShowImage("RGB", CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::RGB));
-			cvShowImage("HSV", CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::HSV));
+			cvShowImage("RGB", Camera::getInstance().getFrame(Camera::ColorSpace::RGB));
+			cvShowImage("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
 		}
 
-		ballPosition = finder->getCirclePosition(CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::HSV));
+		ballPosition = finder->getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
 
 		if (debug)
 		{
-			cvCircle(CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::RGB), cvPoint(cvRound(ballPosition->x), ballPosition->y),
+			cvCircle(Camera::getInstance().getFrame(Camera::ColorSpace::RGB), cvPoint(cvRound(ballPosition->x), ballPosition->y),
 				3, CV_RGB(0,255,0), -1, 8, 0 );
 
-			cvShowImage("RGB", CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::RGB));
-			cvShowImage("HSV", CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::HSV));
+			cvShowImage("RGB", Camera::getInstance().getFrame(Camera::ColorSpace::RGB));
+			cvShowImage("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
 		}
 
 		if( (cvWaitKey(10) & 255) == 27) break;
