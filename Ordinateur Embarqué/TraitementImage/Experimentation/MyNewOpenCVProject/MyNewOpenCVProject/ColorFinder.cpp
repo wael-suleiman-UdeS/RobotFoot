@@ -24,7 +24,7 @@ ColorFinder::~ColorFinder()
 {
 }
 
-void ColorFinder::Filter(IplImage* sourceFrame)
+void ColorFinder::filter(IplImage* sourceFrame)
 {
 	CvScalar minHSV = cvScalar(_hue - _hueTolerance, _saturation, _brightness, MIN_VALUE);
 	CvScalar maxHSV = cvScalar(_hue + _hueTolerance, MAX_VALUE, MAX_VALUE, MAX_VALUE);
@@ -32,12 +32,12 @@ void ColorFinder::Filter(IplImage* sourceFrame)
 	cvInRangeS(sourceFrame, minHSV, maxHSV, _resultFrame);
 }
 
-CvPoint* ColorFinder::GetCirclePosition(IplImage* frame)
+CvPoint* ColorFinder::getCirclePosition(IplImage* frame)
 {
-	Filter(frame);
-	ImageProcessing::Erode(_resultFrame, _resultFrame);
-	ImageProcessing::Dilate(_resultFrame, _resultFrame);
-	ImageProcessing::Smooth(_resultFrame, _resultFrame);
+	filter(frame);
+	ImageProcessing::erode(_resultFrame, _resultFrame);
+	ImageProcessing::dilate(_resultFrame, _resultFrame);
+	ImageProcessing::smooth(_resultFrame, _resultFrame);
 
 	// todo: choix du cercle (présentement le premier)
 	CvMemStorage* storage = cvCreateMemStorage(0);

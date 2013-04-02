@@ -2,8 +2,6 @@
 
 using namespace cv;
 
-CameraCapture* CameraCapture::_instance = NULL;
-
 CameraCapture::CameraCapture()
 {
 	CvSize frameSize = cvSize(WIDTH, HEIGHT);
@@ -20,27 +18,26 @@ CameraCapture::CameraCapture()
 CameraCapture::~CameraCapture()
 {
 	cvReleaseCapture(&_capture);
-	_instance = NULL;
 }
 
-CameraCapture* CameraCapture::GetInstance()
+CameraCapture& CameraCapture::getInstance()
 {
-	if (!_instance) {_instance = new CameraCapture();}
-	return _instance;
+	static CameraCapture instance;
+	return instance;
 }
 
-void CameraCapture::ProcessFrame()
+void CameraCapture::processFrame()
 {
 	ImageProcessing::RGBtoHSV(_rgbFrame, _hsvFrame);
 }
 
-void CameraCapture::CaptureFrame()
+void CameraCapture::captureFrame()
 {
 	_rgbFrame = cvQueryFrame(_capture);
-	ProcessFrame();
+	processFrame();
 }
 
-IplImage* CameraCapture::GetFrame(ColorSpace colorSpace)
+IplImage* CameraCapture::getFrame(ColorSpace colorSpace)
 {
 	switch (colorSpace)
 	{

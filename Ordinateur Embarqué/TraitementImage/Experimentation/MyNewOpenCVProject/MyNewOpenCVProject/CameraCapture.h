@@ -11,23 +11,22 @@ private:
 	static const int WIDTH  = 640;
 	static const int HEIGHT = 480;
 
-	static CameraCapture* _instance;
-
 	IplImage* _rgbFrame;
 	IplImage* _hsvFrame;
 	CvCapture* _capture;
 
 	CameraCapture();
+	CameraCapture(const CameraCapture&);
 	~CameraCapture();
 
-	void ProcessFrame();
+	void processFrame();
 
 public:
 	enum class ColorSpace {RGB, HSV};
 
-	static CameraCapture* GetInstance();
-	void CaptureFrame();
+	static CameraCapture& getInstance();
+	void captureFrame();
 
-	IplImage* GetFrame(ColorSpace colorSpace);
+	IplImage* getFrame(ColorSpace colorSpace);
 
 };

@@ -75,7 +75,6 @@ void test::testPrimaire(){
 void test::testModularite(){
 	bool debug = true;
 
-	CameraCapture *camera = CameraCapture::GetInstance();
 	CvPoint* ballPosition;
 	ColorFinder *finder = new ColorFinder(215, 40, 163, 103);
 
@@ -87,23 +86,23 @@ void test::testModularite(){
 
 	while(true)
 	{
-		camera->CaptureFrame();
+		CameraCapture::getInstance().captureFrame();
 
 		if (debug)
 		{
-			cvShowImage("RGB", camera->GetFrame(CameraCapture::ColorSpace::RGB));
-			cvShowImage("HSV", camera->GetFrame(CameraCapture::ColorSpace::HSV));
+			cvShowImage("RGB", CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::RGB));
+			cvShowImage("HSV", CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::HSV));
 		}
 
-		ballPosition = finder->GetCirclePosition(camera->GetFrame(CameraCapture::ColorSpace::HSV));
+		ballPosition = finder->getCirclePosition(CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::HSV));
 
 		if (debug)
 		{
-			cvCircle(camera->GetFrame(CameraCapture::ColorSpace::RGB), cvPoint(cvRound(ballPosition->x), ballPosition->y),
+			cvCircle(CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::RGB), cvPoint(cvRound(ballPosition->x), ballPosition->y),
 				3, CV_RGB(0,255,0), -1, 8, 0 );
 
-			cvShowImage("RGB", camera->GetFrame(CameraCapture::ColorSpace::RGB));
-			cvShowImage("HSV", camera->GetFrame(CameraCapture::ColorSpace::HSV));
+			cvShowImage("RGB", CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::RGB));
+			cvShowImage("HSV", CameraCapture::getInstance().getFrame(CameraCapture::ColorSpace::HSV));
 		}
 
 		if( (cvWaitKey(10) & 255) == 27) break;

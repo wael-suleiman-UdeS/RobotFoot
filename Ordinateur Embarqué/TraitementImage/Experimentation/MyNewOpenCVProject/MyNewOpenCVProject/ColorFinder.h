@@ -19,13 +19,13 @@ private:
 
 	IplImage* _resultFrame;
 
-	void Filter(IplImage* frame);
+	void filter(IplImage* frame);
 
 public:
 	ColorFinder();
 	ColorFinder(int hue, int hueTolerance, int saturation, int brightness);
 	~ColorFinder();
 
-	CvPoint* GetCirclePosition(IplImage* frame);
+	CvPoint* getCirclePosition(IplImage* frame);
 };
 
