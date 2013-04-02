@@ -44,10 +44,10 @@ IplImage* CameraCapture::GetFrame(ColorSpace colorSpace)
 {
 	switch (colorSpace)
 	{
-	case CameraCapture::RGB_SPACE:
+	case ColorSpace::RGB:
 		return _rgbFrame;
 		break;
-	case CameraCapture::HSV_SPACE:
+	case ColorSpace::HSV:
 		return _hsvFrame;
 		break;
 	default:

@@ -91,19 +91,19 @@ void test::testModularite(){
 
 		if (debug)
 		{
-			cvShowImage("RGB", camera->GetFrame(CameraCapture::RGB_SPACE));
-			cvShowImage("HSV", camera->GetFrame(CameraCapture::HSV_SPACE));
+			cvShowImage("RGB", camera->GetFrame(CameraCapture::ColorSpace::RGB));
+			cvShowImage("HSV", camera->GetFrame(CameraCapture::ColorSpace::HSV));
 		}
 
-		ballPosition = finder->GetCirclePosition(camera->GetFrame(CameraCapture::HSV_SPACE));
+		ballPosition = finder->GetCirclePosition(camera->GetFrame(CameraCapture::ColorSpace::HSV));
 
 		if (debug)
 		{
-			cvCircle(camera->GetFrame(CameraCapture::RGB_SPACE), cvPoint(cvRound(ballPosition->x), ballPosition->y),
+			cvCircle(camera->GetFrame(CameraCapture::ColorSpace::RGB), cvPoint(cvRound(ballPosition->x), ballPosition->y),
 				3, CV_RGB(0,255,0), -1, 8, 0 );
 
-			cvShowImage("RGB", camera->GetFrame(CameraCapture::RGB_SPACE));
-			cvShowImage("HSV", camera->GetFrame(CameraCapture::HSV_SPACE));
+			cvShowImage("RGB", camera->GetFrame(CameraCapture::ColorSpace::RGB));
+			cvShowImage("HSV", camera->GetFrame(CameraCapture::ColorSpace::HSV));
 		}
 
 		if( (cvWaitKey(10) & 255) == 27) break;

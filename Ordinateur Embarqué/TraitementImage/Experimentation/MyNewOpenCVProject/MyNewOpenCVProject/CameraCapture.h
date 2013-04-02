@@ -23,7 +23,7 @@ private:
 	void ProcessFrame();
 
 public:
-	enum ColorSpace {RGB_SPACE, HSV_SPACE};
+	enum class ColorSpace {RGB, HSV};
 
 	static CameraCapture* GetInstance();
 	void CaptureFrame();
