@@ -6,7 +6,6 @@
 class ColorFinder
 {
 public:
-	ColorFinder();
 	ColorFinder(int hue, int hueTolerance, int saturation, int brightness);
 	~ColorFinder();
 
