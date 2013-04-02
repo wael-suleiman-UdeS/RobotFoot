@@ -26,33 +26,36 @@ class Logger
 
       void addStream(std::ostream &stream)
       {
-          m_streams.push_front(&stream);
+          _streams.push_front(&stream);
       }
 
       template <typename T>
       Logger &operator<<(const T &object)
       {
-          for(auto stream_it = m_streams.begin(); stream_it != m_streams.end(); ++stream_it)
+          for(auto stream_it = _streams.begin(); stream_it != _streams.end(); ++stream_it)
           {
-             if (m_timeStamp) **stream_it << timestamp() << ": ";
+             if (_timeStamp) **stream_it << timestamp() << ": ";
 
              **stream_it << object;
           }
-          m_timeStamp = false;
+          _timeStamp = false;
           return *this;
       }
 
       Logger &operator<<(std::ostream& (*endl_ptr)(std::ostream&))
       {
-          for(auto stream_it = m_streams.begin(); stream_it != m_streams.end(); ++stream_it)
+          for(auto stream_it = _streams.begin(); stream_it != _streams.end(); ++stream_it)
           {
              **stream_it << *endl_ptr;
           }
-          m_timeStamp = true;
+          _timeStamp = true;
           return *this;
       }
 
    private:
+	  bool _timeStamp;
+      std::list<std::ostream*> _streams;
+
       Logger(){ m_timeStamp = true; }
       Logger(const Logger&);
       void operator=(const Logger&);
@@ -65,8 +68,5 @@ class Logger
           strftime(buffer,50,"%c",localtime(&ltime));
           return std::string(buffer);
       }
-
-      bool m_timeStamp;
-      std::list<std::ostream*> m_streams;
 };
 #endif
