@@ -14,3 +14,4 @@
 !*.sln
 !*.vcproj
 !*.vcxproj
+!*.props
