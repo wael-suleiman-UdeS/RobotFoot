@@ -12,6 +12,6 @@
 !*.xml
 !*.ini
 !*.sln
-!*.vcproj
-!*.vcxproj
+!*.vcproj*
+!*.vcxproj*
 !*.props
