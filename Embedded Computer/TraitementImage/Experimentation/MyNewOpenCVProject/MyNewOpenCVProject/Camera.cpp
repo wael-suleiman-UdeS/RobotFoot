@@ -8,9 +8,9 @@ Camera& Camera::getInstance()
 	return instance;
 }
 
-bool Camera::initialize()
+bool Camera::initialize(int deviceIndex)
 {
-	_capture = cvCaptureFromCAM(DEVICE_INDEX);
+	_capture = cvCaptureFromCAM(deviceIndex);
 	return _capture;
 }
 

@@ -75,9 +75,18 @@ void test::testPrimaire(){
 void test::testModularite(){
 	bool debug = true;
 
+	// fichier ini
+	//////////////
+	int cameraDeviceIndex = 0;
+	int hue = 215;
+	int hueTolerance = 40;
+	int saturation = 163;
+	int brightness = 103;
+	//////////////
+
 	CvPoint* ballPosition;
-	if (!Camera::getInstance().initialize()) {return;}
-	ColorFinder *finder = new ColorFinder(215, 40, 163, 103);
+	if (!Camera::getInstance().initialize(cameraDeviceIndex)) {return;}
+	ColorFinder *finder = new ColorFinder(hue, hueTolerance, saturation, brightness);
 
 	if (debug)
 	{

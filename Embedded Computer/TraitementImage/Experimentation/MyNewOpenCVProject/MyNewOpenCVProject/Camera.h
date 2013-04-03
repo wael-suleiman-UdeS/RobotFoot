@@ -9,15 +9,12 @@ public:
 	enum class ColorSpace {RGB, HSV};
 
 	static Camera& getInstance();
-	bool initialize();
+	bool initialize(int deviceIndex);
 	void captureFrame();
 
 	IplImage* getFrame(ColorSpace colorSpace);
 
 private:
-	// todo : fichier ini
-	static const int DEVICE_INDEX  = 0;
-
 	IplImage* _rgbFrame;
 	IplImage* _hsvFrame;
 	CvCapture* _capture;
