@@ -16,13 +16,13 @@ bool Camera::initialize(int deviceIndex)
 
 void Camera::captureFrame()
 {
-	if (!_capture) {return;}
+	if (!_capture) { return; }
 
 	_rgbFrame = cvQueryFrame(_capture);
 	processFrame();
 }
 
-IplImage* Camera::getFrame(ColorSpace colorSpace)
+const IplImage* Camera::getFrame(ColorSpace colorSpace)
 {
 	switch (colorSpace)
 	{
@@ -36,12 +36,12 @@ IplImage* Camera::getFrame(ColorSpace colorSpace)
 
 Camera::~Camera()
 {
-	if (_capture) {cvReleaseCapture(&_capture);}
+	if (_capture) { cvReleaseCapture(&_capture); }
 }
 
 void Camera::processFrame()
 {
-	if (!_rgbFrame) {return;}
+	if (!_rgbFrame) { return; }
 	
 	CvSize frameSize = cvSize(_rgbFrame->width, _rgbFrame->height);
 	_hsvFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 3);

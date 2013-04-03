@@ -1,13 +1,15 @@
-#pragma once
+#ifndef IMAGEPROCESSING_H
+#define IMAGEPROCESSING_H
 
 #include <opencv\cvaux.h>
 
 class ImageProcessing
 {
 public:
-	static void RGBtoHSV(IplImage* rgbFrame, IplImage* hsvFrame);
-	static void erode(IplImage* sourceFrame, IplImage* erodedFrame);
-	static void dilate(IplImage* sourceFrame, IplImage* dilatedFrame);
-	static void smooth(IplImage* sourceFrame, IplImage* smoothedFrame);
+	static void RGBtoHSV(const IplImage* rgbFrame, IplImage* hsvFrame);
+	static void erode(const IplImage* sourceFrame, IplImage* erodedFrame);
+	static void dilate(const IplImage* sourceFrame, IplImage* dilatedFrame);
+	static void smooth(const IplImage* sourceFrame, IplImage* smoothedFrame);
 };
 
+#endif // IMAGEPROCESSING_H

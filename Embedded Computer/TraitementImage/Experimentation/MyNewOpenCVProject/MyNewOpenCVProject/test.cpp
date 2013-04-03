@@ -84,36 +84,17 @@ void test::testModularite(){
 	int brightness = 103;
 	//////////////
 
-	CvPoint* ballPosition;
-	if (!Camera::getInstance().initialize(cameraDeviceIndex)) {return;}
-	ColorFinder *finder = new ColorFinder(hue, hueTolerance, saturation, brightness);
+	CvPoint ballPosition;
+	HSVcolor color = {hue, hueTolerance, saturation, brightness};
 
-	if (debug)
-	{
-		cvNamedWindow("RGB", CV_WINDOW_AUTOSIZE);
-		cvNamedWindow("HSV", CV_WINDOW_AUTOSIZE);
-	}
+	if (!Camera::getInstance().initialize(cameraDeviceIndex)) {return;}
+	ColorFinder *finder = new ColorFinder(&color);
 
 	while(true)
 	{
 		Camera::getInstance().captureFrame();
 
-		if (debug)
-		{
-			cvShowImage("RGB", Camera::getInstance().getFrame(Camera::ColorSpace::RGB));
-			cvShowImage("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
-		}
-
 		ballPosition = finder->getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
-
-		if (debug)
-		{
-			cvCircle(Camera::getInstance().getFrame(Camera::ColorSpace::RGB), cvPoint(cvRound(ballPosition->x), ballPosition->y),
-				3, CV_RGB(0,255,0), -1, 8, 0 );
-
-			cvShowImage("RGB", Camera::getInstance().getFrame(Camera::ColorSpace::RGB));
-			cvShowImage("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
-		}
 
 		if( (cvWaitKey(10) & 255) == 27) break;
 	}

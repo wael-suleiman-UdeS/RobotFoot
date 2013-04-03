@@ -2,26 +2,26 @@
 
 using namespace cv;
 
-void ImageProcessing::RGBtoHSV(IplImage* rgbFrame, IplImage* hsvFrame)
+void ImageProcessing::RGBtoHSV(const IplImage* rgbFrame, IplImage* hsvFrame)
 {
-	if (!rgbFrame || !hsvFrame) {return;}
+	if (!rgbFrame || !hsvFrame) { return; }
 	cvCvtColor(rgbFrame, hsvFrame, CV_BGR2HSV);
 }
 
-void ImageProcessing::erode(IplImage* sourceFrame, IplImage* erodedFrame)
+void ImageProcessing::erode(const IplImage* sourceFrame, IplImage* erodedFrame)
 {
-	if (!sourceFrame || !erodedFrame) {return;}
-	cvErode(sourceFrame, erodedFrame, NULL, 0);
+	if (!sourceFrame || !erodedFrame) { return; }
+	cvErode(sourceFrame, erodedFrame, nullptr, 0);
 }
 
-void ImageProcessing::dilate(IplImage* sourceFrame, IplImage* dilatedFrame)
+void ImageProcessing::dilate(const IplImage* sourceFrame, IplImage* dilatedFrame)
 {
-	if (!sourceFrame || !dilatedFrame) {return;}
-	cvDilate(sourceFrame, dilatedFrame, NULL, 2);
+	if (!sourceFrame || !dilatedFrame) { return; }
+	cvDilate(sourceFrame, dilatedFrame, nullptr, 2);
 }
 
-void ImageProcessing::smooth(IplImage* sourceFrame, IplImage* smoothedFrame)
+void ImageProcessing::smooth(const IplImage* sourceFrame, IplImage* smoothedFrame)
 {
-	if (!sourceFrame || !smoothedFrame) {return;}
+	if (!sourceFrame || !smoothedFrame) { return; }
 	cvSmooth(sourceFrame, smoothedFrame, CV_GAUSSIAN, 9, 9);
 }	

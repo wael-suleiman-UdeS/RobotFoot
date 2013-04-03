@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CAMERA_H
+#define CAMERA_H
 
 #include <opencv\highgui.h>
 #include "ImageProcessing.h"
@@ -11,17 +12,18 @@ public:
 	static Camera& getInstance();
 	bool initialize(int deviceIndex);
 	void captureFrame();
-
-	IplImage* getFrame(ColorSpace colorSpace);
+	const IplImage* getFrame(ColorSpace colorSpace);
 
 private:
-	IplImage* _rgbFrame;
+	const IplImage* _rgbFrame;
 	IplImage* _hsvFrame;
 	CvCapture* _capture;
 
-	Camera() {}
-	Camera(const Camera&);
+	Camera() : _rgbFrame(nullptr), _hsvFrame(nullptr) {}
+	Camera(const Camera&) {}
 	~Camera();
 
 	void processFrame();
 };
+
+#endif // CAMERA_H
