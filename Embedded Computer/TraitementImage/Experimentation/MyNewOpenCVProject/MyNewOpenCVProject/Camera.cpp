@@ -49,6 +49,8 @@ Camera::~Camera()
 
 void Camera::processFrame()
 {
-	if (!_rgbFrame || !_hsvFrame) {return;}
+	if (!_rgbFrame || !_hsvFrame
+		&& !(_rgbFrame.width == _hsvFrame.width && _rgbFrame.height == _hsvFrame.height)) {return;}
+
 	ImageProcessing::RGBtoHSV(_rgbFrame, _hsvFrame);
 }
