@@ -1,31 +1,33 @@
-#pragma once
+#ifndef COLORFINDER_H
+#define COLORFINDER_H
 
-
+#include <cstdint>
 #include "ImageProcessing.h"
+
+using std::uint8_t;
+
+struct HSVcolor {
+	uint8_t hue;
+	uint8_t hueTolerance;
+	uint8_t saturation;
+	uint8_t brightness;
+};
 
 class ColorFinder
 {
 public:
-	ColorFinder();
-	ColorFinder(int hue, int hueTolerance, int saturation, int brightness);
-	~ColorFinder();
+	ColorFinder(const HSVcolor* color);
+	~ColorFinder() {}
 
-	CvPoint* getCirclePosition(IplImage* frame);
+	CvPoint getCirclePosition(const IplImage* frame);
 
 private:
-	static const int MIN_VALUE = 0;
-	static const int MAX_VALUE = 255;
-	// todo : fichier ini
-	static const int WIDTH  = 640;
-	static const int HEIGHT = 480;
-
-	int _hue;
-	int _hueTolerance;
-	int _saturation;
-	int _brightness;
-
+	const HSVcolor* _color;
 	IplImage* _resultFrame;
 
-	void filter(IplImage* frame);
+	ColorFinder() {};
+	void setColor(const HSVcolor* color);
+	void filter(const IplImage* frame);
 };
 
+#endif // COLORFINDER_H

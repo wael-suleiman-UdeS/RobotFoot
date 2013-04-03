@@ -86,13 +86,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ImageProcessing\CameraCapture.h" />
+    <ClInclude Include="ImageProcessing\Camera.h" />
     <ClInclude Include="ImageProcessing\ColorFinder.h" />
     <ClInclude Include="ImageProcessing\ImageProcessing.h" />
     <ClInclude Include="Utilities\logger.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ImageProcessing\CameraCapture.cpp" />
+    <ClCompile Include="ImageProcessing\Camera.cpp" />
     <ClCompile Include="ImageProcessing\ColorFinder.cpp" />
     <ClCompile Include="ImageProcessing\ImageProcessing.cpp" />
     <ClCompile Include="RobotFoot.cpp" />

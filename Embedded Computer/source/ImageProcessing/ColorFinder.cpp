@@ -1,62 +1,63 @@
 #include "ColorFinder.h"
+#include <climits>
 
 using namespace cv;
 
-ColorFinder::ColorFinder()
+ColorFinder::ColorFinder(const HSVcolor* color)
 {
-	// todo : Configurer d'une autre façon. Retirer ce constructeur?
-	ColorFinder(160, 10, 80, 180);
+	_color = color;
 }
 
-ColorFinder::ColorFinder(int hue, int hueTolerance, int saturation, int brightness)
+CvPoint ColorFinder::getCirclePosition(const IplImage* frame)
 {
-	//todo : forcer les valeurs de 0 à 255. Classe IntRange ou fonction SetInRange? Nécessaire?
-	_hue = hue;
-	_hueTolerance = hueTolerance;
-	_saturation = saturation;
-	_brightness = brightness;
+	CvPoint circlePosition = {-1, -1};
 
-	CvSize frameSize = cvSize(WIDTH, HEIGHT);
-	_resultFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 1);
-}
+	if (!frame) { return circlePosition; }
 
-ColorFinder::~ColorFinder()
-{
-}
-
-CvPoint* ColorFinder::getCirclePosition(IplImage* frame)
-{
 	filter(frame);
+
 	ImageProcessing::erode(_resultFrame, _resultFrame);
 	ImageProcessing::dilate(_resultFrame, _resultFrame);
 	ImageProcessing::smooth(_resultFrame, _resultFrame);
 
-	// todo: choix du cercle (présentement le premier)
-	CvMemStorage* storage = cvCreateMemStorage(0);
-	CvSeq* circles = cvHoughCircles(_resultFrame, storage, CV_HOUGH_GRADIENT, 2, _resultFrame->height/4,
-		100, 50, 10, 400);
+	double resolution = 2;
+	double minDistance = _resultFrame->height/4;
+	double edgeThreshold = 100;
+	double centerThreshold = 10;
+	double minRadius = 10;
+	double maxRadius = 400;
 
-	CvPoint* circlePosition = new CvPoint();
+	CvMemStorage* storage = cvCreateMemStorage(0);
+	
+	CvSeq* circles = cvHoughCircles(_resultFrame, storage, CV_HOUGH_GRADIENT,
+		resolution, minDistance, edgeThreshold, centerThreshold, minRadius, maxRadius);
+
 	if (circles->total)
 	{
 		float* positionBuffer = (float*)cvGetSeqElem(circles, 0);
-		
-		circlePosition->x = positionBuffer[0];
-		circlePosition->y = positionBuffer[1];
+		circlePosition.x = positionBuffer[0];
+		circlePosition.y = positionBuffer[1];
 	}
-	else
-	{
-		circlePosition->x = -1;
-		circlePosition->y = -1;
-	}
+
+	cvReleaseMemStorage(&storage);
 
 	return circlePosition;
 }
 
-void ColorFinder::filter(IplImage* sourceFrame)
+void ColorFinder::setColor(const HSVcolor* color)
 {
-	CvScalar minHSV = cvScalar(_hue - _hueTolerance, _saturation, _brightness, MIN_VALUE);
-	CvScalar maxHSV = cvScalar(_hue + _hueTolerance, MAX_VALUE, MAX_VALUE, MAX_VALUE);
+	_color = color;
+}
+
+void ColorFinder::filter(const IplImage* sourceFrame)
+{
+	if (!sourceFrame || !_color) { return; }
+
+	CvScalar minHSV = cvScalar(_color->hue - _color->hueTolerance, _color->saturation, _color->brightness, 0);
+	CvScalar maxHSV = cvScalar(_color->hue + _color->hueTolerance, UCHAR_MAX, UCHAR_MAX, 0);
+
+	CvSize frameSize = cvSize(sourceFrame->width, sourceFrame->height);
+	_resultFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 1);
 
 	cvInRangeS(sourceFrame, minHSV, maxHSV, _resultFrame);
 }

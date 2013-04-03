@@ -1,6 +1,0 @@
-# Ignore all
-*.*
-
-# except those:
-!.gitignore
-

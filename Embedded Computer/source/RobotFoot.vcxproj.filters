@@ -39,13 +39,13 @@
     <ClInclude Include="Utilities\logger.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="ImageProcessing\CameraCapture.h">
-      <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
-    </ClInclude>
     <ClInclude Include="ImageProcessing\ColorFinder.h">
       <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
     </ClInclude>
     <ClInclude Include="ImageProcessing\ImageProcessing.h">
+      <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageProcessing\Camera.h">
       <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,13 +53,13 @@
     <ClCompile Include="RobotFoot.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="ImageProcessing\CameraCapture.cpp">
-      <Filter>Fichiers sources\ImageProcessing</Filter>
-    </ClCompile>
     <ClCompile Include="ImageProcessing\ColorFinder.cpp">
       <Filter>Fichiers sources\ImageProcessing</Filter>
     </ClCompile>
     <ClCompile Include="ImageProcessing\ImageProcessing.cpp">
+      <Filter>Fichiers sources\ImageProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProcessing\Camera.cpp">
       <Filter>Fichiers sources\ImageProcessing</Filter>
     </ClCompile>
   </ItemGroup>
