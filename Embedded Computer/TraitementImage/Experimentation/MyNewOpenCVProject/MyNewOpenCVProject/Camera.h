@@ -16,7 +16,7 @@ public:
 
 private:
 	// todo : fichier ini
-	static const int DEVICE_INDEX  = 1;
+	static const int DEVICE_INDEX  = 0;
 	static const int WIDTH  = 640;
 	static const int HEIGHT = 480;
 
@@ -24,7 +24,7 @@ private:
 	IplImage* _hsvFrame;
 	CvCapture* _capture;
 
-	Camera();
+	Camera() {}
 	Camera(const Camera&);
 	~Camera();
 

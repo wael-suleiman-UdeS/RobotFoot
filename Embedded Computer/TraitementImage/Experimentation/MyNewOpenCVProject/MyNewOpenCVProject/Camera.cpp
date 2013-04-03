@@ -15,7 +15,7 @@ bool Camera::initialize()
 	_hsvFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 3);
 
 	_capture = cvCaptureFromCAM(DEVICE_INDEX);
-	return !_capture;
+	return _capture;
 }
 
 void Camera::captureFrame()
@@ -49,8 +49,8 @@ Camera::~Camera()
 
 void Camera::processFrame()
 {
-	if (!_rgbFrame || !_hsvFrame
-		|| !(_rgbFrame.width == _hsvFrame.width && _rgbFrame.height == _hsvFrame.height)) {return;}
+	if (!_rgbFrame || !_hsvFrame) {return;}
+		//|| !(_rgbFrame.width == _hsvFrame.width && _rgbFrame.height == _hsvFrame.height)) {return;}
 
 	ImageProcessing::RGBtoHSV(_rgbFrame, _hsvFrame);
 }
