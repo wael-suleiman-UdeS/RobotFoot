@@ -3,12 +3,13 @@
 #include <opencv\highgui.h>
 #include "ImageProcessing.h"
 
-class CameraCapture
+class Camera
 {
 public:
 	enum class ColorSpace {RGB, HSV};
 
-	static CameraCapture& getInstance();
+	static Camera& getInstance();
+	bool initialize();
 	void captureFrame();
 
 	IplImage* getFrame(ColorSpace colorSpace);
@@ -23,9 +24,9 @@ private:
 	IplImage* _hsvFrame;
 	CvCapture* _capture;
 
-	CameraCapture();
-	CameraCapture(const CameraCapture&);
-	~CameraCapture();
+	Camera();
+	Camera(const Camera&);
+	~Camera();
 
 	void processFrame();
 };
