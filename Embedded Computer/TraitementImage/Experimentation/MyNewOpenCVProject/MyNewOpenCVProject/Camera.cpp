@@ -10,10 +10,6 @@ Camera& Camera::getInstance()
 
 bool Camera::initialize()
 {
-	CvSize frameSize = cvSize(WIDTH, HEIGHT);
-	_rgbFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 3);
-	_hsvFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 3);
-
 	_capture = cvCaptureFromCAM(DEVICE_INDEX);
 	return _capture;
 }
@@ -28,17 +24,13 @@ void Camera::captureFrame()
 
 IplImage* Camera::getFrame(ColorSpace colorSpace)
 {
-	if (!_rgbFrame || !_hsvFrame) {return NULL;}
-
 	switch (colorSpace)
 	{
 	case ColorSpace::RGB:
 		return _rgbFrame;
-		break;
 	case ColorSpace::HSV:
 	default:
 		return _hsvFrame;
-		break;
 	}
 }
 
@@ -49,8 +41,10 @@ Camera::~Camera()
 
 void Camera::processFrame()
 {
-	if (!_rgbFrame || !_hsvFrame) {return;}
-		//|| !(_rgbFrame.width == _hsvFrame.width && _rgbFrame.height == _hsvFrame.height)) {return;}
+	if (!_rgbFrame) {return;}
+	
+	CvSize frameSize = cvSize(_rgbFrame->width, _rgbFrame->height);
+	_hsvFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 3);
 
 	ImageProcessing::RGBtoHSV(_rgbFrame, _hsvFrame);
 }

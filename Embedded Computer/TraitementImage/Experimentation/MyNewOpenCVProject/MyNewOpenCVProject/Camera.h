@@ -17,8 +17,6 @@ public:
 private:
 	// todo : fichier ini
 	static const int DEVICE_INDEX  = 0;
-	static const int WIDTH  = 640;
-	static const int HEIGHT = 480;
 
 	IplImage* _rgbFrame;
 	IplImage* _hsvFrame;

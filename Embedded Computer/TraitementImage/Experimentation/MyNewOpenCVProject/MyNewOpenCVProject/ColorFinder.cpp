@@ -2,36 +2,24 @@
 
 using namespace cv;
 
-ColorFinder::ColorFinder()
-{
-	// todo : Configurer d'une autre façon. Retirer ce constructeur?
-	ColorFinder(160, 10, 80, 180);
-}
-
 ColorFinder::ColorFinder(int hue, int hueTolerance, int saturation, int brightness)
 {
-	//todo : forcer les valeurs de 0 à 255. Classe IntRange ou fonction SetInRange? Nécessaire?
 	_hue = hue;
 	_hueTolerance = hueTolerance;
 	_saturation = saturation;
 	_brightness = brightness;
-
-	CvSize frameSize = cvSize(WIDTH, HEIGHT);
-	_resultFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 1);
-}
-
-ColorFinder::~ColorFinder()
-{
 }
 
 CvPoint* ColorFinder::getCirclePosition(IplImage* frame)
 {
+	if (!frame) {return NULL;}
+
 	filter(frame);
+	
 	ImageProcessing::erode(_resultFrame, _resultFrame);
 	ImageProcessing::dilate(_resultFrame, _resultFrame);
 	ImageProcessing::smooth(_resultFrame, _resultFrame);
 
-	// todo: choix du cercle (présentement le premier)
 	CvMemStorage* storage = cvCreateMemStorage(0);
 	CvSeq* circles = cvHoughCircles(_resultFrame, storage, CV_HOUGH_GRADIENT, 2, _resultFrame->height/4,
 		100, 50, 10, 400);
@@ -40,7 +28,6 @@ CvPoint* ColorFinder::getCirclePosition(IplImage* frame)
 	if (circles->total)
 	{
 		float* positionBuffer = (float*)cvGetSeqElem(circles, 0);
-		
 		circlePosition->x = positionBuffer[0];
 		circlePosition->y = positionBuffer[1];
 	}
@@ -55,8 +42,13 @@ CvPoint* ColorFinder::getCirclePosition(IplImage* frame)
 
 void ColorFinder::filter(IplImage* sourceFrame)
 {
+	if (!sourceFrame) {return;}
+
 	CvScalar minHSV = cvScalar(_hue - _hueTolerance, _saturation, _brightness, MIN_VALUE);
 	CvScalar maxHSV = cvScalar(_hue + _hueTolerance, MAX_VALUE, MAX_VALUE, MAX_VALUE);
+
+	CvSize frameSize = cvSize(sourceFrame->width, sourceFrame->height);
+	_resultFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 1);
 
 	cvInRangeS(sourceFrame, minHSV, maxHSV, _resultFrame);
 }
