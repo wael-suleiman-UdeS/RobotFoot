@@ -8,20 +8,20 @@ void ImageProcessing::RGBtoHSV(const IplImage* rgbFrame, IplImage* hsvFrame)
 	cvCvtColor(rgbFrame, hsvFrame, CV_BGR2HSV);
 }
 
-void ImageProcessing::erode(const IplImage* sourceFrame, IplImage* erodedFrame)
+void ImageProcessing::erode(const IplImage* sourceFrame, IplImage* erodedFrame, int iterations)
 {
 	if (!sourceFrame || !erodedFrame) { return; }
-	cvErode(sourceFrame, erodedFrame, nullptr, 0);
+	cvErode(sourceFrame, erodedFrame, nullptr, iterations);
 }
 
-void ImageProcessing::dilate(const IplImage* sourceFrame, IplImage* dilatedFrame)
+void ImageProcessing::dilate(const IplImage* sourceFrame, IplImage* dilatedFrame, int iterations)
 {
 	if (!sourceFrame || !dilatedFrame) { return; }
-	cvDilate(sourceFrame, dilatedFrame, nullptr, 2);
+	cvDilate(sourceFrame, dilatedFrame, nullptr, iterations);
 }
 
-void ImageProcessing::smooth(const IplImage* sourceFrame, IplImage* smoothedFrame)
+void ImageProcessing::smooth(const IplImage* sourceFrame, IplImage* smoothedFrame, int apertureSize)
 {
 	if (!sourceFrame || !smoothedFrame) { return; }
-	cvSmooth(sourceFrame, smoothedFrame, CV_GAUSSIAN, 9, 9);
+	cvSmooth(sourceFrame, smoothedFrame, CV_GAUSSIAN, apertureSize);
 }	

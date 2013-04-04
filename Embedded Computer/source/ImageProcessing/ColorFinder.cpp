@@ -8,7 +8,7 @@ ColorFinder::ColorFinder(const HSVcolor* color)
 	_color = color;
 }
 
-CvPoint ColorFinder::getCirclePosition(const IplImage* frame)
+CvPoint ColorFinder::getCirclePosition(const IplImage* frame, CircleSpec spec)
 {
 	CvPoint circlePosition = {-1, -1};
 
@@ -16,21 +16,15 @@ CvPoint ColorFinder::getCirclePosition(const IplImage* frame)
 
 	filter(frame);
 
-	ImageProcessing::erode(_resultFrame, _resultFrame);
-	ImageProcessing::dilate(_resultFrame, _resultFrame);
-	ImageProcessing::smooth(_resultFrame, _resultFrame);
-
-	double resolution = 2;
-	double minDistance = _resultFrame->height/4;
-	double edgeThreshold = 100;
-	double centerThreshold = 10;
-	double minRadius = 10;
-	double maxRadius = 400;
+	ImageProcessing::erode(_resultFrame, _resultFrame, spec.erosionIterations);
+	ImageProcessing::dilate(_resultFrame, _resultFrame, spec.dilationIterations);
+	ImageProcessing::smooth(_resultFrame, _resultFrame, spec.smoothingApertureSize);
 
 	CvMemStorage* storage = cvCreateMemStorage(0);
 	
 	CvSeq* circles = cvHoughCircles(_resultFrame, storage, CV_HOUGH_GRADIENT,
-		resolution, minDistance, edgeThreshold, centerThreshold, minRadius, maxRadius);
+		spec.resolutionDivisor, spec.minDistance, spec.edgeThreshold,
+		spec.centerThreshold, spec.minRadius, spec.maxRadius);
 
 	if (circles->total)
 	{
