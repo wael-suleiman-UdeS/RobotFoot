@@ -10,12 +10,12 @@ using namespace cv;
  * @{
  */
 
-/** \brief
+/** \brief Singleton for image capturing from cameras
  */
 class Camera
 {
 public:
-	enum class ColorSpace {RGB, HSV}; /**<  */
+	enum class ColorSpace {BGR, HSV}; /**< Enumeration representing color spaces */
 
 	static Camera& getInstance();
 	bool initialize(int deviceIndex);
@@ -23,9 +23,9 @@ public:
 	const Mat& getFrame(ColorSpace colorSpace);
 
 private:
-	Mat _rgbFrame; /**< RGB frame captured from the camera */
+	Mat _bgrFrame; /**< BGR frame captured from the camera */
 	Mat _hsvFrame; /**< HSV frame converted from the RGB frame */
-	VideoCapture _capture;
+	VideoCapture _capture; /**< Image capturing object */
 
 	Camera() {}
 	Camera(const Camera&) {}

@@ -7,6 +7,12 @@
 using std::uint8_t;
 using namespace cv;
 
+/** @addtogroup Image Processing
+ * @{
+ */
+
+/** \brief Structure representing an HSV color
+ */
 struct HSVcolor
 {
 	uint8_t hue;
@@ -15,6 +21,8 @@ struct HSVcolor
 	uint8_t brightness;
 };
 
+/** \brief Structure containing the specifications of a shape to find
+ */
 struct ShapeSpec
 {
 	int erosionIterations;
@@ -24,6 +32,8 @@ struct ShapeSpec
 	double minDistance;
 };
 
+/** \brief Structure containing the specifications of a circle to find
+ */
 struct CircleSpec : public ShapeSpec
 {
 	double edgeThreshold;
@@ -32,6 +42,8 @@ struct CircleSpec : public ShapeSpec
 	double maxRadius;
 };
 
+/** \brief Class for finding colors positions in images
+ */
 class ColorFinder
 {
 public:
@@ -41,8 +53,8 @@ public:
 	CvPoint getCirclePosition(const Mat& frame, const CircleSpec spec);
 
 private:
-	const HSVcolor* _color;
-	Mat _resultFrame;
+	const HSVcolor* _color; /**< Color to find */
+	Mat _resultFrame; /**< Processed frame used to find the position of a shape */
 
 	ColorFinder() {};
 	void setColor(const HSVcolor* color);
