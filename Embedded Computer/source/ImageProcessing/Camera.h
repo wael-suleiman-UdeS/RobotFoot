@@ -4,24 +4,32 @@
 #include <opencv\highgui.h>
 #include "ImageProcessing.h"
 
+using namespace cv;
+
+/** @addtogroup Image Processing
+ * @{
+ */
+
+/** \brief
+ */
 class Camera
 {
 public:
-	enum class ColorSpace {RGB, HSV};
+	enum class ColorSpace {RGB, HSV}; /**<  */
 
 	static Camera& getInstance();
 	bool initialize(int deviceIndex);
 	void captureFrame();
-	const IplImage* getFrame(ColorSpace colorSpace);
+	const Mat& getFrame(ColorSpace colorSpace);
 
 private:
-	const IplImage* _rgbFrame;
-	IplImage* _hsvFrame;
-	CvCapture* _capture;
+	Mat _rgbFrame; /**< RGB frame captured from the camera */
+	Mat _hsvFrame; /**< HSV frame converted from the RGB frame */
+	VideoCapture _capture;
 
-	Camera() : _rgbFrame(nullptr), _hsvFrame(nullptr) {}
+	Camera() {}
 	Camera(const Camera&) {}
-	~Camera();
+	~Camera() {}
 
 	void processFrame();
 };

@@ -1,28 +1,44 @@
 #include "Camera.h"
 
-using namespace cv;
-
 Camera& Camera::getInstance()
 {
 	static Camera instance;
 	return instance;
 }
 
+/** \brief Initialize the capture device
+ *
+ * \param deviceIndex int
+ * \return bool Success of the initializationc
+ *
+ */
 bool Camera::initialize(int deviceIndex)
 {
-	_capture = cvCaptureFromCAM(deviceIndex);
-	return _capture;
+	_capture = VideoCapture(deviceIndex);
+	return _capture.isOpened();
 }
 
+/** \brief Capture a frame
+ *
+ * \return void
+ *
+ */
 void Camera::captureFrame()
 {
-	if (!_capture) { return; }
+	if (!_capture.isOpened()) { return; }
 
-	_rgbFrame = cvQueryFrame(_capture);
+	_capture >> _rgbFrame;
+
 	processFrame();
 }
 
-const IplImage* Camera::getFrame(ColorSpace colorSpace)
+/** \brief Retrieve the captured frame
+ *
+ * \param colorSpace ColorSpace
+ * \return const Mat
+ *
+ */
+const Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
 {
 	switch (colorSpace)
 	{
@@ -34,17 +50,13 @@ const IplImage* Camera::getFrame(ColorSpace colorSpace)
 	}
 }
 
-Camera::~Camera()
-{
-	if (_capture) { cvReleaseCapture(&_capture); }
-}
-
+/** \brief Create an HSV frame from the captured RGB frame
+ *
+ * \return void
+ *
+ */
 void Camera::processFrame()
 {
-	if (!_rgbFrame) { return; }
-	
-	CvSize frameSize = cvSize(_rgbFrame->width, _rgbFrame->height);
-	_hsvFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 3);
-
+	if (!_rgbFrame.empty()) { return; }
 	ImageProcessing::RGBtoHSV(_rgbFrame, _hsvFrame);
 }

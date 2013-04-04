@@ -3,13 +3,17 @@
 
 #include <opencv\cvaux.h>
 
+using namespace cv;
+
 class ImageProcessing
 {
 public:
-	static void RGBtoHSV(const IplImage* rgbFrame, IplImage* hsvFrame);
-	static void erode(const IplImage* sourceFrame, IplImage* erodedFrame, int iterations);
-	static void dilate(const IplImage* sourceFrame, IplImage* dilatedFrame, int iterations);
-	static void smooth(const IplImage* sourceFrame, IplImage* smoothedFrame, int apertureSize);
+	static void RGBtoHSV(const Mat& rgbFrame, Mat& hsvFrame);
+	static void filter(const Mat& sourceFrame, Mat& filteredFrame,
+		Scalar lowerThreshold, Scalar upperThreshold);
+	static void erode(const Mat& sourceFrame, Mat& erodedFrame, int iterations);
+	static void dilate(const Mat& sourceFrame, Mat& dilatedFrame, int iterations);
+	static void smooth(const Mat& sourceFrame, Mat& smoothedFrame, int apertureSize);
 };
 
 #endif // IMAGEPROCESSING_H

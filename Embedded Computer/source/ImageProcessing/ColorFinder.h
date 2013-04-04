@@ -5,6 +5,7 @@
 #include "ImageProcessing.h"
 
 using std::uint8_t;
+using namespace cv;
 
 struct HSVcolor
 {
@@ -37,15 +38,15 @@ public:
 	ColorFinder(const HSVcolor* color);
 	~ColorFinder() {}
 
-	CvPoint getCirclePosition(const IplImage* frame, const CircleSpec spec);
+	CvPoint getCirclePosition(const Mat& frame, const CircleSpec spec);
 
 private:
 	const HSVcolor* _color;
-	IplImage* _resultFrame;
+	Mat _resultFrame;
 
 	ColorFinder() {};
 	void setColor(const HSVcolor* color);
-	void filter(const IplImage* frame);
+	void filter(const Mat& sourceFrame);
 };
 
 #endif // COLORFINDER_H

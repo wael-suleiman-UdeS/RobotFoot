@@ -1,27 +1,27 @@
 #include "ImageProcessing.h"
 
-using namespace cv;
-
-void ImageProcessing::RGBtoHSV(const IplImage* rgbFrame, IplImage* hsvFrame)
+void ImageProcessing::RGBtoHSV(const Mat& rgbFrame, Mat& hsvFrame)
 {
-	if (!rgbFrame || !hsvFrame) { return; }
-	cvCvtColor(rgbFrame, hsvFrame, CV_BGR2HSV);
+	cvtColor(rgbFrame, hsvFrame, CV_RGB2HSV);
 }
 
-void ImageProcessing::erode(const IplImage* sourceFrame, IplImage* erodedFrame, int iterations)
+void ImageProcessing::filter(const Mat& sourceFrame, Mat& filteredFrame,
+							 Scalar lowerThreshold, Scalar upperThreshold)
 {
-	if (!sourceFrame || !erodedFrame) { return; }
-	cvErode(sourceFrame, erodedFrame, nullptr, iterations);
+	inRange(sourceFrame, lowerThreshold, upperThreshold, filteredFrame);
 }
 
-void ImageProcessing::dilate(const IplImage* sourceFrame, IplImage* dilatedFrame, int iterations)
+void ImageProcessing::erode(const Mat& sourceFrame, Mat& erodedFrame, int iterations)
 {
-	if (!sourceFrame || !dilatedFrame) { return; }
-	cvDilate(sourceFrame, dilatedFrame, nullptr, iterations);
+	cv::erode(sourceFrame, erodedFrame, iterations);
 }
 
-void ImageProcessing::smooth(const IplImage* sourceFrame, IplImage* smoothedFrame, int apertureSize)
+void ImageProcessing::dilate(const Mat& sourceFrame, Mat& dilatedFrame, int iterations)
 {
-	if (!sourceFrame || !smoothedFrame) { return; }
-	cvSmooth(sourceFrame, smoothedFrame, CV_GAUSSIAN, apertureSize);
-}	
+	cv::dilate(sourceFrame, dilatedFrame, iterations);
+}
+
+void ImageProcessing::smooth(const Mat& sourceFrame, Mat& smoothedFrame, int apertureSize)
+{
+	GaussianBlur(sourceFrame, smoothedFrame, Size(apertureSize, apertureSize), 0, 0);
+}
