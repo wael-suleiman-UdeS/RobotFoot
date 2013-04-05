@@ -1,6 +1,0 @@
-Added Pin To Net: NetName=UART_MOT_RX Pin=P2-3
-Added Pin To Net: NetName=UART_MOT_TX Pin=P2-4
-Added Pin To Net: NetName=UART_MOT_RX Pin=P3-3
-Added Pin To Net: NetName=UART_MOT_TX Pin=P3-4
-Added Pin To Net: NetName=UART_MOT_RX Pin=P4-3
-Added Pin To Net: NetName=UART_MOT_TX Pin=P4-4
