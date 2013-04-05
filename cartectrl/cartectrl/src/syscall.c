@@ -24,8 +24,7 @@ void *_sbrk(int incr) {
     }
     prev_heap_end = heap_end;
     if (heap_end + incr > &__heap_end__) {
-      write (1, "Heap and stack collision\n", 25);
-      abort ();
+      return 0;
     }
 
     heap_end += incr;
