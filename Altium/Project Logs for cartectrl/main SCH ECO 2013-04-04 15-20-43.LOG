@@ -1,0 +1,2 @@
+Change Component Footprint: Designator=P6 Old Footprint=BATTFOOT New Footprint=PWR JACK
+Change Component Comment: Designator=P6 Old Comment=Batt Header New Comment=Pwr Jack
