@@ -33,7 +33,7 @@
   *         executes reliably; instruction/data caches as well as the prefetch
   *         buffer are enabled to increase performance.
   * @param  None
-  * @retval None
+  * @return None
   * @todo   It should return an error code, ideally, when everything is screwed
   *         up
   */
