@@ -13,7 +13,7 @@
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_flash.h"
 
-/** @addtogroup RobotFoot init
+/** @addtogroup Init
   * @{
   */
 
