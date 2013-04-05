@@ -50,8 +50,6 @@
         .extern     __ctors_start__
         .extern     __ctors_end__
         .extern     main
-        .extern     memset
-        .extern     memcpy
 
 //=============================================================================
 
@@ -196,18 +194,24 @@ Reset_Handler:
                 ldr         r0, DATA_START
                 ldr         r1, DATA_LOAD
                 ldr         r2, DATA_SIZE
-                bl          memcpy
+                bl          copy_bytes
+
 // Copy fastcode from flash to RAM
                 ldr         r0, FASTC_START
                 ldr         r1, FASTC_LOAD
                 ldr         r2, FASTC_SIZE
-                bl          memcpy
+                bl          copy_bytes
 
 // Zero uninitialized data (bss)
                 ldr         r0, BSS_START
                 mov         r1, #0
                 ldr         r2, BSS_SIZE
-                bl          memset
+                orrs        r2, r2, #0
+                beq         call_ctors
+
+zero_bss:       strb        r1, [r0], #1
+                subs        r2, r2, #1
+                bgt         zero_bss
 
 // Call C++ constructors.  The compiler and linker together populate the .ctors
 // code section with the addresses of the constructor functions.
@@ -236,8 +240,15 @@ call_main:      mov         r0, #0              // argc=0
 
                 b        .
 
-
+copy_bytes:     orrs        r2, r2, #0
+                beq         copy_bytes_x
+copy_bytes_l:   ldrb        r3, [r1], #1
+                strb        r3, [r0], #1
+                subs        r2, r2, #1
+                bgt         copy_bytes_l
+copy_bytes_x:   bx          lr
         .size Reset_Handler, .-Reset_Handler
+
 //=============================================================================
 
 // These are filled in by the linker
