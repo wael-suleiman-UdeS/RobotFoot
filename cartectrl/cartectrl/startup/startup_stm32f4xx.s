@@ -28,6 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
         .syntax     unified
+        .cpu        cortex-m4
         .thumb
         .text
 
@@ -187,7 +188,6 @@ Default_Handler: bx        lr
         .weak Reset_Handler
         .type Reset_Handler, %function
 
-        .thumb_func
 Reset_Handler:
 
 // Copy initialized data from flash to RAM

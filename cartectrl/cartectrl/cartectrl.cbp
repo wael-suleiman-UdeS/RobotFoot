@@ -103,7 +103,6 @@
 		<Unit filename="include/usb/usbd_desc.h" />
 		<Unit filename="linker/stm32f4_linker.ld" />
 		<Unit filename="src/Tools.h" />
-		<Unit filename="src/herkulex.cpp" />
 		<Unit filename="src/herkulex.h" />
 		<Unit filename="src/initClock.c">
 			<Option compilerVar="CC" />
@@ -111,7 +110,7 @@
 		<Unit filename="src/interrupts/stm32fxxx_it.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="src/main.cpp">
+		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/syscall.c">
@@ -133,8 +132,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="startup/startup_stm32f4xx.s">
-			<Option compilerVar="CC" />
-			<Option compiler="armnoneeabi_gnu_gcc" use="1" buildCommand="$compiler -x assembler-with-cpp $includes -c $file -o $object" />
+			<Option compiler="armnoneeabi_gnu_gcc" use="1" buildCommand="$compiler -x assembler-with-cpp -ggdb $includes -c $file -o $object" />
 		</Unit>
 		<Extensions>
 			<code_completion />
