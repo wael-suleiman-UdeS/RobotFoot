@@ -23,8 +23,11 @@ void *_sbrk(int incr) {
       heap_end = &__heap_start__;
     }
     prev_heap_end = heap_end;
-    if (heap_end + incr > &__heap_end__) {
-      return 0;
+    if (heap_end + incr > &__heap_end__)
+    {
+        // Indicate that no memory is available.
+        errno = ENOMEM;
+        return (void *) -1;
     }
 
     heap_end += incr;
