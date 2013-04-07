@@ -63,7 +63,7 @@ CDC_IF_Prop_TypeDef cdc_fops =
   * @brief  cdc_Init
   *         Initializes the Media on the STM32
   * @param  None
-  * @retval Result of the opeartion (USBD_OK in all cases)
+  * @return Result of the operation (USBD_OK in all cases)
   */
 static uint16_t cdc_Init(void)
 {
@@ -81,12 +81,11 @@ static uint16_t cdc_DeInit(void)
 /**
   * @brief  cdc_Ctrl
   *         Manage the CDC class requests
-  * @param  Cmd: Command code
-  * @param  Buf: Buffer containing command data (request parameters)
-  * @param  Len: Number of data to be sent (in bytes)
-  * @retval Result of the opeartion (USBD_OK in all cases
+  * @param  Cmd Command code
+  * @param  Buf Buffer containing command data (request parameters)
+  * @param  Len Number of data to be sent (in bytes)
+  * @return Result of the operation (USBD_OK in all cases)
   */
-//not really necessary for this example
 static uint16_t cdc_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
 {
   switch (Cmd)
@@ -138,9 +137,9 @@ static uint16_t cdc_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
   * @brief  cdc_DataTx
   *         CDC received data to be send over USB IN endpoint are managed in
   *         this function.
-  * @param  Buf: Buffer of data to be sent
-  * @param  Len: Number of data to be sent (in bytes)
-  * @retval Result of the opeartion: USBD_OK
+  * @param  Buf Buffer of data to be sent
+  * @param  Len Number of data to be sent (in bytes)
+  * @return Result of the operation: USBD_OK
   */
 static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
 {
@@ -176,9 +175,9 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
   *         is complete on CDC interface (ie. using DMA controller) it will result
   *         in receiving more data while previous ones are still not sent.
   *
-  * @param  Buf: Buffer of data to be received
-  * @param  Len: Number of data received (in bytes)
-  * @retval Result of the opeartion: USBD_OK
+  * @param  Buf Buffer of data to be received
+  * @param  Len Number of data received (in bytes)
+  * @return Result of the operation: USBD_OK
   */
 static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
 {
