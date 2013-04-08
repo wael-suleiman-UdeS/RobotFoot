@@ -167,8 +167,6 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
   *         Data received over USB OUT endpoint are sent over CDC interface
   *         through this function.
   *
-  *         For this example we are just going to send received data right back to sender.
-  *
   *         @note
   *         This function will block any OUT packet reception on USB endpoint
   *         untill exiting this function. If you exit this function before transfer
