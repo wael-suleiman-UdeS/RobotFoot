@@ -81,6 +81,10 @@ static uint16_t cdc_DeInit(void)
 /**
   * @brief  cdc_Ctrl
   *         Manage the CDC class requests
+  *
+  *         @note
+  *         This function runs in privilegied priority (from USB interrupt).
+  *
   * @param  Cmd Command code
   * @param  Buf Buffer containing command data (request parameters)
   * @param  Len Number of data to be sent (in bytes)
@@ -137,6 +141,10 @@ static uint16_t cdc_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
   * @brief  cdc_DataTx
   *         CDC received data to be send over USB IN endpoint are managed in
   *         this function.
+  *
+  *         @note
+  *         This function runs in privilegied priority (from USB interrupt).
+  *
   * @param  Buf Buffer of data to be sent
   * @param  Len Number of data to be sent (in bytes)
   * @return Result of the operation: USBD_OK
@@ -172,6 +180,9 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
   *         untill exiting this function. If you exit this function before transfer
   *         is complete on CDC interface (ie. using DMA controller) it will result
   *         in receiving more data while previous ones are still not sent.
+  *
+  *         @note
+  *         This function runs in privilegied priority (from USB interrupt).
   *
   * @param  Buf Buffer of data to be received
   * @param  Len Number of data received (in bytes)
