@@ -24,8 +24,8 @@
 #include "Tools.h"
 
 #include <stm32f4xx.h>
-#include <stm32f4xx_usart.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
-#include <misc.h>			 // I recommend you have a look at these in the ST firmware folder
+#include <stm32f4xx_usart.h>
+#include <misc.h>
 
 
 namespace{
@@ -45,30 +45,6 @@ Herkulex::Herkulex(/*PinName tx, PinName rx, uint32_t baudRate*/)
 //------------------------------------------------------------------------------
 Herkulex::~Herkulex()
 {
-}
-
-//------------------------------------------------------------------------------
-void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
-{
-    for(uint8_t i = 0; i < packetSize ; i++)
-    {
-        while( !(USART1->SR & 0x00000040) );
-            USART_SendData(USART1, *data);
-		*data++;
-    }
-}
-
-//------------------------------------------------------------------------------
-void Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
-{
-    waitingForData = true;
-
-    Tools::Timeout( 10000, &waitingForData );
-
-    for (uint8_t i=0; i < packetSize; i++)
-    {
-        data[i] = receivedMsg[i];
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -132,7 +108,7 @@ void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime, 
     txBuf[0]  = HEADER;                 // Packet Header (0xFF)
     txBuf[1]  = HEADER;                 // Packet Header (0xFF)
     txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
-    txBuf[3]  = MAX_PID;                // pID is total number of servos in the network (0 ~ 253)
+    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
     txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
     txBuf[5]  = 0;                      // Checksum1
     txBuf[6]  = 0;                      // Checksum2
@@ -161,7 +137,7 @@ void Herkulex::velocityControl(uint8_t id, int16_t speed, uint8_t setLED)
     txBuf[0]  = HEADER;                 // Packet Header (0xFF)
     txBuf[1]  = HEADER;                 // Packet Header (0xFF)
     txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
-    txBuf[3]  = MAX_PID;                // pID is total number of servos in the network (0 ~ 253)
+    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
     txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
     txBuf[5]  = 0;                      // Checksum1
     txBuf[6]  = 0;                      // Checksum2
@@ -200,7 +176,8 @@ int8_t Herkulex::getStatus(uint8_t id)
     txPacket(7, txBuf);
 
     uint8_t rxBuf[9];
-    rxPacket(9, rxBuf);
+    if( !rxPacket(9, rxBuf) ) return -1;
+
 
     // Checksum1
     uint8_t chksum1 = (rxBuf[2]^rxBuf[3]^rxBuf[4]^rxBuf[7]^rxBuf[8]) & 0xFE;
@@ -247,7 +224,7 @@ int16_t Herkulex::getPos(uint8_t id)
     txPacket(9, txBuf);
 
     uint8_t rxBuf[13];
-    rxPacket(13, rxBuf);
+    if( !rxPacket(13, rxBuf) ) return -1;
 
     // Checksum1
     uint8_t chksum1 = (rxBuf[2]^rxBuf[3]^rxBuf[4]^rxBuf[7]^rxBuf[8]^rxBuf[9]^rxBuf[10]^rxBuf[11]^rxBuf[12]) & 0xFE;
@@ -266,6 +243,35 @@ int16_t Herkulex::getPos(uint8_t id)
     position = ((rxBuf[10]&0x03)<<8) | rxBuf[9];
 
     return position;
+}
+
+//------------------------------------------------------------------------------
+void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
+{
+    for(uint8_t i = 0; i < packetSize ; i++)
+    {
+        while( !(USART1->SR & 0x00000040) );
+            USART_SendData(USART1, *data);
+		*data++;
+    }
+}
+
+//------------------------------------------------------------------------------
+bool Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
+{
+    waitingForData = true;
+
+    // TODO : Timeout time depends on baudrate
+    if ( Tools::Timeout( 15000, waitingForData ) )
+    {
+        return false;
+    }
+
+    for (uint8_t i=0; i < packetSize; i++)
+    {
+        data[i] = receivedMsg[i];
+    }
+    return true;
 }
 
 //------------------------------------------------------------------------------

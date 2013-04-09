@@ -21,6 +21,12 @@
 					<Add option="-O2" />
 				</Compiler>
 			</Target>
+			<Target title="UnitTest2">
+				<Option output="bin/Debug/cartectrl.elf" prefix_auto="0" extension_auto="0" />
+				<Option object_output="obj/Unit_Test2" />
+				<Option type="1" />
+				<Option compiler="armnoneeabi_gnu_gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -96,12 +102,15 @@
 		<Unit filename="extlib/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32_USB_OTG_Driver/src/usb_dcd_int.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="include/Tools.h" />
+		<Unit filename="include/herkulex.h" />
 		<Unit filename="include/initClock.h" />
 		<Unit filename="include/usb/usb_conf.h" />
 		<Unit filename="include/usb/usbd_cdc.h" />
 		<Unit filename="include/usb/usbd_conf.h" />
 		<Unit filename="include/usb/usbd_desc.h" />
 		<Unit filename="linker/stm32f4_linker.ld" />
+		<Unit filename="src/Tools.cpp" />
 		<Unit filename="src/Tools.h" />
 		<Unit filename="src/herkulex.cpp" />
 		<Unit filename="src/herkulex.h" />
@@ -110,8 +119,14 @@
 		</Unit>
 		<Unit filename="src/interrupts/stm32fxxx_it.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
-		<Unit filename="src/main.cpp" />
+		<Unit filename="src/main.cpp">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Unit filename="src/syscall.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -132,6 +147,24 @@
 		</Unit>
 		<Unit filename="startup/startup_stm32f4xx.s">
 			<Option compiler="armnoneeabi_gnu_gcc" use="1" buildCommand="$compiler -x assembler-with-cpp -ggdb $includes -c $file -o $object" />
+		</Unit>
+		<Unit filename="unit_test/UnitTest.h">
+			<Option target="UnitTest2" />
+		</Unit>
+		<Unit filename="unit_test/UnitTestHerkulex.cpp">
+			<Option target="UnitTest2" />
+		</Unit>
+		<Unit filename="unit_test/UnitTestHerkulex.h">
+			<Option target="UnitTest2" />
+		</Unit>
+		<Unit filename="unit_test/UnitTestOutput.cpp">
+			<Option target="UnitTest2" />
+		</Unit>
+		<Unit filename="unit_test/UnitTestOutput.h">
+			<Option target="UnitTest2" />
+		</Unit>
+		<Unit filename="unit_test/main.cpp">
+			<Option target="UnitTest2" />
 		</Unit>
 		<Extensions>
 			<code_completion />

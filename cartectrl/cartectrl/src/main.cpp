@@ -155,12 +155,12 @@ int main(void){
       while(1)
       {
           position = servomotor.getPos(0xFD);
-          servomotor.positionControl(0xFD, 1000, 60, 0x00);
-          Tools::Delay(90000000);
+          servomotor.positionControl(0xFD, 999, 60, 0x00);
+          Tools::Delay(40000000);
 
           position = servomotor.getPos(0xFD);
-          servomotor.positionControl(0xFD, 23, 60, 0x00);
-          Tools::Delay(90000000);
+          servomotor.positionControl(0xFD, 25, 60, 0x00);
+          Tools::Delay(40000000);
 
       }
       /*

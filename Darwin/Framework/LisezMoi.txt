@@ -1,0 +1,3 @@
+Votre rôle sera de modifier le fichier suivant et ses dépendances:
+
+./src/motion/modules/Walking.cpp

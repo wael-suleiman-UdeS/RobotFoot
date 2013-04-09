@@ -1,0 +1,34 @@
+###############################################################
+#
+# Purpose: Makefile for "read_write"
+# Author.: robotis
+# Version: 0.1
+# License: GPL
+#
+###############################################################
+
+TARGET = App2
+
+CXX = g++
+INCLUDE_DIRS = -I../Linux/include/ -I../Framework/include
+CXXFLAGS +=	-O2 -DLINUX -g -Wall -fmessage-length=0 $(INCLUDE_DIRS)
+LIBS += -lpthread -lrt
+
+OBJS =	main.o
+
+
+all: darwin.a $(TARGET)
+
+darwin.a:
+	make -C ../Linux/build
+
+$(TARGET): $(OBJS) ../Linux/lib/darwin.a
+	$(CXX) -o $(TARGET) $(OBJS) ../Linux/lib/darwin.a $(LIBS)
+	
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+
+
+
+
