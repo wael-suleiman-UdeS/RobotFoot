@@ -3,13 +3,23 @@
 
 #include <opencv\cvaux.h>
 
+using namespace cv;
+
+/** @addtogroup Image Processing
+ * @{
+ */
+
+/** \brief Static class for simple image processing operations
+ */
 class ImageProcessing
 {
 public:
-	static void RGBtoHSV(const IplImage* rgbFrame, IplImage* hsvFrame);
-	static void erode(const IplImage* sourceFrame, IplImage* erodedFrame);
-	static void dilate(const IplImage* sourceFrame, IplImage* dilatedFrame);
-	static void smooth(const IplImage* sourceFrame, IplImage* smoothedFrame);
+	static void BGRtoHSV(const Mat& rgbFrame, Mat& hsvFrame);
+	static void filter(const Mat& sourceFrame, Mat& filteredFrame,
+		Scalar lowerBound, Scalar upperBound);
+	static void erode(const Mat& sourceFrame, Mat& erodedFrame, int iterations);
+	static void dilate(const Mat& sourceFrame, Mat& dilatedFrame, int iterations);
+	static void smooth(const Mat& sourceFrame, Mat& smoothedFrame, int apertureSize);
 };
 
 #endif // IMAGEPROCESSING_H

@@ -1,50 +1,63 @@
 #include "Camera.h"
 
-using namespace cv;
-
+/** \brief Retrieve the instance of the singleton
+ *
+ * \return Camera&: Instance of the singleton
+ *
+ */
 Camera& Camera::getInstance()
 {
 	static Camera instance;
 	return instance;
 }
 
+/** \brief Initialize the capture device
+ *
+ * \param deviceIndex int: Id of the camera to retrieve the frame from
+ * \return bool: Success of the initialization
+ *
+ */
 bool Camera::initialize(int deviceIndex)
 {
-	_capture = cvCaptureFromCAM(deviceIndex);
-	return _capture;
+	_capture = VideoCapture(deviceIndex);
+	return _capture.isOpened();
 }
 
+/** \brief Retrieve a frame from the camera
+ *
+ */
 void Camera::captureFrame()
 {
-	if (!_capture) { return; }
+	if (!_capture.isOpened()) { return; }
 
-	_rgbFrame = cvQueryFrame(_capture);
+	_capture >> _bgrFrame;
+
 	processFrame();
 }
 
-const IplImage* Camera::getFrame(ColorSpace colorSpace)
+/** \brief Retrieve the captured frame in a specified color space
+ *
+ * \param colorSpace ColorSpace: Color space of the frame to get
+ * \return const Mat&: Retrieved frame
+ *
+ */
+const Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
 {
 	switch (colorSpace)
 	{
-	case ColorSpace::RGB:
-		return _rgbFrame;
+	case ColorSpace::BGR:
+		return _bgrFrame;
 	case ColorSpace::HSV:
 	default:
 		return _hsvFrame;
 	}
 }
 
-Camera::~Camera()
-{
-	if (_capture) { cvReleaseCapture(&_capture); }
-}
-
+/** \brief Convert the retrieved BRG frame in an HSV frame
+ *
+ */
 void Camera::processFrame()
 {
-	if (!_rgbFrame) { return; }
-	
-	CvSize frameSize = cvSize(_rgbFrame->width, _rgbFrame->height);
-	_hsvFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 3);
-
-	ImageProcessing::RGBtoHSV(_rgbFrame, _hsvFrame);
+	if (!_bgrFrame.empty()) { return; }
+	ImageProcessing::BGRtoHSV(_bgrFrame, _hsvFrame);
 }

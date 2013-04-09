@@ -1,63 +1,70 @@
 #include "ColorFinder.h"
 #include <climits>
 
-using namespace cv;
-
+/** \brief Constructor
+ *
+ * \param color const HSVcolor*: HSV Color to find
+ *
+ */
 ColorFinder::ColorFinder(const HSVcolor* color)
 {
 	_color = color;
 }
 
-CvPoint ColorFinder::getCirclePosition(const IplImage* frame)
+/** \brief Retrieve the position of a circle in the frame
+ *
+ * \param frame const Mat&: Frame in which to find the circle
+ * \param spec CircleSpec: Specifications of the circle to find
+ * \return CvPoint: Position of the first found circle
+ *
+ */
+CvPoint ColorFinder::getCirclePosition(const Mat& frame, CircleSpec spec)
 {
 	CvPoint circlePosition = {-1, -1};
 
-	if (!frame) { return circlePosition; }
+	if (frame.empty()) { return circlePosition; }
 
 	filter(frame);
 
-	ImageProcessing::erode(_resultFrame, _resultFrame);
-	ImageProcessing::dilate(_resultFrame, _resultFrame);
-	ImageProcessing::smooth(_resultFrame, _resultFrame);
-
-	double resolution = 2;
-	double minDistance = _resultFrame->height/4;
-	double edgeThreshold = 100;
-	double centerThreshold = 10;
-	double minRadius = 10;
-	double maxRadius = 400;
-
-	CvMemStorage* storage = cvCreateMemStorage(0);
+	ImageProcessing::erode(_resultFrame, _resultFrame, spec.erosionIterations);
+	ImageProcessing::dilate(_resultFrame, _resultFrame, spec.dilationIterations);
+	ImageProcessing::smooth(_resultFrame, _resultFrame, spec.smoothingApertureSize);
 	
-	CvSeq* circles = cvHoughCircles(_resultFrame, storage, CV_HOUGH_GRADIENT,
-		resolution, minDistance, edgeThreshold, centerThreshold, minRadius, maxRadius);
+	vector<Vec3f> circles;
+	HoughCircles(_resultFrame, circles, CV_HOUGH_GRADIENT,
+		spec.resolutionDivisor, spec.minDistance, spec.edgeThreshold,
+		spec.centerThreshold, spec.minRadius, spec.maxRadius);
 
-	if (circles->total)
+	if (circles.size())
 	{
-		float* positionBuffer = (float*)cvGetSeqElem(circles, 0);
-		circlePosition.x = positionBuffer[0];
-		circlePosition.y = positionBuffer[1];
+		circlePosition.x = circles[0][0];
+		circlePosition.y = circles[0][1];
 	}
-
-	cvReleaseMemStorage(&storage);
 
 	return circlePosition;
 }
 
+/** \brief Set the color to find
+ *
+ * \param color const HSVcolor*: Color to find
+ *
+ */
 void ColorFinder::setColor(const HSVcolor* color)
 {
 	_color = color;
 }
 
-void ColorFinder::filter(const IplImage* sourceFrame)
+/** \brief Filter a frame according to the setted HSV color
+ *
+ * \param sourceFrame const Mat&: Frame to filter
+ *
+ */
+void ColorFinder::filter(const Mat& sourceFrame)
 {
-	if (!sourceFrame || !_color) { return; }
+	if (sourceFrame.empty() || !_color) { return; }
 
-	CvScalar minHSV = cvScalar(_color->hue - _color->hueTolerance, _color->saturation, _color->brightness, 0);
-	CvScalar maxHSV = cvScalar(_color->hue + _color->hueTolerance, UCHAR_MAX, UCHAR_MAX, 0);
+	Scalar minHSV = cvScalar(_color->hue - _color->hueTolerance, _color->saturation, _color->brightness);
+	Scalar maxHSV = cvScalar(_color->hue + _color->hueTolerance, UCHAR_MAX, UCHAR_MAX);
 
-	CvSize frameSize = cvSize(sourceFrame->width, sourceFrame->height);
-	_resultFrame = cvCreateImage(frameSize, IPL_DEPTH_8U, 1);
-
-	cvInRangeS(sourceFrame, minHSV, maxHSV, _resultFrame);
+	ImageProcessing::filter(sourceFrame, _resultFrame, minHSV, maxHSV);
 }

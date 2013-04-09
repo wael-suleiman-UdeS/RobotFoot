@@ -1,27 +1,62 @@
 #include "ImageProcessing.h"
 
-using namespace cv;
-
-void ImageProcessing::RGBtoHSV(const IplImage* rgbFrame, IplImage* hsvFrame)
+/** \brief Convert a BGR frame to an HSV frame
+ *
+ * \param bgrFrame const Mat&: BGR frame to convert
+ * \param hsvFrame Mat&: Destination HSV frame
+ *
+ */
+void ImageProcessing::BGRtoHSV(const Mat& bgrFrame, Mat& hsvFrame)
 {
-	if (!rgbFrame || !hsvFrame) { return; }
-	cvCvtColor(rgbFrame, hsvFrame, CV_BGR2HSV);
+	cvtColor(bgrFrame, hsvFrame, CV_BGR2HSV);
 }
 
-void ImageProcessing::erode(const IplImage* sourceFrame, IplImage* erodedFrame)
+/** \brief Filter a frame by bounds
+ *
+ * \param sourceFrame const Mat&: Frame to filter
+ * \param filteredFrame Mat&: Destination filtered frame
+ * \param lowerBound Scalar: Lower bound of the filter ([H,S,V] if in the HVS space)
+ * \param upperBound Scalar: Upper bound of the filter ([H,S,V] if in the HVS space)
+ *
+ */
+void ImageProcessing::filter(const Mat& sourceFrame, Mat& filteredFrame,
+							 Scalar lowerBound, Scalar upperBound)
 {
-	if (!sourceFrame || !erodedFrame) { return; }
-	cvErode(sourceFrame, erodedFrame, nullptr, 0);
+	inRange(sourceFrame, lowerBound, upperBound, filteredFrame);
 }
 
-void ImageProcessing::dilate(const IplImage* sourceFrame, IplImage* dilatedFrame)
+/** \brief Apply erosion on a frame a specified number of times
+ *
+ * \param sourceFrame const Mat&: Frame to erode
+ * \param erodedFrame Mat&: Destination eroded frame
+ * \param iterations int: Number of times to apply erosion
+ *
+ */
+void ImageProcessing::erode(const Mat& sourceFrame, Mat& erodedFrame, int iterations)
 {
-	if (!sourceFrame || !dilatedFrame) { return; }
-	cvDilate(sourceFrame, dilatedFrame, nullptr, 2);
+	cv::erode(sourceFrame, erodedFrame, iterations);
 }
 
-void ImageProcessing::smooth(const IplImage* sourceFrame, IplImage* smoothedFrame)
+/** \brief Apply dilation on a frame a specified number of times
+ *
+ * \param sourceFrame const Mat&: Frame to dilate
+ * \param dilatedFrame Mat&: Destination dilated frame
+ * \param iterations int: Number of times to apply dilation
+ *
+ */
+void ImageProcessing::dilate(const Mat& sourceFrame, Mat& dilatedFrame, int iterations)
 {
-	if (!sourceFrame || !smoothedFrame) { return; }
-	cvSmooth(sourceFrame, smoothedFrame, CV_GAUSSIAN, 9, 9);
-}	
+	cv::dilate(sourceFrame, dilatedFrame, iterations);
+}
+
+/** \brief Smooth a frame using Gaussian Blur
+ *
+ * \param sourceFrame const Mat&: Frame to smooth
+ * \param smoothedFrame Mat&: Destination smoothed frame
+ * \param apertureSize int: The Gaussian kernel size (must be positive and odd)
+ *
+ */
+void ImageProcessing::smooth(const Mat& sourceFrame, Mat& smoothedFrame, int apertureSize)
+{
+	GaussianBlur(sourceFrame, smoothedFrame, Size(apertureSize, apertureSize), 0, 0);
+}

@@ -4,24 +4,32 @@
 #include <opencv\highgui.h>
 #include "ImageProcessing.h"
 
+using namespace cv;
+
+/** @addtogroup Image Processing
+ * @{
+ */
+
+/** \brief Singleton for image capturing from cameras
+ */
 class Camera
 {
 public:
-	enum class ColorSpace {RGB, HSV};
+	enum class ColorSpace {BGR, HSV}; /**< Enumeration representing color spaces */
 
 	static Camera& getInstance();
 	bool initialize(int deviceIndex);
 	void captureFrame();
-	const IplImage* getFrame(ColorSpace colorSpace);
+	const Mat& getFrame(ColorSpace colorSpace);
 
 private:
-	const IplImage* _rgbFrame;
-	IplImage* _hsvFrame;
-	CvCapture* _capture;
+	Mat _bgrFrame; /**< BGR frame captured from the camera */
+	Mat _hsvFrame; /**< HSV frame converted from the RGB frame */
+	VideoCapture _capture; /**< Image capturing object */
 
-	Camera() : _rgbFrame(nullptr), _hsvFrame(nullptr) {}
+	Camera() {}
 	Camera(const Camera&) {}
-	~Camera();
+	~Camera() {}
 
 	void processFrame();
 };
