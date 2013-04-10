@@ -1,24 +1,22 @@
-#ifdef _OBJECT_TRACKER_H_
-#define _OBJECT_TRACKER_H_
+#ifndef OBJECTTRACKER_H
+#define OBJECTTRACKER_H
 
-#include <iostream>
-#include "ImageProcessing.h"
+#include <opencv\cvaux.h>
 
 class ObjectTracker
 {
+public:
+	ObjectTracker();
+	~ObjectTracker();
+
+	void setCenter(CvPoint center);
+	void track(CvPoint position);
 
 private:
-    int _noObjectCount;
+	CvPoint _centerPosition;
+	CvPoint _objectPosition;
+	int _noObjectCount;
     static const int _noObjectMaxCount = 15;
-
-public:
-    CvPoint _objectPosition;
-
-    ObjectTracker();
-    ~ObjectTracker();
-
-    void track(CvPoint position);
-
 };
 
-#endif
+#endif // IMAGEPROCESSING_H
