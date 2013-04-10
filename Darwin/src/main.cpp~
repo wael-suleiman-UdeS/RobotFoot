@@ -16,7 +16,7 @@ int main()
   for( double time = 0.0; time < tf+dt; time += dt )
   {
     test.Process(time);
-    //usleep(dt*1000*1000);
+    usleep(dt*1000*1000);
     //std::cout << time;      
   }
 }

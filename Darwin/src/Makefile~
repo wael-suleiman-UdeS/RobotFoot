@@ -12,7 +12,7 @@ TARGET = App2
 CXX = g++
 INCLUDE_DIRS = -I../Linux/include/ -I../Framework/include
 CXXFLAGS +=	-O2 -DLINUX -g -Wall -fmessage-length=0 $(INCLUDE_DIRS)
-LIBS += -lpthread -lrt
+#LIBS += -lpthread -lrt
 
 OBJS =	main.o
 

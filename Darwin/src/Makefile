@@ -1,34 +1,16 @@
-###############################################################
-#
-# Purpose: Makefile for "read_write"
-# Author.: robotis
-# Version: 0.1
-# License: GPL
-#
-###############################################################
+CC=g++
+CFLAGS=-c -Wall
+LDFLAGS=
+SOURCES=main.cpp WalkStatus.cpp matrixpinv.cpp
+OBJECTS=$(SOURCES:.cpp=.o)
+EXECUTABLE=App2
 
-TARGET = App2
-
-CXX = g++
-INCLUDE_DIRS = -I../Linux/include/ -I../Framework/include
-CXXFLAGS +=	-O2 -DLINUX -g -Wall -fmessage-length=0 $(INCLUDE_DIRS)
-#LIBS += -lpthread -lrt
-
-OBJS =	main.o
-
-
-all: darwin.a $(TARGET)
-
-darwin.a:
-	make -C ../Linux/build
-
-$(TARGET): $(OBJS) ../Linux/lib/darwin.a
-	$(CXX) -o $(TARGET) $(OBJS) ../Linux/lib/darwin.a $(LIBS)
+all: $(SOURCES) $(EXECUTABLE)
 	
-clean:
-	rm -f $(OBJS) $(TARGET)
+$(EXECUTABLE): $(OBJECTS) 
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
-
-
+.cpp.o:
+	$(CC) $(CFLAGS) $< -o $@
 
 

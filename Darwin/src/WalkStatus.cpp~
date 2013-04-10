@@ -789,7 +789,6 @@ void WalkStatus::LogToFile( const Eigen::MatrixXd& q )
   {
      outfile << RadianToDegree(leftMotor(0,i)) << ' ';
   }
-  outfile << std::endl;
   
   outfile.close();
 }

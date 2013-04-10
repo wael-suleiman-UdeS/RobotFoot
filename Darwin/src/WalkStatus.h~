@@ -254,7 +254,6 @@ private:
      *  \param radian : Angle a convertir de radian vers degre
      */
   double RadianToDegree( const double radian );
-  
   /*!
      *  \brief Converti un angle de degres vers radians
      *
@@ -263,16 +262,6 @@ private:
      *  \param degree : Angle a convertir de degres vers radians 
      */
   double DegreeToRadian( const double degree );
-  
-    /*!
-     *  \brief Enregistre les angles des moteurs dans un fichier texte
-     *
-     *  Enregistre les angles des moteurs dans un fichier texte en degre
-     *  dans un format definie
-     * 
-     *  \param q : Angles a enregistrer 
-     */
-  void LogToFile( const Eigen::MatrixXd& q );
   
   Eigen::MatrixXd DH;
   Eigen::MatrixXd q;

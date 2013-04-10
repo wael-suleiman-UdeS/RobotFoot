@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Eigen/Dense"
-#include "Eigen/Core"
-#include "Eigen/SVD"
+#include <Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/SVD>
 using namespace Eigen;
 /**
  * DLS  of the linear equation: Ax=b
