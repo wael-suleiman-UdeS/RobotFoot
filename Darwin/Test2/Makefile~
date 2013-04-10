@@ -1,0 +1,29 @@
+###############################################################
+#
+# Purpose: Makefile for "read_write"
+# Author.: robotis
+# Version: 0.1
+# License: GPL
+#
+###############################################################
+DEBUG=no
+ifeq ($(DEBUG),yes)
+	CFLAGS=-W -Wall -g
+	LDFLAGS=
+else
+	CFLAGS=-W -Wall
+	LDFLAGS=
+	
+endif
+CC=g++
+SOURCES=main.cpp TestMotion.cpp
+OBJECTS=$(SOURCES:.cpp=.o)
+EXECUTABLE=test
+
+all: $(SOURCES) $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+
+.cpp.o:
+	$(CC) $(CFLAGS) $< -o $@
