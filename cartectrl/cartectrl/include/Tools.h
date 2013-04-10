@@ -1,29 +1,16 @@
 #ifndef TOOLS_H_INCLUDED
 #define TOOLS_H_INCLUDED
 
-class Tools
+
+
+namespace Tools
 {
-public:
-    Tools(){}
-    ~Tools(){}
+    const int DELAY_AROUND_6S = 90000000;
+    const int DELAY_AROUND_1S = 15000000;
 
-    static void Timeout( unsigned int maxDelay, const volatile bool& waitFlag )
-    {
-        unsigned int nb1(0),nb2(1);
-        while( waitFlag && nb2 < maxDelay )
-        {
-            int tmp = nb2;
-            nb2 += nb1;
-            nb1 = tmp;
-
-            Delay(nb2);
-        }
-    }
-
-    static void Delay( volatile uint32_t nCount )
-    {
-        while(nCount--){}
-    }
+    // Return true if it timeout.
+    bool Timeout( unsigned int maxDelay, const volatile bool& waitFlag );
+    void Delay( volatile int nCount );
 
 };
 

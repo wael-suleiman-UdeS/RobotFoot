@@ -248,6 +248,25 @@ class Herkulex
 {
 public:
 
+    enum
+    {
+            ID_R_HIP_YAW            = 1,
+            ID_L_HIP_YAW            = 2,
+            ID_R_HIP_ROLL           = 3,
+            ID_L_HIP_ROLL           = 4,
+            ID_R_HIP_PITCH          = 5,
+            ID_L_HIP_PITCH          = 6,
+            ID_R_KNEE               = 7,
+            ID_L_KNEE               = 8,
+            ID_R_ANKLE_PITCH        = 9,
+            ID_L_ANKLE_PITCH        = 10,
+            ID_R_ANKLE_ROLL         = 11,
+            ID_L_ANKLE_ROLL         = 12,
+            ID_HEAD_PAN             = 13,
+            ID_HEAD_TILT            = 14,
+            NUMBER_OF_JOINTS
+    };
+
     /**@brief Create an Herkulex servo object connected to the serial pins and baudrate
      *
      * @param tx Transmit pin.
@@ -259,20 +278,6 @@ public:
     /** Destroy an Herkulex servo object
      */
     ~Herkulex();
-
-    /**@brief Transmit packet datas with UART
-     *
-     * @param packetSize The packet size.
-     * @param data The transmit packet data array.
-     */
-    void txPacket(uint8_t packetSize, uint8_t* data);
-
-    /** Receive packet datas with UART
-     *
-     * @param packetSize The packet size.
-     * @param data The receive packet data array.
-     */
-    void rxPacket(uint8_t packetSize, uint8_t* data);
 
     /**@brief Clear error status
      *
@@ -319,6 +324,20 @@ public:
     int16_t getPos(uint8_t id);
 
 private :
+
+    /**@brief Transmit packet datas with UART
+     *
+     * @param packetSize The packet size.
+     * @param data The transmit packet data array.
+     */
+    void txPacket(uint8_t packetSize, uint8_t* data);
+
+    /** Receive packet datas with UART
+     *
+     * @param packetSize The packet size.
+     * @param data The receive packet data array.
+     */
+    bool rxPacket(uint8_t packetSize, uint8_t* data);
 
     /**@brief This funcion initializes the USART1 peripheral
      *

@@ -44,6 +44,10 @@ def sendCommand( id, cmd, data=[] ):
 # pos : Position of servomotor (min = 21 max = 1002)
 # time : Time of mouvement
 def goPos(id, pos, time=60):
+        #pos (min = 21 max = 1002)
+        #Set Torque
+        sendCommand(id,3,[0x34,0x01,0x60])
+        #Go pos
         sendCommand(id,6, [time,(pos & 0xFF),((pos >> 8) & 0xFF),0x0,id])
 	
 #-----------------------------------------------------
@@ -92,6 +96,26 @@ def flashLed(id):
         	time.sleep(0.5)
         	sendCommand(id,3, [0x35,0x01,0x04])
         	time.sleep(0.5)
+        	
+ #-----------------------------------------------------
+# Arbre de Noel
+# id1 : ID of servomotor 1
+# id2 : ID of servomotor 2
+# id3 : ID of servomotor 3
+def arbreDeNoel(id1,id2,id3):
+        while 1:
+        	sendCommand(id1,3, [0x35,0x01,0x01])
+        	sendCommand(id2,3, [0x35,0x01,0x02])
+        	sendCommand(id3,3, [0x35,0x01,0x04])
+        	time.sleep(0.5)
+        	sendCommand(id1,3, [0x35,0x01,0x02])
+        	sendCommand(id2,3, [0x35,0x01,0x04])
+        	sendCommand(id3,3, [0x35,0x01,0x01])
+        	time.sleep(0.5)
+        	sendCommand(id1,3, [0x35,0x01,0x04])
+        	sendCommand(id2,3, [0x35,0x01,0x01])
+        	sendCommand(id3,3, [0x35,0x01,0x02])
+        	time.sleep(0.5)
 
 #-----------------------------------------------------
 # Clear error message
@@ -99,7 +123,29 @@ def flashLed(id):
 def clearErrorMsg(id):
         sendCommand(id,3, [0x30,0x02,0x00,0x00])
         sendCommand(id,3, [0x35,0x01,0x00])
-        	
+
+#-----------------------------------------------------
+# Change motor ID
+# currentID : ID of servomotor
+# wantedID : Will set servomotor to this ID
+def changeID(currentID, wantedID):
+        sendCommand(currentID,1, [0x06,0x01,wantedID])
+
+#-----------------------------------------------------
+# Change motor ID
+# id : ID of servomotor
+def readStatus(id):
+        sendCommand(id,7, [])
+        readData(9)
+
+#-----------------------------------------------------
+# Read RAM adress
+# id : ID of servomotor
+# adr : adress to read
+def readRAM(id, adress):
+        sendCommand(id,4, [adress, 0x01])
+        readData(12) 
+      	
 #-----------------------------------------------------
 # Main        	
 if 'ser' not in globals() or ser.isOpen() == False:
@@ -108,27 +154,16 @@ if 'ser' not in globals() or ser.isOpen() == False:
         ser = serial.Serial(2,115200,serial.EIGHTBITS,
                             serial.PARITY_NONE, serial.STOPBITS_ONE, 15);
 
-pos = 21#min = 21 max = 1002
-id = 0xFD
 
-#Servomotor led test
-#flashLed(id)
-        
-#Servomotor position test
-#sendCommand(id,3,[0x34,0x01,0x60]) #??
-##sendCommand(id,3,[22,2,0xAA, 0]) #??
-#goPos(id, pos)
-#time.sleep(1)
-readPosition(id)
+readStatus(4)
+#id = 1;
+#end = 15;
+#pos = 900;
 
- 
-#Servomotor clear error message
-#clearErrorMsg(id)
-
-#Microcontroller test
-#writeUART([97,98,99,100,101,102,103,104,105,106,107,108,109], True)
-#readData(12)
-
+#while id < end :
+#        goPos( id, pos)
+#        time.sleep(0.5)
+#        id = id + 1
 
 ser.close()
 

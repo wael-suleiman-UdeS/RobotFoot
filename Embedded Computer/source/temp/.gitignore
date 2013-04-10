@@ -1,0 +1,17 @@
+# Ignore all
+*.*
+
+# except those:
+!.gitignore
+!*.txt
+!*.c
+!*.cpp
+!*.h
+!*.hpp
+!*.bat
+!*.xml
+!*.ini
+!*.sln
+!*.vcproj*
+!*.vcxproj*
+!*.props
