@@ -48,6 +48,9 @@
     <ClInclude Include="ImageProcessing\Camera.h">
       <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
     </ClInclude>
+    <ClInclude Include="ImageProcessing\ObjectTracker.h">
+      <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RobotFoot.cpp">
@@ -60,6 +63,9 @@
       <Filter>Fichiers sources\ImageProcessing</Filter>
     </ClCompile>
     <ClCompile Include="ImageProcessing\Camera.cpp">
+      <Filter>Fichiers sources\ImageProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProcessing\ObjectTracker.cpp">
       <Filter>Fichiers sources\ImageProcessing</Filter>
     </ClCompile>
   </ItemGroup>

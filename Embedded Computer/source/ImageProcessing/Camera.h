@@ -24,7 +24,7 @@ public:
 
 private:
 	Mat _bgrFrame; /**< BGR frame captured from the camera */
-	Mat _hsvFrame; /**< HSV frame converted from the RGB frame */
+	Mat _hsvFrame; /**< HSV frame converted from the BGR frame */
 	VideoCapture _capture; /**< Image capturing object */
 
 	Camera() {}
