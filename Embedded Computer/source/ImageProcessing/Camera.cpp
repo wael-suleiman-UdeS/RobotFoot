@@ -60,9 +60,9 @@ const Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
  */
 CvPoint Camera::getCenter()
 {
-	if (!_capture.isOpened()) { return; }
+	CvPoint center = {-1, -1};
+	if (!_capture.isOpened()) { return center; }
 
-	CvPoint center;
 	center.x = _capture.get(CV_CAP_PROP_FRAME_WIDTH);
 	center.y = _capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 	return center;

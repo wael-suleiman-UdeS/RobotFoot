@@ -2,10 +2,12 @@
 #include "ImageProcessing\ColorFinder.h"
 #include "ImageProcessing\ObjectTracker.h"
 
-int main()
+#include "Utilities\ConfigParser.h"
+
+void testXMLparsing()
 {
-	testTracking();
-	return 0;
+	ConfigParser config;
+	if (!config.loadFile("config.xml")) { return; }
 }
 
 void testTracking()
@@ -65,4 +67,10 @@ void testTracking()
 	}
 
 	cvDestroyAllWindows();
+}
+
+int main()
+{
+	testXMLparsing();
+	return 0;
 }

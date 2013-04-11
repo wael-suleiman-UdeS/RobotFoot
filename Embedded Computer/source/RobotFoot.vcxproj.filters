@@ -51,7 +51,10 @@
     <ClInclude Include="ImageProcessing\ObjectTracker.h">
       <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\XMLparser.h">
+    <ClInclude Include="Utilities\tinyxml2.h">
+      <Filter>Fichiers d%27en-tête\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Configparser.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,8 +74,11 @@
     <ClCompile Include="ImageProcessing\ObjectTracker.cpp">
       <Filter>Fichiers sources\ImageProcessing</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\XMLparser.cpp">
-      <Filter>Fichiers sources</Filter>
+    <ClCompile Include="Utilities\tinyxml2.cpp">
+      <Filter>Fichiers sources\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Configparser.cpp">
+      <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
