@@ -1,7 +1,4 @@
-
-#include "usbd_usr.h"
-#include "usbd_desc.h"
-#include "usbd_cdc.h"
+#include "usb_com.h"
 #include <stm32f4xx.h>
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_flash.h>
@@ -13,7 +10,7 @@
 #include "stm32f4xx_conf.h"
 
 
-USB_OTG_CORE_HANDLE  USB_OTG_dev __attribute__ ((aligned (4)));
+
 
 // Maybe not needed anymore?
 void Delay(volatile uint32_t nCount)
@@ -137,16 +134,13 @@ int main(void){
 		Tools::Delay(DELAYELEM);
 	}
 */
-
+int a[3];
+  usb::write(a);
   for(;;){
 
       Herkulex servomotor = Herkulex();
 
-      USBD_Init(&USB_OTG_dev,
-                USB_OTG_FS_CORE_ID,
-                &USR_desc,
-                &USBD_CDC_cb,
-                &USR_cb);
+    #warning CALL INIT USB!!!
 
       servomotor.clear(0xFD);
 
