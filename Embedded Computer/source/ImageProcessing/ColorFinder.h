@@ -42,7 +42,7 @@ struct CircleSpec : public ShapeSpec
 	double maxRadius;
 };
 
-/** \brief Class for finding colors positions in images
+/** \brief Class for finding a specified shape of a specified color in images
  */
 class ColorFinder
 {

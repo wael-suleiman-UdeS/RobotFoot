@@ -3,13 +3,18 @@
 
 #include <opencv\cvaux.h>
 
+/** @addtogroup Image Processing
+ * @{
+ */
+
+/** \brief Class for tracking an object position
+ */
 class ObjectTracker
 {
 public:
-	ObjectTracker();
-	~ObjectTracker();
+	ObjectTracker(CvPoint center);
+	~ObjectTracker() {}
 
-	void setCenter(CvPoint center);
 	void track(CvPoint position);
 
 private:
@@ -17,6 +22,8 @@ private:
 	CvPoint _objectPosition;
 	int _noObjectCount;
     static const int _noObjectMaxCount = 15;
+
+	ObjectTracker() {}
 };
 
 #endif // IMAGEPROCESSING_H

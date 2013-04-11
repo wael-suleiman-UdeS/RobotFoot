@@ -21,6 +21,7 @@ public:
 	bool initialize(int deviceIndex);
 	void captureFrame();
 	const Mat& getFrame(ColorSpace colorSpace);
+	CvPoint getCenter();
 
 private:
 	Mat _bgrFrame; /**< BGR frame captured from the camera */

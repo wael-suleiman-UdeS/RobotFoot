@@ -53,6 +53,21 @@ const Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
 	}
 }
 
+/** \brief Retrieve the coordinates of the center of the frame captured by the camera
+ *
+ * \return CvPoint: Coordinates of the center of the camera image
+ *
+ */
+CvPoint Camera::getCenter()
+{
+	if (!_capture.isOpened()) { return; }
+
+	CvPoint center;
+	center.x = _capture.get(CV_CAP_PROP_FRAME_WIDTH);
+	center.y = _capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+	return center;
+}
+
 /** \brief Convert the retrieved BRG frame in an HSV frame
  *
  */
