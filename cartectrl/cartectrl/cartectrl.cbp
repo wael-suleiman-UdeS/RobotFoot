@@ -105,6 +105,10 @@
 		<Unit filename="include/Tools.h" />
 		<Unit filename="include/herkulex.h" />
 		<Unit filename="include/initClock.h" />
+		<Unit filename="include/usb/usb_com.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Unit filename="include/usb/usb_conf.h" />
 		<Unit filename="include/usb/usbd_cdc.h" />
 		<Unit filename="include/usb/usbd_conf.h" />
@@ -132,6 +136,10 @@
 		</Unit>
 		<Unit filename="src/usb/usb_bsp.c">
 			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/usb/usb_com.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
 		<Unit filename="src/usb/usb_core.c">
 			<Option compilerVar="CC" />
