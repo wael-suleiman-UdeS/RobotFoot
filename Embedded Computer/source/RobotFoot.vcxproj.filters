@@ -51,6 +51,9 @@
     <ClInclude Include="ImageProcessing\ObjectTracker.h">
       <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\XMLparser.h">
+      <Filter>Fichiers d%27en-tête\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RobotFoot.cpp">
@@ -67,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="ImageProcessing\ObjectTracker.cpp">
       <Filter>Fichiers sources\ImageProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\XMLparser.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

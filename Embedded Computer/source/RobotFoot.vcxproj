@@ -91,6 +91,7 @@
     <ClInclude Include="ImageProcessing\ImageProcessing.h" />
     <ClInclude Include="ImageProcessing\ObjectTracker.h" />
     <ClInclude Include="Utilities\logger.h" />
+    <ClInclude Include="Utilities\XMLparser.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageProcessing\Camera.cpp" />
@@ -98,6 +99,7 @@
     <ClCompile Include="ImageProcessing\ImageProcessing.cpp" />
     <ClCompile Include="ImageProcessing\ObjectTracker.cpp" />
     <ClCompile Include="RobotFoot.cpp" />
+    <ClCompile Include="Utilities\XMLparser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\config\config.ini" />
