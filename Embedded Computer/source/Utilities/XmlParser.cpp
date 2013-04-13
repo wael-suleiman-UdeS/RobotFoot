@@ -31,9 +31,9 @@ bool XmlParser::loadFile(path filePath)
 	return _document.load_file(filePath.c_str());
 }
 
-/** \brief Retrieve a string value in the XML document
+/** \brief Retrieve a string value attribute in the XML document
  *
- * \param xPath path: XPath of the XML element in which to read the string
+ * \param xPath path: XPath of the XML element in which to read the value attribute
  * \return string: Retrieved string
  *
  */
@@ -46,15 +46,12 @@ string XmlParser::getStringValue(path xPath) const
 		xpath_node node = _document.select_single_node(xPath.generic_string().c_str());
 		return node.node().attribute(XmlPath::Value).value();
 	}
-	catch(const xpath_exception& ex)
-	{
-		return "";
-	}
+	catch(const xpath_exception& ex) { return ""; }
 }
 
-/** \brief Retrieve an int value in the XML document
+/** \brief Retrieve an int value attribute in the XML document
  *
- * \param xPath path: XPath of the XML element in which to read the int
+ * \param xPath path: XPath of the XML element in which to read the value attribute
  * \return string: Retrieved int
  *
  */
