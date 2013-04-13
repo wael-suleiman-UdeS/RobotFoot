@@ -106,7 +106,7 @@ int _getpid(void)
   * @todo   Make write work on stdout and stderr, so using cout/cerr/printf etc.
   *         actually do the work.
   */
-ssize_t _write(int file, const char *ptr, int len)
+ssize_t _write(int file, const char *ptr, size_t len)
 {
     /*
     int todo;
@@ -169,7 +169,7 @@ int _isatty(int file)
   * @todo   Make write work on stdin, so using cin/scanf etc. actually do the
   *         work.
   */
-ssize_t _read(int file, char *ptr, int len)
+ssize_t _read(int file, char *ptr, size_t len)
 {
     return 0;
 }
