@@ -51,10 +51,13 @@
     <ClInclude Include="ImageProcessing\ObjectTracker.h">
       <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\tinyxml2.h">
+    <ClInclude Include="Utilities\pugiconfig.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\Configparser.h">
+    <ClInclude Include="Utilities\pugixml.h">
+      <Filter>Fichiers d%27en-tête\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\XmlParser.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,10 +77,10 @@
     <ClCompile Include="ImageProcessing\ObjectTracker.cpp">
       <Filter>Fichiers sources\ImageProcessing</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\tinyxml2.cpp">
+    <ClCompile Include="Utilities\pugixml.cpp">
       <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\Configparser.cpp">
+    <ClCompile Include="Utilities\XmlParser.cpp">
       <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
   </ItemGroup>

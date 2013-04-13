@@ -1,5 +1,9 @@
 #include "Camera.h"
 
+using boost::filesystem::path;
+using cv::VideoCapture;
+using cv::Mat;
+
 /** \brief Retrieve the instance of the singleton
  *
  * \return Camera&: Instance of the singleton
@@ -9,6 +13,18 @@ Camera& Camera::getInstance()
 {
 	static Camera instance;
 	return instance;
+}
+
+/** \brief Initialize the capture device from the XML configuration
+ *
+ * \param config XmlParser&: XML configuration containing the initialization informations
+ * \return bool: Success of the initialization
+ *
+ */
+bool Camera::initialize(XmlParser& config)
+{
+	return initialize(config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing
+		/ XmlPath::Camera / "DeviceIndex"));
 }
 
 /** \brief Initialize the capture device
@@ -41,7 +57,7 @@ void Camera::captureFrame()
  * \return const Mat&: Retrieved frame
  *
  */
-const Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
+const Mat& Camera::getFrame(Camera::ColorSpace colorSpace) const
 {
 	switch (colorSpace)
 	{
@@ -73,6 +89,6 @@ CvPoint Camera::getCenter()
  */
 void Camera::processFrame()
 {
-	if (!_bgrFrame.empty()) { return; }
+	if (_bgrFrame.empty()) { return; }
 	ImageProcessing::BGRtoHSV(_bgrFrame, _hsvFrame);
 }

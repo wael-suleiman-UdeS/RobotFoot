@@ -3,8 +3,6 @@
 
 #include <opencv\cvaux.h>
 
-using namespace cv;
-
 /** @addtogroup Image Processing
  * @{
  */
@@ -14,12 +12,12 @@ using namespace cv;
 class ImageProcessing
 {
 public:
-	static void BGRtoHSV(const Mat& rgbFrame, Mat& hsvFrame);
-	static void filter(const Mat& sourceFrame, Mat& filteredFrame,
-		Scalar lowerBound, Scalar upperBound);
-	static void erode(const Mat& sourceFrame, Mat& erodedFrame, int iterations);
-	static void dilate(const Mat& sourceFrame, Mat& dilatedFrame, int iterations);
-	static void smooth(const Mat& sourceFrame, Mat& smoothedFrame, int apertureSize);
+	static void BGRtoHSV(const cv::Mat& rgbFrame, cv::Mat& hsvFrame);
+	static void filter(const cv::Mat& sourceFrame, cv::Mat& filteredFrame,
+		cv::Scalar lowerBound, cv::Scalar upperBound);
+	static void erode(const cv::Mat& sourceFrame, cv::Mat& erodedFrame, int iterations);
+	static void dilate(const cv::Mat& sourceFrame, cv::Mat& dilatedFrame, int iterations);
+	static void smooth(const cv::Mat& sourceFrame, cv::Mat& smoothedFrame, int apertureSize);
 };
 
 #endif // IMAGEPROCESSING_H

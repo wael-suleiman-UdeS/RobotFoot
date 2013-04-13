@@ -1,5 +1,11 @@
 #include "ImageProcessing.h"
 
+using cv::Mat;
+using cv::Scalar;
+using cv::Size;
+
+// TODO: Catch OpenCV exceptions
+
 /** \brief Convert a BGR frame to an HSV frame
  *
  * \param bgrFrame const Mat&: BGR frame to convert
@@ -8,7 +14,7 @@
  */
 void ImageProcessing::BGRtoHSV(const Mat& bgrFrame, Mat& hsvFrame)
 {
-	cvtColor(bgrFrame, hsvFrame, CV_BGR2HSV);
+	cv::cvtColor(bgrFrame, hsvFrame, CV_BGR2HSV);
 }
 
 /** \brief Filter a frame by bounds
@@ -22,7 +28,7 @@ void ImageProcessing::BGRtoHSV(const Mat& bgrFrame, Mat& hsvFrame)
 void ImageProcessing::filter(const Mat& sourceFrame, Mat& filteredFrame,
 							 Scalar lowerBound, Scalar upperBound)
 {
-	inRange(sourceFrame, lowerBound, upperBound, filteredFrame);
+	cv::inRange(sourceFrame, lowerBound, upperBound, filteredFrame);
 }
 
 /** \brief Apply erosion on a frame a specified number of times
@@ -58,5 +64,5 @@ void ImageProcessing::dilate(const Mat& sourceFrame, Mat& dilatedFrame, int iter
  */
 void ImageProcessing::smooth(const Mat& sourceFrame, Mat& smoothedFrame, int apertureSize)
 {
-	GaussianBlur(sourceFrame, smoothedFrame, Size(apertureSize, apertureSize), 0, 0);
+	cv::GaussianBlur(sourceFrame, smoothedFrame, cv::Size(apertureSize, apertureSize), 0, 0);
 }

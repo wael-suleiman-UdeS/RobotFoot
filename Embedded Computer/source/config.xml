@@ -6,21 +6,21 @@
     <Colors>
       <Color name="red">
         <HSVcolor>
-          <Hue>215</Hue>
-          <HueTolerance>40</HueTolerance>
-          <Saturation>163</Saturation>
-          <Brightness>103</Brightness>
+          <Hue value="215" />
+          <HueTolerance value="40" />
+          <Saturation value="163" />
+          <Brightness value="103" />
         </HSVcolor>
         <CircleSpec>
-          <ErosionIterations>0</ErosionIterations>
-          <DilationIterations>2</DilationIterations>
-          <SmoothingApertureSize>9</SmoothingApertureSize>
-          <ResolutionDivisor>2</ResolutionDivisor>
-          <MinDistance>120</MinDistance>
-          <EdgeThreshold>100</EdgeThreshold>
-          <CenterThreshold>10</CenterThreshold>
-          <MinRadius>10</MinRadius>
-          <MaxRadius>400</MaxRadius>
+          <ErosionIterations value="0" />
+          <DilationIterations value="2" />
+          <SmoothingApertureSize value="9" />
+          <ResolutionDivisor value="2" />
+          <MinDistance value="120" />
+          <EdgeThreshold value="100" />
+          <CenterThreshold value="10" />
+          <MinRadius value="10" />
+          <MaxRadius value="400" />
         </CircleSpec>
       </Color>
     </Colors>

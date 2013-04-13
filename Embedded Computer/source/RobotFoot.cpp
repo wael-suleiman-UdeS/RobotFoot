@@ -1,58 +1,27 @@
 #include "ImageProcessing\Camera.h"
 #include "ImageProcessing\ColorFinder.h"
 #include "ImageProcessing\ObjectTracker.h"
+#include "Utilities\XmlParser.h"
 
-#include "Utilities\ConfigParser.h"
-
-void testXMLparsing()
+void testTracking(bool debug)
 {
-	ConfigParser config;
+	XmlParser config;
 	if (!config.loadFile("config.xml")) { return; }
-}
 
-void testTracking()
-{
-	// Ini file
-	//////////////////////////////
-	int cameraDeviceIndex = 0;
-
-	// red color
-	int hue = 215;
-	int hueTolerance = 40;
-	int saturation = 163;
-	int brightness = 103;
-
-	// red circle
-	int erosionIterations = 0;
-	int dilationIterations = 2;
-	int smoothingApertureSize = 9;
-	double resolutionDivisor = 2;
-	double minDistance = 120;
-	double edgeThreshold = 100;
-	double centerThreshold = 10;
-	double minRadius = 10;
-	double maxRadius = 400;
-
-	//////////////
-	
-	if (!Camera::getInstance().initialize(cameraDeviceIndex)) {return;}
+	if (!Camera::getInstance().initialize(config)) {return;}
 
 	CvPoint ballPosition;
-	HSVcolor color = {hue, hueTolerance, saturation, brightness};
+	HSVcolor color(config, "red");
+	CircleSpec circle(config, "red");
 	ColorFinder finder(&color);
-	
-	CircleSpec circle;
-	circle.erosionIterations = erosionIterations;
-	circle.dilationIterations = dilationIterations;
-	circle.smoothingApertureSize = smoothingApertureSize;
-	circle.resolutionDivisor = resolutionDivisor;
-	circle.minDistance = minDistance;
-	circle.edgeThreshold = edgeThreshold;
-	circle.centerThreshold = centerThreshold;
-	circle.minRadius = minRadius;
-	circle.maxRadius = maxRadius;
 
 	ObjectTracker tracker(Camera::getInstance().getCenter());
+
+	if (debug)
+	{
+		cv::namedWindow("BGR", CV_WINDOW_AUTOSIZE);
+		cv::namedWindow("HSV", CV_WINDOW_AUTOSIZE);
+	}
 
 	while(true)
 	{
@@ -60,6 +29,12 @@ void testTracking()
 
 		ballPosition = finder.getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV),
 			circle);
+
+		if (debug)
+		{
+			cv::imshow("BGR", Camera::getInstance().getFrame(Camera::ColorSpace::BGR));
+			cv::imshow("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
+		}
 
 		tracker.track(ballPosition);
 
@@ -71,6 +46,6 @@ void testTracking()
 
 int main()
 {
-	testXMLparsing();
+	testTracking(true);
 	return 0;
 }
