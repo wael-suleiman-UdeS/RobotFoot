@@ -83,6 +83,9 @@
     <ClCompile Include="Utilities\XmlParser.cpp">
       <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Utilities\logger.cpp">
+      <Filter>Fichiers sources\Utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\config\config.ini">

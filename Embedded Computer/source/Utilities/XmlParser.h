@@ -8,7 +8,7 @@
 using std::string;
 namespace fs = boost::filesystem;
 
-/** @addtogroup Image Processing
+/** @addtogroup Utilities
  * @{
  */
 
@@ -17,6 +17,8 @@ inline fs::path operator+(fs::path p1, fs::path p2)
 	return p1 += p2;
 }
 
+/** \brief Namespace containing the XPaths of the elements in the XML configuration file
+ */
 namespace XmlPath
 {
 	extern const char* Value;
@@ -31,7 +33,7 @@ namespace XmlPath
 	extern const fs::path CircleSpec;
 }
 
-/** \brief Class for XML parsing
+/** @brief Class for XML parsing
  */
 class XmlParser
 {

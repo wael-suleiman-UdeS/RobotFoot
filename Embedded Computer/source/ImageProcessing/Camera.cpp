@@ -4,9 +4,9 @@ using boost::filesystem::path;
 using cv::VideoCapture;
 using cv::Mat;
 
-/** \brief Retrieve the instance of the singleton
+/** \brief Retrieve the instance of the Camera instance
  *
- * \return Camera&: Instance of the singleton
+ * \return Camera&: Instance of the Camera object
  *
  */
 Camera& Camera::getInstance()

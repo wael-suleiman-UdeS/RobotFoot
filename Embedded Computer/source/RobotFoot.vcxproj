@@ -102,6 +102,7 @@
     <ClCompile Include="ImageProcessing\ImageProcessing.cpp" />
     <ClCompile Include="ImageProcessing\ObjectTracker.cpp" />
     <ClCompile Include="RobotFoot.cpp" />
+    <ClCompile Include="Utilities\logger.cpp" />
     <ClCompile Include="Utilities\pugixml.cpp" />
     <ClCompile Include="Utilities\XmlParser.cpp" />
   </ItemGroup>

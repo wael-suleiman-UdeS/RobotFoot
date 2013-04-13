@@ -4,8 +4,6 @@ using boost::filesystem::path;
 using pugi::xpath_node;
 using pugi::xpath_exception;
 
-/** \brief Namespace containing the XPaths of the elements in the XML configuration file
- */
 namespace XmlPath
 {
 	const char* Value = "value";
