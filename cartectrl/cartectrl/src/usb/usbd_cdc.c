@@ -25,20 +25,36 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc.h"
+#include <string.h>
+
+//------------------------------------------------------------------------------
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
+
+#undef min
+#undef max
+
+#define min(x,y)            ((x) < (y) ? (x) : (y))
+#define max(x,y)            ((x) > (y) ? (x) : (y))
+
+// Constraint x to be between lo and hi
+#define clip(x, lo, hi)     (max(min(x, hi), lo))
+
+
 /* Private variables ---------------------------------------------------------*/
 
 /* These are external variables imported from CDC core to be used for IN
    transfer management. */
-extern uint8_t  APP_Rx_Buffer []; /* Write CDC received data in this buffer.
-                                     These data will be sent over USB IN endpoint
-                                     in the CDC core functions. */
-extern uint32_t APP_Rx_ptr_in;    /* Increment this pointer or roll it back to
-                                     start address when writing received data
-                                     in the buffer APP_Rx_Buffer. */
+// Note: The variable names are a bit misleading, that is, it is from the HOST
+// viewpoint, so the Rx buffer contains data that the HOST will RECEIVE.
+extern uint8_t  APP_Rx_Buffer [];
+extern volatile uint32_t APP_Rx_ptr_in;
+extern volatile uint32_t APP_Rx_ptr_out;
+
+static const uint8_t *APP_Rx_Buffer_end = APP_Rx_Buffer + APP_RX_DATA_SIZE;
+static const uint32_t APP_Rx_wrap_mask = (APP_RX_DATA_SIZE - 1);
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -51,14 +67,37 @@ static uint16_t cdc_DataRx   (uint8_t* Buf, uint32_t Len);
 
 CDC_IF_Prop_TypeDef cdc_fops =
 {
-  cdc_Init,
-  cdc_DeInit,
-  cdc_Ctrl,
-  cdc_DataTx,
-  cdc_DataRx
+    cdc_Init,
+    cdc_DeInit,
+    cdc_Ctrl,
+    cdc_DataTx,
+    cdc_DataRx
 };
 
 /* Private functions ---------------------------------------------------------*/
+
+/**
+  * @brief  in_APP_Rx_buffer
+  *         Number of elements in buffer
+  * @param  None
+  * @return Result of the operation (USBD_OK in all cases)
+  */
+static inline uint32_t in_APP_Rx_buffer(void)
+{
+    return (APP_Rx_ptr_in - APP_Rx_ptr_out) & APP_Rx_wrap_mask;
+}
+
+/**
+  * @brief  left_APP_Rx_buffer
+  *         Number of elements in buffer
+  * @param  None
+  * @return Result of the operation (USBD_OK in all cases)
+  */
+static inline uint32_t left_APP_Rx_buffer(void)
+{
+    return APP_RX_DATA_SIZE - in_APP_Rx_buffer() - 1;
+}
+
 /**
   * @brief  cdc_Init
   *         Initializes the Media on the STM32
@@ -67,14 +106,19 @@ CDC_IF_Prop_TypeDef cdc_fops =
   */
 static uint16_t cdc_Init(void)
 {
-  return USBD_OK;
+    return USBD_OK;
 }
 
-
+/**
+  * @brief  cdc_DeInit
+  *         "Deinitializes" the Media on the STM32
+  * @param  None
+  * @return Result of the operation (USBD_OK in all cases)
+  */
 static uint16_t cdc_DeInit(void)
 {
-
-  return USBD_OK;
+    /* It does not get called at all! */
+    return USBD_OK;
 }
 
 
