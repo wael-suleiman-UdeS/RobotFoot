@@ -3,9 +3,12 @@
 #include "usbd_usr.h"
 #include "usbd_desc.h"
 #include "usbd_cdc.h"
+#include "miscutils.h"
 //------------------------------------------------------------------------------
 
-USB_OTG_CORE_HANDLE  USB_OTG_dev __attribute__ ((aligned (4)));
+// This global object is used inside other USB functions, and seems to require
+// alignment on a 4 byte boundary.
+USB_OTG_CORE_HANDLE  USB_OTG_dev ALIGNED(4);
 
 //------------------------------------------------------------------------------
 namespace usb
