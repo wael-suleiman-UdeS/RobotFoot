@@ -240,7 +240,34 @@ static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
 	return USBD_OK;
 }
 
+/* Exported functions --------------------------------------------------------*/
+
+/**
+  * @brief  usb_tx
+  *         Send requested data
+  *
+  * @param  Buf Buffer of data to be received
+  * @param  Len Number of data received (in bytes)
+  * @return Number of bytes actually put in buffer.
+  */
+size_t usb_tx(const uint8_t *buf, size_t len)
+{
+    const size_t left_in_buffer = left_APP_Rx_buffer();
+    const size_t to_put = min(left_in_buffer, len);
+
+    uint8_t *const ptr_in = APP_Rx_Buffer + APP_Rx_ptr_in;
+    const size_t upper_buffer = APP_Rx_Buffer_end - ptr_in;
+    const size_t unwrapped_xfer = min(to_put, upper_buffer);
+    const size_t wrapped_xfer   = to_put - unwrapped_xfer;
+
+    memcpy(ptr_in, buf, unwrapped_xfer);
+    buf += unwrapped_xfer;
+    memcpy(APP_Rx_Buffer, buf, wrapped_xfer);
+
+    // Update ptr_in to notify driver of the new data
+    APP_Rx_ptr_in += to_put;
+
+    return to_put;
+}
 
 
-
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

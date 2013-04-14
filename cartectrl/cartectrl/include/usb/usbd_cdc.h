@@ -28,13 +28,23 @@
 
 #include "usbd_cdc_core.h"
 #include "usbd_conf.h"
-
-
+#include <stddef.h>
 #define DEFAULT_CONFIG                  0
 #define OTHER_CONFIG                    1
 
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+
+size_t usb_tx(const uint8_t *buf, size_t len);
+
+#ifdef __cplusplus
+ }
+#endif
+
 
 #endif /* __USBD_CDC_VCP_H */
 
