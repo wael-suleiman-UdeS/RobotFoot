@@ -37,12 +37,13 @@ int init()
 }
 
 
-int write(const uint8_t *m, size_t s)
+ssize_t write(const uint8_t *m, size_t s)
 {
-    return 0;
+    // TODO: verify USB state.
+    return usb_tx(m, s);
 }
 
-int read(uint8_t *m, size_t s)
+ssize_t read(uint8_t *m, size_t s)
 {
     return 0;
 }
