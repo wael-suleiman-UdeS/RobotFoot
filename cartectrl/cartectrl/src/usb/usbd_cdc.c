@@ -189,6 +189,11 @@ static uint16_t cdc_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
   *         @note
   *         This function runs in privilegied priority (from USB interrupt).
   *
+  *         @note
+  *         This function, whilst being visible in the USB OTG library, is never
+  *         actually used: one should play with the APP_Rx_buffer above with the
+  *         APP_Rx_ptr_in to actually notify the USB driver to send some data.
+  *
   * @param  Buf Buffer of data to be sent
   * @param  Len Number of data to be sent (in bytes)
   * @return Result of the operation: USBD_OK
@@ -198,6 +203,7 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
 
 	uint32_t i;
 	//loop through buffer
+
 	for( i = 0; i < Len; i++ )
 	{
 		//push data into transfer buffer
@@ -221,7 +227,7 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
   *
   *         @note
   *         This function will block any OUT packet reception on USB endpoint
-  *         untill exiting this function. If you exit this function before transfer
+  *         until exiting this function. If you exit this function before transfer
   *         is complete on CDC interface (ie. using DMA controller) it will result
   *         in receiving more data while previous ones are still not sent.
   *
