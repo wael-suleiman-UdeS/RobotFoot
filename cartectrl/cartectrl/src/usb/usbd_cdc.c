@@ -240,9 +240,7 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
   */
 static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
 {
-
-	//send received data back to sender
-	cdc_DataTx( Buf, Len );
+    //cdc_DataTx( Buf, Len );
 	return USBD_OK;
 }
 
