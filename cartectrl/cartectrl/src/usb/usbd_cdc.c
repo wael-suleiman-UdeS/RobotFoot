@@ -250,28 +250,38 @@ static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
   * @brief  usb_tx
   *         Send requested data
   *
-  * @param  Buf Buffer of data to be received
-  * @param  Len Number of data received (in bytes)
+  * @param  Buf Buffer of data to be transmitted
+  * @param  Len Number of data in buffer (in bytes)
   * @return Number of bytes actually put in buffer.
   */
 size_t usb_tx(const uint8_t *buf, size_t len)
 {
     const size_t left_in_buffer = left_APP_Rx_buffer();
-    const size_t to_put = min(left_in_buffer, len);
 
+    // Limit transfer to what the buffer can hold at this time.
+    len = min(left_in_buffer, len);
+    const size_t result = len;
     uint8_t *const ptr_in = APP_Rx_Buffer + APP_Rx_ptr_in;
-    const size_t upper_buffer = APP_Rx_Buffer_end - ptr_in;
-    const size_t unwrapped_xfer = min(to_put, upper_buffer);
-    const size_t wrapped_xfer   = to_put - unwrapped_xfer;
 
-    memcpy(ptr_in, buf, unwrapped_xfer);
-    buf += unwrapped_xfer;
-    memcpy(APP_Rx_Buffer, buf, wrapped_xfer);
+    // Number of bytes before wrapping down.
+    const size_t upper_buffer = APP_Rx_Buffer_end - ptr_in;
+    const size_t direct_xfer  = min(len, upper_buffer);
+
+
+    memcpy(ptr_in, buf, direct_xfer);
+    len -= direct_xfer;
+    if (len)
+    {
+        // Some data has to be put in the beginning of the buffer.
+        buf += direct_xfer;
+        memcpy(APP_Rx_Buffer, buf, len);
+    }
 
     // Update ptr_in to notify driver of the new data
-    APP_Rx_ptr_in += to_put;
+    // Safe to update normally because the driver doesn't modify it.
+    APP_Rx_ptr_in = (APP_Rx_ptr_in + result) & APP_Rx_wrap_mask;
 
-    return to_put;
+    return result;
 }
 
 /**
