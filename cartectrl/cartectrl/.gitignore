@@ -5,3 +5,4 @@
 
 #ignorer log
 *.log
+*.map

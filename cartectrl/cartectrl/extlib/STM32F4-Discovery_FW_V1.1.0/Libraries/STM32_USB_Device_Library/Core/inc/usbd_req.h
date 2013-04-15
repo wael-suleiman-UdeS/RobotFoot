@@ -6,7 +6,7 @@
   * @date    22-July-2011
   * @brief   header file for the usbd_req.c file
   ******************************************************************************
-  * @attention 
+  * @attention
   *
   * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
   * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
@@ -17,12 +17,16 @@
   *
   * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
-  */ 
+  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 
 #ifndef __USB_REQUEST_H_
 #define __USB_REQUEST_H_
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include  "usbd_def.h"
@@ -33,18 +37,18 @@
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
   */
-  
+
 /** @defgroup USBD_REQ
   * @brief header file for the usbd_ioreq.c file
   * @{
-  */ 
+  */
 
 /** @defgroup USBD_REQ_Exported_Defines
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
+  */
 
 
 /** @defgroup USBD_REQ_Exported_Types
@@ -52,27 +56,27 @@
   */
 /**
   * @}
-  */ 
+  */
 
 
 
 /** @defgroup USBD_REQ_Exported_Macros
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup USBD_REQ_Exported_Variables
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup USBD_REQ_Exported_FunctionsPrototype
   * @{
-  */ 
+  */
 
 USBD_Status  USBD_StdDevReq (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ  *req);
 USBD_Status  USBD_StdItfReq (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ  *req);
@@ -84,19 +88,24 @@ void USBD_CtlError( USB_OTG_CORE_HANDLE  *pdev,
                             USB_SETUP_REQ *req);
 
 void USBD_GetString(uint8_t *desc, uint8_t *unicode, uint16_t *len);
+
+#ifdef __cplusplus
+  }
+#endif
+
 /**
   * @}
-  */ 
+  */
 
 #endif /* __USB_REQUEST_H_ */
 
 /**
   * @}
-  */ 
+  */
 
 /**
 * @}
-*/ 
+*/
 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

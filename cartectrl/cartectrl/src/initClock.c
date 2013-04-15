@@ -9,11 +9,13 @@
   */
 
 //------------------------------------------------------------------------------
+#include "initClock.h"
+//------------------------------------------------------------------------------
 #include "stm32f4xx_pwr.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_flash.h"
 
-/** @addtogroup RobotFoot init
+/** @addtogroup Init
   * @{
   */
 
@@ -33,7 +35,7 @@
   *         executes reliably; instruction/data caches as well as the prefetch
   *         buffer are enabled to increase performance.
   * @param  None
-  * @retval None
+  * @return None
   * @todo   It should return an error code, ideally, when everything is screwed
   *         up
   */
