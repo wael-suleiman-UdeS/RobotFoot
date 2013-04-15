@@ -98,62 +98,14 @@ int main(void)
     // initialize the GPIO pins we need
     initClock();
     init_GPIO();
+    usb::init();
 
-    /* This flashed the LEDs on the board once
-     * Two registers are used to set the pins (pin level is VCC)
-     * or to reset the pins (pin level is GND)
-     *
-     * BSRR stands for bit set/reset register
-     * it is seperated into a high and a low word (each of 16 bit size)
-     *
-     * A logical 1 in BSRRL will set the pin and a logical 1 in BSRRH will
-     * reset the pin. A logical 0 in either register has no effect
-     */
 
-    int a[3];
-    usb::write(a);
     for(;;)
     {
-
-        Herkulex servomotor = Herkulex();
-
-        usb::init();
-
-        servomotor.clear(0xFD);
-
-        servomotor.setTorque(0xFD, TORQUE_ON);
-        uint16_t position(0);
-        while(1)
-        {
-            position = servomotor.getPos(0xFD);
-            servomotor.positionControl(0xFD, 999, 60, 0x00);
-            Tools::Delay(40000000);
-
-            position = servomotor.getPos(0xFD);
-            servomotor.positionControl(0xFD, 25, 60, 0x00);
-            Tools::Delay(40000000);
-
-        }
-        /*
-            GPIOD->BSRRL = 0xF000;  // set PD12 thru PD15
-            Delay(10000000L);		// wait a short period of time
-            GPIOD->BSRRH = 0xF000;  // reset PD12 thru PD15
-            Delay(10000000L);
-
-
-            volatile int i = 0;
-            for (;;)
-            {
-          if (i++ > 1000000)
-          {
-              GPIOD->ODR ^= 0xF000;
-              i = 0;
-          }
-            }
-        */
-
-        //Delay(9000000);
-        //UARTUtility::USART_puts(USART1, "Hello World!!");
+        char p[4];
+        uint32_t r = usb::read(p);
+        usb::write(p, r);
     }
 }
 
