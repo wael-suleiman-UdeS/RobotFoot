@@ -274,4 +274,15 @@ size_t usb_tx(const uint8_t *buf, size_t len)
     return to_put;
 }
 
-
+/**
+  * @brief  usb_rx
+  *         Get received data.
+  *
+  * @param  Buf Buffer of data to be received
+  * @param  Len Capacity of the buffer (in bytes)
+  * @return Number of bytes actually read
+  */
+size_t usb_rx(uint8_t *buf, size_t len)
+{
+    return 0;
+}

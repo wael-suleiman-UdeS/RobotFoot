@@ -40,6 +40,7 @@
 /* Exported functions ------------------------------------------------------- */
 
 size_t usb_tx(const uint8_t *buf, size_t len);
+size_t usb_rx(uint8_t *buf,       size_t len);
 
 #ifdef __cplusplus
  }
@@ -48,4 +49,3 @@ size_t usb_tx(const uint8_t *buf, size_t len);
 
 #endif /* __USBD_CDC_VCP_H */
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
