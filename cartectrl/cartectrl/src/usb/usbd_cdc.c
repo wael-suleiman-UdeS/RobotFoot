@@ -50,19 +50,36 @@
 // Note: The variable names are a bit misleading, that is, it is from the HOST
 // viewpoint, so the Rx buffer contains data that the HOST will RECEIVE.
 extern uint8_t  APP_Rx_Buffer [];
+
 extern volatile uint32_t APP_Rx_ptr_in;
 extern volatile uint32_t APP_Rx_ptr_out;
 
 static const uint8_t *APP_Rx_Buffer_end = APP_Rx_Buffer + APP_RX_DATA_SIZE;
 static const uint32_t APP_Rx_wrap_mask = (APP_RX_DATA_SIZE - 1);
 
+// MUST BE A POWER OF TWO!
+#define READ_BUFFER_SIZE    APP_RX_DATA_SIZE
+static uint8_t  read_buffer[READ_BUFFER_SIZE];
+static uint32_t read_buffer_wrap_mask = (READ_BUFFER_SIZE - 1);
+
+static struct pipe
+{
+    uint8_t *const buffer;
+    uint32_t ptr_in;
+    uint32_t ptr_out;
+}
+rx =
+{
+    read_buffer
+};
+
 /* Private function prototypes -----------------------------------------------*/
 
-static uint16_t cdc_Init     (void);
-static uint16_t cdc_DeInit   (void);
-static uint16_t cdc_Ctrl     (uint32_t Cmd, uint8_t* Buf, uint32_t Len);
-static uint16_t cdc_DataTx   (uint8_t* Buf, uint32_t Len);
-static uint16_t cdc_DataRx   (uint8_t* Buf, uint32_t Len);
+static uint16_t cdc_Init   (void);
+static uint16_t cdc_DeInit (void);
+static uint16_t cdc_Ctrl   (uint32_t Cmd, uint8_t* Buf, uint32_t Len);
+static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len);
+static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len);
 
 
 CDC_IF_Prop_TypeDef cdc_fops =
@@ -240,7 +257,17 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
   */
 static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
 {
-    //cdc_DataTx( Buf, Len );
+    for (; Len; --Len)
+    {
+        rx.buffer[rx.ptr_in] = *Buf++;
+        rx.ptr_in = (rx.ptr_in + 1) & read_buffer_wrap_mask;
+        if (rx.ptr_in == rx.ptr_out)
+        {
+            // "Discard" old data
+            rx.ptr_out = (rx.ptr_out + 1) & read_buffer_wrap_mask;
+        }
+    }
+    // Result is discarded by the driver...
 	return USBD_OK;
 }
 
@@ -294,5 +321,22 @@ size_t usb_tx(const uint8_t *buf, size_t len)
   */
 size_t usb_rx(uint8_t *buf, size_t len)
 {
-    return 0;
+    const size_t in_buffer = (rx.ptr_in - rx.ptr_out) & read_buffer_wrap_mask;
+    // What is in the read buffer is what can be put in the supplied buffer
+    len = min(len, in_buffer);
+    const size_t result = len;
+    const uint8_t *const ptr_out = rx.buffer + rx.ptr_out;
+
+    uint32_t direct = min(READ_BUFFER_SIZE - rx.ptr_out, len);
+
+    memcpy(buf, ptr_out, direct);
+    len -= direct;
+    if (len)
+    {
+        buf += direct;
+        memcpy(buf, rx.buffer, len);
+    }
+    rx.ptr_out = (rx.ptr_out + result) & read_buffer_wrap_mask;
+
+    return result;
 }
