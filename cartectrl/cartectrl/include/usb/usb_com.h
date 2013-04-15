@@ -43,7 +43,7 @@ using std::string;
 
 int init();
 
-// Base trasmit function
+// Base transmit function
 ssize_t write(const uint8_t *m, size_t s);
 
 // Convenience functions:
