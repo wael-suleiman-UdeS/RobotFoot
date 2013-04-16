@@ -2,19 +2,25 @@
 #include "ImageProcessing\ColorFinder.h"
 #include "ImageProcessing\ObjectTracker.h"
 #include "Utilities\XmlParser.h"
+#include "Utilities\Logger.h"
 
 void testTracking(bool debug)
 {
+	Logger::getInstance().addStream(std::cout);
+
+	Logger::getInstance() << "Starting tracking demo" << std::endl;
+
+	Logger::getInstance() << "Loading configuration file"  << std::endl;;
 	XmlParser config;
 	if (!config.loadFile("config.xml")) { return; }
 
+	Logger::getInstance() << "Initializing capture device" << std::endl;
 	if (!Camera::getInstance().initialize(config)) {return;}
 
 	cv::Point ballPosition;
 	HSVcolor color(config, "red");
 	CircleSpec circle(config, "red");
 	ColorFinder finder(&color);
-
 	ObjectTracker tracker(Camera::getInstance().getCenter());
 
 	if (debug)
@@ -23,6 +29,7 @@ void testTracking(bool debug)
 		cv::namedWindow("HSV", CV_WINDOW_AUTOSIZE);
 	}
 
+	Logger::getInstance() << "Starting tracking process" << std::endl;
 	while(true)
 	{
 		Camera::getInstance().captureFrame();

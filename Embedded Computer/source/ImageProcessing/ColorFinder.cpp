@@ -26,7 +26,7 @@ HSVcolor::HSVcolor(const XmlParser& config, string colorName)
 	brightness = config.getIntValue(basePath / "Brightness");
 }
 
-/** \brief Initialize the circle specifications from the XML configuration
+/** \brief Initialigze the circle specifications from the XML configuration
  *
  * \param config XmlParser&: XML configuration containing the initialization informations
  * \param colorName string: Name of the color of the circle to find
