@@ -10,12 +10,20 @@ void testTracking(bool debug)
 
 	Logger::getInstance() << "Starting tracking demo" << std::endl;
 
-	Logger::getInstance() << "Loading configuration file"  << std::endl;;
+	Logger::getInstance() << "Loading configuration file" << std::endl;
 	XmlParser config;
-	if (!config.loadFile("config.xml")) { return; }
+	if (!config.loadFile("config.xml"))
+	{
+		Logger::getInstance() << "Cannot load config.xml" << std::endl;
+		return;
+	}
 
 	Logger::getInstance() << "Initializing capture device" << std::endl;
-	if (!Camera::getInstance().initialize(config)) {return;}
+	if (!Camera::getInstance().initialize(config))
+	{
+		return;
+		Logger::getInstance() << "Cannot initialize capture device" << std::endl;
+	}
 
 	cv::Point ballPosition;
 	HSVcolor color(config, "red");
