@@ -1,14 +1,30 @@
 #include "Camera.h"
 
-/** \brief Retrieve the instance of the singleton
+using boost::filesystem::path;
+using cv::VideoCapture;
+using cv::Mat;
+
+/** \brief Retrieve the instance of the Camera instance
  *
- * \return Camera&: Instance of the singleton
+ * \return Camera&: Instance of the Camera object
  *
  */
 Camera& Camera::getInstance()
 {
 	static Camera instance;
 	return instance;
+}
+
+/** \brief Initialize the capture device from the XML configuration
+ *
+ * \param config XmlParser&: XML configuration containing the initialization informations
+ * \return bool: Success of the initialization
+ *
+ */
+bool Camera::initialize(XmlParser& config)
+{
+	return initialize(config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing
+		/ XmlPath::Camera / "DeviceIndex"));
 }
 
 /** \brief Initialize the capture device
@@ -41,7 +57,7 @@ void Camera::captureFrame()
  * \return const Mat&: Retrieved frame
  *
  */
-const Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
+const Mat& Camera::getFrame(Camera::ColorSpace colorSpace) const
 {
 	switch (colorSpace)
 	{
@@ -53,11 +69,26 @@ const Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
 	}
 }
 
+/** \brief Retrieve the coordinates of the center of the frame captured by the camera
+ *
+ * \return CvPoint: Coordinates of the center of the camera image
+ *
+ */
+CvPoint Camera::getCenter()
+{
+	CvPoint center = {-1, -1};
+	if (!_capture.isOpened()) { return center; }
+
+	center.x = _capture.get(CV_CAP_PROP_FRAME_WIDTH);
+	center.y = _capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+	return center;
+}
+
 /** \brief Convert the retrieved BRG frame in an HSV frame
  *
  */
 void Camera::processFrame()
 {
-	if (!_bgrFrame.empty()) { return; }
+	if (_bgrFrame.empty()) { return; }
 	ImageProcessing::BGRtoHSV(_bgrFrame, _hsvFrame);
 }

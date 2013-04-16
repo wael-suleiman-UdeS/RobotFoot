@@ -1,0 +1,28 @@
+<RobotFoot>
+  <ImageProcessing>
+    <Camera>
+      <DeviceIndex>0</DeviceIndex>
+    </Camera>
+    <Colors>
+      <Color name="red">
+        <HSVcolor>
+          <Hue value="215" />
+          <HueTolerance value="40" />
+          <Saturation value="163" />
+          <Brightness value="103" />
+        </HSVcolor>
+        <CircleSpec>
+          <ErosionIterations value="0" />
+          <DilationIterations value="2" />
+          <SmoothingApertureSize value="9" />
+          <ResolutionDivisor value="2" />
+          <MinDistance value="120" />
+          <EdgeThreshold value="100" />
+          <CenterThreshold value="10" />
+          <MinRadius value="10" />
+          <MaxRadius value="400" />
+        </CircleSpec>
+      </Color>
+    </Colors>
+  </ImageProcessing>
+</RobotFoot>

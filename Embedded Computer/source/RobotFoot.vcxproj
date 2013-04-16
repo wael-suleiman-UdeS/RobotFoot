@@ -56,12 +56,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\source\ThirdParty\boost_1_53_0;$(OPENCV_BUILD)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\source\ThirdParty\opencv\build\include;$(SolutionDir)\source\ThirdParty\boost_1_53_0\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OPENCV_BUILD)\x86\vc11\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\source\ThirdParty\boost_1_53_0\stage\lib;$(SolutionDir)\source\ThirdParty\opencv\build\x86\vc11\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_core244d.lib;opencv_imgproc244d.lib;opencv_highgui244d.lib;opencv_ml244d.lib;opencv_video244d.lib;opencv_features2d244d.lib;opencv_calib3d244d.lib;opencv_objdetect244d.lib;opencv_contrib244d.lib;opencv_legacy244d.lib;opencv_flann244d.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -91,6 +92,9 @@
     <ClInclude Include="ImageProcessing\ImageProcessing.h" />
     <ClInclude Include="ImageProcessing\ObjectTracker.h" />
     <ClInclude Include="Utilities\logger.h" />
+    <ClInclude Include="Utilities\pugiconfig.h" />
+    <ClInclude Include="Utilities\pugixml.h" />
+    <ClInclude Include="Utilities\XmlParser.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageProcessing\Camera.cpp" />
@@ -98,6 +102,9 @@
     <ClCompile Include="ImageProcessing\ImageProcessing.cpp" />
     <ClCompile Include="ImageProcessing\ObjectTracker.cpp" />
     <ClCompile Include="RobotFoot.cpp" />
+    <ClCompile Include="Utilities\logger.cpp" />
+    <ClCompile Include="Utilities\pugixml.cpp" />
+    <ClCompile Include="Utilities\XmlParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\config\config.ini" />

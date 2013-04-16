@@ -1,5 +1,9 @@
 #include "ImageProcessing.h"
 
+using cv::Mat;
+using cv::Scalar;
+using cv::Size;
+
 /** \brief Convert a BGR frame to an HSV frame
  *
  * \param bgrFrame const Mat&: BGR frame to convert
@@ -8,7 +12,11 @@
  */
 void ImageProcessing::BGRtoHSV(const Mat& bgrFrame, Mat& hsvFrame)
 {
-	cvtColor(bgrFrame, hsvFrame, CV_BGR2HSV);
+	try
+	{
+		cv::cvtColor(bgrFrame, hsvFrame, CV_BGR2HSV);
+	}
+	catch(cv::Exception& ex) {}
 }
 
 /** \brief Filter a frame by bounds
@@ -22,7 +30,11 @@ void ImageProcessing::BGRtoHSV(const Mat& bgrFrame, Mat& hsvFrame)
 void ImageProcessing::filter(const Mat& sourceFrame, Mat& filteredFrame,
 							 Scalar lowerBound, Scalar upperBound)
 {
-	inRange(sourceFrame, lowerBound, upperBound, filteredFrame);
+	try
+	{
+		cv::inRange(sourceFrame, lowerBound, upperBound, filteredFrame);
+	}
+	catch(cv::Exception& ex) {}
 }
 
 /** \brief Apply erosion on a frame a specified number of times
@@ -34,7 +46,11 @@ void ImageProcessing::filter(const Mat& sourceFrame, Mat& filteredFrame,
  */
 void ImageProcessing::erode(const Mat& sourceFrame, Mat& erodedFrame, int iterations)
 {
-	cv::erode(sourceFrame, erodedFrame, iterations);
+	try
+	{
+		cv::erode(sourceFrame, erodedFrame, iterations);
+	}
+	catch(cv::Exception& ex) {}
 }
 
 /** \brief Apply dilation on a frame a specified number of times
@@ -46,7 +62,11 @@ void ImageProcessing::erode(const Mat& sourceFrame, Mat& erodedFrame, int iterat
  */
 void ImageProcessing::dilate(const Mat& sourceFrame, Mat& dilatedFrame, int iterations)
 {
-	cv::dilate(sourceFrame, dilatedFrame, iterations);
+	try
+	{
+		cv::dilate(sourceFrame, dilatedFrame, iterations);
+	}
+	catch(cv::Exception& ex) {}
 }
 
 /** \brief Smooth a frame using Gaussian Blur
@@ -58,5 +78,9 @@ void ImageProcessing::dilate(const Mat& sourceFrame, Mat& dilatedFrame, int iter
  */
 void ImageProcessing::smooth(const Mat& sourceFrame, Mat& smoothedFrame, int apertureSize)
 {
-	GaussianBlur(sourceFrame, smoothedFrame, Size(apertureSize, apertureSize), 0, 0);
+	try
+	{
+		cv::GaussianBlur(sourceFrame, smoothedFrame, cv::Size(apertureSize, apertureSize), 0, 0);
+	}
+	catch(cv::Exception& ex) {}
 }

@@ -17,7 +17,7 @@
  extern "C" {
 #endif
 
-/** @addtogroup RobotFoot init
+/** @addtogroup Init
   * @{
   */
 

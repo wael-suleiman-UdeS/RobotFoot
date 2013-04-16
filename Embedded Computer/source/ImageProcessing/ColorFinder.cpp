@@ -1,6 +1,54 @@
 #include "ColorFinder.h"
 #include <climits>
 
+using boost::filesystem::path;
+using cv::Mat;
+using cv::vector;
+using cv::Vec3f;
+using cv::Scalar;
+
+/** \brief Initialize the circle specifications from the XML configuration
+ *
+ * \param config XmlParser&: XML configuration containing the initialization informations
+ * \param colorName string: Name of the HSV color
+ * \return bool: Success of the initialization
+ *
+ */
+HSVcolor::HSVcolor(const XmlParser& config, string colorName)
+{
+	path basePath = XmlPath::Root / XmlPath::ImageProcessing
+		/ XmlPath::Colors / XmlPath::Color + "[@name=\"" + colorName + "\"]" / XmlPath::HSVcolor;
+
+	hue = config.getIntValue(basePath / "Hue");
+	hueTolerance = config.getIntValue(basePath / "HueTolerance");
+	saturation = config.getIntValue(basePath / "Saturation");
+	brightness = config.getIntValue(basePath / "Brightness");
+}
+
+/** \brief Initialize the circle specifications from the XML configuration
+ *
+ * \param config XmlParser&: XML configuration containing the initialization informations
+ * \param colorName string: Name of the color of the circle to find
+ * \return bool: Success of the initialization
+ *
+ */
+CircleSpec::CircleSpec(const XmlParser& config, string colorName)
+{
+	path basePath = XmlPath::Root / XmlPath::ImageProcessing
+		/ XmlPath::Colors / XmlPath::Color + "[@name=\"" + colorName + "\"]" / XmlPath::CircleSpec;
+
+	erosionIterations = config.getIntValue(basePath / "ErosionIterations");
+	dilationIterations = config.getIntValue(basePath / "DilationIterations");
+	smoothingApertureSize = config.getIntValue(basePath / "SmoothingApertureSize");
+	resolutionDivisor = config.getIntValue(basePath / "ResolutionDivisor");
+	minDistance = config.getIntValue(basePath / "MinDistance");
+
+	edgeThreshold = config.getIntValue(basePath / "EdgeThreshold");
+	centerThreshold = config.getIntValue(basePath / "CenterThreshold");
+	minRadius = config.getIntValue(basePath / "MinRadius");
+	maxRadius = config.getIntValue(basePath / "MaxRadius");
+}
+
 /** \brief Constructor
  *
  * \param color const HSVcolor*: HSV Color to find
