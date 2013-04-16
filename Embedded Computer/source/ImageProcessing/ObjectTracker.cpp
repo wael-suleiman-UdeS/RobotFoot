@@ -1,29 +1,29 @@
 #include "ObjectTracker.h"
 
+using cv::Point;
+
 /** \brief Constructor
  *
- * \param center CvPoint: Center of the camera used for calibration
+ * \param center Point: Center of the camera used for calibration
  *
  */
-ObjectTracker::ObjectTracker(CvPoint center)
+ObjectTracker::ObjectTracker(Point center)
 {
-    _objectPosition.x = -1;
-    _objectPosition.y = -1;
+	_objectPosition = Point(-1, -1);
     _noObjectCount = 0;
 	_centerPosition = center;
 }
 
 /** \brief Track an object using its coordinates
  *
- * \param position CvPoint: Coordinates of the object to track
+ * \param position Point: Coordinates of the object to track
  *
  */
-void ObjectTracker::track(CvPoint position)
+void ObjectTracker::track(Point position)
 {
     if(position.x < 0 || position.y < 0)
     {
-        _objectPosition.x = -1;
-        _objectPosition.y = -1;
+		_objectPosition = Point(-1, -1);
         if(_noObjectCount < _noObjectMaxCount)
         {
             // TODO: Continue tracking
@@ -38,8 +38,8 @@ void ObjectTracker::track(CvPoint position)
     else
     {
         _noObjectCount = 0;
-        _objectPosition.x = (position.x - _centerPosition.x) * -1;
-		_objectPosition.y = (position.y - _centerPosition.y) * -1;
+
+		_objectPosition = (position - _centerPosition) * -1;
 		// TODO: pixel -> angle (max horizontal angle / max width)
         // TODO Start tracking with object position
     }

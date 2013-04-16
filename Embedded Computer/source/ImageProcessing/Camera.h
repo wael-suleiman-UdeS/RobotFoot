@@ -21,8 +21,8 @@ public:
 	bool initialize(XmlParser& config);
 	bool initialize(int deviceIndex);
 	void captureFrame();
-	const cv::Mat& getFrame(ColorSpace colorSpace) const;
-	CvPoint getCenter();
+	cv::Mat& getFrame(ColorSpace colorSpace);
+	cv::Point getCenter();
 
 private:
 	cv::Mat _bgrFrame; /**< BGR frame captured from the camera */

@@ -6,6 +6,7 @@ using cv::Mat;
 using cv::vector;
 using cv::Vec3f;
 using cv::Scalar;
+using cv::Point;
 
 /** \brief Initialize the circle specifications from the XML configuration
  *
@@ -63,12 +64,12 @@ ColorFinder::ColorFinder(const HSVcolor* color)
  *
  * \param frame const Mat&: Frame in which to find the circle
  * \param spec CircleSpec: Specifications of the circle to find
- * \return CvPoint: Position of the first found circle
+ * \return Point: Position of the first found circle
  *
  */
-CvPoint ColorFinder::getCirclePosition(const Mat& frame, CircleSpec spec)
+Point ColorFinder::getCirclePosition(const Mat& frame, CircleSpec spec)
 {
-	CvPoint circlePosition = {-1, -1};
+	Point circlePosition = Point(-1, -1);
 
 	if (frame.empty()) { return circlePosition; }
 
@@ -85,8 +86,7 @@ CvPoint ColorFinder::getCirclePosition(const Mat& frame, CircleSpec spec)
 
 	if (circles.size())
 	{
-		circlePosition.x = circles[0][0];
-		circlePosition.y = circles[0][1];
+		circlePosition = Point(circles[0][0], circles[0][1]);
 	}
 
 	return circlePosition;

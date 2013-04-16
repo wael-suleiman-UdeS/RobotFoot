@@ -10,7 +10,7 @@ void testTracking(bool debug)
 
 	if (!Camera::getInstance().initialize(config)) {return;}
 
-	CvPoint ballPosition;
+	cv::Point ballPosition;
 	HSVcolor color(config, "red");
 	CircleSpec circle(config, "red");
 	ColorFinder finder(&color);
@@ -32,6 +32,10 @@ void testTracking(bool debug)
 
 		if (debug)
 		{
+			if (ballPosition.x > -1 && ballPosition.y > -1);
+			cv::Scalar circleColor = cvScalar(255, 0, 0);
+			cv::circle(Camera::getInstance().getFrame(Camera::ColorSpace::BGR), ballPosition, 5, circleColor);
+
 			cv::imshow("BGR", Camera::getInstance().getFrame(Camera::ColorSpace::BGR));
 			cv::imshow("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
 		}

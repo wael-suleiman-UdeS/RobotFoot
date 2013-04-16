@@ -3,6 +3,7 @@
 using boost::filesystem::path;
 using cv::VideoCapture;
 using cv::Mat;
+using cv::Point;
 
 /** \brief Retrieve the instance of the Camera instance
  *
@@ -57,7 +58,7 @@ void Camera::captureFrame()
  * \return const Mat&: Retrieved frame
  *
  */
-const Mat& Camera::getFrame(Camera::ColorSpace colorSpace) const
+Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
 {
 	switch (colorSpace)
 	{
@@ -71,16 +72,16 @@ const Mat& Camera::getFrame(Camera::ColorSpace colorSpace) const
 
 /** \brief Retrieve the coordinates of the center of the frame captured by the camera
  *
- * \return CvPoint: Coordinates of the center of the camera image
+ * \return Point: Coordinates of the center of the camera image
  *
  */
-CvPoint Camera::getCenter()
+Point Camera::getCenter()
 {
-	CvPoint center = {-1, -1};
+	Point center = Point(-1, -1);
 	if (!_capture.isOpened()) { return center; }
 
-	center.x = _capture.get(CV_CAP_PROP_FRAME_WIDTH);
-	center.y = _capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+	center = Point(_capture.get(CV_CAP_PROP_FRAME_WIDTH), _capture.get(CV_CAP_PROP_FRAME_HEIGHT));
+
 	return center;
 }
 

@@ -12,14 +12,14 @@
 class ObjectTracker
 {
 public:
-	ObjectTracker(CvPoint center);
+	ObjectTracker(cv::Point center);
 	~ObjectTracker() {}
 
-	void track(CvPoint position);
+	void track(cv::Point position);
 
 private:
-	CvPoint _centerPosition;
-	CvPoint _objectPosition;
+	cv::Point _centerPosition;
+	cv::Point _objectPosition;
 	int _noObjectCount;
     static const int _noObjectMaxCount = 15;
 
