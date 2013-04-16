@@ -18,9 +18,25 @@ class Logger
       static Logger& getInstance();
 
       void addStream(std::ostream& stream);
-
+	  
+	  /** \brief Stream an object to each output stream in the stream list
+	  *
+	  * \param stream ostream&: Output stream to add
+	  * \return Logger&: 
+	  *
+	  */
       template <typename T>
-      Logger &operator<<(const T& object);
+      Logger &operator<<(const T& object)
+	  {
+		  for(auto stream = _streams.begin(); stream != _streams.end(); ++stream)
+		  {
+			  if (_timeStamp) { **stream << timeStamp() << ": "; }
+			  **stream << object;
+		  }
+		  _timeStamp = false;
+		  return *this;
+	  }
+
       Logger &operator<<(std::ostream& (*endlPtr)(std::ostream&));
 
    private:

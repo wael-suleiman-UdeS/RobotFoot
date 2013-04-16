@@ -60,6 +60,9 @@
     <ClInclude Include="Utilities\XmlParser.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\USBInterface.h">
+      <Filter>Fichiers d%27en-tête\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RobotFoot.cpp">
@@ -84,6 +87,9 @@
       <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\logger.cpp">
+      <Filter>Fichiers sources\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\USBInterface.cpp">
       <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
   </ItemGroup>

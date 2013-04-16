@@ -55,7 +55,7 @@ void Camera::captureFrame()
 /** \brief Retrieve the captured frame in a specified color space
  *
  * \param colorSpace ColorSpace: Color space of the frame to get
- * \return const Mat&: Retrieved frame
+ * \return Mat&: Retrieved frame
  *
  */
 Mat& Camera::getFrame(Camera::ColorSpace colorSpace)

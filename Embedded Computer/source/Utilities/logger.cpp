@@ -24,25 +24,6 @@ void Logger::addStream(ostream& stream)
     _streams.push_front(&stream);
 }
 
-/** \brief Stream an object to each output stream in the stream list
- *
- * \param stream ostream&: Output stream to add
- * \return Logger&: 
- *
- */
-template <typename T>
-Logger& Logger::operator<<(const T& object)
-{
-    for(std::ostream stream = _streams.begin(); stream != _streams.end(); ++stream)
-    {
-		if (_timeStamp) { **stream << timestamp() << ": "; }
-
-        **stream << object;
-    }
-    _timeStamp = false;
-    return *this;
-}
-
 Logger& Logger::operator<<(ostream& (*endlPtr)(std::ostream&))
 {
     for(auto stream = _streams.begin(); stream != _streams.end(); ++stream)

@@ -4,11 +4,13 @@ using cv::Point;
 
 /** \brief Constructor
  *
+ * \param serial USBInterface*: Serial Interface for communication with the control board
  * \param center Point: Center of the camera used for calibration
  *
  */
-ObjectTracker::ObjectTracker(Point center)
+ObjectTracker::ObjectTracker(USBInterface* serial, Point center)
 {
+	_serial = serial;
 	_objectPosition = Point(-1, -1);
     _noObjectCount = 0;
 	_centerPosition = center;
@@ -28,11 +30,19 @@ void ObjectTracker::track(Point position)
         {
             // TODO: Continue tracking
             _noObjectCount++;
+
+			std::stringstream ss;
+			ss <<  "continue tracking";
+			_serial->write(ss.str().c_str());
         }
         else
         {
             // TODO: Stop tracking
 			// TODO: Search ball
+
+			std::stringstream ss;
+			ss <<  "stop tracking";
+			_serial->write(ss.str().c_str());
         }
     }
     else
@@ -42,5 +52,9 @@ void ObjectTracker::track(Point position)
 		_objectPosition = (position - _centerPosition) * -1;
 		// TODO: pixel -> angle (max horizontal angle / max width)
         // TODO Start tracking with object position
+
+		std::stringstream ss;
+		ss <<  "X: " << _objectPosition.x << ", Y: " << _objectPosition.y;
+		_serial->write(ss.str().c_str());
     }
 }

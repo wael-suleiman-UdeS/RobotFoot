@@ -2,6 +2,7 @@
 #define OBJECTTRACKER_H
 
 #include <opencv\cvaux.h>
+#include "..\Utilities\USBInterface.h"
 
 /** @addtogroup Image Processing
  * @{
@@ -12,12 +13,13 @@
 class ObjectTracker
 {
 public:
-	ObjectTracker(cv::Point center);
+	ObjectTracker(USBInterface* serial, cv::Point center);
 	~ObjectTracker() {}
 
 	void track(cv::Point position);
 
 private:
+	USBInterface* _serial;
 	cv::Point _centerPosition;
 	cv::Point _objectPosition;
 	int _noObjectCount;
