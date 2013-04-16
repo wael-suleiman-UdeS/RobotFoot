@@ -68,7 +68,7 @@ LinuxCM730 linux_cm730("/dev/ttyUSB0");
 
 }
 
-WalkStatus::WalkStatus()
+WalkStatus::WalkStatus() : _tf(TF)
 {
   initQ();
   initD();
@@ -77,7 +77,7 @@ WalkStatus::WalkStatus()
   initRot();
   
   initPePdTeTd();
-  initAllTrajParam(); 
+  initAllTrajParam(XF, ZMAX); 
 #ifdef DARWINTEST
   
   if(cm730.Connect() == false)
@@ -157,6 +157,20 @@ WalkStatus::WalkStatus()
 
   
 #endif
+}
+
+WalkStatus::WalkStatus( const double tf )
+{
+  _tf = tf;
+  initQ();
+  initD();
+  initDH();
+  
+  initRot();
+  
+  initPePdTeTd();
+  initAllTrajParam(XF, ZMAX); 
+  
 }
 
 
@@ -355,12 +369,24 @@ void WalkStatus::generateJacobian( Eigen::MatrixXd& J1, Eigen::MatrixXd& J2 )
 
 void WalkStatus::Process( const double time )
 {
+  std::vector<double> vec;
+  Process( time, vec, false );
+}
+
+void WalkStatus::Process( const double time,
+		          const std::vector<double>& pos,
+		          bool isPosValid/* = true*/ )
+{
   const double k1(0.9), k2(0.001);
   Eigen::Vector3d ePos, eTheta;
   Eigen::MatrixXd J1(3,6), J2(3,6), J1inv(3,6), J2inv(3,6);
   
   // Read actual Servormotor position (update q())
   UpdateServoPosition();
+  if( isPosValid )
+  {
+    UpdateQWithVector( pos );
+  } 
 
   // Update DH
   updateDH();
@@ -438,9 +464,9 @@ void WalkStatus::Process( const double time )
             << "Te" << std::endl
             << Te << std::endl << std::endl;
 	    */
-  
+	    
 #ifdef LOGGING
-  LogToFile( q );
+  LogToFile( "log.txt", q );
 #endif
   
 }
@@ -571,16 +597,16 @@ void WalkStatus::updatePeTe()
   Te(2) = q(0);
 }
 
-void WalkStatus::initAllTrajParam()
+void WalkStatus::initAllTrajParam( const double Xf, const double zMax )
 {
  // TODO: change with object parameter.
   double xi(Pe(0)),yi(Pe(1)),zi(Pe(2));
-  double xf(XF),yf(0.0),zf(Pe(2));
+  double xf(Xf),yf(0.0),zf(Pe(2));
   
-  calculateTrajParam( xTrajParam, xi, xf, TF );
-  calculateTrajParam( yTrajParam, yi, yf, TF );
-  calculateTrajParam( zTrajParam1, zi, zf + ZMAX, TF/2 );
-  calculateTrajParam( zTrajParam2, zf + ZMAX, zf, TF/2 );
+  calculateTrajParam( xTrajParam, xi, xf, _tf );
+  calculateTrajParam( yTrajParam, yi, yf, _tf );
+  calculateTrajParam( zTrajParam1, zi, zf + zMax, _tf/2 );
+  calculateTrajParam( zTrajParam2, zf + zMax, zf, _tf/2 );
 }
 
 void WalkStatus::calculateTrajParam( double trajParam[4], double xi, double xf, double tf )
@@ -593,9 +619,9 @@ void WalkStatus::calculateTrajParam( double trajParam[4], double xi, double xf, 
 
 void WalkStatus::UpdatePd( double time )
 {
-  if( time > TF )
+  if( time > _tf )
   {
-     time = TF;
+     time = _tf;
   }
   double time2 = time*time;
   double time3 = time2*time;
@@ -605,13 +631,13 @@ void WalkStatus::UpdatePd( double time )
   // Y
   Pd(1) = yTrajParam[0]*time3 + yTrajParam[1]*time2 + yTrajParam[2]*time + yTrajParam[3];
   // Z
-  if( time <= TF/2 )
+  if( time <= _tf/2 )
   {
      Pd(2) = zTrajParam1[0]*time3 + zTrajParam1[1]*time2 + zTrajParam1[2]*time + zTrajParam1[3];
   }
   else
   {
-     time = time - TF/2;
+     time = time - _tf/2;
      time2 = time*time;
      time3 = time2*time;
      Pd(2) = zTrajParam2[0]*time3 + zTrajParam2[1]*time2 + zTrajParam2[2]*time + zTrajParam2[3];
@@ -755,6 +781,19 @@ void WalkStatus::initMotorValue()
   }
 }
 
+void WalkStatus::getMotorPosition( std::vector<double>& pos )
+{
+  pos.clear();
+  
+  for( int i = 0; i < DDL_NUMBER; i ++ )
+  {
+    if( i == 4 )
+      pos.push_back( RadianToDegree( -q(0,i) ) );
+    else
+      pos.push_back( RadianToDegree( q(0,i) ) );
+  }
+}
+
 double WalkStatus::RadianToDegree( const double radian )
 {
   return radian*180.0/PI;
@@ -765,31 +804,53 @@ double WalkStatus::DegreeToRadian( const double degree )
   return degree*PI/180.0;
 }
 
-void WalkStatus::LogToFile( const Eigen::MatrixXd& q )
-{
+void WalkStatus::LogToFile( const std::string fileName,
+			     const Eigen::MatrixXd& q )
+  {
   const static Eigen::MatrixXd leftMotor = -q;
   static bool isFirstRun = true;
   std::ofstream outfile;
   if(isFirstRun) 
   { 
      isFirstRun = false;
-     outfile.open("log.txt");     
+     outfile.open(fileName.c_str());     
   }
   else
   {
-     outfile.open("log.txt", std::fstream::app);
+     outfile.open(fileName.c_str(), std::fstream::app);
   }/*
   std::cout << std::endl << "Time : " << time << std::endl << "Pd : " << Pd 
             << std::endl <<"Pe : " << Pe << std::endl <<"ePos :  " << ePos << std::endl;*/
   for( int i = 0; i < DDL_NUMBER; i ++ )
   {
-     outfile << RadianToDegree(q(0,i)) << ' ';
+    if( i == 4 )
+     outfile << -RadianToDegree(q(0,i)) << ' ';
+    else
+      outfile << RadianToDegree(q(0,i)) << ' ';
   }
   for( int i = 0; i < DDL_NUMBER; i ++ )
   {
-     outfile << RadianToDegree(leftMotor(0,i)) << ' ';
+    if( i == 4 )
+     outfile << -RadianToDegree(leftMotor(0,i)) << ' ';
+    else
+      outfile << RadianToDegree(leftMotor(0,i)) << ' ';
   }
   outfile << std::endl;
   
   outfile.close();
+}
+
+void WalkStatus::UpdateQWithVector( const std::vector<double>& pos )
+{
+  const int vectorSize = pos.size();
+  for( int i = 0; i < DDL_NUMBER; i ++ )
+  {
+    if( i < vectorSize )
+    {
+      if( i == 4 )
+        q(0,i) = -DegreeToRadian( pos[i] );
+      else
+        q(0,i) = DegreeToRadian( pos[i] );
+    }     
+  }
 }

@@ -14,6 +14,7 @@
 #define _WALK_STATUS_H_
 
 #include "Eigen/Dense"
+#include <vector>
 
 /*! \class WalkStatus
    * \brief Classe qui calcul le deplacement de la jambe.
@@ -30,6 +31,7 @@ public:
      *  Constructeur de la classe WalkStatus.
      */
   WalkStatus();
+  WalkStatus(const double tfinit);
   /*!
      *  \brief Destructeur
      *
@@ -78,6 +80,17 @@ public:
   void printTrajParam();  
   
   /*!
+     *  \brief Process overload
+     *
+     *  Apelle Process( const double time,
+     *		        const std::vector<double>& pos,
+     *		        bool isPosValid );
+     *
+     *  \param time : Le temps ou le deplacement est rendu.
+     *
+     */
+  void Process( const double time );
+  /*!
      *  \brief Iteration de calcul du deplacement de la jambe.
      *
      *  Cette fonction verifie la position des moteurs et determine
@@ -88,8 +101,13 @@ public:
      *  et puis on l'envoie.
      *
      *  \param time : Le temps ou le deplacement est rendu.
+     *  \param pos : Position des motors lue
+     *  \param isPosValid : Use the pos vector only is this is true
+     *
      */
-  void Process( const double time );
+  void Process( const double time,
+		 const std::vector<double>& pos,
+		 bool isPosValid = true );
 
   /*!
      *  \brief Envoie la commandede position au moteur.
@@ -120,6 +138,16 @@ public:
      *  
      */
   void initMotorValue();
+  
+  void getMotorPosition( std::vector<double>& pos );
+  
+  /*!
+     *  \brief Initialise les parametres de la trajectoire cubique du pied
+     *
+     *  Initialise les parametres de la trajectoire cubique du pied
+     *  
+     */
+  void initAllTrajParam( const double Xf, const double zMax );
 
 private:
 
@@ -213,14 +241,6 @@ private:
      *  
      */
   void updatePeTe();
-  
-  /*!
-     *  \brief Initialise les parametres de la trajectoire cubique du pied
-     *
-     *  Initialise les parametres de la trajectoire cubique du pied
-     *  
-     */
-  void initAllTrajParam();
 
   /*!
      *  \brief Calcule la trajectoire cubique
@@ -254,6 +274,7 @@ private:
      *  \param radian : Angle a convertir de radian vers degre
      */
   double RadianToDegree( const double radian );
+  
   /*!
      *  \brief Converti un angle de degres vers radians
      *
@@ -262,6 +283,23 @@ private:
      *  \param degree : Angle a convertir de degres vers radians 
      */
   double DegreeToRadian( const double degree );
+  
+    /*!
+     *  \brief Enregistre les angles des moteurs dans un fichier texte
+     *
+     *  Enregistre les angles des moteurs dans un fichier texte en degre
+     *  dans un format definie
+     * 
+     *  \param q : Angles a enregistrer 
+     */
+  void LogToFile( const std::string fileName, const Eigen::MatrixXd& q );
+  
+  /*!
+     *  \brief Update q matrix with motor position read from external function
+     * 
+     *  \param pos : Position read from motor
+     */
+  void UpdateQWithVector( const std::vector<double>& pos );
   
   Eigen::MatrixXd DH;
   Eigen::MatrixXd q;
@@ -274,6 +312,8 @@ private:
   double yTrajParam[4];
   double zTrajParam1[4];
   double zTrajParam2[4];
+  
+  double _tf;
 };
 
 #endif //_WALK_STATUS_H_
