@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 		mc.setTorque(0x01, STM32F4::TorqueOn);
 		mc.setMotor(0x01, 100);
 
-		testTracking(true, mc);
+		testTracking((argc > 2 && argv[2] == "true"), mc);
 	}
 	catch (std::exception& e)
     {

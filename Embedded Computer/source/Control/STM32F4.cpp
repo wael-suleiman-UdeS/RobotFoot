@@ -1,4 +1,5 @@
 #include "STM32F4.h"
+#include <boost/ref.hpp>
 
 using std::string;
 using boost::asio::io_service;
