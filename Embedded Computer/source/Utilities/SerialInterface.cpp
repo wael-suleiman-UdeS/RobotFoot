@@ -1,9 +1,9 @@
 #include <ostream>
 #include <boost/regex.hpp>
 
-#include "USBInterface.h"
+#include "SerialInterface.h"
 
-USBInterface::USBInterface(boost::asio::io_service &io_service,
+SerialInterface::SerialInterface(boost::asio::io_service &io_service,
                            const std::string &port_name,
                            unsigned int baud)
 : _io_service(io_service),
@@ -19,35 +19,37 @@ USBInterface::USBInterface(boost::asio::io_service &io_service,
     _serialPort.set_option(baud_option);
 }
 
-USBInterface::~USBInterface()
+SerialInterface::~SerialInterface()
 {
     _serialPort.cancel();
     _serialPort.close();
 }
 
-void USBInterface::write(const char *command)
+void SerialInterface::write(std::vector<char> command)
 {
     boost::asio::streambuf streamBuffer;
     std::ostream os(&streamBuffer);
-    os << command << "\r\n";
-    
+    os.write(command.data(), command.size());
+    os << "\r\n";
+
     boost::asio::write(_serialPort, streamBuffer);
 }
 
-const char *USBInterface::read_sync(const char *command)
+std::vector<char> SerialInterface::read_sync(std::vector<char> command)
 {
     boost::asio::streambuf streamBuffer;
     std::ostream os(&streamBuffer);
-    os << command << "\r\n";
+    os.write(command.data(), command.size());
+    os << "\r\n";
     boost::asio::write(_serialPort, streamBuffer);
 
-    boost::asio::streambuf readBuffer;
-    boost::asio::read_until(_serialPort, readBuffer, "\r\n");
+    streamBuffer.consume(streamBuffer.size());
+    boost::asio::read_until(_serialPort, streamBuffer, "\r\n");
 
-    return boost::asio::buffer_cast<const char*>(readBuffer.data()); 
+    return std::vector(streamBuffer.data());
 }
 
-void USBInterface::read_asyc(const char *command)
+void SerialInterface::read_asyc(std::vector<char> command)
 {
     // TODO
 }
