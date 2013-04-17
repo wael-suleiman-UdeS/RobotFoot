@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <boost/asio.hpp>
 
-#include "../Utilities/USBInterface.h"
+#include "../Utilities/SerialInterface.h"
 
 class STM32F4
 {
@@ -21,7 +21,7 @@ public:
 	void read();
 
 private:
-	USBInterface _usb;
+	SerialInterface _usb;
 };
 
 #endif // STM32F4_H

@@ -7,7 +7,7 @@
 #include "ImageProcessing/ObjectTracker.h"
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
-#include "Utilities/USBInterface.h"
+#include "Utilities/SerialInterface.h"
 #include "Control/STM32F4.h"
 
 void testTracking(bool debug, STM32F4& mc)
@@ -54,6 +54,8 @@ void testTracking(bool debug, STM32F4& mc)
 		ballPosition = finder.getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV),
 			circle);
 
+		Logger::getInstance() << "Ball position: " << ballPosition.x << ", " << ballPosition.y << std::endl;
+
 		if (debug)
 		{
 			if (ballPosition.x > -1 && ballPosition.y > -1)
@@ -82,7 +84,10 @@ int main(int argc, char* argv[])
 		STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), io);
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
 
-		testTracking(true, mc);
+		mc.setTorque('\xfd', STM32F4::TorqueOn);
+		mc.setMotor('\xfd', 100);
+
+		testTracking((argc > 2 && argv[2] == "true"), mc);
 	}
 	catch (std::exception& e)
     {

@@ -2,7 +2,7 @@
 #define XMLPARSER_H
 
 #include <string>
-#include <boost\filesystem.hpp>
+#include <boost/filesystem.hpp>
 #include "pugixml.h"
 
 using std::string;
