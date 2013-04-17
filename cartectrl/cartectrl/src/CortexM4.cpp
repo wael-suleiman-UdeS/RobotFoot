@@ -76,12 +76,25 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
             {
                 uint16_t pos = data[2];
                 pos = pos << 8;
-                pos ^= data[3];
+                pos |= data[3];
                 _herkulex.positionControl(data[1], pos, 70, 0x00);
             }
             break;
         case CMD_MOTOR_READ_POS:
-            // TODO : Unimplemented
+            if( n >= 2 ) //TODO : Should be == instead
+            {
+                uint16_t pos = _herkulex.getPos( data[1] );
+
+                uint32_t msgSize = 4;
+                uint8_t msg[msgSize];
+
+                msg[0] = CMD_MOTOR_READ_POS;
+                msg[1] = data[1];
+                msg[2] = pos >> 8;
+                msg[3] = pos;
+
+                CortexM4::write( msg, msgSize );
+            }
             break;
         case CMD_MOTOR_SET_TORQUE:
             if( n >= 2 ) //TODO : Should be == instead
