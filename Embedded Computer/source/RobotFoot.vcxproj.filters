@@ -34,6 +34,12 @@
     <Filter Include="Fichiers de ressources\Config">
       <UniqueIdentifier>{bd3fe53d-4ec8-49de-9ac1-664f3779352b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\Control">
+      <UniqueIdentifier>{89e1fc7a-b808-4b91-be16-4270ca0d15f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\Control">
+      <UniqueIdentifier>{fb98327b-3411-4ada-b5fa-ae34ab2e9d79}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utilities\logger.h">
@@ -48,9 +54,6 @@
     <ClInclude Include="ImageProcessing\Camera.h">
       <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="ImageProcessing\ObjectTracker.h">
-      <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
-    </ClInclude>
     <ClInclude Include="Utilities\pugiconfig.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
@@ -62,6 +65,12 @@
     </ClInclude>
     <ClInclude Include="Utilities\USBInterface.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageProcessing\ObjectTracker.h">
+      <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\STM32F4.h">
+      <Filter>Fichiers d%27en-tête\Control</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -77,9 +86,6 @@
     <ClCompile Include="ImageProcessing\Camera.cpp">
       <Filter>Fichiers sources\ImageProcessing</Filter>
     </ClCompile>
-    <ClCompile Include="ImageProcessing\ObjectTracker.cpp">
-      <Filter>Fichiers sources\ImageProcessing</Filter>
-    </ClCompile>
     <ClCompile Include="Utilities\pugixml.cpp">
       <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
@@ -91,6 +97,12 @@
     </ClCompile>
     <ClCompile Include="Utilities\USBInterface.cpp">
       <Filter>Fichiers sources\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProcessing\ObjectTracker.cpp">
+      <Filter>Fichiers sources\ImageProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\STM32F4.cpp">
+      <Filter>Fichiers sources\Control</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

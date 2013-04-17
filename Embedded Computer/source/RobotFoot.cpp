@@ -1,15 +1,16 @@
 #include <iostream>
-#include <boost\asio.hpp>
-#include <boost\thread.hpp>
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
-#include "ImageProcessing\Camera.h"
-#include "ImageProcessing\ColorFinder.h"
-#include "ImageProcessing\ObjectTracker.h"
-#include "Utilities\XmlParser.h"
-#include "Utilities\logger.h"
-#include "Utilities\USBInterface.h"
+#include "ImageProcessing/Camera.h"
+#include "ImageProcessing/ColorFinder.h"
+#include "ImageProcessing/ObjectTracker.h"
+#include "Utilities/XmlParser.h"
+#include "Utilities/logger.h"
+#include "Utilities/USBInterface.h"
+#include "Control/STM32F4.h"
 
-void testTracking(bool debug, USBInterface& usb)
+void testTracking(bool debug, STM32F4& mc)
 {
 	Logger::getInstance().addStream(std::cout);
 	Logger::getInstance() << "Initializing USB interface..." << std::endl;
@@ -37,7 +38,7 @@ void testTracking(bool debug, USBInterface& usb)
 	HSVcolor color(config, "red");
 	CircleSpec circle(config, "red");
 	ColorFinder finder(&color);
-	ObjectTracker tracker(&usb, Camera::getInstance().getCenter());
+	ObjectTracker tracker(&mc, Camera::getInstance().getCenter());
 
 	if (debug)
 	{
@@ -75,9 +76,21 @@ void testTracking(bool debug, USBInterface& usb)
 
 int main(int argc, char* argv[])
 {
+	try
+	{
+		boost::asio::io_service io;
+		STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), io);
+		boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
+
+		testTracking(true, mc);
+	}
+	catch (std::exception& e)
+    {
+        std::cerr << "Exception :" << e.what() << std::endl;
+    }
 	// Initialize USB
 	// TODO: handle USB exception
-	try
+	/*try
 	{
 		boost::asio::io_service io_service;
 		USBInterface usb(io_service, argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), 115200);
@@ -88,7 +101,7 @@ int main(int argc, char* argv[])
     catch (std::exception& e)
     {
         std::cerr << "Exception :" << e.what() << std::endl;
-    }
+    }*/
 
 	return 0;
 }

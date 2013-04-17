@@ -1,8 +1,8 @@
 #ifndef OBJECTTRACKER_H
 #define OBJECTTRACKER_H
 
-#include <opencv\cvaux.h>
-#include "..\Utilities\USBInterface.h"
+#include <opencv/cvaux.h>
+#include "../Control/STM32F4.h"
 
 /** @addtogroup Image Processing
  * @{
@@ -13,13 +13,13 @@
 class ObjectTracker
 {
 public:
-	ObjectTracker(USBInterface* serial, cv::Point center);
+	ObjectTracker(STM32F4* controller, cv::Point center);
 	~ObjectTracker() {}
 
 	void track(cv::Point position);
 
 private:
-	USBInterface* _serial;
+	STM32F4* _controller;
 	cv::Point _centerPosition;
 	cv::Point _objectPosition;
 	int _noObjectCount;
@@ -28,4 +28,4 @@ private:
 	ObjectTracker() {}
 };
 
-#endif // IMAGEPROCESSING_H
+#endif // OBJECTTRACKER_H

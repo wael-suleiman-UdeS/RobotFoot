@@ -5,7 +5,7 @@ using cv::VideoCapture;
 using cv::Mat;
 using cv::Point;
 
-/** \brief Retrieve the instance of the Camera instance
+/** \brief Retrieve the instance of the Camera
  *
  * \return Camera&: Instance of the Camera object
  *
