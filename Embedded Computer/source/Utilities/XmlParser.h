@@ -31,6 +31,12 @@ namespace XmlPath
 	extern const fs::path Color;
 	extern const fs::path HSVcolor;
 	extern const fs::path CircleSpec;
+
+	extern const fs::path Motion;
+	extern const fs::path Motors;
+	extern const fs::path Head;
+	extern const fs::path HorizontalHead;
+	extern const fs::path VerticalHead;
 }
 
 /** @brief Class for XML parsing

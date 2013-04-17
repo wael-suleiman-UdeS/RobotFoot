@@ -16,6 +16,12 @@ namespace XmlPath
 	const path Color = "Color";
 	const path HSVcolor = "HSVcolor";
 	const path CircleSpec = "CircleSpec";
+
+	const path Motion = "Motion";
+	const path Motors = "Motors";
+	const path Head = "Head";
+	const path HorizontalHead = "HorizontalHead";
+	const path VerticalHead = "VerticalHead";
 }
 
 /** \brief Load an XML file for subsequent parsing operations

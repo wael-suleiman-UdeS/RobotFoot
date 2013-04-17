@@ -25,4 +25,12 @@
       </Color>
     </Colors>
   </ImageProcessing>
+  <Motion>
+    <Motors>
+      <Head>
+        <HorizontalHead value="1" />
+        <VerticalHead value="2" />
+      </Head>
+    </Motors>
+  </Motion>
 </RobotFoot>

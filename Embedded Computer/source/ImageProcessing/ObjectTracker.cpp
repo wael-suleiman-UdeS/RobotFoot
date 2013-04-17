@@ -1,4 +1,5 @@
 #include "ObjectTracker.h"
+#include "../Control/STM32F4.h"
 
 using cv::Point;
 
@@ -8,9 +9,9 @@ using cv::Point;
  * \param center Point: Center of the camera used for calibration
  *
  */
-ObjectTracker::ObjectTracker(USBInterface* serial, Point center)
+ObjectTracker::ObjectTracker(STM32F4* controller, Point center)
 {
-	_serial = serial;
+	_controller = controller;
 	_objectPosition = Point(-1, -1);
     _noObjectCount = 0;
 	_centerPosition = center;
@@ -33,16 +34,13 @@ void ObjectTracker::track(Point position)
 
 			std::stringstream ss;
 			ss <<  "continue tracking";
-			_serial->write(ss.str().c_str());
+			_controller->setMotor(0xFD, 300); // 
+			//_controller->setMotor(2, "todo"); // tilt = 14, pan = 13
         }
         else
         {
             // TODO: Stop tracking
 			// TODO: Search ball
-
-			std::stringstream ss;
-			ss <<  "stop tracking";
-			_serial->write(ss.str().c_str());
         }
     }
     else
@@ -53,8 +51,6 @@ void ObjectTracker::track(Point position)
 		// TODO: pixel -> angle (max horizontal angle / max width)
         // TODO Start tracking with object position
 
-		std::stringstream ss;
-		ss <<  "X: " << _objectPosition.x << ", Y: " << _objectPosition.y;
-		_serial->write(ss.str().c_str());
+		_controller->setMotor(0xFD, 25);
     }
 }
