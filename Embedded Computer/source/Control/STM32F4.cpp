@@ -20,6 +20,7 @@ void STM32F4::setMotor(uint8_t id, uint16_t value)
 {
 	std::vector<char> msg;
 
+	msg.push_back('\x01');
 	msg.push_back(id);
 	msg.push_back(value >> 8);
 	msg.push_back(value);
@@ -31,6 +32,7 @@ void STM32F4::setTorque(uint8_t id, TorqueState state)
 {
 	std::vector<char> msg;
 
+	msg.push_back('\x03');
 	msg.push_back(id);
 	msg.push_back(state);
 
