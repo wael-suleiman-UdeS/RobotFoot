@@ -6,7 +6,6 @@
 *.exe
 
 # Compiled Dynamic libraries
-*.so
 *.dylib
 
 # Compiled Static libraries
