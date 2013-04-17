@@ -7,7 +7,7 @@
 #include "ImageProcessing/ObjectTracker.h"
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
-#include "Utilities/USBInterface.h"
+#include "Utilities/SerialInterface.h"
 #include "Control/STM32F4.h"
 
 void testTracking(bool debug, STM32F4& mc)

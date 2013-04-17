@@ -46,7 +46,9 @@ std::vector<char> SerialInterface::read_sync(std::vector<char> command)
     streamBuffer.consume(streamBuffer.size());
     boost::asio::read_until(_serialPort, streamBuffer, "\r\n");
 
-    return std::vector(streamBuffer.data());
+	//std::vector<char>(streamBuffer.data(), streamBuffer.data() 
+	const char* start_ptr = boost::asio::buffer_cast<const char*>(streamBuffer.data());
+	return std::vector<char>(start_ptr, start_ptr + streamBuffer.size());
 }
 
 void SerialInterface::read_asyc(std::vector<char> command)

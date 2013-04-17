@@ -1,5 +1,4 @@
 #include "ObjectTracker.h"
-#include "../Control/STM32F4.h"
 
 using cv::Point;
 
