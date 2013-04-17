@@ -63,14 +63,14 @@
     <ClInclude Include="Utilities\XmlParser.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\USBInterface.h">
-      <Filter>Fichiers d%27en-tête\Utilities</Filter>
-    </ClInclude>
     <ClInclude Include="ImageProcessing\ObjectTracker.h">
       <Filter>Fichiers d%27en-tête\ImageProcessing</Filter>
     </ClInclude>
     <ClInclude Include="Control\STM32F4.h">
       <Filter>Fichiers d%27en-tête\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\SerialInterface.h">
+      <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -95,14 +95,14 @@
     <ClCompile Include="Utilities\logger.cpp">
       <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\USBInterface.cpp">
-      <Filter>Fichiers sources\Utilities</Filter>
-    </ClCompile>
     <ClCompile Include="ImageProcessing\ObjectTracker.cpp">
       <Filter>Fichiers sources\ImageProcessing</Filter>
     </ClCompile>
     <ClCompile Include="Control\STM32F4.cpp">
       <Filter>Fichiers sources\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\SerialInterface.cpp">
+      <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

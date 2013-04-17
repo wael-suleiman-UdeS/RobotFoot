@@ -1,26 +1,15 @@
-#include "usb_com.h"
+
 #include <stm32f4xx.h>
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_flash.h>
 #include <stm32f4xx_rcc.h>
 #include "initClock.h"
 
-#include "herkulex.h"
+
 #include "Tools.h"
 #include "stm32f4xx_conf.h"
 
-
-
-
-// Maybe not needed anymore?
-void Delay(volatile uint32_t nCount)
-{
-    while(nCount--)
-    {
-    }
-}
-
-#define DELAYELEM 2000000L
+#include "CortexM4.h"
 
 /* This funcion shows how to initialize
  * the GPIO pins on GPIOD and how to configure
@@ -98,14 +87,22 @@ int main(void)
     // initialize the GPIO pins we need
     initClock();
     init_GPIO();
-    usb::init();
+
+/*
+    Herkulex test = Herkulex();
+
+    test.setTorque(0xFD, TORQUE_ON);
+    test.positionControl(0xFD, 900, 70, 0x00);
+*/
 
 
+    CortexM4 cortexM4;
     for(;;)
-    {
+    {/*
         char p[4];
         uint32_t r = usb::read(p);
-        usb::write(p, r);
+        usb::write(p, r);*/
+        cortexM4.read();
     }
 }
 

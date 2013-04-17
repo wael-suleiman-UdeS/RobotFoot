@@ -273,7 +273,7 @@ public:
      * @param rx Receive pin.
      * @param baudRate The serial tx/rx speed.
      */
-    Herkulex(/*PinNameint tx, /*PinNameint rx, uint32_t baudRate*/);
+    Herkulex(/*PinNameint tx, PinNameint rx, uint32_t baudRate*/);
 
     /** Destroy an Herkulex servo object
      */

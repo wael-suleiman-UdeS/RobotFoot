@@ -1,7 +1,7 @@
 #ifndef IMAGEPROCESSING_H
 #define IMAGEPROCESSING_H
 
-#include <opencv\cvaux.h>
+#include <opencv/cvaux.h>
 
 /** @addtogroup Image Processing
  * @{

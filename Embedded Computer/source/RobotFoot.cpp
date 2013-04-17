@@ -7,7 +7,7 @@
 #include "ImageProcessing/ObjectTracker.h"
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
-#include "Utilities/USBInterface.h"
+#include "Utilities/SerialInterface.h"
 #include "Control/STM32F4.h"
 
 void testTracking(bool debug, STM32F4& mc)
@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
 	{
 		boost::asio::io_service io;
 		STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), io);
+		mc.setTorque(0x01, STM32F4::TorqueOn);
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
 
 		testTracking(true, mc);

@@ -1,5 +1,4 @@
 #include "ObjectTracker.h"
-#include "../Control/STM32F4.h"
 
 using cv::Point;
 
@@ -34,13 +33,14 @@ void ObjectTracker::track(Point position)
 
 			std::stringstream ss;
 			ss <<  "continue tracking";
-			_controller->setMotor(0xFD, 300); // 
+			_controller->setMotor(0xFD, 25);
 			//_controller->setMotor(2, "todo"); // tilt = 14, pan = 13
         }
         else
         {
             // TODO: Stop tracking
 			// TODO: Search ball
+			_controller->setMotor(0xFD, 300);
         }
     }
     else

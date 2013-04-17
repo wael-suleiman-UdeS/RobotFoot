@@ -5,17 +5,23 @@
 #include <cstdint>
 #include <boost/asio.hpp>
 
-#include "../Utilities/USBInterface.h"
+#include "../Utilities/SerialInterface.h"
 
 class STM32F4
 {
 public:
+	enum TorqueState { TorqueOff, TorqueOn };
+
 	STM32F4(std::string portName, boost::asio::io_service& io);
 	~STM32F4();
-	void setMotor(std::uint8_t id, std::uint8_t value);
+	void setMotor(std::uint8_t id, std::uint16_t value);
+
+	void setTorque(std::uint8_t id, TorqueState state);
+
+	void read();
 
 private:
-	USBInterface _usb;
+	SerialInterface _usb;
 };
 
 #endif // STM32F4_H
