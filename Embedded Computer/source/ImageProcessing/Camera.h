@@ -1,8 +1,8 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <boost\filesystem.hpp>
-#include <opencv\highgui.h>
+#include <boost/filesystem.hpp>
+#include <opencv/highgui.h>
 #include "ImageProcessing.h"
 #include "../Utilities/XmlParser.h"
 

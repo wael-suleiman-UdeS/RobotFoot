@@ -2,7 +2,7 @@
 #define COLORFINDER_H
 
 #include <cstdint>
-#include <boost\filesystem.hpp>
+#include <boost/filesystem.hpp>
 #include "ImageProcessing.h"
 #include "../Utilities/XmlParser.h"
 
