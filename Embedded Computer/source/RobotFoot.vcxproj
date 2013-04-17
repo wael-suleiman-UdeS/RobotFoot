@@ -87,6 +87,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Control\STM32F4.h" />
     <ClInclude Include="ImageProcessing\Camera.h" />
     <ClInclude Include="ImageProcessing\ColorFinder.h" />
     <ClInclude Include="ImageProcessing\ImageProcessing.h" />
@@ -98,6 +99,7 @@
     <ClInclude Include="Utilities\XmlParser.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Control\STM32F4.cpp" />
     <ClCompile Include="ImageProcessing\Camera.cpp" />
     <ClCompile Include="ImageProcessing\ColorFinder.cpp" />
     <ClCompile Include="ImageProcessing\ImageProcessing.cpp" />
