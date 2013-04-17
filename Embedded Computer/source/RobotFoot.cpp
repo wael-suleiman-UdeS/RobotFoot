@@ -84,8 +84,8 @@ int main(int argc, char* argv[])
 		STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), io);
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
 
-		mc.setTorque(0x01, STM32F4::TorqueOn);
-		mc.setMotor(0x01, 100);
+		mc.setTorque('xfd', STM32F4::TorqueOn);
+		mc.setMotor('xfd', 100);
 
 		testTracking((argc > 2 && argv[2] == "true"), mc);
 	}
