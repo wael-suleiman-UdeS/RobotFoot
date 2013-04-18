@@ -51,16 +51,16 @@ void ObjectTracker::track(Point position)
 			std::stringstream ss;
 			ss <<  "continue tracking";
 
-			_controller->setMotor(_pan, m1 + _horizontal);
-			_controller->setMotor(_tilt, m2 + _vertical);
+			//_controller->setMotor(_pan, m1 + _horizontal);
+			//_controller->setMotor(_tilt, m2 + _vertical);
 			//_controller->setMotor(2, "todo"); // tilt = 14, pan = 13
         }
         else
         {
             // TODO: Stop tracking
 			// TODO: Search ball
-			_controller->setMotor(_pan, m1);
-			_controller->setMotor(_tilt, m2);
+			//_controller->setMotor(_pan, m1);
+			//_controller->setMotor(_tilt, m2);
         }
     }
     else
@@ -71,8 +71,11 @@ void ObjectTracker::track(Point position)
 		// TODO: pixel -> angle (max horizontal angle / max width)
         // TODO Start tracking with object position
 
-		_controller->setMotor(_pan, m1 + _horizontal);
-		_controller->setMotor(_tilt, m2 + _vertical);
+		if (abs(_objectPosition.x) > _threshold)
+		{
+			_controller->setMotor(_pan, m1 + (_horizontal * abs(_objectPosition.x)/_objectPosition.x));
+			_controller->setMotor(_tilt, m2 + (_vertical * abs(_objectPosition.y)/_objectPosition.y));
+		}
     }
 
 }
