@@ -6,13 +6,16 @@ using boost::filesystem::path;
 // todo: remove hack
 void ObjectTracker::initializeHack(const XmlParser& config)
 {
-	path basePath = XmlPath::Root / XmlPath::Motion / XmlPath::Head;
+	path basePath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head;
 
 	_pan = config.getIntValue(basePath / XmlPath::Pan);
 	_tilt = config.getIntValue(basePath / XmlPath::Tilt);
 	_horizontal = config.getIntValue(basePath / XmlPath::HorizontalOffset);
 	_vertical = config.getIntValue(basePath / XmlPath::VerticalOffset);
 	_threshold = config.getIntValue(basePath / XmlPath::Threshold);
+
+	_controller->setTorque(_pan, STM32F4::TorqueOn);
+	_controller->setTorque(_pan, STM32F4::TorqueOn);
 }
 
 /** \brief Constructor
