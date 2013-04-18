@@ -3,6 +3,10 @@
 
 #include <opencv/cvaux.h>
 #include "../Control/STM32F4.h"
+#include "../Utilities/XmlParser.h"
+
+//TODO :crap
+#include <boost/filesystem.hpp>
 
 /** @addtogroup Image Processing
  * @{
@@ -18,14 +22,24 @@ public:
 
 	void track(cv::Point position);
 
+	// TODO: remove hack
+	void initializeHack(const XmlParser& config);
+
 private:
 	STM32F4* _controller;
 	cv::Point _centerPosition;
 	cv::Point _objectPosition;
 	int _noObjectCount;
-    static const int _noObjectMaxCount = 15;
+    static const int _noObjectMaxCount = 3;
 
 	ObjectTracker() {}
+
+	// todo: remove hack
+	std::uint8_t _pan;
+	std::uint8_t _tilt;
+	std::uint8_t _horizontal;
+	std::uint8_t _vertical;
+	int _threshold;
 };
 
 #endif // OBJECTTRACKER_H

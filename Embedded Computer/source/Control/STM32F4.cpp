@@ -4,6 +4,7 @@
 using std::string;
 using boost::asio::io_service;
 
+using std::uint8_t;
 using std::uint16_t;
 
 // portname = argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0")
@@ -40,7 +41,14 @@ void STM32F4::setTorque(uint8_t id, TorqueState state)
 	_usb.write(msg);
 }
 
-void STM32F4::read()
+uint16_t STM32F4::read(uint8_t id)
 {
-	//_usb.read_sync();
+	std::vector<char> msg;
+
+	msg.push_back('\x02');
+	msg.push_back(id);
+
+	msg = _usb.read_sync(msg);
+
+	return ((msg[2] & 0xFF) << 8) | (msg[3] & 0xFF);  
 }

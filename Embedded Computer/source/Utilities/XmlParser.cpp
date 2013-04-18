@@ -20,8 +20,11 @@ namespace XmlPath
 	const path Motion = "Motion";
 	const path Motors = "Motors";
 	const path Head = "Head";
-	const path HorizontalHead = "HorizontalHead";
-	const path VerticalHead = "VerticalHead";
+	const fs::path Pan = "Pan";
+	const fs::path Tilt = "Tilt";
+	const fs::path HorizontalOffset = "HorizontalOffset";
+	const fs::path VerticalOffset = "VerticalOffset";
+	const fs::path Threshold = "Threshold";
 }
 
 /** \brief Load an XML file for subsequent parsing operations
@@ -61,5 +64,10 @@ string XmlParser::getStringValue(path xPath) const
  */
 int XmlParser::getIntValue(path xPath) const
 {
-	return atoi(getStringValue(xPath).c_str());
+	int result = 0;
+	if (1 == std::sscanf(getStringValue(xPath).c_str(), "%i", &result))
+	{
+		// It didn't work!!!
+	}
+	return result;
 }

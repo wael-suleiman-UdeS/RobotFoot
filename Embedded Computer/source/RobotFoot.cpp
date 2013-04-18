@@ -39,6 +39,7 @@ void testTracking(bool debug, STM32F4& mc)
 	CircleSpec circle(config, "red");
 	ColorFinder finder(&color);
 	ObjectTracker tracker(&mc, Camera::getInstance().getCenter());
+	tracker.initializeHack(config); // todo: holy hack
 
 	if (debug)
 	{
