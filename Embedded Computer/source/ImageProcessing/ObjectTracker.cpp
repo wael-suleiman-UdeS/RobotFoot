@@ -74,9 +74,20 @@ void ObjectTracker::track(Point position)
 		// TODO: pixel -> angle (max horizontal angle / max width)
         // TODO Start tracking with object position
 
+		Logger::getInstance() << std::endl << "OBJ POS: " << _objectPosition.x << ", " << _objectPosition.y << std::endl;
+
 		if (abs(_objectPosition.x) > _threshold)
 		{
+			Logger::getInstance() << "m1: " << m1 << std::endl;
+			Logger::getInstance() << "k1: " << (_horizontal * abs(_objectPosition.x)/_objectPosition.x) << std::endl;
+			Logger::getInstance() << "m1+k1: " << m1 + (_horizontal * abs(_objectPosition.x)/_objectPosition.x) << std::endl << std::endl;
 			_controller->setMotor(_pan, m1 + (_horizontal * abs(_objectPosition.x)/_objectPosition.x));
+		}
+		if (abs(_objectPosition.y) > _threshold)
+		{
+			Logger::getInstance() << "m2: " << m2 << std::endl;
+			Logger::getInstance() << "k2: " << (_vertical * abs(_objectPosition.x)/_objectPosition.x) << std::endl;
+			Logger::getInstance() << "m2+k2: " << m2 + (_vertical * abs(_objectPosition.x)/_objectPosition.x) << std::endl << std::endl;
 			_controller->setMotor(_tilt, m2 + (_vertical * abs(_objectPosition.y)/_objectPosition.y));
 		}
     }

@@ -4,6 +4,7 @@
 #include <opencv/cvaux.h>
 #include "../Control/STM32F4.h"
 #include "../Utilities/XmlParser.h"
+#include "../Utilities/logger.h"
 
 //TODO :crap
 #include <boost/filesystem.hpp>
