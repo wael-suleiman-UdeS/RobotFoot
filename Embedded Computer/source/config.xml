@@ -29,13 +29,13 @@
     <Motors>
       <Head>
         <!--crap-->
-        <Pan value="0xFD" />
-        <Tilt value="0xFD" />
+        <Pan value="2" />
+        <Tilt value="1" />
 
-        <HorizontalOffset value="20" />
-        <VerticalOffset value="20" />
+        <HorizontalOffset value="5" />
+        <VerticalOffset value="0" />
       
-        <Threshold value="20" />
+        <Threshold value="80" />
       </Head>
     </Motors>
   </Motion>
