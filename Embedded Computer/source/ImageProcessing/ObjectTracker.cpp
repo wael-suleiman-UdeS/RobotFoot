@@ -14,8 +14,8 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 	_vertical = config.getIntValue(basePath / XmlPath::VerticalOffset);
 	_threshold = config.getIntValue(basePath / XmlPath::Threshold);
 
-	_controller->setTorque(_pan, STM32F4::TorqueOn);
-	_controller->setTorque(_pan, STM32F4::TorqueOn);
+	//_controller->setTorque(_pan, STM32F4::TorqueOn);
+	//_controller->setTorque(_pan, STM32F4::TorqueOn);
 }
 
 /** \brief Constructor
@@ -42,7 +42,6 @@ void ObjectTracker::track(Point position)
 	// TODO: Chiasse au max
 	uint16_t m1 = _controller->read(_pan);
 	uint16_t m2 = _controller->read(_tilt);
-
     if(position.x < 0 || position.y < 0)
     {
 		_objectPosition = Point(-1, -1);
@@ -54,16 +53,16 @@ void ObjectTracker::track(Point position)
 			std::stringstream ss;
 			ss <<  "continue tracking";
 
-			//_controller->setMotor(_pan, m1 + _horizontal);
-			//_controller->setMotor(_tilt, m2 + _vertical);
+			_controller->setMotor(_pan, m1 + _horizontal);
+			_controller->setMotor(_tilt, m2 + _vertical);
 			//_controller->setMotor(2, "todo"); // tilt = 14, pan = 13
         }
         else
         {
             // TODO: Stop tracking
 			// TODO: Search ball
-			//_controller->setMotor(_pan, m1);
-			//_controller->setMotor(_tilt, m2);
+			_controller->setMotor(_pan, m1);
+			_controller->setMotor(_tilt, m2);
         }
     }
     else
@@ -74,21 +73,13 @@ void ObjectTracker::track(Point position)
 		// TODO: pixel -> angle (max horizontal angle / max width)
         // TODO Start tracking with object position
 
-		Logger::getInstance() << std::endl << "CENTER: " << _centerPosition.x << ", " << _centerPosition.y << std::endl;
 		Logger::getInstance() << std::endl << "OBJ POS: " << _objectPosition.x << ", " << _objectPosition.y << std::endl;
 
 		if (abs(_objectPosition.x) > _threshold)
-		{
-			Logger::getInstance() << "m1: " << m1 << std::endl;
-			Logger::getInstance() << "k1: " << (_horizontal * abs(_objectPosition.x)/_objectPosition.x) << std::endl;
-			Logger::getInstance() << "m1+k1: " << m1 + (_horizontal * abs(_objectPosition.x)/_objectPosition.x) << std::endl << std::endl;
-			_controller->setMotor(_pan, m1 + (_horizontal * abs(_objectPosition.x)/_objectPosition.x));
+		{_controller->setMotor(_pan, m1 + (_horizontal * abs(_objectPosition.x)/_objectPosition.x));
 		}
 		if (abs(_objectPosition.y) > _threshold)
 		{
-			Logger::getInstance() << "m2: " << m2 << std::endl;
-			Logger::getInstance() << "k2: " << (_vertical * abs(_objectPosition.x)/_objectPosition.x) << std::endl;
-			Logger::getInstance() << "m2+k2: " << m2 + (_vertical * abs(_objectPosition.x)/_objectPosition.x) << std::endl << std::endl;
 			_controller->setMotor(_tilt, m2 + (_vertical * abs(_objectPosition.y)/_objectPosition.y));
 		}
     }

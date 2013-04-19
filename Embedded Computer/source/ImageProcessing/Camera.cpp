@@ -77,12 +77,8 @@ Mat& Camera::getFrame(Camera::ColorSpace colorSpace)
  */
 Point Camera::getCenter()
 {
-	Point center = Point(-1, -1);
-	if (!_capture.isOpened()) { return center; }
-
-	center = Point(_capture.get(CV_CAP_PROP_FRAME_WIDTH), _capture.get(CV_CAP_PROP_FRAME_HEIGHT));
-
-	return center;
+	if (!_capture.isOpened()) { return Point(-1, -1); }
+	return Point(_capture.get(CV_CAP_PROP_FRAME_WIDTH)/2, _capture.get(CV_CAP_PROP_FRAME_HEIGHT)/2);
 }
 
 /** \brief Convert the retrieved BRG frame in an HSV frame

@@ -10,7 +10,7 @@
 #include "Utilities/SerialInterface.h"
 #include "Control/STM32F4.h"
 
-void testTracking(bool debug, STM32F4& mc)
+void testTracking(STM32F4& mc, bool debug)
 {
 	Logger::getInstance().addStream(std::cout);
 	Logger::getInstance() << "Initializing USB interface..." << std::endl;
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 		STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), io);
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
 
-		testTracking((argc > 2 && argv[2] == "true"), mc);
+		testTracking(mc, (argc > 2 && argv[2] == "true"));
 	}
 	catch (std::exception& e)
     {
