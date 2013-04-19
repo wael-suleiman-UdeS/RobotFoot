@@ -14,8 +14,8 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 	_vertical = config.getIntValue(basePath / XmlPath::VerticalOffset);
 	_threshold = config.getIntValue(basePath / XmlPath::Threshold);
 
-	//_controller->setTorque(_pan, STM32F4::TorqueOn);
-	//_controller->setTorque(_pan, STM32F4::TorqueOn);
+	_controller->setTorque(_pan, STM32F4::TorqueOn);
+	_controller->setTorque(_pan, STM32F4::TorqueOn);
 }
 
 /** \brief Constructor
@@ -76,7 +76,9 @@ void ObjectTracker::track(Point position)
 		Logger::getInstance() << std::endl << "OBJ POS: " << _objectPosition.x << ", " << _objectPosition.y << std::endl;
 
 		if (abs(_objectPosition.x) > _threshold)
-		{_controller->setMotor(_pan, m1 + (_horizontal * abs(_objectPosition.x)/_objectPosition.x));
+		{
+			_controller->setMotor(_pan, m1 + (_horizontal * abs(_objectPosition.x)/_objectPosition.x)
+		);
 		}
 		if (abs(_objectPosition.y) > _threshold)
 		{
