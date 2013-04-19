@@ -70,10 +70,11 @@ void ObjectTracker::track(Point position)
     {
         _noObjectCount = 0;
 
-		_objectPosition = (position - _centerPosition) * -1;
+		_objectPosition = position - _centerPosition;
 		// TODO: pixel -> angle (max horizontal angle / max width)
         // TODO Start tracking with object position
 
+		Logger::getInstance() << std::endl << "CENTER: " << _centerPosition.x << ", " << _centerPosition.y << std::endl;
 		Logger::getInstance() << std::endl << "OBJ POS: " << _objectPosition.x << ", " << _objectPosition.y << std::endl;
 
 		if (abs(_objectPosition.x) > _threshold)

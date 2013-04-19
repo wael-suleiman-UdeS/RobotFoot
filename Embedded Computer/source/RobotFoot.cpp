@@ -79,6 +79,7 @@ void testTracking(bool debug, STM32F4& mc)
 
 int main(int argc, char* argv[])
 {
+
 	try
 	{
 		boost::asio::io_service io;
