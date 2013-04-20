@@ -93,6 +93,7 @@
     <ClInclude Include="ImageProcessing\ImageProcessing.h" />
     <ClInclude Include="ImageProcessing\ObjectTracker.h" />
     <ClInclude Include="Utilities\logger.h" />
+    <ClInclude Include="Utilities\PID.h" />
     <ClInclude Include="Utilities\pugiconfig.h" />
     <ClInclude Include="Utilities\pugixml.h" />
     <ClInclude Include="Utilities\SerialInterface.h" />
@@ -106,6 +107,7 @@
     <ClCompile Include="ImageProcessing\ObjectTracker.cpp" />
     <ClCompile Include="RobotFoot.cpp" />
     <ClCompile Include="Utilities\logger.cpp" />
+    <ClCompile Include="Utilities\PID.cpp" />
     <ClCompile Include="Utilities\pugixml.cpp" />
     <ClCompile Include="Utilities\SerialInterface.cpp" />
     <ClCompile Include="Utilities\XmlParser.cpp" />
