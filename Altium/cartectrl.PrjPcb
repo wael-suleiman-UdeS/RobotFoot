@@ -287,10 +287,14 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [GeneratedDocument1]
-DocumentPath=Output\PCB.BOM
+DocumentPath=Output\Design Rule Check - PCB.html
 DItemRevisionGUID=
 
 [GeneratedDocument2]
+DocumentPath=Output\PCB.BOM
+DItemRevisionGUID=
+
+[GeneratedDocument3]
 DocumentPath=Output\PCB.CSV
 DItemRevisionGUID=
 
