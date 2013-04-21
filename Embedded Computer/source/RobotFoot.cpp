@@ -168,7 +168,6 @@ int main(int argc, char* argv[])
     }
 	// Initialize USB
 	// TODO: handle USB exception
-	/*try
 	{
 		boost::asio::io_service io_service;
 		USBInterface usb(io_service, argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), 115200);

@@ -80,15 +80,14 @@
 
         <AngleH value="115" />
         <AngleV value="140" />
-      
-        <Threshold value="80" />
+        <Threshold value="10" />
         
         <PID>
           <!--caca-->
-          <P value="0.1" />
+          <P value="-0.4" />
           <I value="0" />
-          <D value="0" />
-          <dt value="0.1" />
+          <D value="-0.3" />
+          <dt value="0.2" />
           <Epsilon value="0" />
         </PID>
       </Head>
