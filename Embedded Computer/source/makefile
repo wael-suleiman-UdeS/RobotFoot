@@ -110,5 +110,5 @@ $(OUT) : $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@ 
 
 clean:
-	rm -rf *.o $(OUT)
+	rm -rf $(OBJECTS) $(OUT)
 
