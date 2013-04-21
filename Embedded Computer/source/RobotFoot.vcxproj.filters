@@ -72,6 +72,9 @@
     <ClInclude Include="Utilities\SerialInterface.h">
       <Filter>Fichiers d%27en-tête\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\PID.h">
+      <Filter>Fichiers d%27en-tête\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RobotFoot.cpp">
@@ -102,6 +105,9 @@
       <Filter>Fichiers sources\Control</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\SerialInterface.cpp">
+      <Filter>Fichiers sources\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\PID.cpp">
       <Filter>Fichiers sources\Utilities</Filter>
     </ClCompile>
   </ItemGroup>

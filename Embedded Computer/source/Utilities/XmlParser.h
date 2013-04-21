@@ -35,8 +35,11 @@ namespace XmlPath
 	extern const fs::path Motion;
 	extern const fs::path Motors;
 	extern const fs::path Head;
-	extern const fs::path HorizontalHead;
-	extern const fs::path VerticalHead;
+	extern const fs::path Pan;
+	extern const fs::path Tilt;
+	extern const fs::path HorizontalOffset;
+	extern const fs::path VerticalOffset;
+	extern const fs::path Threshold;
 }
 
 /** @brief Class for XML parsing
@@ -52,7 +55,7 @@ public:
 
 	bool loadFile(fs::path filePath);
 	string getStringValue(fs::path xPath) const;
-	int getIntValue(fs::path xPath) const;
+	float getIntValue(fs::path xPath) const;
 };
 
 #endif // XMLPARSER_H
