@@ -49,9 +49,9 @@ CircleSpec::CircleSpec(const XmlParser& config, string colorName)
 	minRadius = config.getIntValue(basePath / "MinRadius");
 	maxRadius = config.getIntValue(basePath / "MaxRadius");
 
-	std::cout << "EROSION" << erosionIterations;
-	std::cout << "DILATION" << dilationIterations;
-	std::cout << "APERTURE" << smoothingApertureSize;
+	//std::cout << "EROSION" << erosionIterations;
+	//std::cout << "DILATION" << dilationIterations;
+	//std::cout << "APERTURE" << smoothingApertureSize;
 }
 
 /** \brief Constructor
