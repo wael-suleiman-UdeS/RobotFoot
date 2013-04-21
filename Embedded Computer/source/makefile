@@ -93,7 +93,7 @@ INCLUDES += -IThirdParty/opencv/include/
 OUT = audit_demo
 
 # CFLAGS
-CFLAGS= -c -Wall -std=c++0x
+CFLAGS= -c -Wall -std=c++0x -O3
 
 CC = arm-linux-gnueabihf-g++
 
