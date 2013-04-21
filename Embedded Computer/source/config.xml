@@ -4,25 +4,63 @@
       <DeviceIndex value="0" />
     </Camera>
     <Colors>
-      <Color name="red">
-        <HSVcolor>
-          <Hue value="215" />
-          <HueTolerance value="40" />
-          <Saturation value="163" />
-          <Brightness value="103" />
-        </HSVcolor>
-        <CircleSpec>
-          <ErosionIterations value="0" />
-          <DilationIterations value="2" />
-          <SmoothingApertureSize value="9" />
-          <ResolutionDivisor value="2" />
-          <MinDistance value="120" />
-          <EdgeThreshold value="100" />
-          <CenterThreshold value="10" />
-          <MinRadius value="10" />
-          <MaxRadius value="400" />
-        </CircleSpec>
-      </Color>
+	  <Color name="red">
+		<HSVcolor>
+		  <Hue value="215" />
+		  <HueTolerance value="40" />
+		  <Saturation value="163" />
+		  <Brightness value="103" />
+		</HSVcolor>
+		<CircleSpec>
+		  <ErosionIterations value="0" />
+		  <DilationIterations value="2" />
+		  <SmoothingApertureSize value="9" />
+		  <ResolutionDivisor value="2" />
+		  <MinDistance value="120" />
+		  <EdgeThreshold value="100" />
+		  <CenterThreshold value="10" />
+		  <MinRadius value="10" />
+		  <MaxRadius value="400" />
+		</CircleSpec>
+	  </Color>
+	  <Color name="pink">
+		<HSVcolor>
+		  <Hue value="151" />
+		  <HueTolerance value="163" />
+		  <Saturation value="33" />
+		  <Brightness value="0" />
+		</HSVcolor>
+		<CircleSpec>
+		  <ErosionIterations value="4" />
+		  <DilationIterations value="10" />
+		  <SmoothingApertureSize value="9" />
+		  <ResolutionDivisor value="2" />
+		  <MinDistance value="120" />
+		  <EdgeThreshold value="100" />
+		  <CenterThreshold value="10" />
+		  <MinRadius value="10" />
+		  <MaxRadius value="400" />
+		</CircleSpec>
+	  </Color>
+	  <Color name="green">
+		<HSVcolor>
+		  <Hue value="62" />
+		  <HueTolerance value="12" />
+		  <Saturation value="74" />
+		  <Brightness value="130" />
+		</HSVcolor>
+		<CircleSpec>
+		  <ErosionIterations value="2" />
+		  <DilationIterations value="10" />
+		  <SmoothingApertureSize value="9" />
+		  <ResolutionDivisor value="2" />
+		  <MinDistance value="120" />
+		  <EdgeThreshold value="100" />
+		  <CenterThreshold value="10" />
+		  <MinRadius value="10" />
+		  <MaxRadius value="400" />
+		</CircleSpec>
+	  </Color>
     </Colors>
   </ImageProcessing>
   <Motion>
