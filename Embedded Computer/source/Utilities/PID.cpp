@@ -51,3 +51,9 @@ float PID::process_PID(float error)
 
     return output;
 }
+
+void PID::reset()
+{
+	_pre_error = 0;
+	_integral = 0;
+}

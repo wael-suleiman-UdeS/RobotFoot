@@ -20,6 +20,7 @@ class PID
 		~PID(){};
 
 		float process_PID(float error);
+		void reset();
 
 	private:
 		float _Kp;

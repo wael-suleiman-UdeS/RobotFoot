@@ -179,8 +179,8 @@ void ObjectTracker::trackPID(Point position)
 			Logger::getInstance() << "k1: " << k << std::endl;
 			
 			z = m1 + k;
-			if (z < _minH) {z = _minH;}
-			if (z > _maxH) {z = _maxH;}
+			if (z < _minH) { z = _minH; _pids["pan"].reset(); }
+			if (z > _maxH) { z = _maxH; _pids["pan"].reset(); }
 			Logger::getInstance() << "m1 + k1: " << z << std::endl;
 
 			_controller->setMotor(_pan, z);
@@ -197,8 +197,8 @@ void ObjectTracker::trackPID(Point position)
 			Logger::getInstance() << "k2: " << k << std::endl;
 
 			z = m2 + k;
-			if (z < _minV) {z = _minV;}
-			if (z > _maxV) {z = _maxV;}
+			if (z < _minV) { z = _minV; _pids["tilt"].reset(); }
+			if (z > _maxV) { z = _maxV; _pids["tilt"].reset(); }
 			Logger::getInstance() << "m2 + k2: " << z << std::endl;
 
 			_controller->setMotor(_tilt, z);
