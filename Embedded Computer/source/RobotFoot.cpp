@@ -168,17 +168,17 @@ int main(int argc, char* argv[])
     }
 	// Initialize USB
 	// TODO: handle USB exception
-	{
-		boost::asio::io_service io_service;
-		USBInterface usb(io_service, argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), 115200);
-		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+	//{
+	//	boost::asio::io_service io_service;
+	//	USBInterface usb(io_service, argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), 115200);
+	//	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
-		testTracking(true, usb);
-	}
-    catch (std::exception& e)
-    {
-        std::cerr << "Exception :" << e.what() << std::endl;
-    }*/
+	//	testTracking(true, usb);
+	//}
+ //   catch (std::exception& e)
+ //   {
+ //       std::cerr << "Exception :" << e.what() << std::endl;
+ //   }*/
 
 	return 0;
 }
