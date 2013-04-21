@@ -80,6 +80,7 @@ void ImageProcessing::smooth(const Mat& sourceFrame, Mat& smoothedFrame, int ape
 {
 	try
 	{
+		std::cout << "APERTURE_SIZE:" << apertureSize << std::endl;
 		cv::GaussianBlur(sourceFrame, smoothedFrame, cv::Size(apertureSize, apertureSize), 0, 0);
 	}
 	catch(cv::Exception& ex) {}
