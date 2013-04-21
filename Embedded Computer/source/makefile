@@ -4,6 +4,7 @@ SRC += Utilities/SerialInterface.cpp
 SRC += Utilities/logger.cpp
 SRC += Utilities/XmlParser.cpp
 SRC += Utilities/pugixml.cpp
+SRC += Utilities/PID.cpp
 SRC += ImageProcessing/Camera.cpp
 SRC += ImageProcessing/ObjectTracker.cpp
 SRC += ImageProcessing/ColorFinder.cpp
@@ -89,7 +90,7 @@ INCLUDES = -IThirdParty/boost_1_53_0/
 INCLUDES += -IThirdParty/opencv/include/
 
 # Binary
-OUT = audit_2_demo
+OUT = audit_demo
 
 # CFLAGS
 CFLAGS= -c -Wall -std=c++0x
