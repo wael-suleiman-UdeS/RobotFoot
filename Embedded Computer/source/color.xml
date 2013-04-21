@@ -2,14 +2,14 @@
 <Colors>
   <Color name="red">
 	<HSVcolor>
-	  <Hue value="215" />
-	  <HueTolerance value="40" />
-	  <Saturation value="163" />
-	  <Brightness value="103" />
+	  <Hue value="170" />
+	  <HueTolerance value="11" />
+	  <Saturation value="128" />
+	  <Brightness value="119" />
 	</HSVcolor>
 	<CircleSpec>
-	  <ErosionIterations value="0" />
-	  <DilationIterations value="2" />
+	  <ErosionIterations value="4" />
+	  <DilationIterations value="10" />
 	  <SmoothingApertureSize value="9" />
 	  <ResolutionDivisor value="2" />
 	  <MinDistance value="120" />
