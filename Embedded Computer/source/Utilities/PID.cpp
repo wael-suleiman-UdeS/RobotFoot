@@ -1,7 +1,20 @@
+#include <cmath>
+
 #include "PID.h"
 
-PID::PID(unsigned int Kp, unsigned int Ki, unsigned int Kd,
-		 unsigned int epsilon, unsigned int dt, int max_value,
+PID::PID()
+{
+	_Kp = 0.1;
+	_Ki = 0.01;
+	_Kd = 0.005;
+	_epsilon = 0.01;
+	_dt = 0.01;
+	_max_value = 1002;
+	_min_value = 21;
+}
+
+PID::PID(float Kp, float Ki, float Kd,
+		 float epsilon, float dt, int max_value,
 		 int min_value)
 		 : _Kp(Kp), _Ki(Ki), _Kd(Kd), _epsilon(epsilon),
 		   _dt(dt), _max_value(max_value), _min_value(min_value)
@@ -10,17 +23,13 @@ PID::PID(unsigned int Kp, unsigned int Ki, unsigned int Kd,
 	_integral = 0;
 }
 
-float PID::process_PID(float setpoint, float actual_position)
+float PID::process_PID(float error)
 {
-    float error;
     float derivative;
     float output;
 
-    // Caculate P,I,D
-    error = setpoint - actual_position;
-
     // In case of error too small then stop integration
-    if(abs(error) > _epsilon)
+    if(std::abs(error) > _epsilon)
     {
         _integral = _integral + (error * _dt);
     }
@@ -28,14 +37,14 @@ float PID::process_PID(float setpoint, float actual_position)
     output = (_Kp * error) + (_Ki * _integral) + (_Kd * derivative);
 
     // Saturation Filter
-    if(output > _max_value)
-    {
-        output = _max_value;
-    }
-    else if(output < _min_value)
-    {
-        output = _min_value;
-    }
+    //if(output > _max_value)
+    //{
+    //    output = _max_value;
+    //}
+    //else if(output < _min_value)
+    //{
+    //    output = _min_value;
+    //}
 
 	// Update error
 	_pre_error = error;
