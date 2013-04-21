@@ -21,14 +21,14 @@
   </Color>
   <Color name="pink">
 	<HSVcolor>
-	  <Hue value="151" />
-	  <HueTolerance value="163" />
-	  <Saturation value="33" />
-	  <Brightness value="0" />
+	  <Hue value="160" />
+	  <HueTolerance value="10" />
+	  <Saturation value="0" />
+	  <Brightness value="255" />
 	</HSVcolor>
 	<CircleSpec>
-	  <ErosionIterations value="4" />
-	  <DilationIterations value="10" />
+	  <ErosionIterations value="1" />
+	  <DilationIterations value="4" />
 	  <SmoothingApertureSize value="9" />
 	  <ResolutionDivisor value="2" />
 	  <MinDistance value="120" />
@@ -40,13 +40,13 @@
   </Color>
   <Color name="green">
 	<HSVcolor>
-	  <Hue value="62" />
-	  <HueTolerance value="12" />
-	  <Saturation value="74" />
-	  <Brightness value="130" />
+	  <Hue value="65" />
+	  <HueTolerance value="9" />
+	  <Saturation value="172" />
+	  <Brightness value="71" />
 	</HSVcolor>
 	<CircleSpec>
-	  <ErosionIterations value="2" />
+	  <ErosionIterations value="4" />
 	  <DilationIterations value="10" />
 	  <SmoothingApertureSize value="9" />
 	  <ResolutionDivisor value="2" />
