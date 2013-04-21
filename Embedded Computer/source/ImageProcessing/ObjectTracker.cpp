@@ -164,7 +164,7 @@ void ObjectTracker::trackPID(Point position)
 		// TODO: pixel -> angle (max horizontal angle / max width)
         // TODO Start tracking with object position
 
-		Logger::getInstance() << std::endl << "OBJ POS: " << _objectPosition.x << ", " << _objectPosition.y << std::endl;
+		//Logger::getInstance() << std::endl << "OBJ POS: " << _objectPosition.x << ", " << _objectPosition.y << std::endl;
 
 		int angle = 0, k, z;
 
@@ -174,14 +174,14 @@ void ObjectTracker::trackPID(Point position)
 
 			k = _pids["pan"].process_PID(angle);
 
-			Logger::getInstance() << "Angle1 actuel: " << angle << std::endl;
-			Logger::getInstance() << "m1: " << m1 << std::endl;
-			Logger::getInstance() << "k1: " << k << std::endl;
+			//Logger::getInstance() << "Angle1 actuel: " << angle << std::endl;
+			//Logger::getInstance() << "m1: " << m1 << std::endl;
+			//Logger::getInstance() << "k1: " << k << std::endl;
 			
 			z = m1 + k;
 			if (z < _minH) { z = _minH; _pids["pan"].reset(); }
 			if (z > _maxH) { z = _maxH; _pids["pan"].reset(); }
-			Logger::getInstance() << "m1 + k1: " << z << std::endl;
+			//Logger::getInstance() << "m1 + k1: " << z << std::endl;
 
 			_controller->setMotor(_pan, z);
 
@@ -192,14 +192,14 @@ void ObjectTracker::trackPID(Point position)
 			angle = _objectPosition.y * (int)_angleV / (_centerPosition.y * 2);
 			k = _pids["tilt"].process_PID(angle);
 
-			Logger::getInstance() << "Angle2 actuel: " << angle << std::endl;
-			Logger::getInstance() << "m2: " << m2 << std::endl;
-			Logger::getInstance() << "k2: " << k << std::endl;
+			//Logger::getInstance() << "Angle2 actuel: " << angle << std::endl;
+			//Logger::getInstance() << "m2: " << m2 << std::endl;
+			//Logger::getInstance() << "k2: " << k << std::endl;
 
 			z = m2 + k;
 			if (z < _minV) { z = _minV; _pids["tilt"].reset(); }
 			if (z > _maxV) { z = _maxV; _pids["tilt"].reset(); }
-			Logger::getInstance() << "m2 + k2: " << z << std::endl;
+			//Logger::getInstance() << "m2 + k2: " << z << std::endl;
 
 			_controller->setMotor(_tilt, z);
 		}
