@@ -1,1 +1,11 @@
-Record=TopLevelDocument|FileName=audio.SchDoc
+Record=SheetSymbol|SourceDocument=mcu.SchDoc|Designator=Buttons|SchDesignator=Buttons|FileName=buttons.SchDoc|SymbolType=Normal|RawFileName=buttons.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=mcu.SchDoc|Designator=LEDs|SchDesignator=LEDs|FileName=LEDs.SchDoc|SymbolType=Normal|RawFileName=LEDs.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=main.SchDoc|Designator=Audio|SchDesignator=Audio|FileName=audio.SchDoc|SymbolType=Normal|RawFileName=audio.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=main.SchDoc|Designator=Gyro/Accel|SchDesignator=Gyro/Accel|FileName=lsm330.SchDoc|SymbolType=Normal|RawFileName=lsm330.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=main.SchDoc|Designator=MCU|SchDesignator=MCU|FileName=mcu.SchDoc|SymbolType=Normal|RawFileName=mcu.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=main.SchDoc|Designator=Motors|SchDesignator=Motors|FileName=motors.SchDoc|SymbolType=Normal|RawFileName=motors.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=main.SchDoc|Designator=UART_DBG|SchDesignator=UART_DBG|FileName=UART_DBG.SchDoc|SymbolType=Normal|RawFileName=UART_DBG.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=main.SchDoc|Designator=V3.3|SchDesignator=V3.3|FileName=V33.SchDoc|SymbolType=Normal|RawFileName=V33.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=main.SchDoc|Designator=V5|SchDesignator=V5|FileName=V5.SchDoc|SymbolType=Normal|RawFileName=V5.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=main.SchDoc|Designator=Vbatt|SchDesignator=Vbatt|FileName=Vbatt.SchDoc|SymbolType=Normal|RawFileName=Vbatt.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=TopLevelDocument|FileName=main.SchDoc
