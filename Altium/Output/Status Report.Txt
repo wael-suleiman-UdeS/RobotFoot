@@ -1,18 +1,11 @@
-Output: Gerber Files
-Type  : Gerber
+Output: Simple BOM
+Type  : SimpleBOM
 From  : Variant [[No Variations]] of Project [cartectrl.PrjPcb]
-   Generated File[PCB.GTL]
-   Generated File[PCB.GBL]
-   Generated File[PCB.GTO]
-   Generated File[PCB.GTS]
-   Generated File[PCB.GBS]
-   Generated File[PCB.GD1]
-   Generated File[PCB.RUL]
-   Generated File[PCB.EXTREP]
-   Generated File[PCB.REP]
+   Generated File[PCB.BOM]
+   Generated File[PCB.CSV]
 
 
-Files Generated   : 9
+Files Generated   : 2
 Documents Printed : 0
 
-Finished Output Generation At 17:00:31 On 2013-04-22
+Finished Output Generation At 15:25:34 On 2013-04-23
