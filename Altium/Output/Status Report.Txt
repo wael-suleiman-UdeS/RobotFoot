@@ -1,18 +1,12 @@
-Output: Gerber Files
-Type  : Gerber
-From  : Variant [[No Variations]] of Project [cartectrl.PrjPcb]
-   Generated File[PCB.GTL]
-   Generated File[PCB.GBL]
-   Generated File[PCB.GTO]
-   Generated File[PCB.GTS]
-   Generated File[PCB.GBS]
-   Generated File[PCB.GD1]
-   Generated File[PCB.RUL]
-   Generated File[PCB.EXTREP]
-   Generated File[PCB.REP]
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [cartectrl.PrjPcb]
+   Generated File[PCB.TXT]
+   Generated File[PCB.LDP]
+   Generated File[PCB.DRR]
 
 
-Files Generated   : 9
+Files Generated   : 3
 Documents Printed : 0
 
-Finished Output Generation At 17:02:07 On 2013-04-24
+Finished Output Generation At 17:10:09 On 2013-04-24
