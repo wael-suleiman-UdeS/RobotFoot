@@ -43,7 +43,7 @@ void init_GPIO(void)
      * It is also mentioned at the beginning of the peripheral library's
      * source file, e.g. stm32f4xx_gpio.c
      */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 
     /* In this block of instructions all the properties
      * of the peripheral, the GPIO port in this case,
@@ -56,29 +56,31 @@ void init_GPIO(void)
      * The LEDs on the STM324F Discovery are connected to the
      * pins PD12 thru PD15
      */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_12; // we want to configure all LED GPIO pins
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_14; // we want to configure all LED GPIO pins
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT; 		// we want the pins to be an output
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz; 	// this sets the GPIO modules clock speed
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP; 	// this sets the pin type to push / pull (as opposed to open drain)
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; 	// this sets the pullup / pulldown resistors to be inactive
-    GPIO_Init(GPIOD, &GPIO_InitStruct); 			// this finally passes all the values to the GPIO_Init function which takes care of setting the corresponding bits.
+    GPIO_Init(GPIOE, &GPIO_InitStruct); 			// this finally passes all the values to the GPIO_Init function which takes care of setting the corresponding bits.
 
     /* This enables the peripheral clock to
      * the GPIOA IO module
      */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+     #if 1
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
     /* Here the GPIOA module is initialized.
      * We want to use PA0 as an input because
      * the USER button on the board is connected
      * between this pin and VCC.
      */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0;		  // we want to configure PA0
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;		  // we want to configure PA0
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN; 	  // we want it to be an input
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;//this sets the GPIO modules clock speed
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;   // this sets the pin type to push / pull (as opposed to open drain)
-    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;   // this enables the pulldown resistor --> we want to detect a high level
-    GPIO_Init(GPIOA, &GPIO_InitStruct);			  // this passes the configuration to the Init function which takes care of the low level stuff
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;   // this enables the pulldown resistor --> we want to detect a high level
+    GPIO_Init(GPIOC, &GPIO_InitStruct);			  // this passes the configuration to the Init function which takes care of the low level stuff
+    #endif
 }
 
 int main(void)
@@ -95,14 +97,21 @@ int main(void)
     test.positionControl(0xFD, 900, 70, 0x00);
 */
 
-
-    CortexM4 cortexM4;
+    const unsigned ds[3]= {300000, 800000, 1500000};
+    unsigned d = ds[0];
+    //CortexM4 cortexM4;
+    GPIOE->ODR = 0x8000;
     for(;;)
-    {/*
-        char p[4];
-        uint32_t r = usb::read(p);
-        usb::write(p, r);*/
-        cortexM4.read();
+    {
+        Tools::Delay(d);
+        GPIOE->ODR ^= 0xC000;
+        if (!(GPIOC->IDR & 0x2))
+            d = ds[0];
+        else if (!(GPIOC->IDR & 0x4))
+            d = ds[1];
+        else if (!(GPIOC->IDR & 0x8))
+            d = ds[2];
+
     }
 }
 
