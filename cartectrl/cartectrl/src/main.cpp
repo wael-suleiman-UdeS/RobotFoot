@@ -5,7 +5,7 @@
 #include <stm32f4xx_rcc.h>
 #include "initClock.h"
 
-
+#include "usb_com.h"
 #include "Tools.h"
 #include "stm32f4xx_conf.h"
 
@@ -66,7 +66,6 @@ void init_GPIO(void)
     /* This enables the peripheral clock to
      * the GPIOA IO module
      */
-     #if 1
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
     /* Here the GPIOA module is initialized.
@@ -80,7 +79,6 @@ void init_GPIO(void)
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;   // this sets the pin type to push / pull (as opposed to open drain)
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;   // this enables the pulldown resistor --> we want to detect a high level
     GPIO_Init(GPIOC, &GPIO_InitStruct);			  // this passes the configuration to the Init function which takes care of the low level stuff
-    #endif
 }
 
 int main(void)
@@ -90,28 +88,30 @@ int main(void)
     initClock();
     init_GPIO();
 
-/*
-    Herkulex test = Herkulex();
+    usb::init();
 
-    test.setTorque(0xFD, TORQUE_ON);
-    test.positionControl(0xFD, 900, 70, 0x00);
-*/
+    unsigned debounce = 10000, oldb=0;
 
-    const unsigned ds[3]= {300000, 800000, 1500000};
-    unsigned d = ds[0];
-    //CortexM4 cortexM4;
-    GPIOE->ODR = 0x8000;
     for(;;)
     {
-        Tools::Delay(d);
-        GPIOE->ODR ^= 0xC000;
-        if (!(GPIOC->IDR & 0x2))
-            d = ds[0];
-        else if (!(GPIOC->IDR & 0x4))
-            d = ds[1];
-        else if (!(GPIOC->IDR & 0x8))
-            d = ds[2];
-
+        char p[4];
+        uint32_t r = usb::read(p);
+        for (int i=0; i < r; ++i) p[i] += 2;
+        usb::write(p, r);
+        if (r) GPIOE->ODR += 0x4000;
+        if (!debounce--)
+        {
+            const unsigned b = ~GPIOC->IDR;
+            const unsigned p = (b ^ oldb) & b;
+            if (p & 2)
+                GPIOE->ODR ^= 0x8000;
+            else if (p & 4)
+                GPIOE->ODR ^= 0x4000;
+            else if (p & 8)
+                GPIOE->ODR -= 0x4000;
+            oldb = b;
+            debounce = 10000;
+        }
     }
-}
 
+}
