@@ -4,7 +4,7 @@
 #include <stm32f4xx_flash.h>
 #include <stm32f4xx_rcc.h>
 #include "initClock.h"
-
+#include "herkulex.h"
 #include "usb_com.h"
 #include "Tools.h"
 #include "stm32f4xx_conf.h"
@@ -89,6 +89,10 @@ int main(void)
     init_GPIO();
 
     usb::init();
+    Herkulex hercules;
+    Tools::Delay(Tools::DELAY_AROUND_1S);
+
+    hercules.setTorque(DEFAULT_ID, TORQUE_ON);
 
     unsigned debounce = 10000, oldb=0;
 
@@ -104,11 +108,20 @@ int main(void)
             const unsigned b = ~GPIOC->IDR;
             const unsigned p = (b ^ oldb) & b;
             if (p & 2)
+            {
                 GPIOE->ODR ^= 0x8000;
+                hercules.positionControl(DEFAULT_ID, 512 + 300, 40, 0);
+            }
             else if (p & 4)
+            {
                 GPIOE->ODR ^= 0x4000;
+                hercules.positionControl(DEFAULT_ID, 512, 40, 0);
+            }
             else if (p & 8)
+            {
                 GPIOE->ODR -= 0x4000;
+                hercules.positionControl(DEFAULT_ID, 512 - 300, 40, 0);
+            }
             oldb = b;
             debounce = 10000;
         }
