@@ -9,7 +9,128 @@
 #include "Tools.h"
 #include "stm32f4xx_conf.h"
 
+#include <stm32f4xx_dac.h>
+#include <stm32f4xx_dma.h>
+#include <stm32f4xx_tim.h>
+#include <cstdlib>
+
 #include "CortexM4.h"
+
+
+
+uint16_t buffer[1024];
+
+uint16_t *const lobuf = buffer;
+uint16_t *const hibuf = buffer + 512;
+
+static uint32_t phase;
+
+#define NUMEL(x) (sizeof(x)/sizeof(*x))
+
+extern "C" void DMA1_Stream5_IRQHandler(void)
+{
+    uint16_t *buf;
+    if (DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5))
+    {
+        DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_TCIF5);
+        // update upper buffer
+        buf = hibuf;
+    }
+    if (DMA_GetITStatus(DMA1_Stream5, DMA_IT_HTIF5))
+    {
+        DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_HTIF5);
+        // update lower buffer
+        buf = lobuf;
+    }
+
+    for (int i = 0; i < 512; ++i)
+    {
+        int out = phase >> 15;
+
+        if (out & 0x10000)
+        {
+            out ^= 0x1FFFF;
+        }
+        *buf++ = (out * 0xAFFF) >> 16;
+        phase +=  23409859;
+    }
+}
+
+
+int init_DAC()
+{
+    GPIO_InitTypeDef gpinit[1] = {{0}};
+    gpinit->GPIO_Pin   = GPIO_Pin_4;
+    gpinit->GPIO_Mode  = GPIO_Mode_AIN;
+    gpinit->GPIO_Speed = GPIO_Speed_50MHz;
+    gpinit->GPIO_PuPd  = GPIO_PuPd_NOPULL;
+    GPIO_Init(GPIOA, gpinit);
+
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+
+
+
+    DAC_DeInit();
+    DAC_InitTypeDef dac[1];
+    dac->DAC_Trigger = DAC_Trigger_T6_TRGO;
+    dac->DAC_WaveGeneration = DAC_WaveGeneration_None;
+    dac->DAC_LFSRUnmask_TriangleAmplitude = DAC_LFSRUnmask_Bits11_0;
+    dac->DAC_OutputBuffer = DAC_OutputBuffer_Enable;
+    DAC_Init(DAC_Channel_1, dac);
+
+    DAC_Cmd(DAC_Channel_1, ENABLE);
+
+    DMA_DeInit(DMA1_Stream5);
+    DMA_InitTypeDef dma[1];
+    dma->DMA_Channel = DMA_Channel_7;
+    dma->DMA_PeripheralBaseAddr = (uint32_t) &DAC->DHR12L1;
+    dma->DMA_Memory0BaseAddr = (uint32_t) buffer;
+    dma->DMA_DIR = DMA_DIR_MemoryToPeripheral;
+    dma->DMA_BufferSize = NUMEL(buffer);
+    dma->DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    dma->DMA_MemoryInc = DMA_MemoryInc_Enable;
+    dma->DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    dma->DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    dma->DMA_Mode = DMA_Mode_Circular;
+    dma->DMA_Priority = DMA_Priority_High;
+    dma->DMA_FIFOMode = DMA_FIFOMode_Disable;
+    dma->DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
+    dma->DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    dma->DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+    DMA_Init(DMA1_Stream5, dma);
+
+    DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
+    DMA_ITConfig(DMA1_Stream5, DMA_IT_HT, ENABLE);
+
+    NVIC_InitTypeDef nvic[1];
+    nvic->NVIC_IRQChannel = DMA1_Stream5_IRQn;
+    nvic->NVIC_IRQChannelPreemptionPriority = 7;
+    nvic->NVIC_IRQChannelSubPriority = 7;
+    nvic->NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(nvic);
+    DMA_Cmd(DMA1_Stream5, ENABLE);
+
+    DAC_DMACmd(DAC_Channel_1, ENABLE);
+
+    TIM_DeInit(TIM6);
+
+    TIM_TimeBaseInitTypeDef    TIM_TimeBaseStructure;
+    TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
+    TIM_TimeBaseStructure.TIM_Period = 1749;
+    TIM_TimeBaseStructure.TIM_Prescaler = 0;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure);
+
+    TIM_SelectOutputTrigger(TIM6, TIM_TRGOSource_Update);
+
+    TIM_Cmd(TIM6, ENABLE);
+
+
+    return 0;
+}
 
 /* This funcion shows how to initialize
  * the GPIO pins on GPIOD and how to configure
@@ -87,7 +208,7 @@ int main(void)
     // initialize the GPIO pins we need
     initClock();
     init_GPIO();
-
+    init_DAC();
     usb::init();
     Herkulex hercules;
     Tools::Delay(Tools::DELAY_AROUND_1S);
