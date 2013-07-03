@@ -8,9 +8,76 @@
 #include "usb_com.h"
 #include "Tools.h"
 #include "stm32f4xx_conf.h"
-
+#include "stm32f4xx_adc.h"
 #include "CortexM4.h"
 
+extern "C" void ADC_IRQHandler()
+{
+    // Assume interrupt comes from analog watchdog
+    ADC_ClearITPendingBit(ADC1, ADC_IT_AWD);
+    ADC_ITConfig(ADC1, ADC_IT_AWD, DISABLE);    // No longer need this interrupt
+    // Do something...
+    GPIOE->ODR = 0x8000;    //TEST
+}
+
+void init_ADC(void)
+{
+    RCC_APB2PeriphClockCmd(RCC_APB2ENR_ADC1EN, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_GPIOAEN, ENABLE);
+    GPIO_InitTypeDef gpini[1] = {{0}};
+    gpini->GPIO_Pin = GPIO_Pin_0;
+    gpini->GPIO_Mode = GPIO_Mode_AIN;
+    gpini->GPIO_Speed = GPIO_Speed_2MHz;
+    gpini->GPIO_OType = GPIO_OType_PP;
+    gpini->GPIO_PuPd  = GPIO_PuPd_NOPULL;
+    GPIO_Init(GPIOA, gpini);
+
+    ADC_InitTypeDef ini[1] = {{0}};
+    ADC_StructInit(ini);
+    // must be 30MHz max
+
+    ini->ADC_Resolution = ADC_Resolution_12b;
+    ini->ADC_ScanConvMode = DISABLE;
+    ini->ADC_ContinuousConvMode = ENABLE; //???
+    ini->ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+    ini->ADC_ExternalTrigConv = ADC_ExternalTrigConv_T8_TRGO; // Don't care
+    ini->ADC_DataAlign = ADC_DataAlign_Left;
+    ini->ADC_NbrOfConversion = 1; //???
+
+    ADC_CommonInitTypeDef inic[1] = {{0}};
+    ADC_CommonStructInit(inic);
+    inic->ADC_Mode = ADC_Mode_Independent;
+    inic->ADC_Prescaler = ADC_Prescaler_Div8;
+    inic->ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
+    inic->ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_20Cycles; // don't care
+
+    ADC_DeInit();
+    ADC_CommonInit(inic);
+    ADC_Init(ADC1, ini);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_15Cycles);
+    ADC_ContinuousModeCmd(ADC1, ENABLE);
+    ADC_EOCOnEachRegularChannelCmd(ADC1, DISABLE);
+    ADC_Cmd(ADC1, ENABLE);
+    ADC_SoftwareStartConv(ADC1);
+
+}
+
+void enable_ADC_watchdog(uint16_t low, uint16_t high)
+{
+    ADC_AnalogWatchdogSingleChannelConfig(ADC1, ADC_Channel_0);
+    ADC_AnalogWatchdogThresholdsConfig(ADC1, high, low);
+    ADC_ClearFlag(ADC1, ADC_FLAG_AWD);
+    ADC_ClearITPendingBit(ADC1, ADC_IT_AWD);
+    ADC_AnalogWatchdogCmd(ADC1, ADC_AnalogWatchdog_SingleRegEnable);
+    ADC_ITConfig(ADC1, ADC_IT_AWD, ENABLE);
+
+    NVIC_InitTypeDef NVIC_InitStructure = {0};
+    NVIC_InitStructure.NVIC_IRQChannel = ADC_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+}
 /* This funcion shows how to initialize
  * the GPIO pins on GPIOD and how to configure
  * them as inputs and outputs
@@ -87,10 +154,14 @@ int main(void)
     // initialize the GPIO pins we need
     initClock();
     init_GPIO();
-
+    init_ADC();
     usb::init();
     Herkulex hercules;
-    Tools::Delay(Tools::DELAY_AROUND_1S);
+
+    GPIOE->ODR |=  0xC000;
+    Tools::Delay(Tools::DELAY_AROUND_1S / 2);
+    GPIOE->ODR &= ~0xC000;
+    enable_ADC_watchdog(2860, 3870);    // ~7.1V -- ~9.5V (V33 = 3.41V)
 
     hercules.setTorque(DEFAULT_ID, TORQUE_ON);
 
