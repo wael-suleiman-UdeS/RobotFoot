@@ -79,7 +79,7 @@ void initClock(void)
     }
 
     // Set up clock division for the differents buses
-    RCC_HCLKConfig(RCC_HCLK_Div1);      // APB1 = 42MHz
+    RCC_HCLKConfig(RCC_HCLK_Div1);      // AHB1 = 168MHz
     RCC_PCLK1Config(RCC_HCLK_Div4);     // APB1 = 42MHz
     RCC_PCLK2Config(RCC_HCLK_Div2);     // APB2 = 84MHz
 
