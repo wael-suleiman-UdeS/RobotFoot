@@ -11,13 +11,165 @@
 #include "stm32f4xx_adc.h"
 #include "CortexM4.h"
 
+#include <stm32f4xx_dac.h>
+#include <stm32f4xx_dma.h>
+#include <stm32f4xx_tim.h>
+#include <cstdlib>
+
+#include "CortexM4.h"
+
+#include <cstring>
+
+// DAC part {
+
+uint16_t buffer[1024];
+
+static uint16_t *const lobuf = buffer;
+static uint16_t *const hibuf = buffer + 512;
+
+#define NUMEL(x)            (sizeof(x)/sizeof(*x))
+#define SIGN_EXT8(x)        ((int)(int8_t)(x))
+#define SIGN_EXT16(x)       ((int)(int16_t)(x))
+#define APPLY_VOLUME(x, g)  ((SIGN_EXT16(x) * (g)) >> 16)
+
+static void (*DAC_data_handler)(int16_t *ptr, size_t size) = 0;
+
+extern "C" void DMA1_Stream5_IRQHandler(void)
+{
+    uint16_t *buf;
+    if (DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5))
+    {
+        DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_TCIF5);
+        // update upper buffer
+        buf = hibuf;
+    }
+    if (DMA_GetITStatus(DMA1_Stream5, DMA_IT_HTIF5))
+    {
+        DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_HTIF5);
+        // update lower buffer
+        buf = lobuf;
+    }
+    if (DAC_data_handler)
+        DAC_data_handler((int16_t *)buf, 512);
+    else
+        std::memset(buf, 0, 512*2);
+    for (size_t i=512; i--;)
+    {
+        *buf++ ^= 0x8000;
+    }
+}
+
+int init_DAC()
+{
+    GPIO_InitTypeDef gpinit[1] = {{0}};
+    gpinit->GPIO_Pin   = GPIO_Pin_4;
+    gpinit->GPIO_Mode  = GPIO_Mode_AIN;
+    gpinit->GPIO_Speed = GPIO_Speed_50MHz;
+    gpinit->GPIO_PuPd  = GPIO_PuPd_NOPULL;
+    GPIO_Init(GPIOA, gpinit);
+
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+
+
+
+    DAC_DeInit();
+    DAC_InitTypeDef dac[1];
+    dac->DAC_Trigger = DAC_Trigger_T6_TRGO;
+    dac->DAC_WaveGeneration = DAC_WaveGeneration_None;
+    dac->DAC_LFSRUnmask_TriangleAmplitude = DAC_LFSRUnmask_Bits11_0;
+    dac->DAC_OutputBuffer = DAC_OutputBuffer_Enable;
+    DAC_Init(DAC_Channel_1, dac);
+
+    DAC_Cmd(DAC_Channel_1, ENABLE);
+
+    DMA_DeInit(DMA1_Stream5);
+    DMA_InitTypeDef dma[1];
+    dma->DMA_Channel = DMA_Channel_7;
+    dma->DMA_PeripheralBaseAddr = (uint32_t) &DAC->DHR12L1;
+    dma->DMA_Memory0BaseAddr = (uint32_t) buffer;
+    dma->DMA_DIR = DMA_DIR_MemoryToPeripheral;
+    dma->DMA_BufferSize = NUMEL(buffer);
+    dma->DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    dma->DMA_MemoryInc = DMA_MemoryInc_Enable;
+    dma->DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    dma->DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    dma->DMA_Mode = DMA_Mode_Circular;
+    dma->DMA_Priority = DMA_Priority_High;
+    dma->DMA_FIFOMode = DMA_FIFOMode_Disable;
+    dma->DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
+    dma->DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    dma->DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+    DMA_Init(DMA1_Stream5, dma);
+
+    DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
+    DMA_ITConfig(DMA1_Stream5, DMA_IT_HT, ENABLE);
+
+    NVIC_InitTypeDef nvic[1];
+    nvic->NVIC_IRQChannel = DMA1_Stream5_IRQn;
+    nvic->NVIC_IRQChannelPreemptionPriority = 7;
+    nvic->NVIC_IRQChannelSubPriority = 7;
+    nvic->NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(nvic);
+    DMA_Cmd(DMA1_Stream5, ENABLE);
+
+    DAC_DMACmd(DAC_Channel_1, ENABLE);
+
+    TIM_DeInit(TIM6);
+
+    TIM_TimeBaseInitTypeDef    TIM_TimeBaseStructure;
+    TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
+    TIM_TimeBaseStructure.TIM_Period = 1749;
+    TIM_TimeBaseStructure.TIM_Prescaler = 0;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure);
+
+    TIM_SelectOutputTrigger(TIM6, TIM_TRGOSource_Update);
+
+    TIM_Cmd(TIM6, ENABLE);
+
+
+    return 0;
+}
+// } ADC part {
+// TEST!
+static void panic_sound(int16_t *buf, size_t size)
+{
+    static uint16_t key = 0;
+    static uint8_t  phase1 = 0, phase2 = 0x40;
+
+
+    enum { freqp = 16, freqk = 3};
+
+    for (;size--;)
+    {
+        key     += freqk;
+        phase1  += freqp;
+        phase2  += freqp;
+
+        int16_t out = 0;
+
+        if (key & 0x8000)
+        {
+
+            out = APPLY_VOLUME(
+                                (phase2 ^ -!(phase1 & 0x80)) << 9,
+                                0xBFFF);
+
+        }
+        *buf++ = out;
+    }
+}
+
 extern "C" void ADC_IRQHandler()
 {
     // Assume interrupt comes from analog watchdog
     ADC_ClearITPendingBit(ADC1, ADC_IT_AWD);
     ADC_ITConfig(ADC1, ADC_IT_AWD, DISABLE);    // No longer need this interrupt
     // Do something...
-    GPIOE->ODR = 0x8000;    //TEST
+    DAC_data_handler = panic_sound;
 }
 
 void init_ADC(void)
@@ -54,7 +206,7 @@ void init_ADC(void)
     ADC_DeInit();
     ADC_CommonInit(inic);
     ADC_Init(ADC1, ini);
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_15Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_480Cycles);
     ADC_ContinuousModeCmd(ADC1, ENABLE);
     ADC_EOCOnEachRegularChannelCmd(ADC1, DISABLE);
     ADC_Cmd(ADC1, ENABLE);
@@ -78,6 +230,9 @@ void enable_ADC_watchdog(uint16_t low, uint16_t high)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }
+
+// }
+
 /* This funcion shows how to initialize
  * the GPIO pins on GPIOD and how to configure
  * them as inputs and outputs
@@ -154,14 +309,18 @@ int main(void)
     // initialize the GPIO pins we need
     initClock();
     init_GPIO();
+
     init_ADC();
+
+    init_DAC();
+
     usb::init();
     Herkulex hercules;
 
     GPIOE->ODR |=  0xC000;
     Tools::Delay(Tools::DELAY_AROUND_1S / 2);
     GPIOE->ODR &= ~0xC000;
-    enable_ADC_watchdog(2860, 3870);    // ~7.1V -- ~9.5V (V33 = 3.41V)
+    enable_ADC_watchdog(2760, 3870);    // ~6.9V -- ~9.5V (V33 = 3.41V)
 
     hercules.setTorque(DEFAULT_ID, TORQUE_ON);
 
