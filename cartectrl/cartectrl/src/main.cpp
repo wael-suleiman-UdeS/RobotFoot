@@ -16,6 +16,8 @@
 #include <stm32f4xx_tim.h>
 #include <cstdlib>
 
+#include <stm32f4xx_spi.h>
+
 #include "CortexM4.h"
 
 #include <cstring>
@@ -190,11 +192,11 @@ void init_ADC(void)
 
     ini->ADC_Resolution = ADC_Resolution_12b;
     ini->ADC_ScanConvMode = DISABLE;
-    ini->ADC_ContinuousConvMode = ENABLE; //???
+    ini->ADC_ContinuousConvMode = ENABLE;
     ini->ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
     ini->ADC_ExternalTrigConv = ADC_ExternalTrigConv_T8_TRGO; // Don't care
     ini->ADC_DataAlign = ADC_DataAlign_Left;
-    ini->ADC_NbrOfConversion = 1; //???
+    ini->ADC_NbrOfConversion = 1;
 
     ADC_CommonInitTypeDef inic[1] = {{0}};
     ADC_CommonStructInit(inic);
@@ -231,53 +233,61 @@ void enable_ADC_watchdog(uint16_t low, uint16_t high)
 	NVIC_Init(&NVIC_InitStructure);
 }
 
-// } UART 2: {
-void init_UART2()
+// } GYRO/ACC {
+void init_GYACC(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct; // this is for the GPIO pins used as TX and RX
-	USART_InitTypeDef USART_InitStruct; // this is for the USART1 initilization
+    RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_GPIOCEN, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_GPIODEN, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1ENR_SPI3EN, ENABLE);
 
+    GPIO_InitTypeDef gpio[1];
+    gpio->GPIO_Pin  = 0x0F; // 0, 1, 2, 3
+    gpio->GPIO_Mode = GPIO_Mode_IN;
+    gpio->GPIO_Speed= GPIO_Speed_50MHz;
+    gpio->GPIO_OType= GPIO_OType_OD;
+    gpio->GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(GPIOD, gpio);
 
-	/* enable APB2 peripheral clock for USART1
-	 * note that only USART1 and USART6 are connected to APB2
-	 * the other USARTs are connected to APB1
-	 */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    GPIOD->ODR |= 0xC0;
+    gpio->GPIO_Pin  = 0xF0; // 4, 5, 6, 7 (5 is useless although)
+    gpio->GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_Init(GPIOD, gpio);
 
-	/* enable the peripheral clock for the pins used by
-	 * USART1, PB6 for TX and PB7 for RX
-	 */
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    gpio->GPIO_Pin  = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12;
+    gpio->GPIO_Mode = GPIO_Mode_AF;
+    gpio->GPIO_Speed= GPIO_Speed_50MHz;
+    gpio->GPIO_OType= GPIO_OType_PP;
+    gpio->GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(GPIOC, gpio);
 
-	/* This sequence sets up the TX and RX pins
-	 * so they work correctly with the USART1 peripheral
-	 */
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3; // Pins 6 (TX) and 7 (RX) are used
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF; 			// the pins are configured as alternate function so the USART peripheral has access to them
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;		// this defines the IO speed and has nothing to do with the baudrate!
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;			// this defines the output type as push pull mode (as opposed to open drain)
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;			// this activates the pullup resistors on the IO pins
-	GPIO_Init(GPIOA, &GPIO_InitStruct);					// now all the values are passed to the GPIO_Init() function which sets the GPIO registers
+   	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_SPI3); //
+   	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_SPI3); //
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_SPI3);
 
-	/* The RX and TX pins are now connected to their AF
-	 * so that the USART1 can take over control of the
-	 * pins
-	 */
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2); //
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
-
-	/* Now the USART_InitStruct is used to define the
-	 * properties of USART1
-	 */
-	USART_InitStruct.USART_BaudRate = 115200;				// the baudrate is set to the value we passed into this init function
-	USART_InitStruct.USART_WordLength = USART_WordLength_8b;// we want the data frame size to be 8 bits (standard)
-	USART_InitStruct.USART_StopBits = USART_StopBits_1;		// we want 1 stop bit (standard)
-	USART_InitStruct.USART_Parity = USART_Parity_No;		// we don't want a parity bit (standard)
-	USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // we don't want flow control (standard)
-	USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx; // we want to enable the transmitter and the receiver
-	USART_Init(USART2, &USART_InitStruct);
-	USART_Cmd(USART2, ENABLE);
+    SPI_InitTypeDef spi[1];
+    SPI_StructInit(spi);
+    spi->SPI_Direction  = SPI_Direction_2Lines_FullDuplex;
+    spi->SPI_Mode       = SPI_Mode_Master;
+    spi->SPI_DataSize   = SPI_DataSize_16b;
+    spi->SPI_CPOL       = SPI_CPOL_High;
+    spi->SPI_CPHA       = SPI_CPHA_2Edge;
+    spi->SPI_NSS        = SPI_NSS_Soft;
+    spi->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+    spi->SPI_FirstBit   = SPI_FirstBit_MSB;
+    SPI_Init(SPI3, spi);
+    SPI_Cmd(SPI3, ENABLE);
 }
+
+uint16_t GYACC_txrx(bool which, uint16_t data)
+{
+    const uint32_t pin = which ? 0x80 : 0x40;
+    GPIOD->ODR &= ~pin;
+    SPI3->DR = data;
+    while(SPI_GetFlagStatus(SPI3, SPI_I2S_FLAG_BSY));
+    GPIOD->ODR |=  pin;
+    return SPI3->DR;
+}
+enum { USE_GYRO, USE_ACC };
 // }
 
 /* This funcion shows how to initialize
@@ -360,9 +370,9 @@ int main(void)
     init_ADC();
 
     init_DAC();
-
+    init_GYACC();
     usb::init();
-    init_UART2();
+
     Herkulex hercules;
 
     GPIOE->ODR |=  0xC000;
@@ -373,6 +383,8 @@ int main(void)
     hercules.setTorque(DEFAULT_ID, TORQUE_ON);
 
     unsigned debounce = 10000, oldb=0;
+    unsigned g = GYACC_txrx(USE_GYRO, 0x8F00);
+    unsigned a = GYACC_txrx(USE_ACC,  0xA000);
 
     for(;;)
     {
@@ -381,11 +393,7 @@ int main(void)
         for (int i=0; i < r; ++i) p[i] += 2;
         usb::write(p, r);
         if (r) GPIOE->ODR += 0x4000;
-        if (USART2->SR & 0x20)
-        {
-            USART2->DR += 1;
-            GPIOE->ODR += 0x4000;
-        }
+
         if (!debounce--)
         {
             const unsigned b = ~GPIOC->IDR;
