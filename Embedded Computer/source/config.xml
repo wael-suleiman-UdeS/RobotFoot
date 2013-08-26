@@ -1,28 +1,66 @@
 <RobotFoot>
   <ImageProcessing>
     <Camera>
-      <DeviceIndex>0</DeviceIndex>
+      <DeviceIndex value="0" />
     </Camera>
     <Colors>
-      <Color name="red">
-        <HSVcolor>
-          <Hue value="215" />
-          <HueTolerance value="40" />
-          <Saturation value="163" />
-          <Brightness value="103" />
-        </HSVcolor>
-        <CircleSpec>
-          <ErosionIterations value="0" />
-          <DilationIterations value="2" />
-          <SmoothingApertureSize value="9" />
-          <ResolutionDivisor value="2" />
-          <MinDistance value="120" />
-          <EdgeThreshold value="100" />
-          <CenterThreshold value="10" />
-          <MinRadius value="10" />
-          <MaxRadius value="400" />
-        </CircleSpec>
-      </Color>
+	  <Color name="red">
+		<HSVcolor>
+		  <Hue value="215" />
+		  <HueTolerance value="40" />
+		  <Saturation value="163" />
+		  <Brightness value="103" />
+		</HSVcolor>
+		<CircleSpec>
+		  <ErosionIterations value="0" />
+		  <DilationIterations value="2" />
+		  <SmoothingApertureSize value="9" />
+		  <ResolutionDivisor value="2" />
+		  <MinDistance value="120" />
+		  <EdgeThreshold value="100" />
+		  <CenterThreshold value="10" />
+		  <MinRadius value="10" />
+		  <MaxRadius value="400" />
+		</CircleSpec>
+	  </Color>
+	  <Color name="pink">
+		<HSVcolor>
+		  <Hue value="160" />
+		  <HueTolerance value="10" />
+		  <Saturation value="0" />
+		  <Brightness value="255" />
+		</HSVcolor>
+		<CircleSpec>
+		  <ErosionIterations value="1" />
+		  <DilationIterations value="4" />
+		  <SmoothingApertureSize value="9" />
+		  <ResolutionDivisor value="2" />
+		  <MinDistance value="120" />
+		  <EdgeThreshold value="100" />
+		  <CenterThreshold value="10" />
+		  <MinRadius value="10" />
+		  <MaxRadius value="400" />
+		</CircleSpec>
+	  </Color>
+	  <Color name="green">
+		<HSVcolor>
+		  <Hue value="65" />
+		  <HueTolerance value="9" />
+		  <Saturation value="172" />
+		  <Brightness value="71" />
+		</HSVcolor>
+		<CircleSpec>
+		  <ErosionIterations value="4" />
+		  <DilationIterations value="10" />
+		  <SmoothingApertureSize value="9" />
+		  <ResolutionDivisor value="2" />
+		  <MinDistance value="120" />
+		  <EdgeThreshold value="100" />
+		  <CenterThreshold value="10" />
+		  <MinRadius value="10" />
+		  <MaxRadius value="400" />
+		</CircleSpec>
+	  </Color>
     </Colors>
   </ImageProcessing>
   <Motion>
@@ -30,12 +68,28 @@
       <Head>
         <!--crap-->
         <Pan value="2" />
-        <Tilt value="1" />
+        <Tilt value="3" />
 
-        <HorizontalOffset value="5" />
-        <VerticalOffset value="0" />
-      
-        <Threshold value="80" />
+        <MinH value="200" />
+        <MaxH value="800" />
+        <MinV value="350" />
+        <MaxV value="800" />
+
+        <HorizontalOffset value="-15" />
+        <VerticalOffset value="-15" />
+
+        <AngleH value="115" />
+        <AngleV value="115" />
+        <Threshold value="20" />
+        
+        <PID>
+          <!--caca-->
+          <P value="-0.5" />
+          <I value="-0.05" />
+          <D value="-0.2" />
+          <dt value="0.2" />
+          <Epsilon value="0" />
+        </PID>
       </Head>
     </Motors>
   </Motion>

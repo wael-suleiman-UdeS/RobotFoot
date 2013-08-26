@@ -62,12 +62,14 @@ string XmlParser::getStringValue(path xPath) const
  * \return string: Retrieved int
  *
  */
-int XmlParser::getIntValue(path xPath) const
+float XmlParser::getIntValue(path xPath) const
 {
-	int result = 0;
-	if (1 == std::sscanf(getStringValue(xPath).c_str(), "%i", &result))
+	float result = 0;
+	const auto s = getStringValue(xPath);
+	if (1 != std::sscanf(s.c_str(), "%f", &result))
 	{
 		// It didn't work!!!
+		result = 0;
 	}
 	return result;
 }

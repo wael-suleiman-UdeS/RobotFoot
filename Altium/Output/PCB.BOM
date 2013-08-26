@@ -1,0 +1,40 @@
+Bill of Material for 
+On 2013-04-23 at 15:25:34
+
+ Comment             Pattern     Quantity  Components
+------------------------------------------------------------------------------
+ 440247-1            440247           1    J2                           USB 2.0, Right Angle, SMT, B Type, Receptacle, 5 Position, Black 
+ Batt Header         BATTFOOT         2    P6, P8                                            
+ Cap                 C0805           14    C1, C4, C5, C8, C9, C10, C11 Capacitor            
+                                           C13, C18, C22, C24, C25, C26
+                                           C28
+ Cap2                C0805            1    C20                          Capacitor            
+ Cap2                C1206            8    C3, C6, C7, C12, C14, C15    Capacitor            
+                                           C16, C27
+ Cap2                EEE-1EA101XP     3    C17, C21, C23                Capacitor            
+ Cap2                URS1V102         1    C19                          Capacitor            
+ Cap2                UWT1C471MNL1GS    1    C2                           Capacitor            
+ Diode 18TQ045       DO-220AA         1    D4                           Schottky Rectifier   
+ Diode 18TQ045       TO-220AC         2    D9, D10                      Schottky Rectifier   
+ Diode BAS16         SOT-23_N         2    D6, D7                       Silicon Switching Diode for High-Speed Switching 
+ Fuse                FUSEHOLDER       1    F1                                                
+ Inductor Iron       COIL             1    L1                           Magnetic-Core Inductor 
+ Jack Audio          JACK AUDIO       1    J1                           Stereo Jack 3.5mm    
+ LED0                3.2X1.6X1.1      6    D1, D2, D3, D5, D8, D11      Typical INFRARED GaAs LED 
+ LM2576S-5.0         TS5B_L           1    U4                           SIMPLE SWITCHER® 3A Step-Down Voltage Regulator, 5-pin TO-263 
+ LM317T              T03B             1    U5                           3-Terminal Adjustable Regulator, 3-pin TO-220 
+ LM386N-1            SOIC127P600-8AM    1    U1                           Low Voltage Audio Power Amplifier, 8-pin MDIP 
+ LSM330DLC           ACC/GYR          1    U3                           3D Accelerometer/Gyroscope 
+ MHDR1X4             MHDR1X4          4    P2, P3, P4, P5               Header, 4-Pin        
+ MHDR1X6             MHDR1X6          1    P1                           Header, 6-Pin        
+ Pwr Jack            PWR JACK         1    P7                                                
+ Res1                J1-0603         20    R3, R4, R5, R6, R7, R8, R9   Resistor             
+                                           R10, R11, R12, R13, R14, R15
+                                           R16, R17, R18, R19, R20, R21
+                                           R22
+ RPot                Pot-3352-W       2    R1, R2                       Potentiometer        
+ Speaker             PIN2             1    LS1                          Loudspeaker          
+ STM32F407VG         LQFP100_L        1    U2                           STM32 ARM-based 32-bit MCU with 64 Kbytes Flash, 100-pin LQFP, Industrial Temperature 
+ SW                  SWITCH           4    S1, S2, S3, S4               Switch               
+ SW-SPST             SWITCH ON-OFF    1    S5                           Single-Pole, Single-Throw Switch 
+ XTAL                CRYSTAL          1    Y1                           Crystal Oscillator   

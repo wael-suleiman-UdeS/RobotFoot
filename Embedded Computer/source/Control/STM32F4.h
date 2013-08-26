@@ -18,7 +18,7 @@ public:
 
 	void setTorque(std::uint8_t id, TorqueState state);
 
-	std::uint16_t read(std::uint8_t id);
+	int read(std::uint8_t id);
 
 private:
 	SerialInterface _usb;

@@ -41,7 +41,7 @@ void STM32F4::setTorque(uint8_t id, TorqueState state)
 	_usb.write(msg);
 }
 
-uint16_t STM32F4::read(uint8_t id)
+int STM32F4::read(uint8_t id)
 {
 	std::vector<char> msg;
 
@@ -49,6 +49,8 @@ uint16_t STM32F4::read(uint8_t id)
 	msg.push_back(id);
 
 	msg = _usb.read_sync(msg);
+
+	if (msg.size() < 4) { return 0; }
 
 	return ((msg[2] & 0xFF) << 8) | (msg[3] & 0xFF);  
 }

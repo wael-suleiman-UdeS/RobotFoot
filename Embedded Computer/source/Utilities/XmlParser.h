@@ -55,7 +55,7 @@ public:
 
 	bool loadFile(fs::path filePath);
 	string getStringValue(fs::path xPath) const;
-	int getIntValue(fs::path xPath) const;
+	float getIntValue(fs::path xPath) const;
 };
 
 #endif // XMLPARSER_H
