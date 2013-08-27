@@ -250,9 +250,9 @@ void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
 {
     for(uint8_t i = 0; i < packetSize ; i++)
     {
-        while( !(USART1->SR & 0x00000040) );
-            USART_SendData(USART1, *data);
-		*data++;
+        while( !(USART3->SR & 0x00000040) );
+            USART_SendData(USART3, *data);
+		data++;
     }
 }
 
@@ -299,7 +299,7 @@ void Herkulex::init_USART1(uint32_t baudrate){
 	 * note that only USART1 and USART6 are connected to APB2
 	 * the other USARTs are connected to APB1
 	 */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
 	/* enable the peripheral clock for the pins used by
 	 * USART1, PB6 for TX and PB7 for RX
@@ -309,7 +309,7 @@ void Herkulex::init_USART1(uint32_t baudrate){
 	/* This sequence sets up the TX and RX pins
 	 * so they work correctly with the USART1 peripheral
 	 */
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7; // Pins 6 (TX) and 7 (RX) are used
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11; // Pins 6 (TX) and 7 (RX) are used
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF; 			// the pins are configured as alternate function so the USART peripheral has access to them
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;		// this defines the IO speed and has nothing to do with the baudrate!
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;			// this defines the output type as push pull mode (as opposed to open drain)
@@ -320,8 +320,8 @@ void Herkulex::init_USART1(uint32_t baudrate){
 	 * so that the USART1 can take over control of the
 	 * pins
 	 */
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_USART1); //
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource7, GPIO_AF_USART1);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3); //
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_USART3);
 
 	/* Now the USART_InitStruct is used to define the
 	 * properties of USART1
@@ -332,7 +332,7 @@ void Herkulex::init_USART1(uint32_t baudrate){
 	USART_InitStruct.USART_Parity = USART_Parity_No;		// we don't want a parity bit (standard)
 	USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // we don't want flow control (standard)
 	USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx; // we want to enable the transmitter and the receiver
-	USART_Init(USART1, &USART_InitStruct);					// again all the properties are passed to the USART_Init function which takes care of all the bit setting
+	USART_Init(USART3, &USART_InitStruct);					// again all the properties are passed to the USART_Init function which takes care of all the bit setting
 
 
 	/* Here the USART1 receive interrupt is enabled
@@ -340,33 +340,33 @@ void Herkulex::init_USART1(uint32_t baudrate){
 	 * to jump to the USART1_IRQHandler() function
 	 * if the USART1 receive interrupt occurs
 	 */
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // enable the USART1 receive interrupt
+	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE); // enable the USART3 receive interrupt
 
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;		 // we want to configure the USART1 interrupts
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;// this sets the priority group of the USART1 interrupts
+	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;		 // we want to configure the USART3 interrupts
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;// this sets the priority group of the USART3 interrupts
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		 // this sets the subpriority inside the group
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			 // the USART1 interrupts are globally enabled
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			 // the USART3 interrupts are globally enabled
 	NVIC_Init(&NVIC_InitStructure);							 // the properties are passed to the NVIC_Init function which takes care of the low level stuff
 
-	// finally this enables the complete USART1 peripheral
-	USART_Cmd(USART1, ENABLE);
+	// finally this enables the complete USART3 peripheral
+	USART_Cmd(USART3, ENABLE);
 }
 
 //------------------------------------------------------------------------------
 
 namespace{
 
-// This is the interrupt request handler (IRQ) for ALL USART1 interrupts
-extern "C" void USART1_IRQHandler(void){
+// This is the interrupt request handler (IRQ) for ALL USART3 interrupts
+extern "C" void USART3_IRQHandler(void){
 
-	// Check if the USART1 receive interrupt flag was set
-	if( USART_GetITStatus(USART1, USART_IT_RXNE) ){
+	// Check if the USART3 receive interrupt flag was set
+	if( USART_GetITStatus(USART3, USART_IT_RXNE) ){
 
         // This implementation is specific for Herkulex message reception.
         bool status = true;
 		static uint8_t cnt = 0;
 		static uint8_t msgLength = MAX_LEN;
-		uint8_t data = USART1->DR; // the character from the USART1 data register is saved in t
+		uint8_t data = USART3->DR; // the character from the USART3 data register is saved in t
 
         // Check is first two data are HEADER
         if( cnt == 0 || cnt == 1 )
