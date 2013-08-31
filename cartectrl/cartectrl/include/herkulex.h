@@ -284,7 +284,7 @@ public:
      * @param id The herkulex servo ID.
      */
      void clear(uint8_t id);
-
+     void reset(uint8_t id);
     /**@brief Set torque setting
      *
      * @param id The herkulex servo ID.

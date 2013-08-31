@@ -246,6 +246,31 @@ int16_t Herkulex::getPos(uint8_t id)
 }
 
 //------------------------------------------------------------------------------
+void Herkulex::reset(uint8_t id)
+{
+    uint8_t txBuf[7];
+
+    txBuf[0] = HEADER;                  // Packet Header (0xFF)
+    txBuf[1] = HEADER;                  // Packet Header (0xFF)
+    txBuf[2] = MIN_PACKET_SIZE;         // Packet Size
+    txBuf[3] = id;                      // Servo ID
+    txBuf[4] = CMD_REBOOT;
+    txBuf[5] = 0;                       // Checksum1
+    txBuf[6] = 0;                       // Checksum2
+
+    // Check Sum1 and Check Sum2
+    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]) & 0xFE;
+    txBuf[6] = (~txBuf[5])&0xFE;
+
+    // send packet (mbed -> herkulex)
+    txPacket(7, txBuf);
+    if (id != 0xFE)
+    {
+        uint8_t rxBuf[9];
+        rxPacket(9, rxBuf);
+    }
+}
+//------------------------------------------------------------------------------
 void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
 {
     for(uint8_t i = 0; i < packetSize ; i++)

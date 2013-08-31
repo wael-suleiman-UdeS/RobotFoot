@@ -359,10 +359,10 @@ void init_GPIO(void)
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;   // this enables the pulldown resistor --> we want to detect a high level
     GPIO_Init(GPIOC, &GPIO_InitStruct);			  // this passes the configuration to the Init function which takes care of the low level stuff
 }
-
+#define DEFAULT_ID 2
 int main(void)
 {
-
+    bool isOn = false;
     // initialize the GPIO pins we need
     initClock();
     init_GPIO();
@@ -374,13 +374,15 @@ int main(void)
     usb::init();
 
     Herkulex hercules;
+    hercules.reset(0xFE); // TEST
+
 
     GPIOE->ODR |=  0xC000;
     Tools::Delay(Tools::DELAY_AROUND_1S / 2);
     GPIOE->ODR &= ~0xC000;
     enable_ADC_watchdog(2760, 3870);    // ~6.9V -- ~9.5V (V33 = 3.41V)
 
-    hercules.setTorque(DEFAULT_ID, TORQUE_ON);
+
 
     unsigned debounce = 10000, oldb=0;
     unsigned g = GYACC_txrx(USE_GYRO, 0x8F00);
@@ -398,6 +400,11 @@ int main(void)
         {
             const unsigned b = ~GPIOC->IDR;
             const unsigned p = (b ^ oldb) & b;
+            if (!isOn && (p & 0xE))
+            {
+                isOn = false;
+                hercules.setTorque(DEFAULT_ID, TORQUE_ON);
+            }
             if (p & 2)
             {
                 GPIOE->ODR ^= 0x8000;
