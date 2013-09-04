@@ -8,10 +8,10 @@
 namespace
 {
 
-bool checkPosition( uint16_t ReadPosition, uint16_t DesiredPosition, uint16_t Threshold )
-{
-    return DesiredPosition <= ReadPosition +  Threshold && DesiredPosition >= ReadPosition -  Threshold;
-}
+    bool checkPosition( uint16_t ReadPosition, uint16_t DesiredPosition, uint16_t Threshold )
+    {
+        return DesiredPosition <= ReadPosition +  Threshold && DesiredPosition >= ReadPosition -  Threshold;
+    }
 
 }
 

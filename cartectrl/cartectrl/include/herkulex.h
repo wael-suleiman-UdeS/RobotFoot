@@ -267,17 +267,11 @@ public:
             NUMBER_OF_JOINTS
     };
 
-    /**@brief Create an Herkulex servo object connected to the serial pins and baudrate
-     *
-     * @param tx Transmit pin.
-     * @param rx Receive pin.
-     * @param baudRate The serial tx/rx speed.
-     */
-    Herkulex(/*PinNameint tx, PinNameint rx, uint32_t baudRate*/);
-
     /** Destroy an Herkulex servo object
      */
     ~Herkulex();
+
+    static Herkulex* GetInstance() ;
 
     /**@brief Clear error status
      *
@@ -325,6 +319,16 @@ public:
 
 private :
 
+    /**@brief Create an Herkulex servo object connected to the serial pins and baudrate
+     *
+     * @param tx Transmit pin.
+     * @param rx Receive pin.
+     * @param baudRate The serial tx/rx speed.
+     */
+    Herkulex(/*PinNameint tx, PinNameint rx, uint32_t baudRate*/);
+
+    static Herkulex* instance;
+
     /**@brief Transmit packet datas with UART
      *
      * @param packetSize The packet size.
@@ -339,12 +343,6 @@ private :
      */
     bool rxPacket(uint8_t packetSize, uint8_t* data);
 
-    /**@brief This funcion initializes the USART1 peripheral
-     *
-     * @param baudrate The baudrate at which the USART is
-     * 				   supposed to operate
-     */
-    void init_USART1(uint32_t baudrate);
 };
 
 //------------------------------------------------------------------------------
