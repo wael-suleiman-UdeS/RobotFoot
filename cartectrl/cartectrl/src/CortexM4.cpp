@@ -6,7 +6,6 @@ namespace{
 
 const int MAX_LEN = 20;
 uint8_t receivedMsg[MAX_LEN];
-int j = 0;
 
 const uint8_t EndMsg1 = '\r';
 const uint8_t EndMsg2 = '\n';
@@ -33,6 +32,7 @@ CortexM4::~CortexM4()
 
 void CortexM4::read()
 {
+    int j = 0;
     bool end = false;
     bool isPreviousEndMsg1 = false;
 
@@ -54,7 +54,7 @@ void CortexM4::read()
                 isPreviousEndMsg1 = false;
                 end = true;
                 sendCommand ( receivedMsg, j-2 );
-                j = 0;
+                break;
             }
         }
     }
@@ -77,13 +77,13 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
                 uint16_t pos = data[2];
                 pos = pos << 8;
                 pos |= data[3];
-                _herkulex.positionControl(data[1], pos, 70, 0x00);
+                Herkulex::GetInstance()->positionControl(data[1], pos, 70, 0x00);
             }
             break;
         case CMD_MOTOR_READ_POS:
             if( n >= 2 ) //TODO : Should be == instead
             {
-                uint16_t pos = _herkulex.getPos( data[1] );
+                uint16_t pos = Herkulex::GetInstance()->getPos( data[1] );
 
                 uint32_t msgSize = 6;
                 uint8_t msg[msgSize];
@@ -99,9 +99,9 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
             }
             break;
         case CMD_MOTOR_SET_TORQUE:
-            if( n >= 2 ) //TODO : Should be == instead
+            if( n >= 3 ) //TODO : Should be == instead
             {
-                _herkulex.setTorque(data[1], TORQUE_ON);
+                Herkulex::GetInstance()->setTorque(data[1], data[2]);
             }
             break;
     }

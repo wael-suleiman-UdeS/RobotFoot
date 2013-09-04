@@ -14,7 +14,7 @@
 using namespace Robot;
 
 const std::string fileName = "log.txt";
-const int uDt = 16; // Time step in micro second
+const double uDt = 0.016; // Time step in second
 
 int main()
 {   
@@ -37,7 +37,7 @@ int main()
    file.open( fileName.c_str() );
    */
    
-   WalkStatus calculR, calculL;   
+   WalkStatus calculR(2), calculL(2);   
    MotorControl motion = MotorControl( &cm730 );
    
    // Enable Torque
@@ -94,12 +94,12 @@ int main()
       {
 	 break;
       }
-      usleep(uDt*1000);
+      usleep(uDt**1000*1000);
    } 
    */
    
    const double tf = 3.1;
-   double dt = 0.016;
+   double dt = uDt;
    
    for( int i = 0; i < 5; i++ )
    {  
