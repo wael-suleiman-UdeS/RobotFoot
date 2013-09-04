@@ -14,10 +14,10 @@
 using namespace Robot;
 
 const std::string fileName = "log.txt";
-const int uDt = 16; // Time step in micro second
+const double uDt = 0.016; // Time step in second
 
-int main()
-{   
+int run()
+{
    std::cout << "Starting program. Sleeping 4 sec\n";
    sleep(4);
    
@@ -94,12 +94,12 @@ int main()
       {
 	 break;
       }
-      usleep(uDt*1000);
+      usleep(uDt**1000*1000);
    } 
    */
    
    const double tf = 3.1;
-   double dt = 0.016;
+   double dt = uDt;
    
    for( int i = 0; i < 5; i++ )
    {  
@@ -158,12 +158,17 @@ int main()
    std::cout << "Finishing program. Sleeping 4 sec\n";
    sleep(4);
    
-   // Disable torque
-   //motion.DisableTorque( MotorControl::ALL_LEGS );
    //file.close();
    std::cout << "Program finished\n";
    
-   return 0;	
+   return 0;
+}
+
+int main()
+{   
+   std::cout << "Use text file : 1" << std::endl;
+   std::cout << "Use script : 2" << std::endl;
+   return run();	
 }
 
 
