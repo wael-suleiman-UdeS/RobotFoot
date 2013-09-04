@@ -25,8 +25,8 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.522437687" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1982483131" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/arm-linux-gnueabihf/include/c++/4.6.3"/>
-									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/git/Embedded Computer/source/ThirdParty/boost_1_53_0&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/git/Embedded Computer/source/ThirdParty/opencv/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/ThirdParty/boost_1_53_0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/ThirdParty/opencv/build/include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.1180264319" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=gnu++0x" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.26605720" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -36,8 +36,8 @@
 								<option id="gnu.c.compiler.exe.debug.option.debugging.level.1598517039" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1885612701" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/arm-linux-gnueabihf/include"/>
-									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/git/Embedded Computer/source/ThirdParty/boost_1_53_0&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/git/Embedded Computer/source/ThirdParty/opencv/build/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/ThirdParty/boost_1_53_0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/ThirdParty/opencv/build/include&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.360071733" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -45,8 +45,8 @@
 							<tool command="arm-linux-gnueabihf-g++" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.722637704" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.2041679753" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/usr/arm-linux-gnueabihf/lib"/>
-									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/git/Embedded Computer/source/ThirdParty/boost_1_53_0/stage/arm_lib&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/git/Embedded Computer/source/ThirdParty/opencv/build/arm&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/ThirdParty/boost_1_53_0/stage/arm_lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/ThirdParty/opencv/build/arm&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.145698471" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="boost_date_time"/>

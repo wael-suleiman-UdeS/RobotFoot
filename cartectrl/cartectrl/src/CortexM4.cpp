@@ -85,13 +85,15 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
             {
                 uint16_t pos = _herkulex.getPos( data[1] );
 
-                uint32_t msgSize = 4;
+                uint32_t msgSize = 6;
                 uint8_t msg[msgSize];
 
                 msg[0] = CMD_MOTOR_READ_POS;
                 msg[1] = data[1];
                 msg[2] = pos >> 8;
                 msg[3] = pos;
+                msg[4] = EndMsg1;
+                msg[5] = EndMsg2;
 
                 CortexM4::write( msg, msgSize );
             }

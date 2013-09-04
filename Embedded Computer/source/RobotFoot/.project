@@ -28,22 +28,22 @@
 		<link>
 			<name>Control</name>
 			<type>2</type>
-			<location>/home/robotfoot/git/Embedded Computer/source/Control</location>
+			<location>/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/Control</location>
 		</link>
 		<link>
 			<name>ImageProcessing</name>
 			<type>2</type>
-			<location>/home/robotfoot/git/Embedded Computer/source/ImageProcessing</location>
+			<location>/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/ImageProcessing</location>
 		</link>
 		<link>
 			<name>RobotFoot.cpp</name>
 			<type>1</type>
-			<location>/home/robotfoot/git/Embedded Computer/source/RobotFoot.cpp</location>
+			<location>/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/RobotFoot.cpp</location>
 		</link>
 		<link>
 			<name>Utilities</name>
 			<type>2</type>
-			<location>/home/robotfoot/git/Embedded Computer/source/Utilities</location>
+			<location>/home/robotfoot/GitHub/RobotFoot/Embedded Computer/source/Utilities</location>
 		</link>
 	</linkedResources>
 </projectDescription>
