@@ -10,7 +10,7 @@
 class STM32F4
 {
 public:
-	enum TorqueState { TorqueOff, TorqueOn };
+	enum TorqueState { TorqueOff, BreakOn, TorqueOn};
 
 	STM32F4(std::string portName, boost::asio::io_service& io);
 	~STM32F4();

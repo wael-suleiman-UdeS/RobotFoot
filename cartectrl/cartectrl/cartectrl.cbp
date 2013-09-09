@@ -103,6 +103,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="include/CortexM4.h" />
+		<Unit filename="include/EmergencyStop.h" />
 		<Unit filename="include/Tools.h" />
 		<Unit filename="include/herkulex.h" />
 		<Unit filename="include/initClock.h" />
@@ -114,6 +115,7 @@
 		<Unit filename="include/usb/usbd_desc.h" />
 		<Unit filename="linker/stm32f4_linker.ld" />
 		<Unit filename="src/CortexM4.cpp" />
+		<Unit filename="src/EmergencyStop.cpp" />
 		<Unit filename="src/Tools.cpp" />
 		<Unit filename="src/Tools.h" />
 		<Unit filename="src/herkulex.cpp" />

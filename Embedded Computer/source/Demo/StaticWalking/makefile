@@ -1,7 +1,7 @@
 # Sources
-SRC =  test1.cpp
+SRC =  main.cpp
 SRC += ../../Utilities/SerialInterface.cpp
-#SRC += ../../Utilities/logger.cpp
+SRC += ../../Utilities/logger.cpp
 #SRC += ../../Utilities/XmlParser.cpp
 #SRC += ../../Utilities/pugixml.cpp
 #SRC += ../../Utilities/PID.cpp
@@ -10,6 +10,9 @@ SRC += ../../Utilities/SerialInterface.cpp
 #SRC += ../../ImageProcessing/ColorFinder.cpp
 #SRC += ../../ImageProcessing/ImageProcessing.cpp
 SRC += ../../Control/STM32F4.cpp
+SRC += ../../Control/MotorControl.cpp
+SRC += matrixpinv.cpp
+SRC += WalkStatus.cpp
 
 # Libs directories
 #LIBDIR = -L../../ThirdParty/boost_1_53_0/stage/arm_lib/
@@ -92,7 +95,7 @@ INCLUDES = -I../../ThirdParty/boost_1_53_0/
 #INCLUDES += -I../../ThirdParty/opencv/include/
 
 # Binary
-OUT = test1 
+OUT = main 
 
 # CFLAGS
 #CFLAGS= -g -c -Wall -std=c++0x -O3
