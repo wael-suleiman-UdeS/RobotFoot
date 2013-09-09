@@ -1,3 +1,9 @@
+/*!
+ * \file RobotFoot.cpp
+ * \brief The main file of the project
+ * \author Mitchel Labonté
+ * \version 0.1
+ */
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -11,7 +17,16 @@
 #include "Utilities/SerialInterface.h"
 #include "Control/STM32F4.h"
 
-
+/*!
+ * \brief Track the ball
+ *
+ * A test function for the tracking of the ball
+ *
+ * \param mc : An instance of the micro controller
+ * \param debug : Acivate some debug option
+ * \param PID : Activate the use of PID
+ * \param colorName : The string of the color of the ball
+ */
 void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 {
 	Logger::getInstance().addStream(std::cout);
@@ -90,6 +105,13 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 	cvDestroyAllWindows();
 }
 
+/*!
+ * \brief Use for the demo
+ *
+ *  Track the ball and use feedback for controlling the motor of the head
+ *
+ *  \param mc : An instance of the micro controller
+ */
 void hardSet(STM32F4& mc)
 {
 	using boost::filesystem::path;
