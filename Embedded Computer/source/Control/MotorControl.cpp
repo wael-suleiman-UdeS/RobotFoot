@@ -1,9 +1,5 @@
 #include "MotorControl.h"
 
-#include "CM730.h"
-#include "JointData.h"
-#include "MX28.h"
-
 #include <iostream>
 #include <iterator>
 #include <algorithm>
@@ -12,59 +8,80 @@
 //#define DEBUG_TEST_MOTION
 #define DANGER_TEST_MOTION
 
-using namespace Robot;
+namespace
+{
+	//Right Leg
+	const int ID_R_HIP_YAW = 1;
+	const int ID_R_HIP_ROLL = 3;
+	//TODO should be 5 temp test
+	const int ID_R_HIP_PITCH = 253;
+	const int ID_R_KNEE = 7;
+	const int ID_R_ANKLE_PITCH = 9;
+	const int ID_R_ANKLE_ROLL = 11;
+	//Left leg
+	const int ID_L_HIP_YAW = 2;
+	const int ID_L_HIP_ROLL = 4;
+	const int ID_L_HIP_PITCH = 6;
+	const int ID_L_KNEE = 8;
+	const int ID_L_ANKLE_PITCH = 10;
+	const int ID_L_ANKLE_ROLL = 12;
 
-MotorControl::MotorControl( CM730* cm730 ) :
- _cm730(cm730)
+	const double dAngleConvertion = 0.325;
+	const double dInvAngleConvertion = 1/dAngleConvertion;
+	const int iOffsetValue = 512;
+}
+
+MotorControl::MotorControl( STM32F4* stm32f4 ) :
+ _stm32f4(stm32f4)
 {  
    std::vector<int> joints;
    //Right Leg
-   joints.push_back(JointData::ID_R_HIP_YAW);
-   joints.push_back(JointData::ID_R_HIP_ROLL);
-   joints.push_back(JointData::ID_R_HIP_PITCH);
-   joints.push_back(JointData::ID_R_KNEE);
-   joints.push_back(JointData::ID_R_ANKLE_PITCH);
-   joints.push_back(JointData::ID_R_ANKLE_ROLL);
+   joints.push_back(ID_R_HIP_YAW);
+   joints.push_back(ID_R_HIP_ROLL);
+   joints.push_back(ID_R_HIP_PITCH);
+   joints.push_back(ID_R_KNEE);
+   joints.push_back(ID_R_ANKLE_PITCH);
+   joints.push_back(ID_R_ANKLE_ROLL);
    //Left leg
-   joints.push_back(JointData::ID_L_HIP_YAW);
-   joints.push_back(JointData::ID_L_HIP_ROLL);
-   joints.push_back(JointData::ID_L_HIP_PITCH);
-   joints.push_back(JointData::ID_L_KNEE);
-   joints.push_back(JointData::ID_L_ANKLE_PITCH);
-   joints.push_back(JointData::ID_L_ANKLE_ROLL);
+   joints.push_back(ID_L_HIP_YAW);
+   joints.push_back(ID_L_HIP_ROLL);
+   joints.push_back(ID_L_HIP_PITCH);
+   joints.push_back(ID_L_KNEE);
+   joints.push_back(ID_L_ANKLE_PITCH);
+   joints.push_back(ID_L_ANKLE_ROLL);
    
    _config[ALL_LEGS].joints = joints;
-   _config[ALL_LEGS].P = JointData::P_GAIN_DEFAULT;
-   _config[ALL_LEGS].I = JointData::I_GAIN_DEFAULT;
-   _config[ALL_LEGS].D =JointData::D_GAIN_DEFAULT;  
+   //_config[ALL_LEGS].P = JointData::P_GAIN_DEFAULT;
+   //_config[ALL_LEGS].I = JointData::I_GAIN_DEFAULT;
+   //_config[ALL_LEGS].D =JointData::D_GAIN_DEFAULT;  
       
    joints.clear();
    //Right Leg
-   joints.push_back(JointData::ID_R_HIP_YAW);
-   joints.push_back(JointData::ID_R_HIP_ROLL);
-   joints.push_back(JointData::ID_R_HIP_PITCH);
-   joints.push_back(JointData::ID_R_KNEE);
-   joints.push_back(JointData::ID_R_ANKLE_PITCH);
-   joints.push_back(JointData::ID_R_ANKLE_ROLL);
+   joints.push_back(ID_R_HIP_YAW);
+   joints.push_back(ID_R_HIP_ROLL);
+   joints.push_back(ID_R_HIP_PITCH);
+   joints.push_back(ID_R_KNEE);
+   joints.push_back(ID_R_ANKLE_PITCH);
+   joints.push_back(ID_R_ANKLE_ROLL);
    
    _config[RIGHT_LEGS].joints = joints;
-   _config[RIGHT_LEGS].P = JointData::P_GAIN_DEFAULT;
-   _config[RIGHT_LEGS].I = JointData::I_GAIN_DEFAULT;
-   _config[RIGHT_LEGS].D =JointData::D_GAIN_DEFAULT;
+   //_config[RIGHT_LEGS].P = JointData::P_GAIN_DEFAULT;
+   //_config[RIGHT_LEGS].I = JointData::I_GAIN_DEFAULT;
+   //_config[RIGHT_LEGS].D =JointData::D_GAIN_DEFAULT;
    
    joints.clear();
    //Left leg
-   joints.push_back(JointData::ID_L_HIP_YAW);
-   joints.push_back(JointData::ID_L_HIP_ROLL);
-   joints.push_back(JointData::ID_L_HIP_PITCH);
-   joints.push_back(JointData::ID_L_KNEE);
-   joints.push_back(JointData::ID_L_ANKLE_PITCH);
-   joints.push_back(JointData::ID_L_ANKLE_ROLL);
+   joints.push_back(ID_L_HIP_YAW);
+   joints.push_back(ID_L_HIP_ROLL);
+   joints.push_back(ID_L_HIP_PITCH);
+   joints.push_back(ID_L_KNEE);
+   joints.push_back(ID_L_ANKLE_PITCH);
+   joints.push_back(ID_L_ANKLE_ROLL);
    
    _config[LEFT_LEGS].joints = joints;
-   _config[LEFT_LEGS].P = JointData::P_GAIN_DEFAULT;
-   _config[LEFT_LEGS].I = JointData::I_GAIN_DEFAULT;
-   _config[LEFT_LEGS].D =JointData::D_GAIN_DEFAULT; 
+   //_config[LEFT_LEGS].P = JointData::P_GAIN_DEFAULT;
+   //_config[LEFT_LEGS].I = JointData::I_GAIN_DEFAULT;
+   //_config[LEFT_LEGS].D =JointData::D_GAIN_DEFAULT; 
    
 }
 
@@ -83,15 +100,18 @@ bool MotorControl::SetTorque( const Option option )
    for( ; itr != end && status ; itr++ )
    {
      // TODO : Grab status
-      /*status &= */_cm730->WriteByte( *itr, MX28::P_TORQUE_ENABLE, 1, 0);
-      _cm730->WriteByte(*itr, MX28::P_P_GAIN, JointData::P_GAIN_DEFAULT, 0);
-      _cm730->WriteByte(*itr, MX28::P_I_GAIN, JointData::I_GAIN_DEFAULT, 0);
-      _cm730->WriteByte(*itr, MX28::P_D_GAIN, JointData::D_GAIN_DEFAULT, 0);
+      //status &=
+		_stm32f4->setTorque(*itr,STM32F4::TorqueOn);
+      //_cm730->WriteByte(*itr, MX28::P_P_GAIN, JointData::P_GAIN_DEFAULT, 0);
+      //_cm730->WriteByte(*itr, MX28::P_I_GAIN, JointData::I_GAIN_DEFAULT, 0);
+      //_cm730->WriteByte(*itr, MX28::P_D_GAIN, JointData::D_GAIN_DEFAULT, 0);
+		//TODO : temporary test 
+		//sleep(1);
    }
    
    return status;
 }
-
+/*
 bool MotorControl::DisableTorque( const Option option )
 {
    bool status = true;
@@ -102,12 +122,13 @@ bool MotorControl::DisableTorque( const Option option )
    for( ; itr != end && status ; itr++ )
    {
      // TODO : Grab status
-      /*status &= */_cm730->WriteByte( *itr, MX28::P_TORQUE_ENABLE, 0, 0);
+      //status &= 
+		_cm730->WriteByte( *itr, MX28::P_TORQUE_ENABLE, 0, 0);
    }
    
    return status;
 }
-
+*/
 bool MotorControl::InitPosition( const std::vector<double>& desiredPos,
 				  const Option option,
 				  const double msTotalTime /*= 10000.0*/,
@@ -183,7 +204,7 @@ bool MotorControl::SetPosition( const std::vector<double>& pos, const Option opt
    
    for( ; itrJoint != endJoint && itrPos != endPos && status ; itrJoint++, itrPos++ )
    {
-      _cm730->WriteWord( *itrJoint, MX28::P_GOAL_POSITION_L, MX28::Angle2Value(*itrPos), 0);      
+		_stm32f4->setMotor(*itrJoint,Angle2Value(*itrPos));		      
    }
 #endif
 
@@ -205,8 +226,8 @@ bool MotorControl::ReadPosition( std::vector<double>& pos, const Option option )
    
    for( ; itr != end && status ; itr++ )
    {
-      status &= _cm730->ReadWord( *itr, MX28::P_PRESENT_POSITION_L, &value, 0) == CM730::SUCCESS;
-      pos.push_back( MX28::Value2Angle(value) );
+		value = _stm32f4->read(*itr);      
+      pos.push_back( Value2Angle(value) );
    }
    
    return status;
@@ -215,4 +236,14 @@ bool MotorControl::ReadPosition( std::vector<double>& pos, const Option option )
 unsigned int MotorControl::getJointNum( const Option option )
 {
    return _config[ option ].joints.size();
+}
+
+int MotorControl::Angle2Value(const double angle)
+{
+	return (angle*dInvAngleConvertion)+iOffsetValue;
+}
+
+double MotorControl::Value2Angle(const int value)
+{
+	return double(value-iOffsetValue)*dAngleConvertion;
 }
