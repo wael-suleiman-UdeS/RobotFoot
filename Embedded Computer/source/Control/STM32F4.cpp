@@ -26,7 +26,8 @@ void STM32F4::setMotor(uint8_t id, uint16_t value)
 	msg.push_back(id);
 	msg.push_back(value >> 8);
 	msg.push_back(value);
-
+   //std::cout << "Sending id : " << std::hex << id << std::endl;
+   //std::cout << "Sending value : " << std::hex << value << std::endl; 
 	_usb.write(msg);
 }
 
@@ -36,9 +37,11 @@ void STM32F4::setTorque(uint8_t id, TorqueState state)
 
 	msg.push_back('\x03');
 	msg.push_back(id);
-	msg.push_back(state);
-
-	_usb.write(msg);
+	msg.push_back(uint8_t(state));
+	//std::cout << "Sending id : " << std::hex << ((int)id) << std::endl;
+   //std::cout << "Sending value : " << std::hex << state << std::endl; 
+	
+   _usb.write(msg);
 }
 
 int STM32F4::read(uint8_t id)

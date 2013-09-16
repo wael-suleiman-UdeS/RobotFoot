@@ -5,12 +5,12 @@
 #include <algorithm>
 #include <functional>
 
-//#define DEBUG_TEST_MOTION
+#define DEBUG_TEST_MOTION
 #define DANGER_TEST_MOTION
 
 namespace
 {
-	//Right Leg
+	//Right Leg const
 	const int ID_R_HIP_YAW = 1;
 	const int ID_R_HIP_ROLL = 3;
 	//TODO should be 5 temp test
@@ -226,7 +226,13 @@ bool MotorControl::ReadPosition( std::vector<double>& pos, const Option option )
    
    for( ; itr != end && status ; itr++ )
    {
+#ifdef DEBUG_TEST_MOTION
+	std::cout << "Read Position first" << *itr << std::endl;
+#endif	
 		value = _stm32f4->read(*itr);      
+#ifdef DEBUG_TEST_MOTION
+	std::cout << "Read Position end" << *itr << std::endl;
+#endif	
       pos.push_back( Value2Angle(value) );
    }
    
