@@ -20,11 +20,32 @@ namespace XmlPath
 	const path Motion = "Motion";
 	const path Motors = "Motors";
 	const path Head = "Head";
+	const path Legs = "Legs";
 	const fs::path Pan = "Pan";
 	const fs::path Tilt = "Tilt";
 	const fs::path HorizontalOffset = "HorizontalOffset";
 	const fs::path VerticalOffset = "VerticalOffset";
 	const fs::path Threshold = "Threshold";
+
+	const path R_HIP_YAW = "R_HIP_YAW";
+	const path L_HIP_YAW = "L_HIP_YAW";
+	const path R_HIP_ROLL = "R_HIP_ROLL";
+	const path L_HIP_ROLL = "L_HIP_ROLL";
+	const path R_HIP_PITCH = "R_HIP_PITCH";
+	const path L_HIP_PITCH = "L_HIP_PITCH";
+	const path R_KNEE = "R_KNEE";
+	const path L_KNEE = "L_KNEE";
+	const path R_ANKLE_PITCH ="R_ANKLE_PITCH";
+	const path L_ANKLE_PITCH = "L_ANKLE_PITCH";
+	const path R_ANKLE_ROLL = "R_ANKLE_ROLL";
+	const path L_ANKLE_ROLL = "L_ANKLE_ROLL";
+
+	const path LegsMotors = Root / Motion / Motors / Legs;
+
+	const path MotorID = "MotorID";
+	const path Offset = "Offset";
+	const path LimitMin = "LimitMin";
+	const path LimitMax = "LimitMax";
 }
 
 /** \brief Load an XML file for subsequent parsing operations
