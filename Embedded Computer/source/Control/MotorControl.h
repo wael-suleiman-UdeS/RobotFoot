@@ -27,10 +27,8 @@ public:
    
    bool SetPosition( const std::vector<double>& pos, const Option option );
    bool ReadPosition( std::vector<double>& pos, const Option option );
-   
 
-   
-   
+private:
 
    struct Motor
    {
@@ -38,50 +36,25 @@ public:
       int offset;
       int minLimit;
       int maxLimit;
-   };
-   
-	int Angle2Value(const int ID, const double angle);
-
-    Motor R_HIP_YAW;
-    Motor L_HIP_YAW;
-    Motor R_HIP_ROLL;
-    Motor L_HIP_ROLL;
-    Motor R_HIP_PITCH;
-    Motor L_HIP_PITCH;
-    Motor R_KNEE;
-    Motor L_KNEE;
-    Motor R_ANKLE_PITCH;
-    Motor L_ANKLE_PITCH;
-    Motor R_ANKLE_ROLL;
-    Motor L_ANKLE_ROLL;
-   
-    std::vector<Motor> motors;
-
-private:
+   };   
 
    struct Configuration
    {
-      std::vector<int> joints;
-      //int P;
-      //int I;
-      //int D;
+      std::vector<Motor> joints;
    };
 
-
-
-   void InitializeMotors();
+   void InitializeMotors(std::map<std::string, Motor>&);
 
    unsigned int getJointNum( const Option option );
 
-	STM32F4* _stm32f4;
+    STM32F4* _stm32f4;
     Configuration _config[NUM_TEST];
 
 
-
-	int Angle2Value(const double angle);
-
-	double Value2Angle(const int value);
-	double Value2Angle(const int ID, const int value);
+    int Angle2Value(const double angle);
+    int Angle2Value(Motor motor, const double angle);
+    double Value2Angle(const int value);
+    double Value2Angle(Motor motor, const int value);
 };
 
 #endif  //MOTOR_CONTROL_H

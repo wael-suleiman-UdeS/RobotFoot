@@ -8,6 +8,8 @@
 #include <functional>
 #include <boost/algorithm/clamp.hpp>
 
+using boost::filesystem::path;
+
 #define DEBUG_TEST_MOTION
 
 using boost::algorithm::clamp;
@@ -24,23 +26,25 @@ namespace
 MotorControl::MotorControl( STM32F4* stm32f4 ) :
  _stm32f4(stm32f4)
 {
-	InitializeMotors();
+   std::map<string, Motor> motorsMap;
+   InitializeMotors(motorsMap);
 
-   std::vector<int> joints;
+   std::vector<Motor> joints;
    //Right Leg
-   joints.push_back(R_HIP_YAW.id);
-   joints.push_back(R_HIP_ROLL.id);
-   joints.push_back(R_HIP_PITCH.id);
-   joints.push_back(R_KNEE.id);
-   joints.push_back(R_ANKLE_PITCH.id);
-   joints.push_back(R_ANKLE_ROLL.id);
+   
+   joints.push_back(motorsMap.find("R_HIP_YAW")->second);
+   joints.push_back(motorsMap.find("R_HIP_ROLL")->second);
+   joints.push_back(motorsMap.find("R_HIP_PITCH")->second);
+   joints.push_back(motorsMap.find("R_KNEE")->second);
+   joints.push_back(motorsMap.find("R_ANKLE_PITCH")->second);
+   joints.push_back(motorsMap.find("R_ANKLE_ROLL")->second);
    //Left leg
-   joints.push_back(L_HIP_YAW.id);
-   joints.push_back(L_HIP_ROLL.id);
-   joints.push_back(L_HIP_PITCH.id);
-   joints.push_back(L_KNEE.id);
-   joints.push_back(L_ANKLE_PITCH.id);
-   joints.push_back(L_ANKLE_ROLL.id);
+   joints.push_back(motorsMap.find("L_HIP_YAW")->second);
+   joints.push_back(motorsMap.find("L_HIP_ROLL")->second);
+   joints.push_back(motorsMap.find("L_HIP_PITCH")->second);
+   joints.push_back(motorsMap.find("L_KNEE")->second);
+   joints.push_back(motorsMap.find("L_ANKLE_PITCH")->second);
+   joints.push_back(motorsMap.find("L_ANKLE_ROLL")->second);
 
    _config[ALL_LEGS].joints = joints;
    //_config[ALL_LEGS].P = JointData::P_GAIN_DEFAULT;
@@ -49,12 +53,12 @@ MotorControl::MotorControl( STM32F4* stm32f4 ) :
 
    joints.clear();
    //Right Leg
-   joints.push_back(R_HIP_YAW.id);
-   joints.push_back(R_HIP_ROLL.id);
-   joints.push_back(R_HIP_PITCH.id);
-   joints.push_back(R_KNEE.id);
-   joints.push_back(R_ANKLE_PITCH.id);
-   joints.push_back(R_ANKLE_ROLL.id);
+   joints.push_back(motorsMap.find("R_HIP_YAW")->second);
+   joints.push_back(motorsMap.find("R_HIP_ROLL")->second);
+   joints.push_back(motorsMap.find("R_HIP_PITCH")->second);
+   joints.push_back(motorsMap.find("R_KNEE")->second);
+   joints.push_back(motorsMap.find("R_ANKLE_PITCH")->second);
+   joints.push_back(motorsMap.find("R_ANKLE_ROLL")->second);
 
    _config[RIGHT_LEGS].joints = joints;
    //_config[RIGHT_LEGS].P = JointData::P_GAIN_DEFAULT;
@@ -63,12 +67,12 @@ MotorControl::MotorControl( STM32F4* stm32f4 ) :
 
    joints.clear();
    //Left leg
-   joints.push_back(L_HIP_YAW.id);
-   joints.push_back(L_HIP_ROLL.id);
-   joints.push_back(L_HIP_PITCH.id);
-   joints.push_back(L_KNEE.id);
-   joints.push_back(L_ANKLE_PITCH.id);
-   joints.push_back(L_ANKLE_ROLL.id);
+   joints.push_back(motorsMap.find("L_HIP_YAW")->second);
+   joints.push_back(motorsMap.find("L_HIP_ROLL")->second);
+   joints.push_back(motorsMap.find("L_HIP_PITCH")->second);
+   joints.push_back(motorsMap.find("L_KNEE")->second);
+   joints.push_back(motorsMap.find("L_ANKLE_PITCH")->second);
+   joints.push_back(motorsMap.find("L_ANKLE_ROLL")->second);
 
    _config[LEFT_LEGS].joints = joints;
    //_config[LEFT_LEGS].P = JointData::P_GAIN_DEFAULT;
@@ -82,83 +86,38 @@ MotorControl::~MotorControl()
 
 }
 
-void MotorControl::InitializeMotors()
+//Returns a map of joint name and Motor struct
+void MotorControl::InitializeMotors(std::map<std::string, Motor> &motorsMap)
 {
 	XmlParser config;
 	if (config.loadFile("config.xml"))
 	{
-		R_HIP_YAW.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_YAW / XmlPath::MotorID);
-		R_HIP_YAW.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_YAW / XmlPath::Offset);
-		R_HIP_YAW.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_YAW / XmlPath::LimitMin);
-		R_HIP_YAW.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_YAW / XmlPath::LimitMax);
+		std::map<std::string, path> pathsMap;
 
-		L_HIP_YAW.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_YAW / XmlPath::MotorID);
-		L_HIP_YAW.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_YAW / XmlPath::Offset);
-		L_HIP_YAW.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_YAW / XmlPath::LimitMin);
-		L_HIP_YAW.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_YAW / XmlPath::LimitMax);
+		pathsMap.insert(std::make_pair("R_HIP_YAW", XmlPath::LegsMotors / XmlPath::R_HIP_YAW));
+		pathsMap.insert(std::make_pair("L_HIP_YAW", XmlPath::LegsMotors / XmlPath::L_HIP_YAW));
+		pathsMap.insert(std::make_pair("R_HIP_ROLL", XmlPath::LegsMotors / XmlPath::R_HIP_ROLL));
+		pathsMap.insert(std::make_pair("L_HIP_ROLL", XmlPath::LegsMotors / XmlPath::L_HIP_ROLL));
+		pathsMap.insert(std::make_pair("R_HIP_PITCH", XmlPath::LegsMotors / XmlPath::R_HIP_PITCH));
+		pathsMap.insert(std::make_pair("L_HIP_PITCH", XmlPath::LegsMotors / XmlPath::L_HIP_PITCH));
+		pathsMap.insert(std::make_pair("R_KNEE", XmlPath::LegsMotors / XmlPath::R_KNEE));
+		pathsMap.insert(std::make_pair("L_KNEE", XmlPath::LegsMotors / XmlPath::L_KNEE));
+		pathsMap.insert(std::make_pair("R_ANKLE_PITCH", XmlPath::LegsMotors / XmlPath::R_ANKLE_PITCH));
+		pathsMap.insert(std::make_pair("L_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL));
+		pathsMap.insert(std::make_pair("R_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL));
+		pathsMap.insert(std::make_pair("L_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL));
 
-		R_HIP_ROLL.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_ROLL / XmlPath::MotorID);
-		R_HIP_ROLL.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_ROLL / XmlPath::Offset);
-		R_HIP_ROLL.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_ROLL / XmlPath::LimitMin);
-		R_HIP_ROLL.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_ROLL / XmlPath::LimitMax);
+		Motor motor;
 
-		L_HIP_ROLL.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_ROLL / XmlPath::MotorID);
-		L_HIP_ROLL.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_ROLL / XmlPath::Offset);
-		L_HIP_ROLL.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_ROLL / XmlPath::LimitMin);
-		L_HIP_ROLL.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_ROLL / XmlPath::LimitMax);
-
-		R_HIP_PITCH.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_PITCH / XmlPath::MotorID);
-		R_HIP_PITCH.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_PITCH / XmlPath::Offset);
-		R_HIP_PITCH.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_PITCH / XmlPath::LimitMin);
-		R_HIP_PITCH.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_HIP_PITCH / XmlPath::LimitMax);
-
-		L_HIP_PITCH.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_PITCH / XmlPath::MotorID);
-		L_HIP_PITCH.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_PITCH / XmlPath::Offset);
-		L_HIP_PITCH.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_PITCH / XmlPath::LimitMin);
-		L_HIP_PITCH.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_HIP_PITCH / XmlPath::LimitMax);
-
-		R_KNEE.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_KNEE / XmlPath::MotorID);
-		R_KNEE.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_KNEE / XmlPath::Offset);
-		R_KNEE.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_KNEE / XmlPath::LimitMin);
-		R_KNEE.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_KNEE / XmlPath::LimitMax);
-
-		L_KNEE.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_KNEE / XmlPath::MotorID);
-		L_KNEE.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_KNEE / XmlPath::Offset);
-		L_KNEE.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_KNEE / XmlPath::LimitMin);
-		L_KNEE.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_KNEE / XmlPath::LimitMax);
-
-		R_ANKLE_PITCH.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_ANKLE_PITCH / XmlPath::MotorID);
-		R_ANKLE_PITCH.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_ANKLE_PITCH / XmlPath::Offset);
-		R_ANKLE_PITCH.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_ANKLE_PITCH / XmlPath::LimitMin);
-		R_ANKLE_PITCH.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_ANKLE_PITCH / XmlPath::LimitMax);
-
-		L_ANKLE_PITCH.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_ANKLE_PITCH / XmlPath::MotorID);
-		L_ANKLE_PITCH.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_ANKLE_PITCH / XmlPath::Offset);
-		L_ANKLE_PITCH.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_ANKLE_PITCH / XmlPath::LimitMin);
-		L_ANKLE_PITCH.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_ANKLE_PITCH / XmlPath::LimitMax);
-
-		R_ANKLE_ROLL.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL / XmlPath::MotorID);
-		R_ANKLE_ROLL.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL / XmlPath::Offset);
-		R_ANKLE_ROLL.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL / XmlPath::LimitMin);
-		R_ANKLE_ROLL.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL / XmlPath::LimitMax);
-
-		L_ANKLE_ROLL.id  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL / XmlPath::MotorID);
-		L_ANKLE_ROLL.offset  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL / XmlPath::Offset);
-		L_ANKLE_ROLL.minLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL / XmlPath::LimitMin);
-		L_ANKLE_ROLL.maxLimit  = config.getIntValue(XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL / XmlPath::LimitMax);
-
-		motors.push_back(R_HIP_YAW);
-		motors.push_back(R_HIP_ROLL);
-		motors.push_back(R_HIP_PITCH);
-		motors.push_back(R_KNEE);
-		motors.push_back(R_ANKLE_PITCH);
-		motors.push_back(R_ANKLE_ROLL);
-		motors.push_back(L_HIP_YAW);
-		motors.push_back(L_HIP_ROLL);
-		motors.push_back(L_HIP_PITCH);
-		motors.push_back(L_KNEE);
-		motors.push_back(L_ANKLE_PITCH);
-		motors.push_back(L_ANKLE_ROLL);
+		for(auto it = pathsMap.begin(); it != pathsMap.end(); ++it)
+		{
+			motor.id  = config.getIntValue(it->second / XmlPath::MotorID);
+			motor.offset  = config.getIntValue(it->second / XmlPath::Offset);
+			motor.minLimit  = config.getIntValue(it->second / XmlPath::LimitMin);
+			motor.maxLimit  = config.getIntValue(it->second / XmlPath::LimitMax);
+			
+			motorsMap.insert(std::make_pair(it->first, motor));
+		}
 	}
 	else
 	{
@@ -170,14 +129,15 @@ bool MotorControl::SetTorque( const Option option )
 {
    bool status = true;
 
-   std::vector<int>::const_iterator itr = _config[ option ].joints.begin();
-   const std::vector<int>::const_iterator end = _config[ option ].joints.end();
+   std::vector<Motor>::const_iterator itr = _config[ option ].joints.begin();
+   const std::vector<Motor>::const_iterator end = _config[ option ].joints.end();
 
    for( ; itr != end && status ; itr++ )
    {
      // TODO : Grab status
       //status &=
-		_stm32f4->setTorque(*itr,STM32F4::TorqueOn);
+		Motor motor = *itr;
+		_stm32f4->setTorque(motor.id,STM32F4::TorqueOn);
       //_cm730->WriteByte(*itr, MX28::P_P_GAIN, JointData::P_GAIN_DEFAULT, 0);
       //_cm730->WriteByte(*itr, MX28::P_I_GAIN, JointData::I_GAIN_DEFAULT, 0);
       //_cm730->WriteByte(*itr, MX28::P_D_GAIN, JointData::D_GAIN_DEFAULT, 0);
@@ -273,14 +233,15 @@ bool MotorControl::SetPosition( const std::vector<double>& pos, const Option opt
    bool status = true;
 
 #ifdef DANGER_TEST_MOTION   
-   std::vector<int>::const_iterator itrJoint = _config[ option ].joints.begin();
-   const std::vector<int>::const_iterator endJoint = _config[ option ].joints.end();
-   std::vector<double>::const_iterator itrPos = pos.begin();
-   const std::vector<double>::const_iterator endPos = pos.end();
+   auto itrJoint = _config[ option ].joints.begin();
+   const auto endJoint = _config[ option ].joints.end();
+   auto itrPos = pos.begin();
+   const auto endPos = pos.end();
 
    for( ; itrJoint != endJoint && itrPos != endPos && status ; itrJoint++, itrPos++ )
    {
-		_stm32f4->setMotor(*itrJoint,Angle2Value(*itrPos));
+		Motor motor = *itrJoint;
+		_stm32f4->setMotor(motor.id,Angle2Value(*itrPos));
    }
 #endif
 
@@ -297,12 +258,13 @@ bool MotorControl::ReadPosition( std::vector<double>& pos, const Option option )
    bool status = true;
    int value;
 
-   std::vector<int>::const_iterator itr = _config[ option ].joints.begin();
-   const std::vector<int>::const_iterator end = _config[ option ].joints.end();
+   auto itr = _config[ option ].joints.begin();
+   const auto end = _config[ option ].joints.end();
 
    for( ; itr != end && status ; itr++ )
    {
-	value = _stm32f4->read(*itr);
+	Motor motor = *itr;
+	value = _stm32f4->read(motor.id);
 	pos.push_back( Value2Angle(value) );
    }
 
@@ -321,10 +283,10 @@ int MotorControl::Angle2Value(const double angle)
 	return clamp(value, 21, 1002);
 }
 
-int MotorControl::Angle2Value(const int ID, const double angle)
+int MotorControl::Angle2Value(Motor motor, const double angle)
 {
-	int value = (angle*dInvAngleConvertion)+motors[ID].offset;
-	return clamp(value, motors[ID].minLimit, motors[ID].maxLimit);
+	int value = (angle*dInvAngleConvertion) + motor.offset;
+	return clamp(value, motor.minLimit, motor.maxLimit);
 }
 
 double MotorControl::Value2Angle(const int value)
@@ -334,8 +296,8 @@ double MotorControl::Value2Angle(const int value)
 	return double(clampedValue-iOffsetValue)*dAngleConvertion;
 }
 
-double MotorControl::Value2Angle(const int ID, const int value)
+double MotorControl::Value2Angle(Motor motor, const int value)
 {
-	int clampedValue = clamp(value, motors[ID].minLimit, motors[ID].maxLimit);
-	return double(clampedValue-motors[ID].offset)*dAngleConvertion;
+	int clampedValue = clamp(value, motor.minLimit, motor.maxLimit);
+	return double(clampedValue - motor.offset)*dAngleConvertion;
 }
