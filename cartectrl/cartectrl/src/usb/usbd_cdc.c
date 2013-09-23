@@ -97,7 +97,9 @@ CDC_IF_Prop_TypeDef cdc_fops =
   * @brief  in_APP_Rx_buffer
   *         Number of elements in buffer
   * @param  None
-  * @return Result of the operation (USBD_OK in all cases)
+  * @return Number of elements in buffer
+  * @note   Remember that RX is for IN transaction, so from the device point of à
+  *         view, it's rather TX.
   */
 static inline uint32_t in_APP_Rx_buffer(void)
 {
@@ -106,13 +108,37 @@ static inline uint32_t in_APP_Rx_buffer(void)
 
 /**
   * @brief  left_APP_Rx_buffer
-  *         Number of elements in buffer
+  *         Number of elements left in buffer
   * @param  None
-  * @return Result of the operation (USBD_OK in all cases)
+  * @return Number of elements left in buffer
+  * @note   Remember that RX is for IN transaction, so from the device point of à
+  *         view, it's rather TX.
   */
 static inline uint32_t left_APP_Rx_buffer(void)
 {
     return APP_RX_DATA_SIZE - in_APP_Rx_buffer() - 1;
+}
+
+/**
+  * @brief  rx_in_buffer
+  *         Number of elements in a pipe
+  * @param  None
+  * @return Number of elements in a pipe
+  */
+static inline uint32_t rx_in_buffer(struct pipe *p)
+{
+    return (p->ptr_in - p->ptr_out) & read_buffer_wrap_mask;
+}
+
+/**
+  * @brief  rx_left_buffer
+  *         Number of elements left in a pipe
+  * @param  None
+  * @return Number of elements left in a pipe
+  */
+static inline uint32_t rx_left_buffer(struct pipe *p)
+{
+    return READ_BUFFER_SIZE - rx_in_buffer(p) - 1;
 }
 
 /**
@@ -253,7 +279,7 @@ static uint16_t cdc_DataTx (uint8_t* Buf, uint32_t Len)
   *
   * @param  Buf Buffer of data to be received
   * @param  Len Number of data received (in bytes)
-  * @return Result of the operation: USBD_OK
+  * @return Result of the operation: USBD_OK, or USBD_BUSY if buffer full
   */
 static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
 {
@@ -264,10 +290,11 @@ static uint16_t cdc_DataRx (uint8_t* Buf, uint32_t Len)
         if (rx.ptr_in == rx.ptr_out)
         {
             // "Discard" old data
+            // This should never happen anymore!
             rx.ptr_out = (rx.ptr_out + 1) & read_buffer_wrap_mask;
         }
     }
-    // Result is discarded by the driver...
+    usb_resume_out_xfer();
 	return USBD_OK;
 }
 
@@ -321,7 +348,7 @@ size_t usb_tx(const uint8_t *buf, size_t len)
   */
 size_t usb_rx(uint8_t *buf, size_t len)
 {
-    const size_t in_buffer = (rx.ptr_in - rx.ptr_out) & read_buffer_wrap_mask;
+    const size_t in_buffer = rx_in_buffer(&rx);
     // What is in the read buffer is what can be put in the supplied buffer
     len = min(len, in_buffer);
     const size_t result = len;
@@ -339,4 +366,25 @@ size_t usb_rx(uint8_t *buf, size_t len)
     rx.ptr_out = (rx.ptr_out + result) & read_buffer_wrap_mask;
 
     return result;
+}
+
+// PUT DOXYGEN COMMENT HERE
+void usb_resume_out_xfer(void)
+{
+    size_t const left = rx_left_buffer(&rx);
+    if (left >= USB_OTG_FS_MAX_PACKET_SIZE)
+    {
+
+        extern USB_OTG_CORE_HANDLE USB_OTG_dev;
+        extern uint8_t USB_Rx_Buffer[CDC_DATA_MAX_PACKET_SIZE];
+        USB_OTG_CORE_HANDLE *pdev = &USB_OTG_dev;
+
+        if (DCD_GetEPStatus(&USB_OTG_dev, CDC_OUT_EP) != USB_OTG_EP_TX_VALID)
+        {
+            DCD_EP_PrepareRx(&USB_OTG_dev,
+                            CDC_OUT_EP,
+                            (uint8_t*)(USB_Rx_Buffer),
+                            CDC_DATA_OUT_PACKET_SIZE);
+        }
+    }
 }

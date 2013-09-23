@@ -39,8 +39,12 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
+// Note: should only be used by usbd_cdc.c and usbd_cdc_core.c, do not tamper
+// with these functions.
 size_t usb_tx(const uint8_t *buf, size_t len);
 size_t usb_rx(uint8_t *buf,       size_t len);
+
+void usb_resume_out_xfer(void);
 
 #ifdef __cplusplus
  }
