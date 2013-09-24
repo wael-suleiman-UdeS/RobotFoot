@@ -21,6 +21,7 @@ LIBDIR_ARM += -LThirdParty/opencv/build/arm/
 
 LIBDIR_X86 =  -LThirdParty/boost_1_54_0/stage/ubuntu_x86_lib/
 LIBDIR_X86 += -LThirdParty/opencv/build/x86/ubuntu/
+LIBDIR_X86 += -LThirdParty/opencv/build/x86/ubuntu/dependencies/
 
 LIBDIR_X64 =  -LThirdParty/boost_1_54_0/stage/ubuntu_x64_lib/
 LIBDIR_X64 += -LThirdParty/opencv/build/x64/ubuntu/
