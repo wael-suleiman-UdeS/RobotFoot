@@ -1,9 +1,9 @@
 # Sources
 SRC =  test1.cpp
 SRC += ../../Utilities/SerialInterface.cpp
-#SRC += ../../Utilities/logger.cpp
-#SRC += ../../Utilities/XmlParser.cpp
-#SRC += ../../Utilities/pugixml.cpp
+SRC += ../../Utilities/logger.cpp
+SRC += ../../Utilities/XmlParser.cpp
+SRC += ../../Utilities/pugixml.cpp
 #SRC += ../../Utilities/PID.cpp
 #SRC += ../../ImageProcessing/Camera.cpp
 #SRC += ../../ImageProcessing/ObjectTracker.cpp

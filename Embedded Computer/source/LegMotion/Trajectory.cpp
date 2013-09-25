@@ -111,16 +111,8 @@ Eigen::MatrixXf Trajectory::SpatialZMP(Eigen::Vector2f pointA, Eigen::Vector2f p
             mxbMatrix = mxbMatrixRL;
         }
 
-        //Append this to the total trajectory
-        if(trajectory.rows() > 0)
-        {
-            Eigen::MatrixXf tempMatrix = AppendMatrix(trajectory, mxbMatrix, 2);
-            trajectory.swap(tempMatrix);
-        }
-        else
-        {
-            trajectory = mxbMatrix;
-        }
+        Eigen::MatrixXf tempMatrix = AppendMatrix(trajectory, mxbMatrix, 2);
+        trajectory.swap(tempMatrix);
     }
 
     //Append the last step to pointD
@@ -139,42 +131,21 @@ Eigen::MatrixXf Trajectory::AppendMatrix(Eigen::MatrixXf matrixA, Eigen::MatrixX
     return appendedMatrix;
 }
 
-
-
-
-
-
-/*
-//Mettre les ref
-Eigen::MatrixXf Trajectory::SpatialZMP(Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::MatrixXf leftTrajectory, Eigen::MatrixXf rightTrajectory)
-{
-    Eigen::MatrixXf trajectory = MXB(rightTrajectory.row(0), leftTrajectory.row(0), 0.001);
-    for(int i =0; i < leftTrajectory.innerSize(); ++i)
-    {
-        Eigen::MatrixXf mxbMatrix = MXB(rightTrajectory.row(i), leftTrajectory.row(i), 0.001);//Droite Gauche- Puis Gauche Droite!, on n'a que droite Gauche!
-
-        //if(trajectory.rows() > 0)
-        //{
-            Eigen::MatrixXf tempMatrix(trajectory.rows()+mxbMatrix.rows(), 2);
-            tempMatrix << trajectory, mxbMatrix;
-            trajectory.swap(tempMatrix);
-        //}
-        //else
-        //{
-        //    trajectory = mxbMatrix;
-        //}
-    }
-
-    return trajectory;
-}
-*/
-
+//Mettre ref et pointeurs
 Eigen::MatrixXf Trajectory::TemporalZMP(Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::MatrixXf leftTrajectory, Eigen::MatrixXf rightTrajectory, int Tp, float TEch)
 {
     float Ts = 0.2*Tp;
+
+    //Create Tpn
+    Eigen::VectorXf tpn = Eigen::VectorXf::LinSpaced(Tp/TEch, 0.0, Tp);
+
+    //Create Tsn
+    Eigen::VectorXf tsn = tpn;
+    tsn.resize(tpn.rows()/5);
+
     int trajectorySize = (leftTrajectory.innerSize() + rightTrajectory.innerSize() +1);
 
-    float TempsTotal = trajectorySize * (Ts+Tp);
+    float TempsTotal = trajectorySize * (Ts+Tp);l
     Eigen::Vector3f tempDeplacement(pointA(0), pointA(1), 0);//(X,Y,T)
 
     for(int i = 0; i < trajectorySize;++i)
@@ -183,10 +154,10 @@ Eigen::MatrixXf Trajectory::TemporalZMP(Eigen::Vector2f pointA, Eigen::Vector2f 
     }
 
 
+//////////////////////////////////////
+//Eigen::MatrixXf temp;
 
-Eigen::MatrixXf temp;
-
-return temp;
+//return temp;
 }
 
 /*
@@ -225,4 +196,6 @@ DeplacementTemporel = [tempDeplacement(1:end,1), tempDeplacement(1:end,2), Ttn ]
 
 end
 */
+
+
 

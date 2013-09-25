@@ -15,6 +15,7 @@
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
 #include "Utilities/SerialInterface.h"
+#include "Utilities/test.h"
 #include "Control/STM32F4.h"
 
 /*!

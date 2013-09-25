@@ -14,37 +14,6 @@ int main(int argc, char* argv[])
 	int endAngle = 0;
 
 	traj->BezierDegre2(xPositionsVector, yPositionsVector, pointA, pointD, startAngle, endAngle);
-/*
-	Eigen::MatrixXf leftTraj(6,2);
- 	leftTraj(0,0) = 0;
-	leftTraj(0,1) = 0.1;
-	leftTraj(1,0) = 0.5842;
-	leftTraj(1,1) = 0.1507;
-	leftTraj(2,0) = 1.1767;
-	leftTraj(2,1) = 0.2732;
-	leftTraj(3,0) = 1.7767;	
-	leftTraj(3,1) = 0.4212;
-	leftTraj(4,0) = 2.3842;
-	leftTraj(4,1) = 0.5467;
-	leftTraj(5,0) = 2.9995;
-	leftTraj(5,1) = 0.6;
-
-	Eigen::MatrixXf rightTraj(7,2);
- 	rightTraj(0,0) = 0;
-	rightTraj(0,1) = -0.1;
-	rightTraj(1,0) = 0.3090;
-	rightTraj(1,1) = -0.0856;
-	rightTraj(2,0) = 0.9205;
-	rightTraj(2,1) = 0.0101;
-	rightTraj(3,0) = 1.5243;	
-	rightTraj(3,1) = 0.1530;
-	rightTraj(4,0) = 2.1205;
-	rightTraj(4,1) = 0.2941;
-	rightTraj(5,0) = 2.7090;
-	rightTraj(5,1) = 0.3864;
-	rightTraj(6,0) = 3.0005;
-	rightTraj(6,1) = 0.4;
-*/
 
 	Eigen::MatrixXf leftTraj(6,2);
  	leftTraj(0,0) = 0;
@@ -110,6 +79,8 @@ int main(int argc, char* argv[])
 	float test20 = matrix3(6000,0);
 
 	float test21 = matrix3(1999,1);
+
+	Eigen::MatrixXf  matrix4 = traj->TemporalZMP(pointA, pointD, leftTraj, rightTraj, 2, 0.005);
 	
 
 	return 0;
