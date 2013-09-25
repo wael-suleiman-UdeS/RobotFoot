@@ -16,13 +16,13 @@ SRC += ImageProcessing/ImageProcessing.cpp
 SRC += Control/STM32F4.cpp
 
 # Libs directories
-LIBDIR_ARM =  -LThirdParty/boost_1_53_0/stage/arm_lib/
+LIBDIR_ARM =  -LThirdParty/boost_1_54_0/stage/arm_lib/
 LIBDIR_ARM += -LThirdParty/opencv/build/arm/
 
-LIBDIR_X86 =  -LThirdParty/boost_1_53_0/stage/ubuntu_x86_lib/
+LIBDIR_X86 =  -LThirdParty/boost_1_54_0/stage/ubuntu_x86_lib/
 LIBDIR_X86 += -LThirdParty/opencv/build/x86/ubuntu/
 
-LIBDIR_X64 =  -LThirdParty/boost_1_53_0/stage/ubuntu_x64_lib/
+LIBDIR_X64 =  -LThirdParty/boost_1_54_0/stage/ubuntu_x64_lib/
 LIBDIR_X64 += -LThirdParty/opencv/build/x64/ubuntu/
 
 # Boost libs
@@ -33,6 +33,7 @@ LIBFLAGS += -lboost_thread
 LIBFLAGS += -lpthread
 LIBFLAGS += -lboost_wserialization
 LIBFLAGS += -lboost_filesystem
+LIBFLAGS += -lboost_timer
 
 # OpenCV libs
 LIBFLAGS += -lopencv_calib3d
@@ -96,7 +97,7 @@ LIBFLAGS += -lXau
 LIBFLAGS += -lXdmcp
 
 # Additionnal includes directories
-INCLUDES = -IThirdParty/boost_1_53_0/
+INCLUDES = -IThirdParty/boost_1_54_0/
 INCLUDES += -IThirdParty/opencv/include/
 
 # Architectures
