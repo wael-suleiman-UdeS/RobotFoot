@@ -76,12 +76,12 @@ Eigen::MatrixXf Trajectory::ToList(Eigen::Vector2f pointA, Eigen::Vector2f point
 //float testNorm = leftTraj.col(1).norm();
 //le faire pour chaque colonne qu'on veut (x,y)
 
-Eigen::MatrixXf Trajectory::MXB(Eigen::Vector2f pointA, Eigen::Vector2f pointB, float increment)
+Eigen::MatrixXf Trajectory::MXB(Eigen::Vector2f pointA, Eigen::Vector2f pointB, float increment, int offset)
 {   
     int matrixSize = 1/increment;
     Eigen::MatrixXf result(matrixSize, 2);
     int matrixIndex = 0;
-    for(float t = 0; matrixIndex < matrixSize ; t += increment, matrixIndex++)
+    for(float t = offset*increment; matrixIndex < matrixSize ; t += increment, matrixIndex++)
     {        
         result(matrixIndex,0) = pointA(0) + t * (pointB(0) - pointA(0));
         result(matrixIndex,1) = pointA(1) + t * (pointB(1) - pointA(1));
@@ -96,20 +96,7 @@ Eigen::MatrixXf Trajectory::SpatialZMP(Eigen::Vector2f pointA, Eigen::Vector2f p
 
     for(int i =0, j = 1; i < leftTrajectory.innerSize(); ++i, ++j)
     {
-        //Create a matrix with right to left and left to right zmp trajectory
-        Eigen::MatrixXf mxbMatrixRL = MXB(leftTrajectory.row(i), rightTrajectory.row(j), increment);
-        
-        //Append both step trajectories
-        Eigen::MatrixXf mxbMatrix;
-        if(leftTrajectory.rows() > i+1)
-        {  
-            Eigen::MatrixXf mxbMatrixLR = MXB(rightTrajectory.row(j), leftTrajectory.row(i+1), increment);
-            mxbMatrix = AppendMatrix(mxbMatrixRL, mxbMatrixLR, 2);  
-        }
-        else
-        {
-            mxbMatrix = mxbMatrixRL;
-        }
+		Eigen::MatrixXf mxbMatrix = CreateCombinedMXBMatrix(leftTrajectory, rightTrajectory, increment, i, j);
 
         Eigen::MatrixXf tempMatrix = AppendMatrix(trajectory, mxbMatrix, 2);
         trajectory.swap(tempMatrix);
@@ -131,13 +118,33 @@ Eigen::MatrixXf Trajectory::AppendMatrix(Eigen::MatrixXf matrixA, Eigen::MatrixX
     return appendedMatrix;
 }
 
-//Mettre ref et pointeurs
-Eigen::MatrixXf Trajectory::TemporalZMP(Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::MatrixXf leftTrajectory, Eigen::MatrixXf rightTrajectory, int Tp, float TEch)
+Eigen::MatrixXf Trajectory::CreateCombinedMXBMatrix(Eigen::MatrixXf matrixA, Eigen::MatrixXf matrixB, float increment, int i, int j, int offset)
 {
-    float Ts = 0.2*Tp;
+    //Create a matrix with right to left and left to right zmp trajectory
+    Eigen::MatrixXf mxbMatrixBA = MXB(matrixA.row(i), matrixB.row(j), increment);
+    
+    //Append both step trajectories 
+    Eigen::MatrixXf mxbMatrix;
+    if(matrixA.rows() > i+1)
+    {  
+        Eigen::MatrixXf mxbMatrixAB = MXB(matrixB.row(j), matrixA.row(i+1), increment);
+        mxbMatrix = AppendMatrix(mxbMatrixBA, mxbMatrixAB, 2);  
+    }
+    else
+    {
+        mxbMatrix = mxbMatrixBA;
+    }
+
+	return mxbMatrix;
+}
+
+//Mettre pointeurs
+Eigen::MatrixXf Trajectory::TemporalZMP(Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::MatrixXf leftTrajectory, Eigen::MatrixXf rightTrajectory, int tp, float tEch)
+{
+    float ts = 0.2*tp;
 
     //Create Tpn
-    Eigen::VectorXf tpn = Eigen::VectorXf::LinSpaced(Tp/TEch, 0.0, Tp);
+    Eigen::VectorXf tpn = Eigen::VectorXf::LinSpaced(tp/tEch - 1, tEch, tp);
 
     //Create Tsn
     Eigen::VectorXf tsn = tpn;
@@ -145,19 +152,18 @@ Eigen::MatrixXf Trajectory::TemporalZMP(Eigen::Vector2f pointA, Eigen::Vector2f 
 
     int trajectorySize = (leftTrajectory.innerSize() + rightTrajectory.innerSize() +1);
 
-    float TempsTotal = trajectorySize * (Ts+Tp);l
+    float TempsTotal = trajectorySize * (ts+tp);
     Eigen::Vector3f tempDeplacement(pointA(0), pointA(1), 0);//(X,Y,T)
+	
+	Eigen::MatrixXf trajectory = MXB(pointA, leftTrajectory.row(0), tEch/ts);
 
-    for(int i = 0; i < trajectorySize;++i)
+    for(int i =0, j = 1; i < leftTrajectory.innerSize(); ++i, ++j)
     {
-        Eigen::MatrixXf mxbMatrix = MXB(rightTrajectory.row(i), leftTrajectory.row(i), TEch/Ts);//possible inverse
+		Eigen::MatrixXf mxbMatrix = CreateCombinedMXBMatrix(leftTrajectory.row(i), rightTrajectory.row(i), tEch/ts, i, j, 1);
+		Eigen::MatrixXf deplacementZMP = AppendMatrix(mxbMatrix, tsn, 3);
     }
 
-
-//////////////////////////////////////
-//Eigen::MatrixXf temp;
-
-//return temp;
+	return trajectory;
 }
 
 /*
