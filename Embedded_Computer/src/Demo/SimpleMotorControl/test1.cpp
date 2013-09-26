@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
    try
    {
       boost::asio::io_service io; 
-      STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), io);
+      STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyACM0"), io);
       boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
       
 		while(1)

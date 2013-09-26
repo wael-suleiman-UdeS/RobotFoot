@@ -96,7 +96,7 @@ OUT = test1
 
 # CFLAGS
 #CFLAGS= -g -c -Wall -std=c++0x -O3
-CFLAGS= -g -c -Wall -std=gnu++0x -O3
+CFLAGS= -g -c -Wall -std=gnu++0x -O0
 
 
 #CC = arm-linux-gnueabihf-g++
