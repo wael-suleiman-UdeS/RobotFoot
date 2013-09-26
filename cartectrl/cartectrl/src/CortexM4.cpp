@@ -101,7 +101,15 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
         case CMD_MOTOR_SET_TORQUE:
             if( n >= 3 ) //TODO : Should be == instead
             {
-                Herkulex::GetInstance()->setTorque(data[1], data[2]);
+                static const uint8_t toCMD[] =
+                { TORQUE_FREE, BREAK_ON, TORQUE_ON };
+
+                uint32_t const idx = data[2];
+
+                if (idx < sizeof(toCMD))
+                {
+                    Herkulex::GetInstance()->setTorque(data[1], toCMD[idx]);
+                }
             }
             break;
     }
