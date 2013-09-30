@@ -78,7 +78,7 @@ Eigen::MatrixXf Trajectory::ToList(Eigen::Vector2f pointA, Eigen::Vector2f point
 
 Eigen::MatrixXf Trajectory::MXB(Eigen::Vector2f pointA, Eigen::Vector2f pointB, float increment, int offset)
 {   
-    int matrixSize = 1/increment;
+    int matrixSize = (1/increment) - offset;
     Eigen::MatrixXf result(matrixSize, 2);
     int matrixIndex = 0;
     for(float t = offset*increment; matrixIndex < matrixSize ; t += increment, matrixIndex++)
@@ -94,7 +94,7 @@ Eigen::MatrixXf Trajectory::SpatialZMP(Eigen::Vector2f pointA, Eigen::Vector2f p
 {
     Eigen::MatrixXf trajectory = MXB(pointA, leftTrajectory.row(0), increment);
 
-    for(int i =0, j = 1; i < leftTrajectory.innerSize(); ++i, ++j)
+    for(int i =0, j = 1; i < leftTrajectory.innerSize() - 1; ++i, ++j)
     {
 		Eigen::MatrixXf mxbMatrix = CreateCombinedMXBMatrix(leftTrajectory, rightTrajectory, increment, i, j);
 
@@ -129,13 +129,13 @@ Eigen::MatrixXf Trajectory::AppendMatrixColumn(Eigen::MatrixXf matrixA, Eigen::M
 Eigen::MatrixXf Trajectory::CreateCombinedMXBMatrix(Eigen::MatrixXf matrixA, Eigen::MatrixXf matrixB, float increment, int i, int j, int offset)
 {
     //Create a matrix with right to left and left to right zmp trajectory
-    Eigen::MatrixXf mxbMatrixBA = MXB(matrixA.row(i), matrixB.row(j), increment);
+    Eigen::MatrixXf mxbMatrixBA = MXB(matrixA.row(i), matrixB.row(j), increment, offset);
     
     //Append both step trajectories 
     Eigen::MatrixXf mxbMatrix;
     if(matrixA.rows() > i+1)
     {  
-        Eigen::MatrixXf mxbMatrixAB = MXB(matrixB.row(j), matrixA.row(i+1), increment);
+        Eigen::MatrixXf mxbMatrixAB = MXB(matrixB.row(j), matrixA.row(i+1), increment, offset);
         mxbMatrix = AppendMatrixRow(mxbMatrixBA, mxbMatrixAB);  
     }
     else
@@ -158,69 +158,48 @@ Eigen::MatrixXf Trajectory::TemporalZMP(Eigen::Vector2f pointA, Eigen::Vector2f 
     Eigen::VectorXf tsn = tpn;
     tsn.resize(tpn.rows()/5);
 
-    int trajectorySize = (leftTrajectory.innerSize() + rightTrajectory.innerSize() +1);
-
-    float TempsTotal = trajectorySize * (ts+tp);
     Eigen::Vector3f tempDeplacement(pointA(0), pointA(1), 0);//(X,Y,T)
-	
-	Eigen::MatrixXf trajectory = MXB(pointA, leftTrajectory.row(0), tEch/ts);
+
+	Eigen::MatrixXf timeMVTMatrix;
+
+	int attendVectorLength = tp/tEch - 1;
 
     for(int i =0, j = 1; i < leftTrajectory.innerSize(); ++i, ++j)
     {
-		Eigen::MatrixXf mxbMatrix = CreateCombinedMXBMatrix(leftTrajectory.row, rightTrajectory.row, tEch/ts, i, j, 1);
+		Eigen::MatrixXf mxbMatrix = MXB(leftTrajectory.row(i), rightTrajectory.row(j), tEch/ts, 1);
+
 		Eigen::MatrixXf deplacementZMP = AppendMatrixColumn(mxbMatrix, tsn);
 	
-		Eigen::VectorXf xAttendRight(tp/tEch) = Eigen::VectorXf::Constant(rightTrajectory(j, 0));//manque possiblement un step a la fin
-		Eigen::VectorXf yAttendRight(tp/tEch) = Eigen::VectorXf::Constant(rightTrajectory(j, 1));
+		Eigen::VectorXf xAttendRight = Eigen::VectorXf::Constant(attendVectorLength, rightTrajectory(j, 0));//manque possiblement un step a la fin
+		Eigen::VectorXf yAttendRight = Eigen::VectorXf::Constant(attendVectorLength, rightTrajectory(j, 1));
 
-		Eigen::VectorXf xAttendLeft(tp/tEch) = Eigen::VectorXf::Constant(leftTrajectory(i, 0));//manque possiblement un step a la fin
-		Eigen::VectorXf yAttendLeft(tp/tEch) = Eigen::VectorXf::Constant(leftTrajectory(i, 1));
+		Eigen::VectorXf xAttendLeft = Eigen::VectorXf::Constant(attendVectorLength, leftTrajectory(i, 0));//manque possiblement un step a la fin
+		Eigen::VectorXf yAttendLeft = Eigen::VectorXf::Constant(attendVectorLength, leftTrajectory(i, 1));
 
-		Eigen::MatrixXf deplacementPied = AppendMatrixColumn(xAttendLeft, yAttendLeft);
+		Eigen::MatrixXf tempMatrix = AppendMatrixColumn(xAttendLeft, yAttendLeft);
+		Eigen::MatrixXf deplacementPied = AppendMatrixColumn(tempMatrix, tpn);
 
-		//Eigen::MatrixXf deplacementPied = AppendMatrix(mxbMatrix, tsn, 3);
-		//Eigen::MatrixXf deplacementZMP = AppendMatrix(mxbMatrix, tsn, 3);
+		Eigen::MatrixXf deplacement = AppendMatrixRow(deplacementZMP, deplacementPied);
+
+		if(timeMVTMatrix.rows() > 0)
+		{
+			Eigen::MatrixXf tempTimeMVTMatrix = AppendMatrixRow(timeMVTMatrix, deplacement);
+			timeMVTMatrix.swap(tempTimeMVTMatrix);
+		}
+		else
+			timeMVTMatrix = deplacement;
     }
 
-	return trajectory;
+   	int trajectorySize = (leftTrajectory.innerSize() + rightTrajectory.innerSize() +1);
+    float tempsTotal = trajectorySize * (ts+tp);
+	Eigen::VectorXf ttn = Eigen::VectorXf::LinSpaced(tempsTotal/tEch, 0, tempsTotal);
+
+	Eigen::MatrixXf tempDeplacementTemporel = AppendMatrixColumn(timeMVTMatrix.col(0), timeMVTMatrix.col(1));
+	Eigen::MatrixXf deplacementTemporel = AppendMatrixColumn(tempDeplacementTemporel, ttn);
+
+	return deplacementTemporel;
 }
 
-/*
-function DeplacementTemporel = ZMPtemporel( PA, Tp, Tech, ZMPlist)
-%ZMPTEMPOREL Summary of this function goes here
-%   Detailed explanation goes here
-
-Tpn = 0:Tech:Tp;
-% Temps 
-Ts =0.2*Tp ;  %sec
-Tsn = 0:Tech:Ts;
-
-    TrajX = [];
-    TrajY = [];
-
-        Tempstotal = (length(ZMPlist)-1)*(Ts+Tp)
-        
-        tempDeplacement = [PA(1) PA(2) 0];
-      
-    for j = 1:1: length(ZMPlist)-1
-
-        [DroiteX DroiteY ] = mxb(Tsn/Ts, ZMPlist(j,1:2), ZMPlist(j+1,1:2));
-        DeplacementZMP = [DroiteX(2:end) ; DroiteY(2:end) ; Tsn(2:end)]';
-        
-        Xattend(1:Tp/Tech) = ZMPlist(j+1,1);
-        Yattend(1:Tp/Tech) = ZMPlist(j+1,2);
-        DeplacementPied = [ Xattend ; Yattend ; Tpn(2:end)]';
-        
-        Deplacement     = [DeplacementZMP ; DeplacementPied];
-        tempDeplacement  = [tempDeplacement ; Deplacement];
-  
-    end
- 
- Ttn = [0:Tech:Tempstotal]'  
-DeplacementTemporel = [tempDeplacement(1:end,1), tempDeplacement(1:end,2), Ttn ];
-
-end
-*/
 
 
 
