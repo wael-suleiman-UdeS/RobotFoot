@@ -2,8 +2,8 @@
 SRC =  main.cpp
 SRC += ../../Utilities/SerialInterface.cpp
 SRC += ../../Utilities/logger.cpp
-#SRC += ../../Utilities/XmlParser.cpp
-#SRC += ../../Utilities/pugixml.cpp
+SRC += ../../Utilities/XmlParser.cpp
+SRC += ../../Utilities/pugixml.cpp
 #SRC += ../../Utilities/PID.cpp
 #SRC += ../../ImageProcessing/Camera.cpp
 #SRC += ../../ImageProcessing/ObjectTracker.cpp
@@ -16,7 +16,7 @@ SRC += WalkStatus.cpp
 
 # Libs directories
 #LIBDIR = -L../../ThirdParty/boost_1_53_0/stage/arm_lib/
-LIBDIR = -L/usr/local/lib/
+LIBDIR = -L../../../ThirdParty/boost_1_54_0/stage/ubuntu_x86_lib
 #LIBDIR += -L../../ThirdParty/opencv/build/arm/
 
 # Boost libs
@@ -91,7 +91,7 @@ LIBFLAGS += -lboost_filesystem
 #LIBFLAGS += -g
 
 # Additionnal includes directories
-INCLUDES = -I../../ThirdParty/boost_1_53_0/
+INCLUDES = -I../../../ThirdParty/boost_1_54_0/
 #INCLUDES += -I../../ThirdParty/opencv/include/
 
 # Binary
@@ -99,7 +99,7 @@ OUT = main
 
 # CFLAGS
 #CFLAGS= -g -c -Wall -std=c++0x -O3
-CFLAGS= -g -c -Wall -std=gnu++0x -O3
+CFLAGS= -g -c -Wall -std=gnu++0x -O0
 
 
 #CC = arm-linux-gnueabihf-g++

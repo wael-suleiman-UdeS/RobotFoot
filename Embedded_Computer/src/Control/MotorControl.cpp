@@ -103,7 +103,7 @@ void MotorControl::InitializeMotors(std::map<std::string, Motor> &motorsMap)
 		pathsMap.insert(std::make_pair("R_KNEE", XmlPath::LegsMotors / XmlPath::R_KNEE));
 		pathsMap.insert(std::make_pair("L_KNEE", XmlPath::LegsMotors / XmlPath::L_KNEE));
 		pathsMap.insert(std::make_pair("R_ANKLE_PITCH", XmlPath::LegsMotors / XmlPath::R_ANKLE_PITCH));
-		pathsMap.insert(std::make_pair("L_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL));
+		pathsMap.insert(std::make_pair("L_ANKLE_PITCH", XmlPath::LegsMotors / XmlPath::L_ANKLE_PITCH));
 		pathsMap.insert(std::make_pair("R_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL));
 		pathsMap.insert(std::make_pair("L_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL));
 
@@ -142,7 +142,7 @@ bool MotorControl::SetTorque( const Option option )
       //_cm730->WriteByte(*itr, MX28::P_I_GAIN, JointData::I_GAIN_DEFAULT, 0);
       //_cm730->WriteByte(*itr, MX28::P_D_GAIN, JointData::D_GAIN_DEFAULT, 0);
 		//TODO : temporary test 
-		//sleep(1);
+	//	sleep(1);
    }
 
    return status;
@@ -241,7 +241,7 @@ bool MotorControl::SetPosition( const std::vector<double>& pos, const Option opt
    for( ; itrJoint != endJoint && itrPos != endPos && status ; itrJoint++, itrPos++ )
    {
 		Motor motor = *itrJoint;
-		_stm32f4->setMotor(motor.id,Angle2Value(*itrPos));
+		_stm32f4->setMotor(motor.id,Angle2Value(motor, *itrPos));
    }
 #endif
 
@@ -265,7 +265,7 @@ bool MotorControl::ReadPosition( std::vector<double>& pos, const Option option )
    {
 	Motor motor = *itr;
 	value = _stm32f4->read(motor.id);
-	pos.push_back( Value2Angle(value) );
+	pos.push_back( Value2Angle(motor, value) );
    }
 
    return status;
@@ -283,7 +283,7 @@ int MotorControl::Angle2Value(const double angle)
 	return clamp(value, 21, 1002);
 }
 
-int MotorControl::Angle2Value(Motor motor, const double angle)
+int MotorControl::Angle2Value(const Motor& motor, const double angle)
 {
 	int value = (angle*dInvAngleConvertion) + motor.offset;
 	return clamp(value, motor.minLimit, motor.maxLimit);
@@ -296,7 +296,7 @@ double MotorControl::Value2Angle(const int value)
 	return double(clampedValue-iOffsetValue)*dAngleConvertion;
 }
 
-double MotorControl::Value2Angle(Motor motor, const int value)
+double MotorControl::Value2Angle(const Motor& motor, const int value)
 {
 	int clampedValue = clamp(value, motor.minLimit, motor.maxLimit);
 	return double(clampedValue - motor.offset)*dAngleConvertion;

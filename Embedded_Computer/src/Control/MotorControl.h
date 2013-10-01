@@ -52,9 +52,9 @@ private:
 
 
     int Angle2Value(const double angle);
-    int Angle2Value(Motor motor, const double angle);
+    int Angle2Value(const Motor& motor, const double angle);
     double Value2Angle(const int value);
-    double Value2Angle(Motor motor, const int value);
+    double Value2Angle(const Motor& motor, const int value);
 };
 
 #endif  //MOTOR_CONTROL_H

@@ -21,11 +21,19 @@ STM32F4::~STM32F4()
 void STM32F4::setMotor(uint8_t id, uint16_t value)
 {
 	std::vector<char> msg;
+	const uint8_t cmd = 0x01;
+	const uint8_t highPos = value >> 8;
+	const uint8_t lowPos = value;
+	const uint8_t nb = 4;
+	const uint8_t checkSum = cmd + id + highPos + lowPos + nb;
 
-	msg.push_back('\x01');
+	msg.push_back('\xff');
+	msg.push_back(checkSum);
+	msg.push_back(nb);
+	msg.push_back(cmd);
 	msg.push_back(id);
-	msg.push_back(value >> 8);
-	msg.push_back(value);
+	msg.push_back(highPos);
+	msg.push_back(lowPos);
    //std::cout << "Sending id : " << std::hex << id << std::endl;
    //std::cout << "Sending value : " << std::hex << value << std::endl; 
 	_usb.write(msg);
@@ -34,8 +42,14 @@ void STM32F4::setMotor(uint8_t id, uint16_t value)
 void STM32F4::setTorque(uint8_t id, TorqueState state)
 {
 	std::vector<char> msg;
+	const uint8_t cmd = 0x03;
+	const uint8_t nb = 3;
+	const uint8_t checkSum = cmd + nb + uint8_t(state) + id;
 
-	msg.push_back('\x03');
+	msg.push_back('\xff');
+	msg.push_back(checkSum);
+	msg.push_back(nb);
+	msg.push_back(cmd);
 	msg.push_back(id);
 	msg.push_back(uint8_t(state));
 	//std::cout << "Sending id : " << std::hex << ((int)id) << std::endl;
@@ -47,8 +61,14 @@ void STM32F4::setTorque(uint8_t id, TorqueState state)
 int STM32F4::read(uint8_t id)
 {
 	std::vector<char> msg;
+	const uint8_t cmd = 0x02;
+	const uint8_t nb = 2;
+	const uint8_t checkSum = cmd + nb + id;
 
-	msg.push_back('\x02');
+	msg.push_back('\xff');
+	msg.push_back(checkSum);
+	msg.push_back(nb);
+	msg.push_back(cmd);
 	msg.push_back(id);
 
 	msg = _usb.read_sync(msg);

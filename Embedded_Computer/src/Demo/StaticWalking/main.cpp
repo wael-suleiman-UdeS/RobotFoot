@@ -55,14 +55,6 @@ void run(const std::string filename, const bool isUsingAlgorithm, const bool isM
 	        std::istream_iterator<double>(),
 	        std::back_inserter(vPos));      
      
-      /*calculR.getMotorPosition( vPos );
-      std::vector<double>::iterator itr = vPos.begin();
-      const std::vector<double>::iterator end = vPos.end();
-      for( ; itr != end; itr++ )
-      {
-	vPos.push_back( -*itr );
-      }
-     */ 
 		// TODO Rename InitPosition to GoToPosition
       if(isMotorActivated)
 		{
@@ -103,10 +95,10 @@ void run(const std::string filename, const bool isUsingAlgorithm, const bool isM
 	      
 			if(isMotorActivated)
 			{
-		      /*if( file.eof() || !motion.SetPosition( vPos, MotorControl::RIGHT_LEGS ) )
+		      if( file.eof() || !motion.SetPosition( vPos, MotorControl::RIGHT_LEGS ) )
 		      {
 					break;
-	      	}*/
+	      	}
 			}
 			for(std::vector<double>::iterator it = vPos.begin(); it != vPos.end(); ++it)
 			{

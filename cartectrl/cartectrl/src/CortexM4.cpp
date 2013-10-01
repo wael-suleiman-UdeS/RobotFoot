@@ -2,13 +2,17 @@
 
 #include "usb_com.h"
 
+//HACK
+#include <cstdlib>
+
 namespace{
 
-const int MAX_LEN = 20;
-uint8_t receivedMsg[MAX_LEN];
+const int MAX_LEN = 200;
+uint8_t circularBuff[MAX_LEN];
+uint8_t* pCircularBuff = circularBuff;
+uint8_t* pEndBuff = pCircularBuff + MAX_LEN;
 
-const uint8_t EndMsg1 = '\r';
-const uint8_t EndMsg2 = '\n';
+const uint8_t StartMsg = 0xFF;
 
 enum CMD
 {
@@ -32,30 +36,72 @@ CortexM4::~CortexM4()
 
 void CortexM4::read()
 {
-    int j = 0;
-    bool end = false;
-    bool isPreviousEndMsg1 = false;
+    uint8_t data[10];
+    uint8_t calculatedCheckSum = 0;
+    uint8_t checkSum = 0;
+    uint8_t msgNb = 0;
 
-    char p[4];
-    while( !end )
+    bool isReadingMessage = false;
+    int iMsgNb = -1;
+    uint8_t* pData = data;
+
+    while(1)
     {
-        uint32_t n = usb::read(p);
+        //TODO : if usb::read return a lot of value, buffer can be overwrited
+        uint8_t* pTempBuff = pCircularBuff;
+        pCircularBuff += usb::read(pCircularBuff, pEndBuff-pCircularBuff);
 
-        for( unsigned int i = 0; i < n; i++ )
+        for(;pTempBuff != pCircularBuff;pTempBuff++)
         {
-            receivedMsg[j] = p[i];
-            j++;
-            if( p[i] == EndMsg1 )
+            if(!isReadingMessage)
             {
-                isPreviousEndMsg1 = true;
+                if(*pTempBuff == StartMsg)
+                {
+                    isReadingMessage = true;
+                }
             }
-            else if ( isPreviousEndMsg1 && p[i] == EndMsg2)
+            else
             {
-                isPreviousEndMsg1 = false;
-                end = true;
-                sendCommand ( receivedMsg, j-2 );
-                break;
+                if(iMsgNb == -1)
+                {
+                    checkSum = *pTempBuff;
+                    iMsgNb++;
+                }
+                else if(iMsgNb == 0)
+                {
+                    iMsgNb = *pTempBuff;
+                    msgNb = iMsgNb;
+                    calculatedCheckSum = iMsgNb;
+                }
+                else
+                {
+                    *pData = *pTempBuff;
+                    pData++;
+                    iMsgNb--;
+                    calculatedCheckSum += *pTempBuff;
+
+                    if(iMsgNb == 0)
+                    {
+                        if(checkSum == calculatedCheckSum)
+                        {
+                            sendCommand(data, msgNb);
+                        }
+                        else
+                        {
+                            // TODO : dummy
+                            isReadingMessage = false;
+                        }
+                        isReadingMessage = false;
+                        iMsgNb = -1;
+                        pData = data;
+                    }
+                }
             }
+        }
+
+        if(pCircularBuff == pEndBuff)
+        {
+            pCircularBuff = circularBuff;
         }
     }
 }
@@ -84,7 +130,7 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
             if( n >= 2 ) //TODO : Should be == instead
             {
                 uint16_t pos = Herkulex::GetInstance()->getPos( data[1] );
-
+                // TODO : Change write protocol
                 uint32_t msgSize = 6;
                 uint8_t msg[msgSize];
 
@@ -92,8 +138,8 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
                 msg[1] = data[1];
                 msg[2] = pos >> 8;
                 msg[3] = pos;
-                msg[4] = EndMsg1;
-                msg[5] = EndMsg2;
+                msg[4] = '\r';
+                msg[5] = '\n';
 
                 CortexM4::write( msg, msgSize );
             }

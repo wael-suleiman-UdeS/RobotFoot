@@ -41,7 +41,6 @@ void SerialInterface::write(std::vector<char> command)
     boost::asio::streambuf streamBuffer;
     std::ostream os(&streamBuffer);
     os.write(command.data(), command.size());
-    os << "\r\n";
 
     boost::asio::write(_serialPort, streamBuffer);
 }
@@ -53,7 +52,6 @@ std::vector<char> SerialInterface::read_sync(std::vector<char> command)
     boost::asio::streambuf streamBuffer;
     std::ostream os(&streamBuffer);
     os.write(command.data(), command.size());
-    os << "\r\n";
     boost::asio::write(_serialPort, streamBuffer);
 
     streamBuffer.consume(streamBuffer.size());

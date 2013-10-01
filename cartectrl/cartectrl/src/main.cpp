@@ -172,12 +172,6 @@ int main(void)
 {
     initialize();
 
-//    Tools::Delay(Tools::DELAY_AROUND_1S/2);
-//    Herkulex::GetInstance()->setTorque(2, TORQUE_ON);
-
     CortexM4 cortexM4;
-    for(;;)
-    {
-        cortexM4.read();
-    }
+    cortexM4.read();
 }
