@@ -5,6 +5,10 @@
 *.obj
 *.exe
 
+# eclipse
+.metadata
+/.metadata
+
 # Compiled Dynamic libraries
 *.dylib
 

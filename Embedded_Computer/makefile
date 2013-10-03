@@ -35,6 +35,7 @@ LIBFLAGS += -lpthread
 LIBFLAGS += -lboost_wserialization
 LIBFLAGS += -lboost_filesystem
 LIBFLAGS += -lboost_timer
+LIBFLAGS += -lboost_chrono
 
 # OpenCV libs
 LIBFLAGS += -lopencv_calib3d
