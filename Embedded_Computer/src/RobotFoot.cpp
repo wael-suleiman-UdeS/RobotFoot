@@ -8,6 +8,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/chrono.hpp>
 
 #include "ImageProcessing/Camera.h"
 #include "ImageProcessing/ColorFinder.h"
@@ -71,6 +72,7 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 	Logger::getInstance() << "Tracking process started" << std::endl;
 	while(true)
 	{
+      boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		Camera::getInstance().captureFrame();
 
 		ballPosition = finder.getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV),
@@ -100,6 +102,8 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 		}
 
 		if((cvWaitKey(10) & 255) == 27) break;
+      boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+      std::cout << "took " << sec.count() << " seconds\n";
 	}
 
 	cvDestroyAllWindows();
