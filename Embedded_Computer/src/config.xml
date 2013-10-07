@@ -67,8 +67,8 @@
     <Motors>
       <Head>
         <!--crap-->
-        <Pan value="2" />
-        <Tilt value="3" />
+        <Pan value="13" />
+        <Tilt value="14" />
 
         <MinH value="200" />
         <MaxH value="800" />
