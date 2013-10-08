@@ -122,7 +122,6 @@ ARM_CC = arm-linux-gnueabihf-g++
 INTEL_CC = g++
 
 .PHONY: armd arm x86d x86 x64d x64
-
 ifeq ($(MAKECMDGOALS), arm)	
     BUILD_PATH := $(BUILD_PATH)$(ARM)/$(RELEASE_PREFIX)/
     CFLAGS += $(RELEASE_CFLAG)
@@ -155,6 +154,7 @@ else
     LIBDIR := $(LIBDIR_X86)
 endif
 
+# Add prefix to build variables
 OBJECTS  = $(addprefix $(BUILD_PATH), $(SRC:.cpp=.o))
 SRC_     = $(addprefix $(SRC_PATH), $(SRC))
 OUT      = $(addprefix $(BUILD_PATH), $(OUT_FILE))
@@ -162,18 +162,51 @@ OBJECTS_PATH = $(dir $(OBJECTS))
 
 arm armd x86 x86d x64 x64d all: $(SRC_) $(OUT)
 
+# Link
 $(OUT) : $(OBJECTS)
 	@echo "Linking..."
 	$(CC) $(LIBDIR) $(OBJECTS) $(LIBFLAGS) -o $@
 
+# Compile
 $(BUILD_PATH)%.o : $(SRC_PATH)%.cpp
 	@mkdir -p $(OBJECTS_PATH) 
 	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
 
+.PHONY: install
+# Install shared libs in /usr/local/lib
+INSTALL_PATH = /usr/local/lib/
+ifneq (,$(findstring i686, $(shell arch)))
+    $(info i686 architecture detected.)
+    BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/ubuntu_x86_lib/libboost_*
+    OPENCV_SHARED = ThirdParty/opencv/build/x86/ubuntu/libopencv_*
+else ifneq (,$(findstring arm, $(shell arch))
+    $(info Arm architecture detected.)
+    # TODO Support installation for this build
+else ifneq (,$(findstring x86_64, $(shell arch)))
+    $(info x64 architecture detected.)
+    # TODO Support installation for this build
+else
+    $(info Unknow architecture.)
+endif
+
+install:
+	if [[ -z $(BOOST_SHARED)] && [ -z $(OPENCV_SHARED)]]; then \
+	    echo "Could not install shared libs"; \
+	else \
+	    rsync -av $(BOOST_SHARED) $(INSTALL_PATH); \
+	    rsync -av $(OPENCV_SHARED) $(INSTALL_PATH); \
+	    echo "/usr/local/lib" > /etc/ld.so.conf.d/robotfoot.conf; \
+	    ldconfig; \
+	fi
+
 .PHONY: clean debug
+# Clear all files of any builds
+# TODO Make clean for each build type
 clean:
-	find bin/ -name "*.o" -exec rm -f '{}' +
-	find bin/ -name $(OUT_FILE) -exec rm -f '{}' +
+	@echo "Cleanning project..."
+	@find bin/ -name "*.o" -exec rm -f '{}' +
+	@find bin/ -name $(OUT_FILE) -exec rm -f '{}' +
+	@echo "done"
 
 debug:
 	@echo $(OBJECTS)
