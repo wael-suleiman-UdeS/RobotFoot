@@ -155,7 +155,7 @@ void hardSet(STM32F4& mc)
 	}
 }
 
-int main_inprogress(int argc, char * argv[])
+int main(int argc, char * argv[])
 {
    try
    {
@@ -164,20 +164,20 @@ int main_inprogress(int argc, char * argv[])
       Logger::getInstance().setLogLvl(Logger::LogLvl::INFO);
 
       // Load config file
-      //Logger::getInstance() << "Loading configuration file..." << std::endl;
-      //XmlParser config;
-      //if (!config.loadFile("config.xml")) 
-      //{
-      //    Logger::getInstance(Logger::LogLvl::ERROR) << "Error while loading configuration file." << std::endl;
-      //    return;
-      //}
-      //path basePath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head;
-
+      Logger::getInstance() << "Loading configuration file..." << std::endl;
+      XmlParser config;
+      if (!config.loadFile("config.xml")) 
+      {
+          Logger::getInstance(Logger::LogLvl::ERROR) << "Error while loading configuration file." << std::endl;
+          std::exit(1);
+      }
 
       // Init USB interface with STM32F4
       Logger::getInstance() << "Initializing USB interface..." << std::endl;
       boost::asio::io_service boost_io;
-      // STM32F4 mc(
+      std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
+      STM32F4 mc(port_name, boost_io);
+      boost::thread io_thread(boost::bind(&boost::asio::io_service::run, &boost_io)); 
       
    }
    catch (std::exception& e)
@@ -187,7 +187,7 @@ int main_inprogress(int argc, char * argv[])
    return 0;
 }
 
-int main(int argc, char* argv[])
+int main_old(int argc, char* argv[])
 {
 
 	try

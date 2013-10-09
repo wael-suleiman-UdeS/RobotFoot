@@ -16,16 +16,17 @@ SerialInterface::SerialInterface(boost::asio::io_service &io_service,
 	}
 	catch (std::exception &ex)
 	{
-      Logger::getInstance(Logger::LogLvl::ERROR) << "Error in SerialInterface.cpp : " << ex.what() << std::endl;
+      Logger::getInstance(Logger::LogLvl::ERROR) << "Error in SerialInterface.cpp : could not open port " << port_name << std::endl;
 		std::exit(1);
 	}
-		if(!_serialPort.is_open())
-		{
-			 Logger::getInstance(Logger::LogLvl::ERROR) << "Can't open serial port " << port_name << std::endl;
-			 std::exit(1);
-		}
-		boost::asio::serial_port_base::baud_rate baud_option(baud);
-		_serialPort.set_option(baud_option);
+ 
+	if(!_serialPort.is_open())
+	{
+      Logger::getInstance(Logger::LogLvl::ERROR) << "Can't open serial port " << port_name << std::endl;
+      std::exit(1);
+   }
+	boost::asio::serial_port_base::baud_rate baud_option(baud);
+	_serialPort.set_option(baud_option);
 }
 
 SerialInterface::~SerialInterface()

@@ -63,6 +63,9 @@
 	  </Color>
     </Colors>
   </ImageProcessing>
+  <USB_Interface>
+    <TTY value="/dev/ttyACM0" />
+  </USB_Interface>
   <Motion>
     <Motors>
       <Head>
