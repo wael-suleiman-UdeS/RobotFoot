@@ -3,15 +3,21 @@
 using std::string;
 using std::ostream;
 
-/** \brief Retrieve the instance of the Logger instance
- *
- * \return Logger&: Instance of the Logger object
- *
- */
+Logger* Logger::instance = &getInstance();
+
 Logger& Logger::getInstance()
 {
-    static Logger instance;
-    return instance;
+    if (instance == NULL) 
+    {
+       instance = new Logger();
+    }
+    return *instance;
+}
+
+Logger& Logger::getInstance(LogLvl lvl)
+{
+    instance->_currentLvl = lvl;
+    return getInstance();
 }
 
 /** \brief Add an output stream object to the stream list
@@ -24,13 +30,22 @@ void Logger::addStream(ostream& stream)
     _streams.push_front(&stream);
 }
 
+void Logger::setLogLvl(LogLvl lvl)
+{
+    _masterLvl = lvl;
+}
+
 Logger& Logger::operator<<(ostream& (*endlPtr)(std::ostream&))
 {
-    for(auto stream = _streams.begin(); stream != _streams.end(); ++stream)
+    if (_currentLvl >= _masterLvl)
     {
-        **stream << *endlPtr;
+        for(auto stream = _streams.begin(); stream != _streams.end(); ++stream)
+        {
+            **stream << *endlPtr;
+        }
+        _timeStamp = true;
+        _currentLvl = LogLvl::INFO;
     }
-    _timeStamp = true;
     return *this;
 }
 

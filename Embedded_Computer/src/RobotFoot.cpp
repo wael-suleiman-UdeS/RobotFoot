@@ -155,13 +155,45 @@ void hardSet(STM32F4& mc)
 	}
 }
 
+int main_inprogress(int argc, char * argv[])
+{
+   try
+   {
+      // Init Logger
+      Logger::getInstance().addStream(std::cout);
+      Logger::getInstance().setLogLvl(Logger::LogLvl::INFO);
+
+      // Load config file
+      //Logger::getInstance() << "Loading configuration file..." << std::endl;
+      //XmlParser config;
+      //if (!config.loadFile("config.xml")) 
+      //{
+      //    Logger::getInstance(Logger::LogLvl::ERROR) << "Error while loading configuration file." << std::endl;
+      //    return;
+      //}
+      //path basePath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head;
+
+
+      // Init USB interface with STM32F4
+      Logger::getInstance() << "Initializing USB interface..." << std::endl;
+      boost::asio::io_service boost_io;
+      // STM32F4 mc(
+      
+   }
+   catch (std::exception& e)
+   {
+      Logger::getInstance(Logger::LogLvl::ERROR) << "Exception in main() : " << e.what() << std::endl;
+   }
+   return 0;
+}
+
 int main(int argc, char* argv[])
 {
 
 	try
 	{
 		boost::asio::io_service io;
-		STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), io);
+		STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyACM0"), io);
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
 
 		string color = "red";
