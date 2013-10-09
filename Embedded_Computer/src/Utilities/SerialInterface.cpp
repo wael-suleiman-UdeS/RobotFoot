@@ -2,6 +2,7 @@
 #include <boost/regex.hpp>
 
 #include "SerialInterface.h"
+#include "logger.h"
 
 SerialInterface::SerialInterface(boost::asio::io_service &io_service,
                            const std::string &port_name,
@@ -15,13 +16,13 @@ SerialInterface::SerialInterface(boost::asio::io_service &io_service,
 	}
 	catch (std::exception &ex)
 	{
-		return;
+      Logger::getInstance(Logger::LogLvl::ERROR) << "Error in SerialInterface.cpp : " << ex.what() << std::endl;
+		std::exit(1);
 	}
 		if(!_serialPort.is_open())
 		{
-			 // TODO Logger
-			 std::cout << "Can't open the serial port" << port_name << std::endl;
-			 return;
+			 Logger::getInstance(Logger::LogLvl::ERROR) << "Can't open serial port " << port_name << std::endl;
+			 std::exit(1);
 		}
 		boost::asio::serial_port_base::baud_rate baud_option(baud);
 		_serialPort.set_option(baud_option);
@@ -57,7 +58,6 @@ std::vector<char> SerialInterface::read_sync(std::vector<char> command)
     streamBuffer.consume(streamBuffer.size());
     boost::asio::read_until(_serialPort, streamBuffer, "\r\n");
 
-	//std::vector<char>(streamBuffer.data(), streamBuffer.data() 
 	const char* start_ptr = boost::asio::buffer_cast<const char*>(streamBuffer.data());
 	return std::vector<char>(start_ptr, start_ptr + streamBuffer.size());
 }

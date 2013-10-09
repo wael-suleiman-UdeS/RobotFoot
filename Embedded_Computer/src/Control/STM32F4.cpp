@@ -7,7 +7,6 @@ using boost::asio::io_service;
 using std::uint8_t;
 using std::uint16_t;
 
-// portname = argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0")
 STM32F4::STM32F4(string portName, io_service& io)
 	: _usb(boost::ref(io),
 	  portName.c_str(), 115200)
@@ -34,8 +33,6 @@ void STM32F4::setMotor(uint8_t id, uint16_t value)
 	msg.push_back(id);
 	msg.push_back(highPos);
 	msg.push_back(lowPos);
-   //std::cout << "Sending id : " << std::hex << id << std::endl;
-   //std::cout << "Sending value : " << std::hex << value << std::endl; 
 	_usb.write(msg);
 }
 
@@ -52,9 +49,6 @@ void STM32F4::setTorque(uint8_t id, TorqueState state)
 	msg.push_back(cmd);
 	msg.push_back(id);
 	msg.push_back(uint8_t(state));
-	//std::cout << "Sending id : " << std::hex << ((int)id) << std::endl;
-   //std::cout << "Sending value : " << std::hex << state << std::endl; 
-	
    _usb.write(msg);
 }
 
