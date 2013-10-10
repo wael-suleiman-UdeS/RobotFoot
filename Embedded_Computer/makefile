@@ -166,6 +166,8 @@ arm armd x86 x86d x64 x64d all: $(SRC_) $(OUT)
 $(OUT) : $(OBJECTS)
 	@echo "Linking..."
 	$(CC) $(LIBDIR) $(OBJECTS) $(LIBFLAGS) -o $@
+	@echo "$(BUILD_PATH)$(OUT_FILE)" > ./run
+	@chmod 777 run
 
 # Compile
 $(BUILD_PATH)%.o : $(SRC_PATH)%.cpp
