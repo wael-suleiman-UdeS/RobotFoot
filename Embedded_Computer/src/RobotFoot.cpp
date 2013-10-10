@@ -1,8 +1,8 @@
 /*!
  * \file RobotFoot.cpp
  * \brief The main file of the project
- * \author Mitchel Labonté
- * \version 0.1
+ * \authors Mitchel Labonté and Mickael Paradis
+ * \version 0.2
  */
 #include <iostream>
 #include <boost/asio.hpp>
@@ -158,10 +158,10 @@ void hardSet(STM32F4& mc)
 int main(int argc, char * argv[])
 {
    try
-   {
-      // Init Logger
+   {  
+      // Add io stream to Logger
       Logger::getInstance().addStream(std::cout);
-      Logger::getInstance().setLogLvl(Logger::LogLvl::INFO);
+      //Logger::getInstance().setLogLvl(Logger::LogLvl::INFO);
 
       // Load config file
       Logger::getInstance() << "Loading configuration file..." << std::endl;
@@ -172,6 +172,9 @@ int main(int argc, char * argv[])
           std::exit(1);
       }
 
+      // Set logging lvl  
+      Logger::getInstance().setLogLvl(config.getStringValue(XmlPath::Root / "Logging" / "LogLvl"));
+
       // Init USB interface with STM32F4
       Logger::getInstance() << "Initializing USB interface..." << std::endl;
       boost::asio::io_service boost_io;
@@ -179,6 +182,8 @@ int main(int argc, char * argv[])
       STM32F4 mc(port_name, boost_io);
       boost::thread io_thread(boost::bind(&boost::asio::io_service::run, &boost_io)); 
       
+      // Start main process here
+      Logger::getInstance() << "Done" << std::endl;
    }
    catch (std::exception& e)
    {
@@ -187,6 +192,7 @@ int main(int argc, char * argv[])
    return 0;
 }
 
+// Deprecated main
 int main_old(int argc, char* argv[])
 {
 
@@ -211,12 +217,12 @@ int main_old(int argc, char* argv[])
 			}
 			else if (*argv[3] == 'p')
 			{
-				testTracking(mc, (argc > 2 && argv[2] == "true"), true, color);
+				testTracking(mc, true, true, color);
 			}
 		}
 		else
 		{ 
-			testTracking(mc, (argc > 2 && argv[2] == "true"), false, color);
+			testTracking(mc, true, false, color);
 		}
 
 	}

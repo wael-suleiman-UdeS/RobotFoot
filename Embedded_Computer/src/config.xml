@@ -1,4 +1,7 @@
 <RobotFoot>
+  <Logging>
+    <LogLvl value="INFO" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
+  </Logging>
   <ImageProcessing>
     <Camera>
       <DeviceIndex value="0" />

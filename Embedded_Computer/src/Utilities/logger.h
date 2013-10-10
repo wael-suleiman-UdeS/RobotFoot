@@ -23,23 +23,14 @@ class Logger
          ERROR = 3,
          SHUTUP = 4
       };
-
-      /** \brief Retreive the instance of the Logger (Singleton pattern)
-       *
-       *  \return Logger&: Instance of the Logger object
-       *
-       */
+ 
       static Logger& getInstance();     
       
-      /** \brief Retreive Logger instance and set the Log lvl for the next entry.
-       *
-       *  \return Logger&: Instance of the Logger object
-       *
-       */
       static Logger& getInstance(LogLvl lvl);
 
       void addStream(std::ostream& stream);
       void setLogLvl(LogLvl lvl);
+      void setLogLvl(std::string lvl);
 	  
 	   /** \brief Stream an object to each output stream in the stream list
 	   *
@@ -77,7 +68,8 @@ class Logger
       std::list<std::ostream*> _streams;
 
       Logger() { _timeStamp  = true;
-                 _currentLvl = LogLvl::INFO; }
+                 _currentLvl = LogLvl::INFO;
+                 _masterLvl  = LogLvl::INFO;}
       Logger(const Logger&);
       void operator=(const Logger&);
       static Logger* instance;
