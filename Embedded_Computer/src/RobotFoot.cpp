@@ -38,7 +38,7 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 	// Load config
 	Logger::getInstance() << "Loading configuration file..." << std::endl;
 	XmlParser config;
-	if (!config.loadFile("config.xml"))
+	if (!config.loadFile("config/config.xml"))
 	{
 		Logger::getInstance() << "Error while loading configuration file." << std::endl;
 		return;
@@ -166,7 +166,7 @@ int main(int argc, char * argv[])
       // Load config file
       Logger::getInstance() << "Loading configuration file..." << std::endl;
       XmlParser config;
-      if (!config.loadFile("config.xml")) 
+      if (!config.loadFile("config/config.xml")) 
       {
           Logger::getInstance(Logger::LogLvl::ERROR) << "Error while loading configuration file." << std::endl;
           std::exit(1);
