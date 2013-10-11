@@ -153,6 +153,7 @@
 		<Unit filename="include/herkulex.h" />
 		<Unit filename="include/initClock.h" />
 		<Unit filename="include/miscutils.h" />
+		<Unit filename="include/sound/sound.hpp" />
 		<Unit filename="include/usb/usb_com.h">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -184,6 +185,7 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="src/sound/sound.cpp" />
 		<Unit filename="src/syscall.c">
 			<Option compilerVar="CC" />
 		</Unit>
