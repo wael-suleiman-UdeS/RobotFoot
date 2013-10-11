@@ -14,7 +14,7 @@
 //------------------------------------------------------------------------------
 
 
-// Request an aligned for an object.
+// Request an alignment for an object.
 // Do like this: Type n ALIGNED(4);
 #define ALIGNED(x) __attribute__ ((aligned (x)))
 
