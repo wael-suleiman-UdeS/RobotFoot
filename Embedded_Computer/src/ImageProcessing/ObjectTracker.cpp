@@ -87,14 +87,13 @@ void ObjectTracker::track(Point position)
             // TODO: Stop tracking
 			// TODO: Search ball
 
-        	// yes caca
         	int kThres = _horizontal * abs(_threshold)/_threshold; // yes caca
         	k = _horizontal * abs(_objectPosition.x)/_objectPosition.x;
         	mk = m1 + k;
 
-        	if (mk < minH + kThres) {
+        	if (mk < _minH + kThres) {
         		_objectPosition.x = -1;
-        	} else if (mk > maxH - kThres) {
+        	} else if (mk > _maxH - kThres) {
         		_objectPosition.x = 1;
         	}
 
