@@ -27,8 +27,8 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 	_controller->setTorque(_tilt, STM32F4::TorqueOn);
 }
 
-void ObjectTracker::initializeHackPID(const XmlParser& config)
-{
+void ObjectTracker::initializeHackPDarwin7987
+
 	path basePath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head / "PID";
 
 	_kp = config.getIntValue(basePath / "P");
@@ -86,8 +86,23 @@ void ObjectTracker::track(Point position)
         {
             // TODO: Stop tracking
 			// TODO: Search ball
-			//_controller->setMotor(_pan, m1);
-			//_controller->setMotor(_tilt, m2);
+
+        	// yes caca
+        	int kThres = _horizontal * abs(_threshold)/_threshold; // yes caca
+        	k = _horizontal * abs(_objectPosition.x)/_objectPosition.x;
+        	mk = m1 + k;
+
+        	if (mk < minH + kThres) {
+        		_objectPosition.x = -1;
+        	} else if (mk > maxH - kThres) {
+        		_objectPosition.x = 1;
+        	}
+
+        	if (_objectPosition.x > 0) {
+        		_controller->setMotor(_pan, _minH);
+        	} else if (_objectPosition.y < 0) {
+        		_controller->setMotor(_pan, _maxH);
+        	}
         }
     }
     else
