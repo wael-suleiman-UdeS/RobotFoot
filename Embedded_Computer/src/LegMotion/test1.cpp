@@ -4,9 +4,9 @@
 
 int main(int argc, char* argv[])
 {
-	Trajectory* traj = new Trajectory();
+//	Trajectory* traj = new Trajectory();
 
-	Eigen::VectorXf xPositionsVector(100);
+	/*Eigen::VectorXf xPositionsVector(100);
 	Eigen::VectorXf yPositionsVector(100);
 	Eigen::Vector2f pointA(0,0);
 	Eigen::Vector2f pointD(3, 0.5);
@@ -44,10 +44,10 @@ int main(int argc, char* argv[])
 	rightTraj(5,1) = 0.3864;
 	rightTraj(6,0) = 3.0005;
 	rightTraj(6,1) = 0.4;
+*/
+	//Eigen::MatrixXf matrix = traj->ToList(pointA, pointD, leftTraj, rightTraj);
 
-	Eigen::MatrixXf matrix = traj->ToList(pointA, pointD, leftTraj, rightTraj);
-
-	float testNorm = leftTraj.col(0).norm();
+	//float testNorm = leftTraj.col(0).norm();
 
 	//Eigen::MatrixXf matrix2 = traj->MXB(matrix.row(0), matrix.row(2), 0.001);
 
@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
 	//float test3 = matrix2(15,1);
 	//float test4 = matrix2(20,1);
 
+	/*
 	Eigen::MatrixXf matrix3 = traj->SpatialZMP(pointA, pointD, leftTraj, rightTraj, 0.001);
 
 	float test5 = matrix3(0,1);
@@ -78,15 +79,16 @@ int main(int argc, char* argv[])
 	float test20 = matrix3(6000,0);
 
 	float test21 = matrix3(1999,1);
+	*/
 
 	//Eigen::MatrixXf  matrix4 = traj->TemporalZMP(matrix, 2, 0.005);
-
+/*
 	Eigen::VectorXf xInner(xPositionsVector.innerSize());
 	Eigen::VectorXf yInner(yPositionsVector.innerSize());
 	Eigen::VectorXf xOuter(xPositionsVector.innerSize());
-	Eigen::VectorXf yOuter(yPositionsVector.innerSize());
+	Eigen::VectorXf yOuter(yPositionsVector.innerSize());*/
 	//xPositionsVector and yPositionsVector does not start a 0.0, why?
-	traj->ParallelCurve(xInner,yInner,xOuter,yOuter,xPositionsVector,yPositionsVector,0.1);
+	//traj->ParallelCurve(xInner,yInner,xOuter,yOuter,xPositionsVector,yPositionsVector,0.1);
 
 
 	return 0;
