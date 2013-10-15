@@ -27,7 +27,7 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 	_controller->setTorque(_tilt, STM32F4::TorqueOn);
 }
 
-void ObjectTracker::initializeHackPDarwin7987
+void ObjectTracker::initializeHack() {
 
 	path basePath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head / "PID";
 
