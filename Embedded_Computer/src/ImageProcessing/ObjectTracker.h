@@ -35,7 +35,7 @@ private:
 	cv::Point _centerPosition;
 	cv::Point _objectPosition;
 	int _noObjectCount;
-    static const int _noObjectMaxCount = 20;
+    static const int _noObjectMaxCount = 300;
 
 	ObjectTracker() {}
 
