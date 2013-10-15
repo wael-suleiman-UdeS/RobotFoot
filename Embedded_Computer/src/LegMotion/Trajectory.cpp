@@ -1,6 +1,9 @@
 #include "Trajectory.h"
 #include <vector>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 Trajectory::Trajectory()
 {}
 
@@ -37,6 +40,7 @@ void Trajectory::BezierDegre2(Eigen::VectorXf& xTrajectory, Eigen::VectorXf& yTr
 	}
 }
 
+//This function might be removed, this should be done when the steps are calculated
 Eigen::MatrixXf Trajectory::ToList(Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::MatrixXf leftTrajectory, Eigen::MatrixXf rightTrajectory)
 { 
     //Take the longest trajectory
@@ -44,12 +48,9 @@ Eigen::MatrixXf Trajectory::ToList(Eigen::Vector2f pointA, Eigen::Vector2f point
     int rightTrajLength = rightTrajectory.innerSize();
     int largestTrajLength = leftTrajLength >= rightTrajLength ? leftTrajLength : rightTrajLength;
 
-    Eigen::MatrixXf result(leftTrajLength+rightTrajLength+2, 2);
+    Eigen::MatrixXf result(leftTrajLength+rightTrajLength, 2);
 
-    result(0,0) = pointA(0);
-    result(0,1) = pointA(1);
-
-    int matrixIndex = 1;
+    int matrixIndex = 0;
     for(int i = 0; i < largestTrajLength; ++i)
     {
         if(i < rightTrajLength)
@@ -65,17 +66,16 @@ Eigen::MatrixXf Trajectory::ToList(Eigen::Vector2f pointA, Eigen::Vector2f point
         matrixIndex +=2;
     }
 
-    result(largestTrajLength+1,0) = pointD(0);
-    result(largestTrajLength+1,1) = pointD(1);
+    result(0,0) = pointA(0);
+    result(0,1) = pointA(1);
+
+    result(largestTrajLength,0) = pointD(0);
+    result(largestTrajLength,1) = pointD(1);
 
     return result;
 }
 
-//Exemple de magn.m
-//float testNorm = leftTraj.col(0).norm();
-//float testNorm = leftTraj.col(1).norm();
-//le faire pour chaque colonne qu'on veut (x,y)
-
+//*****************************Check if offset should be removed*************************************//
 Eigen::MatrixXf Trajectory::MXB(Eigen::Vector2f pointA, Eigen::Vector2f pointB, float increment, int offset)
 {   
     int matrixSize = (1/increment) - offset;
@@ -92,17 +92,19 @@ Eigen::MatrixXf Trajectory::MXB(Eigen::Vector2f pointA, Eigen::Vector2f pointB, 
 
 Eigen::MatrixXf Trajectory::SpatialZMP(Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::MatrixXf leftTrajectory, Eigen::MatrixXf rightTrajectory, float increment)
 {
+	//Trajectory from point A to left footprint
     Eigen::MatrixXf trajectory = MXB(pointA, leftTrajectory.row(0), increment);
 
     for(int i =0, j = 1; i < leftTrajectory.innerSize() - 1; ++i, ++j)
     {
+		//Trajectory from left to right to left foot steps
 		Eigen::MatrixXf mxbMatrix = CreateCombinedMXBMatrix(leftTrajectory, rightTrajectory, increment, i, j);
 
         Eigen::MatrixXf tempMatrix = AppendMatrixRow(trajectory, mxbMatrix);
         trajectory.swap(tempMatrix);
     }
 
-    //Append the last step to pointD
+    //Append the last step (left foot) to pointD
     Eigen::MatrixXf finalStepTraj = MXB(leftTrajectory.row(leftTrajectory.rows()-1), pointD, increment);
     Eigen::MatrixXf tempMatrix = AppendMatrixRow(trajectory, finalStepTraj);
     trajectory.swap(tempMatrix);
@@ -126,15 +128,19 @@ Eigen::MatrixXf Trajectory::AppendMatrixColumn(Eigen::MatrixXf matrixA, Eigen::M
     return appendedMatrix;
 }
 
+
+//************This method could be used only when there are many steps, otherwise it might be removed*******************************************//
+//Create a combined mxb matrix for trajectories from A to B to A
 Eigen::MatrixXf Trajectory::CreateCombinedMXBMatrix(Eigen::MatrixXf matrixA, Eigen::MatrixXf matrixB, float increment, int i, int j, int offset)
 {
-    //Create a matrix with right to left and left to right zmp trajectory
+    //Create a matrix with zmp trajectory from A to B
     Eigen::MatrixXf mxbMatrixBA = MXB(matrixA.row(i), matrixB.row(j), increment, offset);
     
     //Append both step trajectories 
     Eigen::MatrixXf mxbMatrix;
     if(matrixA.rows() > i+1)
     {  
+		//Create a matrix with zmp trajectory from B to A
         Eigen::MatrixXf mxbMatrixAB = MXB(matrixB.row(j), matrixA.row(i+1), increment, offset);
         mxbMatrix = AppendMatrixRow(mxbMatrixBA, mxbMatrixAB);  
     }
@@ -147,59 +153,175 @@ Eigen::MatrixXf Trajectory::CreateCombinedMXBMatrix(Eigen::MatrixXf matrixA, Eig
 }
 
 //Mettre pointeurs
-Eigen::MatrixXf Trajectory::TemporalZMP(Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::MatrixXf leftTrajectory, Eigen::MatrixXf rightTrajectory, int tp, float tEch)
+Eigen::MatrixXf Trajectory::TemporalZMP(Eigen::MatrixXf zmpSteps, int tp, float tEch)
 {
     float ts = 0.2*tp;
 
     //Create Tpn
-    Eigen::VectorXf tpn = Eigen::VectorXf::LinSpaced(tp/tEch - 1, tEch, tp);
-
-    //Create Tsn
-    Eigen::VectorXf tsn = tpn;
-    tsn.resize(tpn.rows()/5);
-
-    Eigen::Vector3f tempDeplacement(pointA(0), pointA(1), 0);//(X,Y,T)
+    Eigen::VectorXf tpn = Eigen::VectorXf::LinSpaced(tp/tEch, 0, tp);
+	
+	//Initial position (X,Y,T)
+    Eigen::Vector3f tempDeplacement(zmpSteps(0, 0), zmpSteps(0, 1), 0);
 
 	Eigen::MatrixXf timeMVTMatrix;
 
-	int attendVectorLength = tp/tEch - 1;
+	int attendVectorLength = tp/tEch;
 
-    for(int i =0, j = 1; i < leftTrajectory.innerSize(); ++i, ++j)
+    for(int i = 0; i < zmpSteps.innerSize() - 1; ++i)
     {
-		Eigen::MatrixXf mxbMatrix = MXB(leftTrajectory.row(i), rightTrajectory.row(j), tEch/ts, 1);
+		Eigen::Vector2f firstStep = zmpSteps.row(i);
+		Eigen::Vector2f secondStep = zmpSteps.row(i + 1);
 
-		Eigen::MatrixXf deplacementZMP = AppendMatrixColumn(mxbMatrix, tsn);
-	
-		Eigen::VectorXf xAttendRight = Eigen::VectorXf::Constant(attendVectorLength, rightTrajectory(j, 0));//manque possiblement un step a la fin
-		Eigen::VectorXf yAttendRight = Eigen::VectorXf::Constant(attendVectorLength, rightTrajectory(j, 1));
+		//Calculate trajectory between 2 footsteps
+		Eigen::MatrixXf deplacementZMP = MXB(firstStep, secondStep, tEch/ts);
 
-		Eigen::VectorXf xAttendLeft = Eigen::VectorXf::Constant(attendVectorLength, leftTrajectory(i, 0));//manque possiblement un step a la fin
-		Eigen::VectorXf yAttendLeft = Eigen::VectorXf::Constant(attendVectorLength, leftTrajectory(i, 1));
+		Eigen::MatrixXf groundedFootZMP(attendVectorLength, 2);
+		groundedFootZMP << Eigen::VectorXf::Constant(attendVectorLength, firstStep(0)), Eigen::VectorXf::Constant(attendVectorLength, firstStep(1));
 
-		Eigen::MatrixXf tempMatrix = AppendMatrixColumn(xAttendLeft, yAttendLeft);
-		Eigen::MatrixXf deplacementPied = AppendMatrixColumn(tempMatrix, tpn);
+		Eigen::MatrixXf deplacement = AppendMatrixRow(deplacementZMP, groundedFootZMP);
 
-		Eigen::MatrixXf deplacement = AppendMatrixRow(deplacementZMP, deplacementPied);
-
-		if(timeMVTMatrix.rows() > 0)
-		{
-			Eigen::MatrixXf tempTimeMVTMatrix = AppendMatrixRow(timeMVTMatrix, deplacement);
-			timeMVTMatrix.swap(tempTimeMVTMatrix);
-		}
+		Eigen::MatrixXf tempMatrix;
+		if(timeMVTMatrix.innerSize() >0)
+			tempMatrix = AppendMatrixRow(timeMVTMatrix, deplacement);
 		else
-			timeMVTMatrix = deplacement;
-    }
+			tempMatrix = deplacement;
 
-   	int trajectorySize = (leftTrajectory.innerSize() + rightTrajectory.innerSize() +1);
-    float tempsTotal = trajectorySize * (ts+tp);
-	Eigen::VectorXf ttn = Eigen::VectorXf::LinSpaced(tempsTotal/tEch, 0, tempsTotal);
+		timeMVTMatrix.swap(tempMatrix);
+	}
 
-	Eigen::MatrixXf tempDeplacementTemporel = AppendMatrixColumn(timeMVTMatrix.col(0), timeMVTMatrix.col(1));
-	Eigen::MatrixXf deplacementTemporel = AppendMatrixColumn(tempDeplacementTemporel, ttn);
+	//total time
+	float totalTime = (zmpSteps.innerSize() - 1)*(ts + tp);
 
+	//Create Ttn
+    Eigen::VectorXf ttn = Eigen::VectorXf::LinSpaced(totalTime/tEch, 0, totalTime);
+
+	Eigen::MatrixXf deplacementTemporel = AppendMatrixColumn(timeMVTMatrix, ttn);
+	
 	return deplacementTemporel;
 }
 
+void Trajectory::ParallelCurve(Eigen::VectorXf &xInner, Eigen::VectorXf &yInner, Eigen::VectorXf &xOuter, Eigen::VectorXf &yOuter, Eigen::VectorXf x, Eigen::VectorXf y, float d)
+{
+	//remove 1 element, but shoulnt (matlab gradient does not)
+	Eigen::VectorXf dx(x.rows());
+	dx << x.row(1)-x.row(0), x.bottomRows(x.rows()-1) - x.topRows(x.rows()-1);
+	Eigen::VectorXf dy(y.rows());
+	dy << y.row(1)-y.row(0), y.bottomRows(y.rows()-1) - y.topRows(y.rows()-1);
 
+	Eigen::VectorXf dx2(dx.rows());
+	dx2 << dx.row(1)-dx.row(0), dx.bottomRows(dx.rows()-1) - dx.topRows(dx.rows()-1);
+	Eigen::VectorXf dy2(dy.rows());
+	dy2 << dy.row(1)-dy.row(0), dy.bottomRows(dy.rows()-1) - dy.topRows(dy.rows()-1);
 
+	Eigen::MatrixXf unv = AppendMatrixColumn(dy, -dx);
 
+	float norm = 0;
+	for(int i = 0; i < dy.rows(); i ++)
+	{
+		norm = unv.row(i).norm();
+		unv.row(i) /= norm;
+	}
+
+	for(int i = 0; i < x.innerSize() - 1; ++i)
+	{
+		xInner(i) = x(i) - unv(i, 0)*d;
+		yInner(i) = y(i) - unv(i, 1)*d;
+
+		xOuter(i) = x(i) + unv(i, 0)*d;
+		yOuter(i) = y(i) + unv(i, 1)*d;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//Does not belong in this class, im just being lazy
+///////////////////////////////////////////////////////////////////////////////
+
+//NOT TESTED
+Eigen::MatrixXf Trajectory::UpdateDH(float L4, float L5, Eigen::VectorXf q)
+{
+	Eigen::MatrixXf DH = Eigen::MatrixXf::Zero(6,4);
+	DH(0,1) = M_PI_2;
+	DH(0,3) = q(1);
+	DH(1,0) = L4;
+	DH(1,3) = q(2);
+	DH(2,0) = L5;
+	DH(2,3) = q(3);
+	DH(0,1) = -M_PI_2;
+	DH(0,1) = q(4);
+	DH(0,1) = M_PI_2;
+	DH(0,1) = q(5)+M_PI_2;
+	DH(0,1) = q(6);
+
+	return DH;
+}
+
+//NOT TESTED
+Eigen::Matrix4f Trajectory::MatrixHomogene(Eigen::MatrixXf DH)
+{
+	//find better names, MF & A
+	Eigen::Matrix4f A = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f MF = Eigen::Matrix4f::Identity();
+
+	for(int i = 0; i < DH.innerSize(); ++i)
+	{
+		A(0,0) = cos(DH(i,3)); A(0,1) = -sin(DH(i,3))*cos(DH(i,1)); A(0,2) = sin(DH(i,3))*sin(DH(i,1)); A(0,3) = DH(i,0)*cos(DH(i,3));
+		A(0,0) = sin(DH(i,3)); A(0,1) = cos(DH(i,3))*cos(DH(i,1)); A(0,2) = -cos(DH(i,3))*sin(DH(i,1)); A(0,3) = DH(i,0)*sin(DH(i,3));
+		A(0,0) = 0; 		   A(0,1) = sin(DH(i,1)); 				A(0,2) = cos(DH(i,1)); 				A(0,3) = DH(i,2);
+
+		MF *= A;
+	}
+
+	return MF;
+}
+
+//NOT TESTED
+Eigen::MatrixXf Trajectory::Jacobian(Eigen::MatrixXf DH, int returnChoice)
+{
+	Eigen::Matrix4f A01 = MatrixHomogene(DH.row(0));
+	Eigen::Matrix4f A12 = MatrixHomogene(DH.row(1));
+	Eigen::Matrix4f A23 = MatrixHomogene(DH.row(2));
+	Eigen::Matrix4f A34 = MatrixHomogene(DH.row(3));
+	Eigen::Matrix4f A45 = MatrixHomogene(DH.row(4));
+	//Eigen::Matrix4f A56 = MatrixHomogene(DH.row(5)); //not used
+
+	Eigen::Matrix4f A02 = A01*A12;
+	Eigen::Matrix4f A03 = A02*A23;
+	Eigen::Matrix4f A04 = A03*A34;
+	Eigen::Matrix4f A05 = A04*A45;
+	//Eigen::Matrix4f A06 = A05*A56; //not used
+
+	Eigen::Vector4f Z1(0,0,1,0);
+	Eigen::MatrixXf Z(4,6);
+	Z << Z1, A01.col(2), A02.col(2), A03.col(2), A04.col(2), A05.col(2);
+	Z.resize(3, Z.cols());
+
+	Eigen::MatrixXf P(4,7);
+	P << Eigen::Vector4f::Zero(), A01.col(3), A02.col(3), A03.col(3), A04.col(3), A05.col(3);
+	P.resize(3, P.cols());
+
+	Eigen::MatrixXf Jposition(3,6);
+	Eigen::MatrixXf Jrotation = Z;//Clearer but Useless...
+
+	//CROSS error: static assertion failed: "THIS_METHOD_IS_ONLY_FOR_VECTORS_OF_A_SPECIFIC_SIZE"
+	//Eigen::VectorXf test = Z.zCol(0).cross(P.col(6)-P.col(0));
+
+	//Correct, but lame
+	//Eigen::Vector3f zCol = Z.col(0);
+	//Eigen::Vector3f deltaP = P.col(6)-P.col(0);
+	//Eigen::VectorXf test = zCol.cross(deltaP);
+
+	//Make this work!
+	//Jposition << Z.col(0).cross(P.col(6)-P.col(0)), Z.col(1).cross(P.col(6)-P.col(1)), Z.col(2).cross(P.col(6)-P.col(2)), Z.col(3).cross(P.col(6)-P.col(3), Z.col(4).cross(P.col(6)-P.col(4)), Z.col(5).cross(P.col(6)-P.col(5)));
+
+	if(returnChoice > 2)
+		return Jrotation;
+	else if(returnChoice < 2)
+	{
+		Eigen::MatrixXf J(6,6);
+		J << Jposition, Jrotation;
+		return J;
+	}
+	else
+		return Jposition;
+
+}
