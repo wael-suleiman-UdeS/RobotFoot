@@ -23,6 +23,8 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 	_angleH = config.getIntValue(basePath / "AngleH");
 	_angleV = config.getIntValue(basePath / "AngleV");
 
+	_noObjectMaxCount = config.getIntValue(basePath / "NoObjectMaxCount");
+
 	_controller->setTorque(_pan, STM32F4::TorqueOn);
 	_controller->setTorque(_tilt, STM32F4::TorqueOn);
 }
@@ -99,7 +101,7 @@ void ObjectTracker::track(Point position)
 
         	if (_objectPosition.x > 0) {
         		_controller->setMotor(_pan, _minH);
-        	} else if (_objectPosition.y < 0) {
+        	} else if (_objectPosition.x < 0) {
         		_controller->setMotor(_pan, _maxH);
         	}
         }

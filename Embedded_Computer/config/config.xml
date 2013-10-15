@@ -87,6 +87,7 @@
         <AngleH value="115" />
         <AngleV value="115" />
         <Threshold value="20" />
+        <NoObjectMaxCount value="50"/>
         
         <PID>
           <!--caca-->
