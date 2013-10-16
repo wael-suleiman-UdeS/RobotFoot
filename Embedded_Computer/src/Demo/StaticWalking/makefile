@@ -13,9 +13,10 @@ SRC += ../../Control/STM32F4.cpp
 SRC += ../../Control/MotorControl.cpp
 SRC += matrixpinv.cpp
 SRC += WalkStatus.cpp
+SRC += StaticWalk.cpp
 
 # Libs directories
-#LIBDIR = -L../../ThirdParty/boost_1_53_0/stage/arm_lib/
+LIBDIR = -L../../../ThirdParty/boost_1_54_0/stage/arm_lib/
 LIBDIR = -L../../../ThirdParty/boost_1_54_0/stage/ubuntu_x86_lib
 #LIBDIR += -L../../ThirdParty/opencv/build/arm/
 
@@ -27,6 +28,8 @@ LIBFLAGS += -lboost_thread
 LIBFLAGS += -lpthread
 LIBFLAGS += -lboost_wserialization
 LIBFLAGS += -lboost_filesystem
+LIBFLAGS += -lboost_timer
+LIBFLAGS += -lboost_chrono
 
 # OpenCV libs
 #LIBFLAGS += -lopencv_calib3d
@@ -98,11 +101,11 @@ INCLUDES = -I../../../ThirdParty/boost_1_54_0/
 OUT = main 
 
 # CFLAGS
-#CFLAGS= -g -c -Wall -std=c++0x -O3
+CFLAGS= -g -c -Wall -std=c++0x -O3
 CFLAGS= -g -c -Wall -std=gnu++0x -O0
 
 
-#CC = arm-linux-gnueabihf-g++
+CC = arm-linux-gnueabihf-g++
 CC = g++
 
 OBJECTS = $(SRC:.cpp=.o)
