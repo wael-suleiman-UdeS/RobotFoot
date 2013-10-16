@@ -54,6 +54,9 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 		return;
 	}
 
+	double durationMean = 0;
+	int durationIndex = 0;
+
 	cv::Point ballPosition;
 	HSVcolor color(config, colorName);
 	CircleSpec circle(config, colorName);
@@ -105,7 +108,14 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 
 		if((cvWaitKey(10) & 255) == 27) break;
       boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-      std::cout << "took " << sec.count() << " seconds\n";
+      durationMean += sec.count();
+      durationIndex++;
+      if(!(durationIndex <= 99)) 
+      {
+      	  std::cout << "took " << durationMean/100 << " seconds\n";
+	  durationMean = 0;
+	  durationIndex = 0;
+      }
 	}
 
 	cvDestroyAllWindows();
