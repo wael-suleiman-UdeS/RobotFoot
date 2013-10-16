@@ -178,15 +178,15 @@ $(BUILD_PATH)%.o : $(SRC_PATH)%.cpp
 .PHONY: install
 # Install shared libs in /usr/local/lib
 INSTALL_PATH = /usr/local/lib/
-ifneq (NULL ,$(findstring i686, $(shell arch)))
+ifeq (i686 ,$(findstring i686, $(shell arch)))
     $(info i686 architecture detected.)
     BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/ubuntu_x86_lib/libboost_*
     OPENCV_SHARED = ThirdParty/opencv/build/x86/ubuntu/libopencv_*
-else ifneq (NULL ,$(findstring arm, $(shell arch)))
+else ifeq (arm ,$(findstring arm, $(shell arch)))
     $(info Arm architecture detected.)
     BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/arm_lib/libboost_*
     OPENCV_SHARED = ThirdParty/opencv/build/arm/*
-else ifneq (NULL ,$(findstring x86_64, $(shell arch)))
+else ifeq (x86_64 ,$(findstring x86_64, $(shell arch)))
     $(info x64 architecture detected.)
     BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/ubuntu_x64_lib/libboost_*
     OPENCV_SHARED = ThirdParty/opencv/build/x64/ubuntu/libopencv_*
