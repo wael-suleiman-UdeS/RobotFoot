@@ -4,7 +4,26 @@
 
 int main(int argc, char* argv[])
 {
-//	Trajectory* traj = new Trajectory();
+	Eigen::Vector2f pointA(0,0);
+	Eigen::Vector2f pointD(3, 0.5);
+
+	Trajectory* traj = new Trajectory();
+	traj->GenerateWalk(pointA, pointD);
+
+/*	float a1 = matrix(0,0);
+	float a2 = matrix(0,1);
+	float a3 = matrix(1,0);
+	float a4 = matrix(1,1);
+	float a5 = matrix(2,0);
+	float a6 = matrix(2,1);
+	float a7 = matrix(3,0);
+	float a8 = matrix(3,1);
+	float a9 = matrix(4,0);
+	float a10 = matrix(4,1);
+	float a11 = matrix(5,0);
+	float a12 = matrix(5,1);*/
+
+	int x = 0;
 
 	/*Eigen::VectorXf xPositionsVector(100);
 	Eigen::VectorXf yPositionsVector(100);
