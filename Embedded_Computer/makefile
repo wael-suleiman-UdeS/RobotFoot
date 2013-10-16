@@ -25,6 +25,7 @@ LIBDIR_X86 += -LThirdParty/opencv/build/x86/ubuntu/dependencies/
 
 LIBDIR_X64 =  -LThirdParty/boost_1_54_0/stage/ubuntu_x64_lib/
 LIBDIR_X64 += -LThirdParty/opencv/build/x64/ubuntu/
+LIBDIR_X64 += -LThirdParty/opencv/build/x64/ubuntu/dependencies/
 
 # Boost libs
 LIBFLAGS =  -lboost_date_time
