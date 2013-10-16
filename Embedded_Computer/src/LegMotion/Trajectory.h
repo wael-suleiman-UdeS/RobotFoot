@@ -16,11 +16,16 @@ void GenerateKick();
 private:
 
 Eigen::MatrixXf ToList(Eigen::Vector2f PointA, Eigen::Vector2f PointD, Eigen::MatrixXf LeftTrajectory, Eigen::MatrixXf RightTrajectory);
+
 void BezierDegre2(Eigen::VectorXf& xPositionsVector, Eigen::VectorXf& yPositionsVector, 
 						Eigen::Vector2f pointA, Eigen::Vector2f pointD, int startAngle, int endAngle, int dist = 1);
 void ParallelCurve(Eigen::VectorXf &xInner, Eigen::VectorXf &yInner, Eigen::VectorXf &xOuter, Eigen::VectorXf &yOuter, Eigen::VectorXf& x, Eigen::VectorXf& y);
 void GenerateSteps(Eigen::MatrixXf &rightSteps, Eigen::MatrixXf &leftSteps, Eigen::VectorXf &xInner, Eigen::VectorXf &yInner, Eigen::VectorXf &xOuter, Eigen::VectorXf &yOuter,
 		Eigen::Vector2f startingPoint, int startAngle);
+
+Eigen::MatrixXf GenerateParabollicStepsTrajectories(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps);
+Eigen::MatrixXf GenerateParabollicTrajParams(Eigen::VectorXf initialPos, Eigen::VectorXf finalPos, float timeLapse);
+Eigen::VectorXf GenerateParabollicTrajectory(Eigen::MatrixXf params, float currentTime);
 
 float m_samplingTime;
 float m_singleStepTime;

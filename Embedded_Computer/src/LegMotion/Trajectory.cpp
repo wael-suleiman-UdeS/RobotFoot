@@ -40,7 +40,7 @@ void Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goa
 	GenerateSteps(rightSteps, leftSteps, xInner, yInner, xOuter, yOuter, startingPoint, startingAngle);
 
 	//Create trajectory for moving foot
-	GenerateStepsTrajectories();
+	GenerateParabollicStepsTrajectories(rightSteps, leftSteps);
 
 	//Append all matrix
 
@@ -160,6 +160,7 @@ void Trajectory::ParallelCurve(Eigen::VectorXf &xInner, Eigen::VectorXf &yInner,
 	}
 }
 
+//Generates 2d (x,y) steps on the ground to follow the bezier curve
 void Trajectory::GenerateSteps(Eigen::MatrixXf &rightSteps, Eigen::MatrixXf &leftSteps, Eigen::VectorXf &xInner, Eigen::VectorXf &yInner, Eigen::VectorXf &xOuter, Eigen::VectorXf &yOuter,
 		Eigen::Vector2f startingPoint, int startAngle)
 {
@@ -258,4 +259,119 @@ void Trajectory::GenerateSteps(Eigen::MatrixXf &rightSteps, Eigen::MatrixXf &lef
 	//Add the last steps
 	rightSteps.row(trajLSize - 1) = trajR.row(trajLSize - 1);
 	leftSteps.row(trajLSize - 1) = trajL.row(trajLSize - 1);
+}
+
+
+//Generates the trajectories to move a foot from step to step
+//Also Generates the final matrix with time, feet positions and which foot stands on the ground
+Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps)
+{
+	Eigen::Vector3f stepPosition;
+	float timeLapse = 1;
+	float dTime = 0.01;
+
+	Eigen::MatrixXf params(4,3);
+	Eigen::Vector3f currentFootPos;
+
+	//Final matrix:
+	//time, rightStepX, rightStepY, rightStepZ, leftStepX, leftStepY, leftStepZ, GroundedFoot(0 = right, 1 = left)
+	int finalMatrixSize = (timeLapse/dTime)*(rightSteps.rows() + leftSteps.rows());
+	Eigen::MatrixXf finalMatrix(finalMatrixSize, 8);
+
+	int leftStepsSize = leftSteps.rows();
+
+	int stepCount = 1;
+	for(int i = 0; i < rightSteps.rows() - 1; i++)
+	{
+		//Left to right
+
+		//if right to left
+		//	right to left
+
+		//Left to right
+		params = GenerateParabollicTrajParams(leftSteps.row(i), rightSteps.row(i+1), timeLapse);
+		for(int time = 0; time < timeLapse/dTime; time ++)
+		{
+			currentFootPos = GenerateParabollicTrajectory(params, time*dTime);
+			//Time
+			finalMatrix(time*(stepCount), 0) = time*dTime*(i+1);
+			//Right foot moving
+			finalMatrix(time*(stepCount), 1) = currentFootPos(0);	//x
+			finalMatrix(time*(stepCount), 2) = currentFootPos(1);	//y
+			finalMatrix(time*(stepCount), 3) = currentFootPos(2);	//z
+			//Left foot position on the ground
+			finalMatrix(time*(stepCount), 4) = leftSteps(i, 0);	//x
+			finalMatrix(time*(stepCount), 5) = leftSteps(i, 1);	//y
+			finalMatrix(time*(stepCount), 6) = 0;	//z
+			//Left foot is the one standing on the ground
+			finalMatrix(time*(stepCount), 7) = 1;	//1 = left foot
+
+			stepCount++;
+		}
+
+		//right to left
+		if(leftStepsSize < (i+1))
+		{
+			params = GenerateParabollicTrajParams(rightSteps.row(i + 1), leftSteps.row(i+1), timeLapse);
+			for(int time = 0; time < timeLapse/dTime; time ++)
+			{
+				currentFootPos = GenerateParabollicTrajectory(params, time*dTime);
+				//Time
+				finalMatrix(time*(stepCount), 0) = time*dTime*(i+1);
+				//left foot moving
+				finalMatrix(time*(stepCount), 4) = currentFootPos(0);	//x
+				finalMatrix(time*(stepCount), 5) = currentFootPos(1);	//y
+				finalMatrix(time*(stepCount), 6) = currentFootPos(2);	//z
+				//right foot position on the ground
+				finalMatrix(time*(stepCount), 0) = leftSteps(i, 0);	//x
+				finalMatrix(time*(stepCount), 1) = leftSteps(i, 1);	//y
+				finalMatrix(time*(stepCount), 2) = 0;	//z
+				//right foot is the one standing on the ground
+				finalMatrix(time*(stepCount), 7) = 0;	//0 = right foot
+
+				stepCount++;
+			}
+		}
+
+	}
+	return finalMatrix;
+}
+
+//Time in seconds to complete a step
+Eigen::MatrixXf Trajectory::GenerateParabollicTrajParams(Eigen::VectorXf initialPos, Eigen::VectorXf finalPos, float timeLapse)
+{
+	Eigen::MatrixXf params(4,3);
+
+	//Calculate params for x,y,z
+	for(int i = 0; i < initialPos.cols(); i++)
+	{
+		params(0, i) = 2*(initialPos(i)-finalPos(i))/(pow(timeLapse,3));
+		params(1, i) = -(3/2)*timeLapse*params(0,i);
+		params(2, i) = 0;
+		params(3, i) = initialPos(i);
+	}
+
+	//Add the z dimension if it's missing
+	if(initialPos.cols() == 2)
+	{
+		params(0, 2) = 0;
+		params(1, 2) = 0;
+		params(2, 2) = 0;
+		params(3, 2) = 0;
+	}
+
+	return params;
+}
+
+//Returns the position (x,y,z) of a foot at a certain time following a parabollic trajectory
+Eigen::VectorXf Trajectory::GenerateParabollicTrajectory(Eigen::MatrixXf params, float currentTime)
+{
+	Eigen::Vector3f trajectory;
+
+	for(int i = 0; i < params.cols(); i++)
+	{
+		trajectory(i) = params(0,i)*(pow(currentTime,3)) + params(1,i)*(pow(currentTime,2)) + params(2,i)*currentTime + params(3,i);
+	}
+
+	return trajectory;
 }
