@@ -5,6 +5,7 @@
 #include <ostream>
 #include <list>
 #include <time.h>
+#include <boost/thread.hpp>
 
 /** @addtogroup Utilities
  * @{
@@ -32,7 +33,7 @@ class Logger
       void setLogLvl(LogLvl lvl);
       void setLogLvl(std::string lvl);
 	  
-	   /** \brief Stream an object to each output stream in the stream list
+	  /** \brief Stream an object to each output stream in the stream list
 	   *
 	   * \param stream ostream&: Output stream to add
 	   * \return Logger&: 
@@ -40,18 +41,22 @@ class Logger
 	   */
       template <typename T>
       Logger &operator<<(const T& object)
-	   {
-         if (_currentLvl >= _masterLvl)
-         {
-	         for(auto stream = _streams.begin(); stream != _streams.end(); ++stream)
-	         {
-			      if (_timeStamp) { **stream << timeStamp() << ": "; }
-			      **stream << object;
-		      }
-		      _timeStamp = false;
-         }
-		   return *this;
-	   }
+	  {
+          if (_currentLvl >= _masterLvl)
+          {
+              for(auto stream = _streams.begin(); stream != _streams.end(); ++stream)
+              {
+                  if (_timeStamp)
+                  {
+                      **stream << timeStamp() << ": ";
+                      _mutex.lock();
+                  }
+                  **stream << object;
+              }
+              _timeStamp = false;
+          }
+          return *this;
+      }
 
       Logger &operator<<(std::ostream& (*endlPtr)(std::ostream&));
 
@@ -75,5 +80,8 @@ class Logger
       static Logger* instance;
  
       std::string timeStamp();
+
+      // Thread sync
+      boost::mutex _mutex;
 };
 #endif

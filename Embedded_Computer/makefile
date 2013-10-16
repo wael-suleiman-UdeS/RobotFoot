@@ -9,6 +9,7 @@ SRC += Utilities/logger.cpp
 SRC += Utilities/XmlParser.cpp
 SRC += Utilities/pugixml.cpp
 SRC += Utilities/PID.cpp
+SRC += Utilities/ThreadManager.cpp
 SRC += ImageProcessing/Camera.cpp
 SRC += ImageProcessing/ObjectTracker.cpp
 SRC += ImageProcessing/ColorFinder.cpp

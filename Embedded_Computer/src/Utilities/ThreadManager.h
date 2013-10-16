@@ -8,9 +8,8 @@
 /////////////////////////////////////////////////////////////////////
 #ifndef THREADMANAGER_H
 #define THREADMANAGER_H
-#include <boost/thread/thread.hpp>
+#include <boost/thread.hpp>
 #include <boost/function.hpp>
-#include <boost/uuid/uuid.hpp>
 #include <map>
 
 class ThreadManager
@@ -19,13 +18,17 @@ class ThreadManager
         ThreadManager();
         ~ThreadManager();
 
-        boost::uuids::uuid create(unsigned int priority, auto function);
+        boost::thread::id create(unsigned int priority, const boost::function0<void>& threadfunc);
         
-        void stop(boost::uuids::uuid thread_id);
-        void attach(boost::uuids::uuid thread_id);
-        void resume(boost::uuids::uuid thread_id);        
+        void stop(boost::thread::id thread_id);
+        void attach(boost::thread::id thread_id);
+
+        void resume(boost::thread::id thread_id);
+        void wait();
+
+        int calculate_the_answer_to_life_the_universe_and_everything();       
     private:
-        std::map<boost::uuids::uuid, boost::thread*> _threads;
-        std::map<boost::uuids::uuid, boost::condition_variable> _cond_variables;
+        std::map<boost::thread::id, boost::thread*> _threads;
+        std::map<boost::thread::id, boost::condition_variable*> _cond_variables;
 };
 #endif

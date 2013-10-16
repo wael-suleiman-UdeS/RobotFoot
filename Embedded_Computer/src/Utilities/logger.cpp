@@ -88,8 +88,9 @@ Logger& Logger::operator<<(ostream& (*endlPtr)(std::ostream&))
             **stream << *endlPtr;
         }
         _timeStamp = true;
-        _currentLvl = LogLvl::INFO;
+        _mutex.unlock();
     }
+    _currentLvl = LogLvl::INFO;
     return *this;
 }
 
