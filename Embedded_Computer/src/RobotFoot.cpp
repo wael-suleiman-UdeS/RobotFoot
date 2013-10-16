@@ -9,6 +9,7 @@
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/chrono.hpp>
+#include <boost/uuid/uuid.hpp>
 
 #include "ImageProcessing/Camera.h"
 #include "ImageProcessing/ColorFinder.h"
@@ -16,6 +17,7 @@
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
 #include "Utilities/SerialInterface.h"
+#include "Utilities/ThreadManager.h"
 #include "Control/STM32F4.h"
 
 /*!
@@ -161,7 +163,6 @@ int main_new(int argc, char * argv[])
    {  
       // Add io stream to Logger
       Logger::getInstance().addStream(std::cout);
-      //Logger::getInstance().setLogLvl(Logger::LogLvl::INFO);
 
       // Load config file
       Logger::getInstance() << "Loading configuration file..." << std::endl;
@@ -172,18 +173,22 @@ int main_new(int argc, char * argv[])
           std::exit(1);
       }
 
-      // Set logging lvl  
+      // Set logging level  
       Logger::getInstance().setLogLvl(config.getStringValue(XmlPath::Root / "Logging" / "LogLvl"));
+
+      // Thread Manager
+      ThreadManager threadManager;
 
       // Init USB interface with STM32F4
       Logger::getInstance() << "Initializing USB interface..." << std::endl;
       boost::asio::io_service boost_io;
       std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
       STM32F4 mc(port_name, boost_io);
-      boost::thread io_thread(boost::bind(&boost::asio::io_service::run, &boost_io)); 
-      
+      threadManager.create(50, boost::bind(&boost::asio::io_service::run, &boost_io)); 
+       
       // Start main process here
       Logger::getInstance() << "Done" << std::endl;
+      boost_io.stop();
    }
    catch (std::exception& e)
    {
@@ -217,12 +222,12 @@ int main(int argc, char* argv[])
 			}
 			else if (*argv[3] == 'p')
 			{
-				testTracking(mc, true, true, color);
+				testTracking(mc, false, true, color);
 			}
 		}
 		else
 		{ 
-			testTracking(mc, true, false, color);
+			testTracking(mc, false, false, color);
 		}
 
 	}
