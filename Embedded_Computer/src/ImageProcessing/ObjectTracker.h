@@ -35,8 +35,6 @@ private:
 	cv::Point _centerPosition;
 	cv::Point _objectPosition;
 	int _noObjectCount;
-    static const int _noObjectMaxCount = 3;
-
 	ObjectTracker() {}
 
 	// todo: remove hack
@@ -51,6 +49,7 @@ private:
 	int _maxV;
 	unsigned int _angleH;
 	unsigned _angleV;
+    int _noObjectMaxCount;
 
 	//todo: pid values elsewhere
 	float _kp;

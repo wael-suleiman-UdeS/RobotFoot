@@ -155,7 +155,7 @@ void hardSet(STM32F4& mc)
 	}
 }
 
-int main(int argc, char * argv[])
+int main_new(int argc, char * argv[])
 {
    try
    {  
@@ -193,7 +193,7 @@ int main(int argc, char * argv[])
 }
 
 // Deprecated main
-int main_old(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 
 	try
