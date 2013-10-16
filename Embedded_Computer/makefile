@@ -184,10 +184,12 @@ ifneq (NULL ,$(findstring i686, $(shell arch)))
     OPENCV_SHARED = ThirdParty/opencv/build/x86/ubuntu/libopencv_*
 else ifneq (NULL ,$(findstring arm, $(shell arch)))
     $(info Arm architecture detected.)
-    # TODO Support installation for this build
+    BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/arm_lib/libboost_*
+    OPENCV_SHARED = ThirdParty/opencv/build/arm/*
 else ifneq (NULL ,$(findstring x86_64, $(shell arch)))
     $(info x64 architecture detected.)
-    # TODO Support installation for this build
+    BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/ubuntu_x64_lib/libboost_*
+    OPENCV_SHARED = ThirdParty/opencv/build/x64/ubuntu/libopencv_*
 else
     $(info Unknow architecture.)
 endif
