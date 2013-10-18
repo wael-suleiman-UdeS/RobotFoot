@@ -5,20 +5,16 @@
  * \version 0.2
  */
 #include <iostream>
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/chrono.hpp>
-#include <boost/uuid/uuid.hpp>
 
 #include "ImageProcessing/Camera.h"
 #include "ImageProcessing/ColorFinder.h"
 #include "ImageProcessing/ObjectTracker.h"
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
-#include "Utilities/SerialInterface.h"
 #include "Utilities/ThreadManager.h"
-#include "Control/STM32F4.h"
+#include "Control/MotorControl_2.h"
 
 /*!
  * \brief Track the ball
@@ -168,43 +164,30 @@ void hardSet(STM32F4& mc)
 }
 
 int main_new(int argc, char * argv[])
-{
-   try
-   {  
-      // Add io stream to Logger
-      Logger::getInstance().addStream(std::cout);
+{ 
+    // Add io stream to Logger
+    Logger::getInstance().addStream(std::cout);
 
-      // Load config file
-      Logger::getInstance() << "Loading configuration file..." << std::endl;
-      XmlParser config;
-      if (!config.loadFile("config/config.xml")) 
-      {
-          Logger::getInstance(Logger::LogLvl::ERROR) << "Error while loading configuration file." << std::endl;
-          std::exit(1);
-      }
+    // Load config file
+    Logger::getInstance() << "Loading configuration file..." << std::endl;
+    XmlParser config;
+    if (!config.loadFile("config/config.xml")) 
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "Error while loading configuration file." << std::endl;
+        std::exit(1);
+    }
 
-      // Set logging level  
-      Logger::getInstance().setLogLvl(config.getStringValue(XmlPath::Root / "Logging" / "LogLvl"));
+    // Set logging level  
+    Logger::getInstance().setLogLvl(config.getStringValue(XmlPath::Root / "Logging" / "LogLvl"));
 
-      // Thread Manager
-      ThreadManager threadManager;
+    // Thread Manager
+    ThreadManager *threadManager = new ThreadManager();
 
-      // Init USB interface with STM32F4
-      Logger::getInstance() << "Initializing USB interface..." << std::endl;
-      boost::asio::io_service boost_io;
-      std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
-      STM32F4 mc(port_name, boost_io);
-      threadManager.create(50, boost::bind(&boost::asio::io_service::run, &boost_io)); 
-       
-      // Start main process here
-      Logger::getInstance() << "Done" << std::endl;
-      boost_io.stop();
-   }
-   catch (std::exception& e)
-   {
-      Logger::getInstance(Logger::LogLvl::ERROR) << "Exception in main() : " << e.what() << std::endl;
-   }
-   return 0;
+    MotorControl motorControl(threadManager, config);
+
+    // Start main process here
+    Logger::getInstance() << "Done" << std::endl;
+    return 0;
 }
 
 // Deprecated main
