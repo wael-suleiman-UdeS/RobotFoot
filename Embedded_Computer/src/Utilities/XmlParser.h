@@ -2,6 +2,7 @@
 #define XMLPARSER_H
 
 #include <string>
+#include <vector>
 #include <boost/filesystem.hpp>
 #include "pugixml.h"
 
@@ -75,6 +76,7 @@ public:
 
 	bool loadFile(fs::path filePath);
 	string getStringValue(fs::path xPath) const;
+    std::vector<std::string> XmlParser::getStringValues(path xPath) const
 	float getIntValue(fs::path xPath) const;
 };
 

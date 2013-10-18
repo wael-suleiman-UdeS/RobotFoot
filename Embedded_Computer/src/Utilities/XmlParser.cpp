@@ -2,6 +2,7 @@
 
 using boost::filesystem::path;
 using pugi::xpath_node;
+using pugi::xml_node;
 using pugi::xpath_exception;
 
 namespace XmlPath
@@ -74,6 +75,29 @@ string XmlParser::getStringValue(path xPath) const
 		xpath_node node = _document.select_single_node(xPath.generic_string().c_str());
 		return node.node().attribute(XmlPath::Value).value();
 	}
+	catch(const xpath_exception& ex) { return ""; }
+}
+
+/** \brief Retrieve the string value attribute of each child of the xPath Node
+ *
+ * \param xPath path: XPath of the XML element in which to read the value attributes
+ * \return std::vector<string>: Vector of the retrieved values
+ *
+ */
+std::vector<std::string> XmlParser::getStringValues(path xPath) const
+{
+	if (_document.empty()) { return ""; }
+   
+    try
+    {
+        std::vector<std::string> values;
+        xpath_node node = _document.select_single_node(xPath.generic_string().c_str());
+
+        for (xml_node it = node.node().first_child(); it != node.last_child(); ++it)
+        {
+            values.push_back(it.attribute(XmlPath::Value).value());
+        }
+    } 
 	catch(const xpath_exception& ex) { return ""; }
 }
 

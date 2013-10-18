@@ -15,6 +15,7 @@ SRC += ImageProcessing/ObjectTracker.cpp
 SRC += ImageProcessing/ColorFinder.cpp
 SRC += ImageProcessing/ImageProcessing.cpp
 SRC += Control/STM32F4.cpp
+SRC += Control/MotorControl_2.cpp
 
 # Libs directories
 LIBDIR_ARM =  -LThirdParty/boost_1_54_0/stage/arm_lib/
@@ -103,6 +104,7 @@ LIBFLAGS += -lXdmcp
 # Additionnal includes directories
 INCLUDES = -IThirdParty/boost_1_54_0/
 INCLUDES += -IThirdParty/opencv/include/
+INCLUDES += -Isrc/
 
 # Architectures
 ARM=arm

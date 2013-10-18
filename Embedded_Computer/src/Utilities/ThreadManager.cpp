@@ -23,7 +23,7 @@ ThreadManager::~ThreadManager()
 boost::thread::id ThreadManager::create(unsigned int priority, std::string thread_name, const boost::function0<void>& thread_func)
 {
     Logger::getInstance(Logger::LogLvl::DEBUG) << "Creating new thread with priority : " << priority << std::endl;
-    boost::thread* newThread = new boost::thread(threadfunc);
+    boost::thread* newThread = new boost::thread(thread_func);
     _threads.insert(std::make_pair(newThread->get_id(), newThread));
 
     boost::condition_variable* cond = new boost::condition_variable(); 
