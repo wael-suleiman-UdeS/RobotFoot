@@ -1,4 +1,3 @@
-#include <string>
 #include <boost/lexical_cast.hpp>
 #include <utility> // std::pair
 #include <unistd.h>
@@ -21,14 +20,16 @@ ThreadManager::~ThreadManager()
     }
 }
 
-boost::thread::id ThreadManager::create(unsigned int priority, const boost::function0<void>& threadfunc)
+boost::thread::id ThreadManager::create(unsigned int priority, std::string thread_name, const boost::function0<void>& thread_func)
 {
     Logger::getInstance(Logger::LogLvl::DEBUG) << "Creating new thread with priority : " << priority << std::endl;
-    boost::thread* newThread = new boost::thread(threadfunc); // TODO
+    boost::thread* newThread = new boost::thread(threadfunc);
     _threads.insert(std::make_pair(newThread->get_id(), newThread));
 
     boost::condition_variable* cond = new boost::condition_variable(); 
     _cond_variables.insert(std::make_pair(newThread->get_id(), cond));
+
+    _names.insert(std::make_pair(thread_name, newThread->get_id()));
 
     int retcode;
     int policy;
@@ -63,16 +64,31 @@ void ThreadManager::stop(boost::thread::id thread_id)
     _threads[thread_id]->join();
 }
 
+void ThreadManager::stop(std::string thread_name)
+{
+    stop(_names[thread_name]);
+}
+
 void ThreadManager::attach(boost::thread::id thread_id)
 {
     Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Joining thread " << boost::lexical_cast<std::string>(thread_id) << std::endl;
     _threads[thread_id]->join();
 }
 
+void ThreadManager::attach(std::string thread_name)
+{
+    attach(_names[thread_name]);
+}
+
 void ThreadManager::resume(boost::thread::id thread_id)
 {
     Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Resuming thread " << boost::lexical_cast<std::string>(thread_id) << std::endl;
     _cond_variables[thread_id]->notify_one(); 
+}
+
+void ThreadManager::resume(std::string thread_name)
+{
+    resume(_names[thread_name]);
 }
 
 void ThreadManager::wait()
