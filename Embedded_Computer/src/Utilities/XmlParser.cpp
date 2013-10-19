@@ -86,19 +86,20 @@ string XmlParser::getStringValue(path xPath) const
  */
 std::vector<std::string> XmlParser::getStringValues(path xPath) const
 {
-	if (_document.empty()) { return ""; }
+    std::vector<std::string> values;
+	if (_document.empty()) { return values; }
    
     try
     {
-        std::vector<std::string> values;
         xpath_node node = _document.select_single_node(xPath.generic_string().c_str());
 
-        for (xml_node it = node.node().first_child(); it != node.last_child(); ++it)
+        for (xml_node child = node.node().first_child(); child; child = child.next_sibling())
         {
-            values.push_back(it.attribute(XmlPath::Value).value());
+            values.push_back(child.attribute(XmlPath::Value).value());
         }
+        return values;
     } 
-	catch(const xpath_exception& ex) { return ""; }
+	catch(const xpath_exception& ex) { return std::vector<std::string>(); }
 }
 
 /** \brief Retrieve an int value attribute in the XML document

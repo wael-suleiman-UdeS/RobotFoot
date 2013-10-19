@@ -76,7 +76,7 @@ public:
 
 	bool loadFile(fs::path filePath);
 	string getStringValue(fs::path xPath) const;
-    std::vector<std::string> XmlParser::getStringValues(path xPath) const
+    std::vector<std::string> getStringValues(fs::path xPath) const;
 	float getIntValue(fs::path xPath) const;
 };
 
