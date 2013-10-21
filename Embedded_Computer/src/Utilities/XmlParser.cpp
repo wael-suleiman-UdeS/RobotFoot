@@ -13,6 +13,7 @@ namespace XmlPath
 
 	const path ImageProcessing = "ImageProcessing";
 	const path Camera = "Camera";
+	const path ActiveColor = "ActiveColor";
 	const path Colors = "Colors";
 	const path Color = "Color";
 	const path HSVcolor = "HSVcolor";
