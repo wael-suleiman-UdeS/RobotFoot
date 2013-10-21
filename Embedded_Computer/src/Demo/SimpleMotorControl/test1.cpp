@@ -5,6 +5,54 @@
 
 #include "../../Control/STM32F4.h"
 
+void setPosition(STM32F4& mc)
+{
+	int id;
+	std::string sPosition;
+
+	std::cout << "Enter motor id : ";
+	std::cin >> id;
+	std::cout << "Current position is : " << mc.read(id) << std::endl;
+
+	mc.setTorque(id,STM32F4::TorqueOn);
+	std::cout << "Desired position : ";
+	std::cin >> sPosition;
+	mc.setMotor(id,atoi(sPosition.c_str()));
+	sleep(2);
+	mc.setTorque(id,STM32F4::TorqueOff);
+}
+
+void readStatus(STM32F4& mc)
+{
+	int id;
+	std::string sPosition;
+
+	std::cout << "Enter motor id : ";
+	std::cin >> id;
+
+	std::cout << "Status is : " << mc.readStatus(id) << std::endl;
+}
+
+void clearStatus(STM32F4& mc)
+{
+	int id;
+	std::string sPosition;
+
+	std::cout << "Enter motor id : ";
+	std::cin >> id;
+
+	mc.clearStatus(id);
+}
+
+void clearAllStatus(STM32F4& mc)
+{
+	for(int id = 1; id < 15; id++)
+	{
+		mc.clearStatus(id);
+	}
+	mc.clearStatus(253);
+}
+
 int main(int argc, char* argv[])
 {
    try
@@ -15,24 +63,28 @@ int main(int argc, char* argv[])
       
 		while(1)
 		{
-			int id;
-			std::string sPosition;
-
-			std::cout << "Enter motor id : ";
-			std::cin >> id;
-
-			if(id==0)
-				return 0;
-
-			std::cout << "Current position is : " << mc.read(id) << std::endl;
-
-			mc.setTorque(id,STM32F4::TorqueOn);
-			std::cout << "Desired position : ";
-			std::cin >> sPosition;
-			mc.setMotor(id,atoi(sPosition.c_str()));
-			sleep(2);
-			mc.setTorque(id,STM32F4::TorqueOff);
-
+			std::cout << "Choose Command (Set Position = 1, Read Status = 2, Clear Status = 3, Clear All Status = 4, End = 0)" << std::endl;
+			int choice;
+			std::cin >> choice;
+			switch(choice)
+			{
+				case 0:
+					return 0;
+					break;
+				case 1:
+					setPosition(mc);
+					break;
+				case 2:
+					readStatus(mc);
+					break;
+				case 3:
+					clearStatus(mc);
+					break;
+				case 4:
+					clearAllStatus(mc);
+					break;
+			}
+ 
 			std::cout << std::endl;
  		}
       

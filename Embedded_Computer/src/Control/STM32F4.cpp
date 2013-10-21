@@ -71,3 +71,39 @@ int STM32F4::read(uint8_t id)
 
 	return ((msg[2] & 0xFF) << 8) | (msg[3] & 0xFF);  
 }
+
+int STM32F4::readStatus(std::uint8_t id)
+{
+	std::vector<char> msg;
+	const uint8_t cmd = 0x04;
+	const uint8_t nb = 2;
+	const uint8_t checkSum = cmd + nb + id;
+
+	msg.push_back('\xff');
+	msg.push_back(checkSum);
+	msg.push_back(nb);
+	msg.push_back(cmd);
+	msg.push_back(id);
+	
+	msg = _usb.read_sync(msg);
+
+	if (msg.size() < 3) { return 0; }
+
+	return msg[2];
+}
+
+void STM32F4::clearStatus(std::uint8_t id)
+{
+	std::vector<char> msg;
+	const uint8_t cmd = 0x05;
+	const uint8_t nb = 2;
+	const uint8_t checkSum = cmd + nb + id;
+
+	msg.push_back('\xff');
+	msg.push_back(checkSum);
+	msg.push_back(nb);
+	msg.push_back(cmd);
+	msg.push_back(id);
+   _usb.write(msg);
+}
+
