@@ -189,7 +189,17 @@ Default_Handler: bx        lr
         .type Reset_Handler, %function
 
 Reset_Handler:
-
+// Enable FPU
+                // CPACR is located at address 0xE000ED88
+                LDR.W   R0, =0xE000ED88
+                LDR     R1, [R0]
+                // Set bits 20-23 to enable CP10 and CP11 coprocessors
+                ORR     R1, R1, #(0xF << 20)
+                // Write back the modified value to the CPACR
+                STR     R1, [R0] // wait for store to complete
+                DSB
+                // reset pipeline now the FPU is enabled
+                ISB
 // Copy initialized data from flash to RAM
                 ldr         r0, DATA_START
                 ldr         r1, DATA_LOAD
