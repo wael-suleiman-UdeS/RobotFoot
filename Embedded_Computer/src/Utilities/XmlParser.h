@@ -28,6 +28,7 @@ namespace XmlPath
 
 	extern const fs::path ImageProcessing;
 	extern const fs::path Camera;
+	extern const fs::path ActiveColor;
 	extern const fs::path Colors;
 	extern const fs::path Color;
 	extern const fs::path HSVcolor;
