@@ -23,6 +23,62 @@ namespace
 	const double dInvAngleConvertion = 1/dAngleConvertion;
 }
 
+Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int speed)
+:
+_stm32f4(stm32f4),
+_name(name),
+_id(id),
+_offset(offset),
+_min(min),
+_max(max),
+_speed(speed),
+_currentPos(-1),
+_nextPos(-1)
+{    
+}
+
+Motor::~Motor()
+{
+}
+
+void Motor::setPos(double pos)
+{
+    _nextPos = pos;
+}
+
+const double Motor::getPos()
+{
+    return _currentPos;
+}
+
+void Motor::setTorque(bool value)
+{
+    _stm32f4->setTorque(_id, value ? STM32F4::TorqueOn : STM32F4::TorqueOff);
+}
+
+int Motor::Angle2Value(const double angle)
+{
+	int value = (angle*dInvAngleConvertion) + _offset;
+	return clamp(value, _min, _max);
+}
+
+double Motor::Value2Angle(const int value)
+{
+	int clampedValue = clamp(value, _min, _max);
+	return double(clampedValue - _offset)*dAngleConvertion;
+}
+
+void Motor::Read()
+{
+    _currentPos = Value2Angle(_stm32f4->read(_id));
+}
+
+void Motor::Write()
+{
+    if (_currentPos != _nextPos)
+        _stm32f4->setMotor(_id, Angle2Value(_nextPos));
+}
+
 MotorControl::MotorControl( ThreadManager *threadManager, const XmlParser &config ) :
  _threadManager(threadManager)
 {
@@ -33,65 +89,15 @@ MotorControl::MotorControl( ThreadManager *threadManager, const XmlParser &confi
         boost::asio::io_service boost_io;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
         _stm32f4 = new STM32F4(port_name, boost_io);
-        threadManager->create(50, "boost::io_service",  boost::bind(&boost::asio::io_service::run, &boost_io));
+        threadManager->create(50, boost::bind(&boost::asio::io_service::run, &boost_io));
     }
     catch (std::exception& e)
     {
         Logger::getInstance(Logger::LogLvl::ERROR) << "Exception in MotorControl.cpp while initialising USB interface : " << e.what() << std::endl;
     }
 
-    std::map<string, Motor> motorsMap;
-    InitializeMotors(motorsMap, config);
-
-    std::vector<Motor> joints;
-
-    //Right Leg
-    joints.push_back(motorsMap.find("R_HIP_YAW")->second);
-    joints.push_back(motorsMap.find("R_HIP_ROLL")->second);
-    joints.push_back(motorsMap.find("R_HIP_PITCH")->second);
-    joints.push_back(motorsMap.find("R_KNEE")->second);
-    joints.push_back(motorsMap.find("R_ANKLE_PITCH")->second);
-    joints.push_back(motorsMap.find("R_ANKLE_ROLL")->second);
-    //Left leg
-    joints.push_back(motorsMap.find("L_HIP_YAW")->second);
-    joints.push_back(motorsMap.find("L_HIP_ROLL")->second);
-    joints.push_back(motorsMap.find("L_HIP_PITCH")->second);
-    joints.push_back(motorsMap.find("L_KNEE")->second);
-    joints.push_back(motorsMap.find("L_ANKLE_PITCH")->second);
-    joints.push_back(motorsMap.find("L_ANKLE_ROLL")->second);
-
-    _leg_config[ALL_LEGS].joints = joints;
-    //_config[ALL_LEGS].P = JointData::P_GAIN_DEFAULT;
-    //_config[ALL_LEGS].I = JointData::I_GAIN_DEFAULT;
-    //_config[ALL_LEGS].D =JointData::D_GAIN_DEFAULT;
-
-    joints.clear();
-    //Right Leg
-    joints.push_back(motorsMap.find("R_HIP_YAW")->second);
-    joints.push_back(motorsMap.find("R_HIP_ROLL")->second);
-    joints.push_back(motorsMap.find("R_HIP_PITCH")->second);
-    joints.push_back(motorsMap.find("R_KNEE")->second);
-    joints.push_back(motorsMap.find("R_ANKLE_PITCH")->second);
-    joints.push_back(motorsMap.find("R_ANKLE_ROLL")->second);
-
-    _leg_config[RIGHT_LEGS].joints = joints;
-    //_config[RIGHT_LEGS].P = JointData::P_GAIN_DEFAULT;
-    //_config[RIGHT_LEGS].I = JointData::I_GAIN_DEFAULT;
-    //_config[RIGHT_LEGS].D =JointData::D_GAIN_DEFAULT;
-
-    joints.clear();
-    //Left leg
-    joints.push_back(motorsMap.find("L_HIP_YAW")->second);
-    joints.push_back(motorsMap.find("L_HIP_ROLL")->second);
-    joints.push_back(motorsMap.find("L_HIP_PITCH")->second);
-    joints.push_back(motorsMap.find("L_KNEE")->second);
-    joints.push_back(motorsMap.find("L_ANKLE_PITCH")->second);
-    joints.push_back(motorsMap.find("L_ANKLE_ROLL")->second);
- 
-    _leg_config[LEFT_LEGS].joints = joints;
-    //_config[LEFT_LEGS].P = JointData::P_GAIN_DEFAULT;
-    //_config[LEFT_LEGS].I = JointData::I_GAIN_DEFAULT;
-    //_config[LEFT_LEGS].D =JointData::D_GAIN_DEFAULT;
+    InitializeMotors(config);
+    InitializeConfigurations(config);
 }
 
 MotorControl::~MotorControl()
@@ -99,154 +105,185 @@ MotorControl::~MotorControl()
 
 }
 
-//Returns a map of joint name and Motor struct
-void MotorControl::InitializeMotors(std::map<std::string, Motor> &motorsMap, const XmlParser &config)
+void MotorControl::Start()
 {
-    std::map<std::string, path> pathsMap;
-
-    pathsMap.insert(std::make_pair("R_HIP_YAW", XmlPath::LegsMotors / XmlPath::R_HIP_YAW));
-	pathsMap.insert(std::make_pair("L_HIP_YAW", XmlPath::LegsMotors / XmlPath::L_HIP_YAW));
-	pathsMap.insert(std::make_pair("R_HIP_ROLL", XmlPath::LegsMotors / XmlPath::R_HIP_ROLL));
-	pathsMap.insert(std::make_pair("L_HIP_ROLL", XmlPath::LegsMotors / XmlPath::L_HIP_ROLL));
-	pathsMap.insert(std::make_pair("R_HIP_PITCH", XmlPath::LegsMotors / XmlPath::R_HIP_PITCH));
-	pathsMap.insert(std::make_pair("L_HIP_PITCH", XmlPath::LegsMotors / XmlPath::L_HIP_PITCH));
-	pathsMap.insert(std::make_pair("R_KNEE", XmlPath::LegsMotors / XmlPath::R_KNEE));
-	pathsMap.insert(std::make_pair("L_KNEE", XmlPath::LegsMotors / XmlPath::L_KNEE));
-	pathsMap.insert(std::make_pair("R_ANKLE_PITCH", XmlPath::LegsMotors / XmlPath::R_ANKLE_PITCH));
-	pathsMap.insert(std::make_pair("L_ANKLE_PITCH", XmlPath::LegsMotors / XmlPath::L_ANKLE_PITCH));
-	pathsMap.insert(std::make_pair("R_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL));
-	pathsMap.insert(std::make_pair("L_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL));
-
-	Motor motor;
-	for(auto it = pathsMap.begin(); it != pathsMap.end(); ++it)
-	{
-	    motor.id       = config.getIntValue(it->second / XmlPath::MotorID);
-		motor.offset   = config.getIntValue(it->second / XmlPath::Offset);
-		motor.minLimit = config.getIntValue(it->second / XmlPath::LimitMin);
-		motor.maxLimit = config.getIntValue(it->second / XmlPath::LimitMax);	
-		motorsMap.insert(std::make_pair(it->first, motor));
-	}
+    // Main task reading and sending data
+    ReadAll();
+    _threadManager->resume(ThreadManager::Task::LEGS_CONTROL);
+    _threadManager->wait();
+    WriteAll();
+    _threadManager->wait(); 
 }
 
-bool MotorControl::SetTorque( const Option option )
+// Populate the motor list
+void MotorControl::InitializeMotors(const XmlParser &config)
+{
+    std::map<std::string, path> paths;
+    paths.insert(std::make_pair("R_HIP_YAW", XmlPath::LegsMotors / XmlPath::R_HIP_YAW));
+	paths.insert(std::make_pair("L_HIP_YAW", XmlPath::LegsMotors / XmlPath::L_HIP_YAW));
+	paths.insert(std::make_pair("R_HIP_ROLL", XmlPath::LegsMotors / XmlPath::R_HIP_ROLL));
+	paths.insert(std::make_pair("L_HIP_ROLL", XmlPath::LegsMotors / XmlPath::L_HIP_ROLL));
+	paths.insert(std::make_pair("R_HIP_PITCH", XmlPath::LegsMotors / XmlPath::R_HIP_PITCH));
+	paths.insert(std::make_pair("L_HIP_PITCH", XmlPath::LegsMotors / XmlPath::L_HIP_PITCH));
+	paths.insert(std::make_pair("R_KNEE", XmlPath::LegsMotors / XmlPath::R_KNEE));
+	paths.insert(std::make_pair("L_KNEE", XmlPath::LegsMotors / XmlPath::L_KNEE));
+	paths.insert(std::make_pair("R_ANKLE_PITCH", XmlPath::LegsMotors / XmlPath::R_ANKLE_PITCH));
+	paths.insert(std::make_pair("L_ANKLE_PITCH", XmlPath::LegsMotors / XmlPath::L_ANKLE_PITCH));
+	paths.insert(std::make_pair("R_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL));
+	paths.insert(std::make_pair("L_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL));
+
+	for (auto it = paths.begin(); it != paths.end(); ++it)
+	{
+	    int id     = config.getIntValue(it->second / XmlPath::MotorID);
+		int offset = config.getIntValue(it->second / XmlPath::Offset);
+		int min    = config.getIntValue(it->second / XmlPath::LimitMin);
+		int max    = config.getIntValue(it->second / XmlPath::LimitMax);
+        int speed  = config.getIntValue(it->second / XmlPath::Speed);    
+        Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, speed);
+	    _motors.insert(std::make_pair(it->first, motor));
+    }
+}
+
+// Populate the configuration list
+void MotorControl::InitializeConfigurations(const XmlParser &config)
+{
+    std::map<Config, path> paths;
+    paths.insert(std::make_pair(Config::ALL_MOTORS, XmlPath::Configurations / "ALL_MOTORS"));
+    paths.insert(std::make_pair(Config::ALL_LEGS, XmlPath::Configurations / "ALL_LEGS"));
+    paths.insert(std::make_pair(Config::RIGHT_LEG, XmlPath::Configurations / "RIGHT_LEG"));
+    paths.insert(std::make_pair(Config::LEFT_LEG, XmlPath::Configurations / "LEFT_LEG"));
+    paths.insert(std::make_pair(Config::HEAD, XmlPath::Configurations / "HEAD"));
+
+    for (auto it = paths.begin(); it != paths.end(); ++it)
+    {
+        std::vector<Motor*> motors;
+        std::vector<std::string> names = config.getChildrenStringValues(it->second);
+        for (auto name = names.begin(); name != names.end(); ++name)
+        {
+            if (_motors.find(*name) != _motors.end())
+                motors.push_back(_motors[*name]);
+        } 
+        _configurations.insert(std::make_pair(it->first, motors));
+    }
+}
+
+bool MotorControl::SetTorque(bool value, const Config config)
 {
    bool status = true;
-
-   std::vector<Motor>::const_iterator itr = _leg_config[ option ].joints.begin();
-   const std::vector<Motor>::const_iterator end = _leg_config[ option ].joints.end();
-
-   for( ; itr != end && status ; itr++ )
+   if (_configurations.find(config) != _configurations.end())
    {
-     // TODO : Grab status
-      //status &=
-		Motor motor = *itr;
-		_stm32f4->setTorque(motor.id,STM32F4::TorqueOn);
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetTorque\" : Configuration is invalid." << std::endl;
+       return false;
+   }
+
+   for (auto it = _configurations[config].begin(); it != _configurations[config].end() && status; ++it)
+   {
+       // TODO : Grab motor status
+       (*it)->setTorque(value);
       //_cm730->WriteByte(*itr, MX28::P_P_GAIN, JointData::P_GAIN_DEFAULT, 0);
       //_cm730->WriteByte(*itr, MX28::P_I_GAIN, JointData::I_GAIN_DEFAULT, 0);
       //_cm730->WriteByte(*itr, MX28::P_D_GAIN, JointData::D_GAIN_DEFAULT, 0);
-		//TODO : temporary test 
-	//	sleep(1);
    }
-
    return status;
 }
-/*
-bool MotorControl::DisableTorque( const Option option )
+
+bool MotorControl::InitPosition(const std::vector<double>& desiredPos, const Config config,
+				                const double msTotalTime /*= 10000.0*/,
+				                const double msDt /*= 16*/ )
 {
-   bool status = true;
-
-   std::vector<int>::const_iterator itr = _config[ option ].joints.begin();
-   const std::vector<int>::const_iterator end = _config[ option ].joints.end();
-
-   for( ; itr != end && status ; itr++ )
+   if (_configurations.find(config) == _configurations.end())
    {
-     // TODO : Grab status
-      //status &=
-		_cm730->WriteByte( *itr, MX28::P_TORQUE_ENABLE, 0, 0);
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"InitPosition\" : Configuration is invalid." << std::endl;
+       return false;
    }
-
-   return status;
-}
-*/
-bool MotorControl::InitPosition( const std::vector<double>& desiredPos,
-				  const Option option,
-				  const double msTotalTime /*= 10000.0*/,
-				  const double msDt /*= 16*/ )
-{
-   if( desiredPos.size() != getJointNum( option ) )
+   
+   if (desiredPos.size() != _configurations[config].size())
    {
 #ifdef DEBUG_TEST_MOTION
-       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"InitPosition\" : Joint number is invalid." 
-                                                  << std::endl;
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"InitPosition\" : Joint number is invalid." << std::endl;
 #endif
-      return false;
+       return false;
    }
 
+   Logger::getInstance(Logger::LogLvl::INFO) << "Setting initial position" << std::endl;
 #ifdef DEBUG_TEST_MOTION
-   Logger::getInstance(Logger::LogLvl::DEBUG) << "Setting initial position : \n";
+   Logger::getInstance(Logger::LogLvl::DEBUG) << "";
    std::copy(desiredPos.begin(), desiredPos.end(), std::ostream_iterator<double>(std::cout, " "));
    Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
 #endif   
 
-   std::vector<double> pos;
-   if( !ReadPosition( pos, option ) )
-   {
-#ifdef DEBUG_TEST_MOTION      
-       Logger::getInstance(Logger::LogLvl::ERROR) << "Error reading motor position" 
-                                                  << std::endl;
-#endif
-      return false;
-   }
+   ReadAll();
 
+   std::vector<double> pos;
+   if (!ReadPositions(pos, config))
+   {
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"InitPosition\" : Error ready positions.";
+       return false;
+   }
    std::vector<double> posDt;
 
-   std::vector<double>::const_iterator itrDesiredPos = desiredPos.begin();
-   const std::vector<double>::const_iterator endDesiredPos = desiredPos.end();
-   std::vector<double>::iterator itrPos = pos.begin();
-   const std::vector<double>::iterator endPos = pos.end();
+   auto itrDesiredPos = desiredPos.begin();
+   auto endDesiredPos = desiredPos.end();
+   auto itrPos = pos.begin();
+   auto endPos = pos.end();
 
    // Calcul position dt for each motor
-   for( ; itrDesiredPos != endDesiredPos || itrPos != endPos; itrDesiredPos++, itrPos++ )
+   for ( ; itrDesiredPos != endDesiredPos || itrPos != endPos; itrDesiredPos++, itrPos++ )
    {
       posDt.push_back( (*itrDesiredPos - *itrPos)/(msTotalTime/msDt) );
    }
 
    // Loop to add position dt to motor position and send command to motor
-   for(double t = 0.0; t < msTotalTime; t+=msDt)
+   for (double t = 0.0; t < msTotalTime; t+=msDt)
    {
       std::transform(pos.begin(), pos.end(), posDt.begin(), pos.begin(), std::plus<double>());
 
-      SetPosition( pos, option );
-
+      SetPositions(pos, config);
+      WriteAll();
       usleep(msDt*1000);
    }
-
    return true;
 }
 
-bool MotorControl::SetPosition( const std::vector<double>& pos, const Option option )
+bool MotorControl::SetPosition(double pos, std::string name)
+{  
+    if (_motors.find(name) == _motors.end())
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetPosition\" : Motor " << name << " invalid." << std::endl;
+        return false;
+    }
+
+    _motors[name]->setPos(pos);
+    return true;  
+}
+
+bool MotorControl::SetPositions(const std::vector<double>& pos, const Config config)
 {
-   if( pos.size() != getJointNum( option ) )
+   if (_configurations.find(config) == _configurations.end())
+   {
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetPositions\" : Configuration is invalid." << std::endl;
+       return false;
+   }
+   
+   if (pos.size() != _configurations[config].size())
    {
 #ifdef DEBUG_TEST_MOTION
-       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetPosition\" : Joint number is invalid."
-                                                  << std::endl;
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetPositions\" : Joint number is invalid." << std::endl;
 #endif
-      return false;
+       return false;
    }
 
    bool status = true;
 
 #ifdef DANGER_TEST_MOTION   
-   auto itrJoint = _leg_config[ option ].joints.begin();
-   const auto endJoint = _leg_config[ option ].joints.end();
+   auto itrJoint = _configurations[config].begin();
+   const auto endJoint = _configurations[config].end();
    auto itrPos = pos.begin();
    const auto endPos = pos.end();
 
-   for( ; itrJoint != endJoint && itrPos != endPos && status ; itrJoint++, itrPos++ )
+   for ( ; itrJoint != endJoint && itrPos != endPos && status ; itrJoint++, itrPos++ )
    {
-		Motor motor = *itrJoint;
-		_stm32f4->setMotor(motor.id,Angle2Value(motor, *itrPos));
+       (*itrJoint)->setPos(*itrPos);
    }
 #endif
 
@@ -255,55 +292,50 @@ bool MotorControl::SetPosition( const std::vector<double>& pos, const Option opt
       std::copy(pos.begin(), pos.end(), std::ostream_iterator<double>(std::cout, " "));
       Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
 #endif
-
    return status;
 }
 
-bool MotorControl::ReadPosition( std::vector<double>& pos, const Option option )
+const double MotorControl::ReadPosition(std::string name)
 {
-   bool status = true;
-   int value;
+    if (_motors.find(name) == _motors.end())
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"ReadPosition\" : Motor " << name << " invalid." << std::endl;
+        return -1;
+    }
+    return _motors[name]->getPos();
+}
 
-   auto itr = _leg_config[ option ].joints.begin();
-   const auto end = _leg_config[ option ].joints.end();
-
-   for( ; itr != end && status ; itr++ )
+bool MotorControl::ReadPositions(std::vector<double>& pos, const Config config)
+{
+   if (_configurations.find(config) == _configurations.end())
    {
-	Motor motor = *itr;
-	value = _stm32f4->read(motor.id);
-	pos.push_back( Value2Angle(motor, value) );
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"ReadPositions\" : Configuration is invalid." << std::endl;
+       return false;
    }
 
+   bool status = true;
+   auto itr = _configurations[config].begin();
+   const auto end = _configurations[config].end();
+
+   for ( ; itr != end && status ; itr++ )
+   {
+       pos.push_back((*itr)->getPos());
+   }
    return status;
 }
 
-unsigned int MotorControl::getJointNum( const Option option )
+void MotorControl::ReadAll()
 {
-   return _leg_config[ option ].joints.size();
+    for (auto it = _motors.begin(); it != _motors.end(); ++it)
+    {
+        it->second->Read();
+    }
 }
 
-int MotorControl::Angle2Value(const double angle)
+void MotorControl::WriteAll()
 {
-	int iOffsetValue = 512;
-	int value = (angle*dInvAngleConvertion)+iOffsetValue;
-	return clamp(value, 21, 1002);
-}
-
-int MotorControl::Angle2Value(const Motor& motor, const double angle)
-{
-	int value = (angle*dInvAngleConvertion) + motor.offset;
-	return clamp(value, motor.minLimit, motor.maxLimit);
-}
-
-double MotorControl::Value2Angle(const int value)
-{
-	int iOffsetValue = 512;
-	int clampedValue = clamp(value, 21, 1002);
-	return double(clampedValue-iOffsetValue)*dAngleConvertion;
-}
-
-double MotorControl::Value2Angle(const Motor& motor, const int value)
-{
-	int clampedValue = clamp(value, motor.minLimit, motor.maxLimit);
-	return double(clampedValue - motor.offset)*dAngleConvertion;
+    for (auto it = _motors.begin(); it != _motors.end(); ++it)
+    {
+        it->second->Write();
+    }
 }
