@@ -26,8 +26,8 @@ namespace XmlPath
 	const path Legs = "Legs";
 
 	// Head
-	const path Pan = "Pan";
-	const path Tilt = "Tilt";
+	const path HEAD_PAN = "HEAD_PAN";
+	const path HEAD_TILT = "HEAD_TILT";
 
 	const path Threshold = "Threshold";
 

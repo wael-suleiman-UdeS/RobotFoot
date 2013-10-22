@@ -41,8 +41,8 @@ namespace XmlPath
 	extern const fs::path Threshold;
 
 	// Head
-	extern const fs::path Pan;
-	extern const fs::path Tilt;
+	extern const fs::path HEAD_PAN;
+	extern const fs::path HEAD_TILT;
 
 	extern const fs::path R_HIP_YAW;
 	extern const fs::path L_HIP_YAW;

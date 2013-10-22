@@ -23,7 +23,7 @@ public:
    HeadControlTask(ThreadManager *threadManager, XmlParser &config, MotorControl &mc);
    ~HeadControlTask();
 
-   void start();
+   void run();
 
 private:
     ThreadManager *_threadManager;
