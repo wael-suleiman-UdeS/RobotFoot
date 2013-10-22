@@ -28,11 +28,11 @@ void StaticWalk::init(const std::string filename, const bool isUsingAlgorithm, c
     std::ifstream file;
     file.open( filename.c_str() );
     std::vector<double> vPos;  
+    getline( file, strLine );
     
     while( !file.eof() )
     {
         vPos.clear();
-        getline( file, strLine );
         std::istringstream iss(strLine);
 
         std::copy(std::istream_iterator<double>(iss),
@@ -40,6 +40,7 @@ void StaticWalk::init(const std::string filename, const bool isUsingAlgorithm, c
             std::back_inserter(vPos));
 
         vPosition.push_back(vPos);
+        getline( file, strLine );
 
     }
 
