@@ -37,10 +37,11 @@ class ThreadManager
         void attach(boost::thread::id thread_id);
         void attach(Task task);
 
-        void resume(boost::thread::id thread_id);
-        void resume(Task task);
+        bool resume(boost::thread::id thread_id);
+        bool resume(Task task);
 
         void wait();
+        void end();
         int calculate_the_answer_to_life_the_universe_and_everything();     
     private:
         void timer();

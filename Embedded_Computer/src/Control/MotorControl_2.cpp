@@ -24,7 +24,7 @@ namespace
 	const double dInvAngleConvertion = 1/dAngleConvertion;
 }
 
-Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playtime)
+Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime)
 :
 _stm32f4(stm32f4),
 _name(name),
@@ -33,8 +33,8 @@ _offset(offset),
 _min(min),
 _max(max),
 _playTime(playTime),
-_currentPos(-1),
-_nextPos(-1)
+_lastPos(-1),
+_currentPos(-1)
 {    
 }
 
@@ -44,7 +44,7 @@ Motor::~Motor()
 
 void Motor::setPos(double pos)
 {
-    _nextPos = pos;
+    _currentPos = pos;
 }
 
 const double Motor::getPos()
@@ -63,22 +63,26 @@ int Motor::Angle2Value(const double angle)
 	return clamp(value, _min, _max);
 }
 
-double Motor::Value2Angle(const std::int16_t value)
+double Motor::Value2Angle(const int value)
 {
-	if (value < 0) return value;
 	int clampedValue = clamp(value, _min, _max);
 	return double(clampedValue - _offset)*dAngleConvertion;
 }
 
 void Motor::Read()
 {
-    _currentPos = Value2Angle(_stm32f4->read(_id));
+    std::int16_t value = _stm32f4->read(_id);
+    if (value > 0)
+        _currentPos = Value2Angle(value);
 }
 
 void Motor::Write()
 {
-    if (_currentPos != _nextPos)
-        _stm32f4->setMotor(_id, Angle2Value(_nextPos), _playTime);
+    if (_currentPos != _lastPos)
+    {
+        _lastPos = _currentPos;
+        _stm32f4->setMotor(_id, Angle2Value(_currentPos), _playTime);
+    }
 }
 
 MotorControl::MotorControl( ThreadManager *threadManager, const XmlParser &config ) :
@@ -107,13 +111,17 @@ MotorControl::~MotorControl()
 
 }
 
-void MotorControl::Start()
+void MotorControl::run()
 {
+    boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
+    
     // Main task reading and sending data
     ReadAll();
-    _threadManager->resume(ThreadManager::Task::LEGS_CONTROL);
-    _threadManager->wait();
+    if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
+        _threadManager->wait();
     WriteAll();
+    boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+    Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl took " << sec.count() << " seconds" << std::endl;
     _threadManager->wait(); 
 }
 
@@ -189,7 +197,7 @@ bool MotorControl::SetTorque(bool value, const Config config)
    return status;
 }
 
-bool MotorControl::InitPosition(const std::vector<double>& desiredPos, const Config config,
+bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Config config,
 				                const double msTotalTime /*= 10000.0*/,
 				                const double msDt /*= 16*/ )
 {

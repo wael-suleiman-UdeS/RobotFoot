@@ -19,6 +19,7 @@
 #include "Utilities/ThreadManager.h"
 #include "Control/MotorControl_2.h"
 #include "ImageProcessing/HeadControlTask.h"
+#include "Demo/StaticWalking/StaticWalk.h"
 
 /*!
  * \brief Use for the demo
@@ -94,7 +95,17 @@ int main(int argc, char * argv[])
         MotorControl motorControl(threadManager, config);
         
         // Starting Head task
-        HeadControlTask headTask(threadManager, config, motorControl);
+        //HeadControlTask headTask(threadManager, config, motorControl);
+        
+        // Init Walk task
+        StaticWalk staticWalk(threadManager, motorControl);
+        staticWalk.init("file", false, true);
+        staticWalk.initPosition(7000);
+
+        // Start tasks
+        threadManager->create(90, boost::bind(&StaticWalk::run, &staticWalk, 25));
+        threadManager->attach(threadManager->create(90, boost::bind(&MotorControl::run, &motorControl)));
+        delete threadManager;
     }
     catch (std::exception& e)
     {
