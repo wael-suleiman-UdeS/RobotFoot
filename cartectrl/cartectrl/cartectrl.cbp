@@ -147,6 +147,7 @@
 		<Unit filename="include/LED.hpp" />
 		<Unit filename="include/LEDs.hpp" />
 		<Unit filename="include/Tools.h" />
+		<Unit filename="include/bsp/Button.hpp" />
 		<Unit filename="include/bsp/GPIO.hpp" />
 		<Unit filename="include/herkulex.h" />
 		<Unit filename="include/initClock.h" />
@@ -165,6 +166,7 @@
 		<Unit filename="src/LED.cpp" />
 		<Unit filename="src/LEDs.cpp" />
 		<Unit filename="src/Tools.cpp" />
+		<Unit filename="src/bsp/Button.cpp" />
 		<Unit filename="src/bsp/GPIO.cpp" />
 		<Unit filename="src/herkulex.cpp" />
 		<Unit filename="src/initClock.c">
