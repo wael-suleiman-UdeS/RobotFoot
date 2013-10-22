@@ -5,6 +5,11 @@ using std::ostream;
 
 Logger* Logger::instance = &getInstance();
 
+/** \brief Retreive the instance of the Logger (Singleton pattern)
+ *
+ *  \return Logger&: Instance of the Logger object
+ *
+ */
 Logger& Logger::getInstance()
 {
     if (instance == NULL) 
@@ -14,6 +19,11 @@ Logger& Logger::getInstance()
     return *instance;
 }
 
+/** \brief Retreive Logger instance and set the Log lvl for the next entry.
+ *
+ *  \return Logger&: Instance of the Logger object
+ *
+ */
 Logger& Logger::getInstance(LogLvl lvl)
 {
     instance->_currentLvl = lvl;
@@ -30,9 +40,43 @@ void Logger::addStream(ostream& stream)
     _streams.push_front(&stream);
 }
 
+/** \brief Set the master log lvl for the whole session
+ *
+ *  \param Logger::LogLvl enum {DEBUG, INFO, WARN, ERROR, SHUTUP}
+ *
+ */
 void Logger::setLogLvl(LogLvl lvl)
 {
     _masterLvl = lvl;
+}
+
+/** \brief Set the master log lvl for the whole session
+ *
+ *  \param LogLvl string "DEBUG", "INFO", "WARN", "ERROR", "SHUTUP"
+ *
+ */
+void Logger::setLogLvl(std::string lvl)
+{
+    if (lvl == "DEBUG")
+    {
+        _masterLvl = LogLvl::DEBUG; 
+    }
+    else if (lvl == "ERROR")
+    {
+        _masterLvl = LogLvl::ERROR;
+    }
+    else if (lvl == "WARN")
+    {
+        _masterLvl = LogLvl::WARN;
+    }
+    else if (lvl == "SHUTUP")
+    {
+        _masterLvl = LogLvl::SHUTUP;
+    }
+    else
+    {
+        _masterLvl = LogLvl::INFO;
+    }
 }
 
 Logger& Logger::operator<<(ostream& (*endlPtr)(std::ostream&))
@@ -44,8 +88,9 @@ Logger& Logger::operator<<(ostream& (*endlPtr)(std::ostream&))
             **stream << *endlPtr;
         }
         _timeStamp = true;
-        _currentLvl = LogLvl::INFO;
+        _mutex.unlock();
     }
+    _currentLvl = LogLvl::INFO;
     return *this;
 }
 

@@ -10,7 +10,7 @@
 
 using boost::filesystem::path;
 
-#define DEBUG_TEST_MOTION
+//#define DEBUG_TEST_MOTION
 
 using boost::algorithm::clamp;
 

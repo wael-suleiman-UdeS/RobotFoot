@@ -2,6 +2,7 @@
 
 using boost::filesystem::path;
 using pugi::xpath_node;
+using pugi::xml_node;
 using pugi::xpath_exception;
 
 namespace XmlPath
@@ -12,6 +13,7 @@ namespace XmlPath
 
 	const path ImageProcessing = "ImageProcessing";
 	const path Camera = "Camera";
+	const path ActiveColor = "ActiveColor";
 	const path Colors = "Colors";
 	const path Color = "Color";
 	const path HSVcolor = "HSVcolor";
@@ -19,13 +21,15 @@ namespace XmlPath
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";
+    const path Configurations = "Configurations";
 	const path Head = "Head";
 	const path Legs = "Legs";
-	const fs::path Pan = "Pan";
-	const fs::path Tilt = "Tilt";
-	const fs::path HorizontalOffset = "HorizontalOffset";
-	const fs::path VerticalOffset = "VerticalOffset";
-	const fs::path Threshold = "Threshold";
+
+	// Head
+	const path Pan = "Pan";
+	const path Tilt = "Tilt";
+
+	const path Threshold = "Threshold";
 
 	const path R_HIP_YAW = "R_HIP_YAW";
 	const path L_HIP_YAW = "L_HIP_YAW";
@@ -41,11 +45,13 @@ namespace XmlPath
 	const path L_ANKLE_ROLL = "L_ANKLE_ROLL";
 
 	const path LegsMotors = Root / Motion / Motors / Legs;
+    const path MotorsConfig = Root / Motion / Motors / Configurations;
 
 	const path MotorID = "MotorID";
 	const path Offset = "Offset";
 	const path LimitMin = "LimitMin";
 	const path LimitMax = "LimitMax";
+    const path Speed = "Speed";
 }
 
 /** \brief Load an XML file for subsequent parsing operations
@@ -75,6 +81,30 @@ string XmlParser::getStringValue(path xPath) const
 		return node.node().attribute(XmlPath::Value).value();
 	}
 	catch(const xpath_exception& ex) { return ""; }
+}
+
+/** \brief Retrieve the string value attribute of each child of the xPath Node
+ *
+ * \param xPath path: XPath of the XML element in which to read the value attributes
+ * \return std::vector<string>: Vector of the retrieved values
+ *
+ */
+std::vector<std::string> XmlParser::getChildrenStringValues(path xPath) const
+{
+    std::vector<std::string> values;
+	if (_document.empty()) { return values; }
+   
+    try
+    {
+        xpath_node node = _document.select_single_node(xPath.generic_string().c_str());
+
+        for (xml_node child = node.node().first_child(); child; child = child.next_sibling())
+        {
+            values.push_back(child.attribute(XmlPath::Value).value());
+        }
+        return values;
+    } 
+	catch(const xpath_exception& ex) { return std::vector<std::string>(); }
 }
 
 /** \brief Retrieve an int value attribute in the XML document

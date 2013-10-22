@@ -9,11 +9,15 @@ SRC += Utilities/logger.cpp
 SRC += Utilities/XmlParser.cpp
 SRC += Utilities/pugixml.cpp
 SRC += Utilities/PID.cpp
+SRC += Utilities/ThreadManager.cpp
 SRC += ImageProcessing/Camera.cpp
 SRC += ImageProcessing/ObjectTracker.cpp
 SRC += ImageProcessing/ColorFinder.cpp
 SRC += ImageProcessing/ImageProcessing.cpp
+SRC += ImageProcessing/HeadControlTask.cpp
 SRC += Control/STM32F4.cpp
+SRC += Control/MotorControl.cpp
+#SRC += Control/MotorControl_2.cpp
 
 # Libs directories
 LIBDIR_ARM =  -LThirdParty/boost_1_54_0/stage/arm_lib/
@@ -25,6 +29,7 @@ LIBDIR_X86 += -LThirdParty/opencv/build/x86/ubuntu/dependencies/
 
 LIBDIR_X64 =  -LThirdParty/boost_1_54_0/stage/ubuntu_x64_lib/
 LIBDIR_X64 += -LThirdParty/opencv/build/x64/ubuntu/
+LIBDIR_X64 += -LThirdParty/opencv/build/x64/ubuntu/dependencies/
 
 # Boost libs
 LIBFLAGS =  -lboost_date_time
@@ -101,6 +106,7 @@ LIBFLAGS += -lXdmcp
 # Additionnal includes directories
 INCLUDES = -IThirdParty/boost_1_54_0/
 INCLUDES += -IThirdParty/opencv/include/
+INCLUDES += -Isrc/
 
 # Architectures
 ARM=arm
@@ -166,6 +172,8 @@ arm armd x86 x86d x64 x64d all: $(SRC_) $(OUT)
 $(OUT) : $(OBJECTS)
 	@echo "Linking..."
 	$(CC) $(LIBDIR) $(OBJECTS) $(LIBFLAGS) -o $@
+	@echo "$(BUILD_PATH)$(OUT_FILE)" > ./run
+	@chmod 777 run
 
 # Compile
 $(BUILD_PATH)%.o : $(SRC_PATH)%.cpp
@@ -175,16 +183,18 @@ $(BUILD_PATH)%.o : $(SRC_PATH)%.cpp
 .PHONY: install
 # Install shared libs in /usr/local/lib
 INSTALL_PATH = /usr/local/lib/
-ifneq (,$(findstring i686, $(shell arch)))
+ifeq (i686 ,$(findstring i686, $(shell arch)))
     $(info i686 architecture detected.)
     BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/ubuntu_x86_lib/libboost_*
     OPENCV_SHARED = ThirdParty/opencv/build/x86/ubuntu/libopencv_*
-else ifneq (,$(findstring arm, $(shell arch))
+else ifeq (arm ,$(findstring arm, $(shell arch)))
     $(info Arm architecture detected.)
-    # TODO Support installation for this build
-else ifneq (,$(findstring x86_64, $(shell arch)))
+    BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/arm_lib/libboost_*
+    OPENCV_SHARED = ThirdParty/opencv/build/arm/*
+else ifeq (x86_64 ,$(findstring x86_64, $(shell arch)))
     $(info x64 architecture detected.)
-    # TODO Support installation for this build
+    BOOST_SHARED  = ThirdParty/boost_1_54_0/stage/ubuntu_x64_lib/libboost_*
+    OPENCV_SHARED = ThirdParty/opencv/build/x64/ubuntu/libopencv_*
 else
     $(info Unknow architecture.)
 endif

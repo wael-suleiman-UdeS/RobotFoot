@@ -1,22 +1,24 @@
 /*!
  * \file RobotFoot.cpp
  * \brief The main file of the project
- * \author Mitchel Labonté
- * \version 0.1
+ * \authors Mitchel Labonté and Mickael Paradis
+ * \version 0.2
  */
 #include <iostream>
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/chrono.hpp>
 
+// TODO Remove from here
 #include "ImageProcessing/Camera.h"
 #include "ImageProcessing/ColorFinder.h"
 #include "ImageProcessing/ObjectTracker.h"
+// TODO to here
+
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
-#include "Utilities/SerialInterface.h"
-#include "Control/STM32F4.h"
+#include "Utilities/ThreadManager.h"
+#include "Control/MotorControl_2.h"
+#include "ImageProcessing/HeadControlTask.h"
 
 /*!
  * \brief Track the ball
@@ -38,7 +40,7 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 	// Load config
 	Logger::getInstance() << "Loading configuration file..." << std::endl;
 	XmlParser config;
-	if (!config.loadFile("config.xml"))
+	if (!config.loadFile("config/config.xml"))
 	{
 		Logger::getInstance() << "Error while loading configuration file." << std::endl;
 		return;
@@ -51,6 +53,9 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 		Logger::getInstance() << "Error while initializing capture device." << std::endl;
 		return;
 	}
+
+	double durationMean = 0;
+	int durationIndex = 0;
 
 	cv::Point ballPosition;
 	HSVcolor color(config, colorName);
@@ -103,7 +108,14 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
 
 		if((cvWaitKey(10) & 255) == 27) break;
       boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-      std::cout << "took " << sec.count() << " seconds\n";
+      durationMean += sec.count();
+      durationIndex++;
+      if(!(durationIndex <= 99)) 
+      {
+      	  std::cout << "took " << durationMean/100 << " seconds\n";
+	  durationMean = 0;
+	  durationIndex = 0;
+      }
 	}
 
 	cvDestroyAllWindows();
@@ -156,37 +168,43 @@ void hardSet(STM32F4& mc)
 }
 
 int main(int argc, char * argv[])
-{
-   try
-   {
-      // Init Logger
-      Logger::getInstance().addStream(std::cout);
-      Logger::getInstance().setLogLvl(Logger::LogLvl::INFO);
+{ 
+    // Add io stream to Logger
+    Logger::getInstance().addStream(std::cout);
 
-      // Load config file
-      Logger::getInstance() << "Loading configuration file..." << std::endl;
-      XmlParser config;
-      if (!config.loadFile("config.xml")) 
-      {
-          Logger::getInstance(Logger::LogLvl::ERROR) << "Error while loading configuration file." << std::endl;
-          std::exit(1);
-      }
+    // Load config file
+    Logger::getInstance() << "Loading configuration file..." << std::endl;
+    XmlParser config;
+    if (!config.loadFile("config/config.xml")) 
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "Error while loading configuration file." << std::endl;
+        std::exit(1);
+    }
 
-      // Init USB interface with STM32F4
-      Logger::getInstance() << "Initializing USB interface..." << std::endl;
-      boost::asio::io_service boost_io;
-      std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
-      STM32F4 mc(port_name, boost_io);
-      boost::thread io_thread(boost::bind(&boost::asio::io_service::run, &boost_io)); 
-      
-   }
-   catch (std::exception& e)
-   {
-      Logger::getInstance(Logger::LogLvl::ERROR) << "Exception in main() : " << e.what() << std::endl;
-   }
-   return 0;
+    // Set logging level  
+    Logger::getInstance().setLogLvl(config.getStringValue(XmlPath::Root / "Logging" / "LogLvl"));
+
+    // Thread Manager
+    try
+    {
+        // Init IO_service for ThreadManager
+        boost::asio::io_service boost_io;
+        ThreadManager *threadManager = new ThreadManager(boost_io);
+        threadManager->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
+
+        MotorControl motorControl(threadManager, config);
+        
+        // Starting Head task
+        HeadControlTask headTask(threadManager, config, motorControl);
+    }
+    catch (std::exception& e)
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "Exception while initialising ThreadManager : " << e.what() << std::endl;
+    }
+    return 0;
 }
 
+// Deprecated main
 int main_old(int argc, char* argv[])
 {
 
@@ -211,12 +229,12 @@ int main_old(int argc, char* argv[])
 			}
 			else if (*argv[3] == 'p')
 			{
-				testTracking(mc, (argc > 2 && argv[2] == "true"), true, color);
+				testTracking(mc, false, true, color);
 			}
 		}
 		else
 		{ 
-			testTracking(mc, (argc > 2 && argv[2] == "true"), false, color);
+			testTracking(mc, false, false, color);
 		}
 
 	}
