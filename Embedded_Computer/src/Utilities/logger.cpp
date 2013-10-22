@@ -3,15 +3,31 @@
 using std::string;
 using std::ostream;
 
-/** \brief Retrieve the instance of the Logger instance
+Logger* Logger::instance = &getInstance();
+
+/** \brief Retreive the instance of the Logger (Singleton pattern)
  *
- * \return Logger&: Instance of the Logger object
+ *  \return Logger&: Instance of the Logger object
  *
  */
 Logger& Logger::getInstance()
 {
-    static Logger instance;
-    return instance;
+    if (instance == NULL) 
+    {
+       instance = new Logger();
+    }
+    return *instance;
+}
+
+/** \brief Retreive Logger instance and set the Log lvl for the next entry.
+ *
+ *  \return Logger&: Instance of the Logger object
+ *
+ */
+Logger& Logger::getInstance(LogLvl lvl)
+{
+    instance->_currentLvl = lvl;
+    return getInstance();
 }
 
 /** \brief Add an output stream object to the stream list
@@ -24,13 +40,57 @@ void Logger::addStream(ostream& stream)
     _streams.push_front(&stream);
 }
 
+/** \brief Set the master log lvl for the whole session
+ *
+ *  \param Logger::LogLvl enum {DEBUG, INFO, WARN, ERROR, SHUTUP}
+ *
+ */
+void Logger::setLogLvl(LogLvl lvl)
+{
+    _masterLvl = lvl;
+}
+
+/** \brief Set the master log lvl for the whole session
+ *
+ *  \param LogLvl string "DEBUG", "INFO", "WARN", "ERROR", "SHUTUP"
+ *
+ */
+void Logger::setLogLvl(std::string lvl)
+{
+    if (lvl == "DEBUG")
+    {
+        _masterLvl = LogLvl::DEBUG; 
+    }
+    else if (lvl == "ERROR")
+    {
+        _masterLvl = LogLvl::ERROR;
+    }
+    else if (lvl == "WARN")
+    {
+        _masterLvl = LogLvl::WARN;
+    }
+    else if (lvl == "SHUTUP")
+    {
+        _masterLvl = LogLvl::SHUTUP;
+    }
+    else
+    {
+        _masterLvl = LogLvl::INFO;
+    }
+}
+
 Logger& Logger::operator<<(ostream& (*endlPtr)(std::ostream&))
 {
-    for(auto stream = _streams.begin(); stream != _streams.end(); ++stream)
+    if (_currentLvl >= _masterLvl)
     {
-        **stream << *endlPtr;
+        for(auto stream = _streams.begin(); stream != _streams.end(); ++stream)
+        {
+            **stream << *endlPtr;
+        }
+        _timeStamp = true;
+        _mutex.unlock();
     }
-    _timeStamp = true;
+    _currentLvl = LogLvl::INFO;
     return *this;
 }
 

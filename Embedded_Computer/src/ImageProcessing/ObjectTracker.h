@@ -24,33 +24,33 @@ public:
 	~ObjectTracker() {}
 
 	void track(cv::Point position);
-	void trackPID(cv::Point position);
 
 	// TODO: remove hack
 	void initializeHack(const XmlParser& config);
 	void initializeHackPID(const XmlParser& config);
 
 private:
+	void scan();
+	void readMotors();
+	cv::Point limitAngle(cv::Point angle);
+
 	STM32F4* _controller;
 	cv::Point _centerPosition;
-	cv::Point _objectPosition;
+	cv::Point _objectError;
 	int _noObjectCount;
-    static const int _noObjectMaxCount = 3;
-
 	ObjectTracker() {}
 
-	// todo: remove hack
-	std::uint8_t _pan;
-	std::uint8_t _tilt;
-	int _horizontal;
-	int _vertical;
+	// todo: Values to be in a motor object
+	cv::Point _currentAngle;
+	std::uint8_t _panId;
+	std::uint8_t _tiltId;
 	int _threshold;
-	int _minH;
-	int _maxH;
-	int _minV;
-	int _maxV;
-	unsigned int _angleH;
-	unsigned _angleV;
+	int _minPan;
+	int _maxPan;
+	int _minTilt;
+	int _maxTilt;
+	unsigned int _scanningError;
+    int _noObjectMaxCount;
 
 	//todo: pid values elsewhere
 	float _kp;

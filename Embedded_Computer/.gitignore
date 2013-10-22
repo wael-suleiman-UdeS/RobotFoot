@@ -1,4 +1,6 @@
-bin
 bin/*
 .cproject
 .project
+*~
+*.swp
+run
