@@ -4,7 +4,7 @@
 #include <stm32f4xx_flash.h>
 
 #include "initClock.h"
-#include "LEDs.hhp"
+#include "LEDs.hpp"
 
 #include "Tools.h"
 #include "stm32f4xx_conf.h"
