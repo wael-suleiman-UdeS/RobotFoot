@@ -19,7 +19,7 @@ class Motor
         void Write();
     private:
         int Angle2Value(const double angle);
-        double Value2Angle(const std::int16_t value);
+        double Value2Angle(const int value);
         
         STM32F4 *_stm32f4; 
         std::string _name;
@@ -28,8 +28,9 @@ class Motor
         int _min;
         int _max;
         int _speed;
+        int _playTime;
+        double _lastPos;
         double _currentPos;
-        double _nextPos;
 };
 
 class MotorControl
@@ -47,16 +48,16 @@ public:
    MotorControl(ThreadManager *threadManager, const XmlParser &config);
    ~MotorControl();
 
-   void Start();
+   void run();
 
    bool SetTorque(bool value, const Config config);
    bool SetTorque(bool value, const std::string name);
   
-   bool InitPosition( const std::vector<double>& vPos,
+   bool InitPositions( const std::vector<double>& vPos,
                       const Config config,
                       const double msTotalTime = 10000.0,
                       const double msDt = 16);
-   
+  
    bool SetPosition(double pos, std::string name); 
    const double ReadPosition(std::string name);
    
