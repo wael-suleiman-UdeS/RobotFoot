@@ -133,7 +133,6 @@ void init_USART1(uint32_t baudrate){
 
 void initialize()
 {
-    initClock();
     init_USART1(115200);
     init_GPIO();
     LED1.set();

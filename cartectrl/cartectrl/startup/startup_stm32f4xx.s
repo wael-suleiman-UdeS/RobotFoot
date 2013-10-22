@@ -51,6 +51,7 @@
         .extern     __ctors_start__
         .extern     __ctors_end__
         .extern     main
+        .extern     initClock
 
 //=============================================================================
 
@@ -191,15 +192,17 @@ Default_Handler: bx        lr
 Reset_Handler:
 // Enable FPU
                 // CPACR is located at address 0xE000ED88
-                LDR.W   R0, =0xE000ED88
-                LDR     R1, [R0]
+                ldr.w   r0, =0xE000ED88
+                ldr     r1, [r0]
                 // Set bits 20-23 to enable CP10 and CP11 coprocessors
-                ORR     R1, R1, #(0xF << 20)
+                orr     r1, r1, #(0xF << 20)
                 // Write back the modified value to the CPACR
-                STR     R1, [R0] // wait for store to complete
-                DSB
+                str     r1, [r0] // wait for store to complete
+                dsb
                 // reset pipeline now the FPU is enabled
-                ISB
+                isb
+// Call initClock
+                bl          initClock
 // Copy initialized data from flash to RAM
                 ldr         r0, DATA_START
                 ldr         r1, DATA_LOAD
