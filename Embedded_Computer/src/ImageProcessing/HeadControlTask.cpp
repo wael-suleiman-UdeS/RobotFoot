@@ -70,8 +70,6 @@ void HeadControlTask::run()
 
 			_ballPosition = _finder->getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV), *_circle);
 
-			//Logger::getInstance() << "Ball position: " << _ballPosition.x << ", " << _ballPosition.y << std::endl;
-
 			if (_guiEnabled)
 			{
 				if (_ballPosition.x > -1 && _ballPosition.y > -1)
@@ -89,16 +87,13 @@ void HeadControlTask::run()
 			boost::this_thread::sleep(boost::posix_time::millisec(10));
 
 			boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-			if(_guiEnabled)
-			{      		
-				_durationMean += sec.count();
-				_durationIndex++;
-				if(!(_durationIndex <= 99))
-	      		{
-		      		std::cout << "took " << _durationMean/100 << " seconds\n";
-			  		_durationMean = 0;
-			  		_durationIndex = 0;
-	      		}
+			_durationMean += sec.count();
+			_durationIndex++;
+			if(!(_durationIndex <= 99))
+			{
+				Logger::getInstance(Logger::LogLvl::INFO) << "took " << _durationMean/100 << " seconds\n";
+				_durationMean = 0;
+				_durationIndex = 0;
 			}
 		}
 	}
