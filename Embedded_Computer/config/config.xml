@@ -6,6 +6,7 @@
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
+    <ActiveColor name="red" />
     <Colors>
 	  <Color name="red">
 		<HSVcolor>

@@ -20,6 +20,9 @@ public:
 
 	int read(std::uint8_t id);
 
+	int readStatus(std::uint8_t id);
+	
+	void clearStatus(std::uint8_t id);
 private:
 	SerialInterface _usb;
 };
