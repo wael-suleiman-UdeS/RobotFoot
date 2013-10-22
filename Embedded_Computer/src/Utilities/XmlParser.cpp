@@ -51,7 +51,7 @@ namespace XmlPath
 	const path Offset = "Offset";
 	const path LimitMin = "LimitMin";
 	const path LimitMax = "LimitMax";
-    const path Speed = "Speed";
+    const path PlayTime = "PlayTime";
 }
 
 /** \brief Load an XML file for subsequent parsing operations

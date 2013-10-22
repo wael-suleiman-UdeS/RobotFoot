@@ -7,6 +7,7 @@
 #include <functional>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 using boost::filesystem::path;
 
@@ -23,7 +24,7 @@ namespace
 	const double dInvAngleConvertion = 1/dAngleConvertion;
 }
 
-Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int speed)
+Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playtime)
 :
 _stm32f4(stm32f4),
 _name(name),
@@ -31,7 +32,7 @@ _id(id),
 _offset(offset),
 _min(min),
 _max(max),
-_speed(speed),
+_playTime(playTime),
 _currentPos(-1),
 _nextPos(-1)
 {    
@@ -58,12 +59,13 @@ void Motor::setTorque(bool value)
 
 int Motor::Angle2Value(const double angle)
 {
-	int value = (angle*dInvAngleConvertion) + _offset;
+    int value = (angle*dInvAngleConvertion) + _offset;
 	return clamp(value, _min, _max);
 }
 
-double Motor::Value2Angle(const int value)
+double Motor::Value2Angle(const std::int16_t value)
 {
+	if (value < 0) return value;
 	int clampedValue = clamp(value, _min, _max);
 	return double(clampedValue - _offset)*dAngleConvertion;
 }
@@ -76,7 +78,7 @@ void Motor::Read()
 void Motor::Write()
 {
     if (_currentPos != _nextPos)
-        _stm32f4->setMotor(_id, Angle2Value(_nextPos));
+        _stm32f4->setMotor(_id, Angle2Value(_nextPos), _playTime);
 }
 
 MotorControl::MotorControl( ThreadManager *threadManager, const XmlParser &config ) :
@@ -134,12 +136,12 @@ void MotorControl::InitializeMotors(const XmlParser &config)
 
 	for (auto it = paths.begin(); it != paths.end(); ++it)
 	{
-	    int id     = config.getIntValue(it->second / XmlPath::MotorID);
-		int offset = config.getIntValue(it->second / XmlPath::Offset);
-		int min    = config.getIntValue(it->second / XmlPath::LimitMin);
-		int max    = config.getIntValue(it->second / XmlPath::LimitMax);
-        int speed  = config.getIntValue(it->second / XmlPath::Speed);    
-        Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, speed);
+	    int id        = config.getIntValue(it->second / XmlPath::MotorID);
+		int offset    = config.getIntValue(it->second / XmlPath::Offset);
+		int min       = config.getIntValue(it->second / XmlPath::LimitMin);
+		int max       = config.getIntValue(it->second / XmlPath::LimitMax);
+        int playTime  = config.getIntValue(it->second / XmlPath::PlayTime);    
+        Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, playTime);
 	    _motors.insert(std::make_pair(it->first, motor));
     }
 }

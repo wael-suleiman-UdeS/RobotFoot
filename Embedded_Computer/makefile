@@ -16,7 +16,8 @@ SRC += ImageProcessing/ColorFinder.cpp
 SRC += ImageProcessing/ImageProcessing.cpp
 SRC += ImageProcessing/HeadControlTask.cpp
 SRC += Control/STM32F4.cpp
-SRC += Control/MotorControl.cpp
+SRC += Control/MotorControl_2.cpp
+SRC += Demo/StaticWalking/StaticWalk.cpp
 #SRC += Control/MotorControl_2.cpp
 
 # Libs directories

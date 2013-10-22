@@ -10,7 +10,7 @@
 class Motor
 {
     public:  
-        Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int speed);
+        Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime);
         ~Motor();
         void setPos(double pos);
         const double getPos();
@@ -19,7 +19,7 @@ class Motor
         void Write();
     private:
         int Angle2Value(const double angle);
-        double Value2Angle(const int value);
+        double Value2Angle(const std::int16_t value);
         
         STM32F4 *_stm32f4; 
         std::string _name;
