@@ -15,21 +15,22 @@
 #include "ImageProcessing/ObjectTracker.h"
 #include "Utilities/XmlParser.h"
 #include "Utilities/ThreadManager.h"
+#include "Control/MotorControl.h"
 
-class HeadMotorTask
+class HeadControlTask
 {
 public:
-   HeadControlTask(ThreadManager *threadManager, const XmlParser &config, MotorControl mc);
+   HeadControlTask(ThreadManager *threadManager, XmlParser &config, MotorControl &mc);
    ~HeadControlTask();
 
    void start();
 
 private:
-        ThreadManager *_threadManager;
+    ThreadManager *_threadManager;
 	cv::Point _ballPosition;
-	CircleSpec _circle;
-	ColorFinder _finder;
-	ObjectTracker _tracker;
+	CircleSpec *_circle;
+	ColorFinder *_finder;
+	ObjectTracker *_tracker;
 	bool _guiEnabled;
 	double _durationMean;
 	int _durationIndex;

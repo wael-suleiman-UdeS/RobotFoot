@@ -17,7 +17,8 @@
  * \param colorName : The string of the color of the ball
  * \param mc : An instance of the micro controller
  */
-HeadControlTask::HeadControlTask( ThreadManager *threadManager, const XmlParser &config, MotorControl mc ) : _threadManager(threadManager)
+HeadControlTask::HeadControlTask(ThreadManager *threadManager, XmlParser &config, MotorControl &mc) : 
+_threadManager(threadManager)
 {
 	// Initialize capture
 	Logger::getInstance() << "Initializing capture device..." << std::endl;
@@ -61,11 +62,10 @@ void HeadControlTask::start()
 	Logger::getInstance() << "Tracking process started" << std::endl;
 	while(true)
 	{
-      		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
+      	boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		Camera::getInstance().captureFrame();
 
-		_ballPosition = _finder.getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV),
-			_circle);
+		_ballPosition = _finder.getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV), _circle);
 
 		//Logger::getInstance() << "Ball position: " << _ballPosition.x << ", " << _ballPosition.y << std::endl;
 
@@ -85,7 +85,7 @@ void HeadControlTask::start()
 
 		if((cvWaitKey(10) & 255) == 27) break;
 
-      		boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+        boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 		if(_guiEnabled)
 		{      		
 			durationMean += sec.count();
@@ -93,7 +93,7 @@ void HeadControlTask::start()
 		        if(!(durationIndex <= 99)) 
       			{
 	      	  		std::cout << "took " << durationMean/100 << " seconds\n";
-		  		durationMean = 0;
+		     		durationMean = 0;
 		    		durationIndex = 0;
       			}
 		}
