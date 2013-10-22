@@ -22,8 +22,8 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 
 	_noObjectMaxCount = config.getIntValue(headPath / "NoObjectMaxCount");
 
-	_controller->setTorque(_panId, STM32F4::TorqueOn);
-	_controller->setTorque(_tiltId, STM32F4::TorqueOn);
+	_mc->setTorque(true, MotorControl::Config::HEAD);
+
 }
 
 void ObjectTracker::initializeHackPID(const XmlParser& config) {
@@ -47,9 +47,9 @@ void ObjectTracker::initializeHackPID(const XmlParser& config) {
  * \param center Point: Center of the camera used for calibration
  *
  */
-ObjectTracker::ObjectTracker(STM32F4* controller, Point center)
+ObjectTracker::ObjectTracker(MotorControl* mc, Point center)
 {
-	_controller = controller;
+	_mc = mc;
 	_objectError = Point(-1, -1);
     _noObjectCount = 0;
 	_centerPosition = center;
@@ -95,8 +95,9 @@ void ObjectTracker::track(Point position)
 	}
 
 	limitAngle(newAngle);
-	if (newAngle.x > 0) { _controller->setMotor(_panId, newAngle.x); }
-	if (newAngle.y > 0) { _controller->setMotor(_tiltId, newAngle.y); }
+	//TO DO Find the same fucntion
+	if (newAngle.x > 0) { _mc->SetPosition(_panId, newAngle.x); }
+	if (newAngle.y > 0) { _mc->SetPosition(_tiltId, newAngle.y); }
 
     Logger::getInstance() << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
     Logger::getInstance() << "Current angle: " << _currentAngle.x << ", " << _currentAngle.y << std::endl;
@@ -107,11 +108,15 @@ void ObjectTracker::track(Point position)
 
 void ObjectTracker::readMotors() {
 	// If I don't put data in int16, I get high values instead of negative values
-	int16_t x = _controller->read(_panId);
-	int16_t y = _controller->read(_tiltId);
-    Logger::getInstance() << "Current angle (16bits): " << x << ", " << y << std::endl;
+	//TO DO Validate that it work
+	std::vector<double>* pos;
+	ReadPositions(pos,MotorControl::Config::HEAD);
+	int x = Angle2Value(pos.at(0));
+	int y = Angle2Value(pos.at(1));
+    Logger::getInstance() << "Current angle : " << x << ", " << y << std::endl;
 	_currentAngle.x = x;
 	_currentAngle.y = y;
+
 }
 
 void ObjectTracker::scan() {

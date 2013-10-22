@@ -2,10 +2,11 @@
 #define OBJECTTRACKER_H
 
 #include <opencv/cvaux.h>
-#include "../Control/STM32F4.h"
+#include "Control/MotorControl.h"
 #include "../Utilities/XmlParser.h"
 #include "../Utilities/logger.h"
 #include "../Utilities/PID.h"
+#include <vector>
 
 //TODO :crap
 #include <boost/filesystem.hpp>
@@ -20,7 +21,7 @@
 class ObjectTracker
 {
 public:
-	ObjectTracker(STM32F4* controller, cv::Point center);
+	ObjectTracker(MotorControl* mc, cv::Point center);
 	~ObjectTracker() {}
 
 	void track(cv::Point position);
@@ -34,7 +35,7 @@ private:
 	void readMotors();
 	cv::Point limitAngle(cv::Point angle);
 
-	STM32F4* _controller;
+	MotorControl* _mc;
 	cv::Point _centerPosition;
 	cv::Point _objectError;
 	int _noObjectCount;
