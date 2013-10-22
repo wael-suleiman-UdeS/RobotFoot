@@ -1,23 +1,19 @@
 /**
   ******************************************************************************
-  * @file    miscutils.h
+  * @file    LED.cpp
   * @author  James-Adam Renquinha Henri (Jarhmander)
-  * @version V1.0.0
-  * @date    2013-04-12
-  * @brief   Various utils
+  * @version 1.0
+  * @date    2013-09-05
+  * @brief   LED control, rely on bsp::GPIO_Pin
   ******************************************************************************
   */
 
 //------------------------------------------------------------------------------
-#ifndef MISCUTILS_H
-#define MISCUTILS_H
+#include <LED.hpp>
 //------------------------------------------------------------------------------
 
 
-// Request an alignment for an object.
-// Do like this: Type n ALIGNED(4);
-#define ALIGNED(x) __attribute__ ((aligned (x)))
+/// File is empty on purpose.
 
 
 //------------------------------------------------------------------------------
-#endif // MISCUTILS_H

@@ -64,7 +64,7 @@ namespace XmlPath
 	extern const fs::path Offset;
 	extern const fs::path LimitMin;
 	extern const fs::path LimitMax;
-    extern const fs::path Speed;
+    extern const fs::path PlayTime;
 }
 
 /** @brief Class for XML parsing

@@ -1,6 +1,6 @@
 #include "../../Utilities/logger.h"
 #include "../../Control/STM32F4.h"
-#include "../../Control/MotorControl.h"
+#include "../../Control/MotorControl_2.h"
 
 #include <string>
 #include <vector>
@@ -25,5 +25,6 @@ private:
     std::vector<std::vector<double>>::iterator itrPos;
     std::vector<std::vector<double>>::iterator itrEnd;
 	
-    MotorControl motion;
+    MotorControl *motion;
+    ThreadManager *_threadManager;
 };
