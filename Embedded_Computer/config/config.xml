@@ -72,39 +72,26 @@
   <Motion>
     <Motors>
       <Head>
-        <HEAD_PAN>
+        <Pan>
           <MotorID value="13"/>
           <Offset value="0"/>
           <LimitMin value="200"/>
           <LimitMax value="800"/>
-        </HEAD_PAN>
-        <HEAD_TILT>
+        </Pan>
+        <Tilt>
           <MotorID value="14"/>
           <Offset value="0"/>
           <LimitMin value="350"/>
           <LimitMax value="800"/>
-        </HEAD_TILT>
-        <!--DEPRECATED-->
-        <Pan value="13" />
-        <Tilt value="14" />
-
-        <MinH value="200" />
-        <MaxH value="800" />
-        <MinV value="350" />
-        <MaxV value="800" />
-
-        <HorizontalOffset value="-15" />
-        <VerticalOffset value="-15" />
-
-        <AngleH value="115" />
-        <AngleV value="115" />
+        </Tilt>
+        <ScanningError value="300" />
         <Threshold value="20" />
-        <NoObjectMaxCount value="50"/>
+        <NoObjectMaxCount value="15"/>
         
         <PID>
-          <P value="-0.5" />
-          <I value="-0.05" />
-          <D value="-0.2" />
+          <P value="0.4" />
+          <I value="0.03" />
+          <D value="0.02" />
           <dt value="0.2" />
           <Epsilon value="0" />
         </PID>
