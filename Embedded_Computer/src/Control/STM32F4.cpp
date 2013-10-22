@@ -17,14 +17,14 @@ STM32F4::~STM32F4()
 {
 }
 
-void STM32F4::setMotor(uint8_t id, uint16_t value)
+void STM32F4::setMotor(uint8_t id, uint16_t value, uint8_t playTime/* = 70*/)
 {
 	std::vector<char> msg;
 	const uint8_t cmd = 0x01;
 	const uint8_t highPos = value >> 8;
 	const uint8_t lowPos = value;
-	const uint8_t nb = 4;
-	const uint8_t checkSum = cmd + id + highPos + lowPos + nb;
+	const uint8_t nb = 5;
+	const uint8_t checkSum = cmd + id + highPos + lowPos + playTime + nb;
 
 	msg.push_back('\xff');
 	msg.push_back(checkSum);
@@ -33,6 +33,7 @@ void STM32F4::setMotor(uint8_t id, uint16_t value)
 	msg.push_back(id);
 	msg.push_back(highPos);
 	msg.push_back(lowPos);
+    msg.push_back(playTime);
 	_usb.write(msg);
 }
 

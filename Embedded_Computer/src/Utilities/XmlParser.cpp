@@ -22,11 +22,12 @@ namespace XmlPath
 	const path Motors = "Motors";
 	const path Head = "Head";
 	const path Legs = "Legs";
-	const fs::path Pan = "Pan";
-	const fs::path Tilt = "Tilt";
-	const fs::path HorizontalOffset = "HorizontalOffset";
-	const fs::path VerticalOffset = "VerticalOffset";
-	const fs::path Threshold = "Threshold";
+
+	// Head
+	const path Pan = "Pan";
+	const path Tilt = "Tilt";
+
+	const path Threshold = "Threshold";
 
 	const path R_HIP_YAW = "R_HIP_YAW";
 	const path L_HIP_YAW = "L_HIP_YAW";

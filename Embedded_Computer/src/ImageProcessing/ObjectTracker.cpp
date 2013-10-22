@@ -6,27 +6,24 @@ using boost::filesystem::path;
 // todo: remove hack
 void ObjectTracker::initializeHack(const XmlParser& config)
 {
-	path basePath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head;
+	path headPath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head;
 
-	_pan = config.getIntValue(basePath / XmlPath::Pan);
-	_tilt = config.getIntValue(basePath / XmlPath::Tilt);
-	_horizontal = config.getIntValue(basePath / XmlPath::HorizontalOffset);
-	_vertical = config.getIntValue(basePath / XmlPath::VerticalOffset);
-	_threshold = config.getIntValue(basePath / XmlPath::Threshold);
+	_panId = config.getIntValue(headPath / XmlPath::Pan / XmlPath::MotorID);
+	_minPan = config.getIntValue(headPath / XmlPath::Pan / XmlPath::LimitMin);
+	_maxPan = config.getIntValue(headPath / XmlPath::Pan / XmlPath::LimitMax);
 
-	_minH = config.getIntValue(basePath / "MinH");
-	_maxH = config.getIntValue(basePath / "MaxH");
+	_tiltId = config.getIntValue(headPath / XmlPath::Tilt / XmlPath::MotorID);
+	_minTilt = config.getIntValue(headPath / XmlPath::Tilt / XmlPath::LimitMin);
+	_maxTilt = config.getIntValue(headPath / XmlPath::Tilt / XmlPath::LimitMax);
 
-	_minV = config.getIntValue(basePath / "MinV");
-	_maxV = config.getIntValue(basePath / "MaxV");
+	_threshold = config.getIntValue(headPath / XmlPath::Threshold);
 
-	_angleH = config.getIntValue(basePath / "AngleH");
-	_angleV = config.getIntValue(basePath / "AngleV");
+	_scanningError = config.getIntValue(headPath / "ScanningError");
 
-	_noObjectMaxCount = config.getIntValue(basePath / "NoObjectMaxCount");
+	_noObjectMaxCount = config.getIntValue(headPath / "NoObjectMaxCount");
 
-	_controller->setTorque(_pan, STM32F4::TorqueOn);
-	_controller->setTorque(_tilt, STM32F4::TorqueOn);
+	_controller->setTorque(_panId, STM32F4::TorqueOn);
+	_controller->setTorque(_tiltId, STM32F4::TorqueOn);
 }
 
 void ObjectTracker::initializeHackPID(const XmlParser& config) {
@@ -39,8 +36,8 @@ void ObjectTracker::initializeHackPID(const XmlParser& config) {
 	_dt = config.getIntValue(basePath / "dt");
 	_epsilon = config.getIntValue(basePath / "Epsilon");
 
-	_pids.insert(std::pair<string, PID>("tilt", PID(_kp, _ki, _kd, _epsilon, _dt, _maxV, _minV)));
-	_pids.insert(std::pair<string, PID>("pan", PID(_kp, _ki, _kd, _epsilon, _dt, _maxH, _minH)));
+	_pids.insert(std::pair<string, PID>("Pan", PID(_kp, _ki, _kd, _epsilon, _dt, _maxPan, _minPan)));
+	_pids.insert(std::pair<string, PID>("Tilt", PID(_kp, _ki, _kd, _epsilon, _dt, _maxTilt, _minTilt)));
 
 }
 
@@ -53,171 +50,98 @@ void ObjectTracker::initializeHackPID(const XmlParser& config) {
 ObjectTracker::ObjectTracker(STM32F4* controller, Point center)
 {
 	_controller = controller;
-	_objectPosition = Point(-1, -1);
+	_objectError = Point(-1, -1);
     _noObjectCount = 0;
 	_centerPosition = center;
 }
 
-/** \brief Track an object using its coordinates
- *
- * \param position Point: Coordinates of the object to track
- *
- */
 void ObjectTracker::track(Point position)
 {
-	// TODO: Chiasse au max
-	int16_t m1 = _controller->read(_pan);
-	int16_t m2 = _controller->read(_tilt);
-	int k = 0, mk = 0;
-    if(position.x < 0 || position.y < 0)
-    {
-		_objectPosition = Point(-1, -1);
-        if(_noObjectCount < _noObjectMaxCount)
-        {
-            // TODO: Continue tracking
-            _noObjectCount++;
 
-			std::stringstream ss;
-			ss <<  "continue tracking";
+    Logger::getInstance() << "Position: " << position.x << ", " << position.y << std::endl;
+    Logger::getInstance() << "No object count: " << _noObjectCount << "/" << _noObjectMaxCount << std::endl;
 
-			//_controller->setMotor(_pan, m1 + _horizontal);
-			//_controller->setMotor(_tilt, m2 + _vertical);
-			//_controller->setMotor(2, "todo"); // tilt = 14, pan = 13
-        }
-        else
-        {
-            // TODO: Stop tracking
-			// TODO: Search ball
+    readMotors(); // TODO: this is for now
 
-        	int kThres = _horizontal * abs(_threshold)/_threshold; // yes caca
-        	k = _horizontal * abs(_objectPosition.x)/_objectPosition.x;
-        	mk = m1 + k;
-
-        	if (mk < _minH + kThres) {
-        		_objectPosition.x = -1;
-        	} else if (mk > _maxH - kThres) {
-        		_objectPosition.x = 1;
-        	}
-
-        	if (_objectPosition.x > 0) {
-        		_controller->setMotor(_pan, _minH);
-        	} else if (_objectPosition.x < 0) {
-        		_controller->setMotor(_pan, _maxH);
-        	}
-        }
+    if ( position.x > 0 && position.y > 0) {
+		_objectError = _centerPosition - position;
+		_noObjectCount = 0;
     }
-    else
-    {
-        _noObjectCount = 0;
+    else if(_noObjectCount > _noObjectMaxCount) {
+		scan();
+	}
+	else {
+		_noObjectCount++;
 
-		_objectPosition = position - _centerPosition;
-		// TODO: pixel -> angle (max horizontal angle / max width)
-        // TODO Start tracking with object position
-
-		Logger::getInstance() << std::endl << "OBJ POS: " << _objectPosition.x << ", " << _objectPosition.y << std::endl;
-
-		if (abs(_objectPosition.x) > _threshold)
-		{
-			Logger::getInstance() << "m1: " << m1 << std::endl;
-			
-			if (m1 >= 0)
-			{
-				k = _horizontal * abs(_objectPosition.x)/_objectPosition.x;
-				mk = m1 + k;
-				if (mk < _minH) {mk = _minH;}
-				if (mk > _maxH) {mk = _maxH;}
-
-				Logger::getInstance() << "k1: " << k << std::endl;
-				Logger::getInstance() << "m1+k1: " << mk << std::endl;
-
-				_controller->setMotor(_pan, mk);
-			}
+		if (_noObjectCount > _noObjectMaxCount) {
+			_pids["Pan"].reset();
+			if (_objectError.x <= 0) { _objectError.x = _scanningError; }
+			if (_objectError.x > 0) { _objectError.x = -_scanningError; }
 		}
-		if (abs(_objectPosition.y) > _threshold)
-		{
-			Logger::getInstance() << "m2: " << m2 << std::endl;
-			
-			if (m2 >= 0)
-			{
-				k = _vertical * abs(_objectPosition.y)/_objectPosition.y;
-				mk = m2 + k;
-				if (mk < _minV) {mk = _minV;}
-				if (mk > _maxV) {mk = _maxV;}
+	    Logger::getInstance() << "-------------------" << std::endl;
+		return;
+	}
 
-				Logger::getInstance() << "k2: " << k << std::endl;
-				Logger::getInstance() << "m2+k2: " << mk << std::endl;
-				_controller->setMotor(_tilt, mk);
-			}
-		}
-    }
+	Point newAngle(-1,-1);
+
+	if (_currentAngle.x >= 0 && abs(_objectError.x) > _threshold)
+	{
+		newAngle.x = _currentAngle.x + _pids["Pan"].process_PID(_objectError.x);
+	}
+
+	if (_currentAngle.y >= 0 && abs(_objectError.y) > _threshold)
+	{
+		newAngle.y = _currentAngle.y + _pids["Tilt"].process_PID(_objectError.y);
+	}
+
+	limitAngle(newAngle);
+	if (newAngle.x > 0) { _controller->setMotor(_panId, newAngle.x); }
+	if (newAngle.y > 0) { _controller->setMotor(_tiltId, newAngle.y); }
+
+    Logger::getInstance() << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
+    Logger::getInstance() << "Current angle: " << _currentAngle.x << ", " << _currentAngle.y << std::endl;
+    Logger::getInstance() << "New angle: " << newAngle.x << ", " << newAngle.y << std::endl;
+    Logger::getInstance() << "-------------------" << std::endl;
 
 }
 
-void ObjectTracker::trackPID(Point position)
-{
-	// TODO: Chiasse au max
-	int16_t m1 = _controller->read(_pan);
-	int16_t m2 = _controller->read(_tilt);
-    if(position.x < 0 || position.y < 0)
-    {
-		_objectPosition = Point(-1, -1);
-        if(_noObjectCount < _noObjectMaxCount)
-        {
-            // TODO: Continue tracking
-            _noObjectCount++;
-        }
-        else
-        {
-			//_controller->setMotor(_pan, m1);
-			//_controller->setMotor(_tilt, m2);
-        }
-    }
-    else
-    {
-        _noObjectCount = 0;
+void ObjectTracker::readMotors() {
+	// If I don't put data in int16, I get high values instead of negative values
+	int16_t x = _controller->read(_panId);
+	int16_t y = _controller->read(_tiltId);
+    Logger::getInstance() << "Current angle (16bits): " << x << ", " << y << std::endl;
+	_currentAngle.x = x;
+	_currentAngle.y = y;
+}
 
-		_objectPosition = position - _centerPosition;
-		// TODO: pixel -> angle (max horizontal angle / max width)
-        // TODO Start tracking with object position
-
-		//Logger::getInstance() << std::endl << "OBJ POS: " << _objectPosition.x << ", " << _objectPosition.y << std::endl;
-
-		int angle = 0, k, z;
-
-		if (m1 >= 0 && abs(_objectPosition.x) > _threshold)
-		{
-			angle = _objectPosition.x * (int)_angleH / (_centerPosition.x * 2);
-
-			k = _pids["pan"].process_PID(angle);
-
-			//Logger::getInstance() << "Angle1 actuel: " << angle << std::endl;
-			//Logger::getInstance() << "m1: " << m1 << std::endl;
-			//Logger::getInstance() << "k1: " << k << std::endl;
-			
-			z = m1 + k;
-			if (z < _minH) { z = _minH; _pids["pan"].reset(); }
-			if (z > _maxH) { z = _maxH; _pids["pan"].reset(); }
-			//Logger::getInstance() << "m1 + k1: " << z << std::endl;
-
-			_controller->setMotor(_pan, z);
-
+void ObjectTracker::scan() {
+	if (_currentAngle.x >= 0)
+	{
+	    if (_currentAngle.x < _minPan + _threshold) {
+			_pids["Pan"].reset();
+			_objectError.x = _scanningError;
+		    Logger::getInstance() << "Start scanning to the right" << std::endl;
+		} else if (_currentAngle.x > _maxPan - _threshold) {
+			_pids["Pan"].reset();
+			_objectError.x = -_scanningError;
+		    Logger::getInstance() << "Start scanning to the left" << std::endl;
 		}
 
-		if (m2 >= 0 && abs(_objectPosition.y) > _threshold)
-		{
-			angle = _objectPosition.y * (int)_angleV / (_centerPosition.y * 2);
-			k = _pids["tilt"].process_PID(angle);
+	}
 
-			//Logger::getInstance() << "Angle2 actuel: " << angle << std::endl;
-			//Logger::getInstance() << "m2: " << m2 << std::endl;
-			//Logger::getInstance() << "k2: " << k << std::endl;
-
-			z = m2 + k;
-			if (z < _minV) { z = _minV; _pids["tilt"].reset(); }
-			if (z > _maxV) { z = _maxV; _pids["tilt"].reset(); }
-			//Logger::getInstance() << "m2 + k2: " << z << std::endl;
-
-			_controller->setMotor(_tilt, z);
-		}
+	if (_currentAngle.y >= 0)
+	{
+		_objectError.y = (_maxPan - _minPan) * 0.75 - _currentAngle.y;
 	}
 }
+
+Point ObjectTracker::limitAngle(Point angle) {
+	if (angle.x < _minPan) { angle.x = _minPan; _pids["Pan"].reset(); }
+	else if (angle.x > _maxPan) { angle.x = _maxPan; _pids["Pan"].reset(); }
+
+	if (angle.y < _minTilt) { angle.y = _minTilt; _pids["Tilt"].reset(); }
+	else if (angle.y > _maxTilt) { angle.y = _maxTilt; _pids["Tilt"].reset(); }
+
+	return angle;
+}
+

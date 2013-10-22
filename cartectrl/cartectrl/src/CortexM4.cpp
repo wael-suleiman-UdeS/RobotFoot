@@ -147,12 +147,14 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
     switch ( data[0] )
     {
         case CMD_MOTOR_SET_POS:
-            if( n >= 4 ) //TODO : Should be == instead
+            if( n >= 5 ) //TODO : Should be == instead
             {
                 uint16_t pos = data[2];
                 pos = pos << 8;
                 pos |= data[3];
-                Herkulex::GetInstance()->positionControl(data[1], pos, 70, 0x00);
+                uint8_t playTime = data[4];
+
+                Herkulex::GetInstance()->positionControl(data[1], pos, playTime, 0x00);
             }
             break;
         case CMD_MOTOR_READ_POS:

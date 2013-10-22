@@ -36,11 +36,11 @@ namespace XmlPath
 	extern const fs::path Motion;
 	extern const fs::path Motors;
 	extern const fs::path Head;
+	extern const fs::path Threshold;
+
+	// Head
 	extern const fs::path Pan;
 	extern const fs::path Tilt;
-	extern const fs::path HorizontalOffset;
-	extern const fs::path VerticalOffset;
-	extern const fs::path Threshold;
 
 	extern const fs::path R_HIP_YAW;
 	extern const fs::path L_HIP_YAW;
