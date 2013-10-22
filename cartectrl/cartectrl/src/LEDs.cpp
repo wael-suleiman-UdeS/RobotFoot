@@ -22,8 +22,8 @@ LED<gpio::d, 13> LED2 {};
 LED<gpio::d, 14> LED3 {};
 LED<gpio::d, 15> LED4 {};
 #else
-LED<gpio::e, 14> LED1 {};
-LED<gpio::e, 15> LED2 {};
+LED<gpio::e, 15> LED1 {};
+LED<gpio::e, 14> LED2 {};
 #endif
 
 
