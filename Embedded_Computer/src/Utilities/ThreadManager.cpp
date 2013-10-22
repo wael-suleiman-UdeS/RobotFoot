@@ -7,9 +7,19 @@
 #include "logger.h"
 #include "ThreadManager.h"
 
-ThreadManager::ThreadManager()
+ThreadManager::ThreadManager(boost::asio::io_service &boost_io)
+:
+_timer(boost_io, boost::posix_time::milliseconds(25))
 {
-
+    try
+    {
+        // Time task
+        timer();
+    }
+    catch (std::exception& e)
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "Exception in ThreadManager.cpp while initialising timer task : " << e.what() << std::endl;
+    }
 }
 
 ThreadManager::~ThreadManager()
@@ -20,7 +30,13 @@ ThreadManager::~ThreadManager()
     }
 }
 
-boost::thread::id ThreadManager::create(unsigned int priority, std::string thread_name, const boost::function0<void>& thread_func)
+void ThreadManager::timer()
+{
+    resume(Task::MOTOR_CONTROL);
+    _timer.async_wait(boost::bind(&ThreadManager::timer, this));
+}
+
+boost::thread::id ThreadManager::create(unsigned int priority, const boost::function0<void>& thread_func, Task task)
 {
     Logger::getInstance(Logger::LogLvl::DEBUG) << "Creating new thread with priority : " << priority << std::endl;
     boost::thread* newThread = new boost::thread(thread_func);
@@ -29,7 +45,8 @@ boost::thread::id ThreadManager::create(unsigned int priority, std::string threa
     boost::condition_variable* cond = new boost::condition_variable(); 
     _cond_variables.insert(std::make_pair(newThread->get_id(), cond));
 
-    _names.insert(std::make_pair(thread_name, newThread->get_id()));
+    if (task != Task::UNKNOW)
+        _tasks.insert(std::make_pair(task, newThread->get_id()));
 
     int retcode;
     int policy;
@@ -60,35 +77,44 @@ boost::thread::id ThreadManager::create(unsigned int priority, std::string threa
 void ThreadManager::stop(boost::thread::id thread_id)
 {
     Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Stopping thread " << boost::lexical_cast<std::string>(thread_id) << std::endl;
-    _threads[thread_id]->interrupt();
-    _threads[thread_id]->join();
+    
+    if (_threads.find(thread_id) != _threads.end())
+    {
+        _threads[thread_id]->interrupt();
+        _threads[thread_id]->join();
+    }
 }
 
-void ThreadManager::stop(std::string thread_name)
+void ThreadManager::stop(Task task)
 {
-    stop(_names[thread_name]);
+    if (_tasks.find(task) != _tasks.end())
+        stop(_tasks[task]);
 }
 
 void ThreadManager::attach(boost::thread::id thread_id)
 {
     Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Joining thread " << boost::lexical_cast<std::string>(thread_id) << std::endl;
-    _threads[thread_id]->join();
+    if (_threads.find(thread_id) != _threads.end())
+        _threads[thread_id]->join();
 }
 
-void ThreadManager::attach(std::string thread_name)
+void ThreadManager::attach(Task task)
 {
-    attach(_names[thread_name]);
+    if (_tasks.find(task) != _tasks.end())
+        attach(_tasks[task]);
 }
 
 void ThreadManager::resume(boost::thread::id thread_id)
 {
     Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Resuming thread " << boost::lexical_cast<std::string>(thread_id) << std::endl;
-    _cond_variables[thread_id]->notify_one(); 
+    if (_cond_variables.find(thread_id) != _cond_variables.end())
+        _cond_variables[thread_id]->notify_one(); 
 }
 
-void ThreadManager::resume(std::string thread_name)
+void ThreadManager::resume(Task task)
 {
-    resume(_names[thread_name]);
+    if (_tasks.find(task) != _tasks.end())
+        resume(_tasks[task]);
 }
 
 void ThreadManager::wait()

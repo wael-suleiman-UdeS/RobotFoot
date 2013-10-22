@@ -7,59 +7,73 @@
 
 #include <vector>
 
+class Motor
+{
+    public:  
+        Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int speed);
+        ~Motor();
+        void setPos(double pos);
+        const double getPos();
+        void setTorque(bool value);
+        void Read();
+        void Write();
+    private:
+        int Angle2Value(const double angle);
+        double Value2Angle(const int value);
+        
+        STM32F4 *_stm32f4; 
+        std::string _name;
+        int _id;
+        int _offset;
+        int _min;
+        int _max;
+        int _speed;
+        double _currentPos;
+        double _nextPos;
+};
+
 class MotorControl
 {
 public:
-   enum Option {
-      ALL_LEGS = 0,
-      RIGHT_LEGS = 1,
-      LEFT_LEGS = 2,
+   enum Config {
+      ALL_MOTORS = 0,
+      ALL_LEGS,
+      RIGHT_LEG,
+      LEFT_LEG,
+      HEAD,
       NUM_TEST
    };
 
    MotorControl(ThreadManager *threadManager, const XmlParser &config);
    ~MotorControl();
 
-   void start();
+   void Start();
 
-   bool SetTorque( const Option option );
-   //bool DisableTorque( const Option option );
+   bool SetTorque(bool value, const Config config);
+   bool SetTorque(bool value, const std::string name);
   
    bool InitPosition( const std::vector<double>& vPos,
-		       const Option option,
-		       const double msTotalTime = 10000.0,
-		       const double msDt = 16 );	
+                      const Config config,
+                      const double msTotalTime = 10000.0,
+                      const double msDt = 16);
    
-   bool SetPosition( const std::vector<double>& pos, const Option option );
-   bool ReadPosition( std::vector<double>& pos, const Option option );
+   bool SetPosition(double pos, std::string name); 
+   const double ReadPosition(std::string name);
+   
+   bool SetPositions(const std::vector<double>& pos, const Config config);
+   bool ReadPositions(std::vector<double>& pos, const Config config);
 
 private:
+   void InitializeMotors(const XmlParser &config);
+   void InitializeConfigurations(const XmlParser &config);
 
-   struct Motor
-   {
-      int id;
-      int offset;
-      int minLimit;
-      int maxLimit;
-   };   
+   void ReadAll();
+   void WriteAll();
 
-   struct Configuration
-   {
-      std::vector<Motor> joints;
-   };
-
-   void InitializeMotors(std::map<std::string, Motor>&, const XmlParser &config);
-
-   unsigned int getJointNum( const Option option );
-
-    STM32F4 *_stm32f4;
-    ThreadManager *_threadManager;
-    Configuration _leg_config[NUM_TEST];
-
-    int Angle2Value(const double angle);
-    int Angle2Value(const Motor& motor, const double angle);
-    double Value2Angle(const int value);
-    double Value2Angle(const Motor& motor, const int value);
+   STM32F4 *_stm32f4;
+   ThreadManager *_threadManager;
+    
+   std::map<std::string, Motor*> _motors;
+   std::map<Config, std::vector<Motor*>> _configurations;
 };
-
 #endif  //MOTOR_CONTROL_H

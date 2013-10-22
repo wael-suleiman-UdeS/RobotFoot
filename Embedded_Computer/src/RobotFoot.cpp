@@ -163,7 +163,7 @@ void hardSet(STM32F4& mc)
 	}
 }
 
-int main_new(int argc, char * argv[])
+int main(int argc, char * argv[])
 { 
     // Add io stream to Logger
     Logger::getInstance().addStream(std::cout);
@@ -181,17 +181,24 @@ int main_new(int argc, char * argv[])
     Logger::getInstance().setLogLvl(config.getStringValue(XmlPath::Root / "Logging" / "LogLvl"));
 
     // Thread Manager
-    ThreadManager *threadManager = new ThreadManager();
+    try
+    {
+        // Init IO_service for ThreadManager
+        boost::asio::io_service boost_io;
+        ThreadManager *threadManager = new ThreadManager(boost_io);
+        threadManager->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
 
-    MotorControl motorControl(threadManager, config);
-
-    // Start main process here
-    Logger::getInstance() << "Done" << std::endl;
+        MotorControl motorControl(threadManager, config);
+    }
+    catch (std::exception& e)
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "Exception while initialising ThreadManager : " << e.what() << std::endl;
+    }
     return 0;
 }
 
 // Deprecated main
-int main(int argc, char* argv[])
+int main_old(int argc, char* argv[])
 {
 
 	try

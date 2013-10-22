@@ -20,6 +20,7 @@ namespace XmlPath
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";
+    const path Configurations = "Configurations";
 	const path Head = "Head";
 	const path Legs = "Legs";
 	const fs::path Pan = "Pan";
@@ -42,11 +43,13 @@ namespace XmlPath
 	const path L_ANKLE_ROLL = "L_ANKLE_ROLL";
 
 	const path LegsMotors = Root / Motion / Motors / Legs;
+    const path MotorsConfig = Root / Motion / Motors / Configurations;
 
 	const path MotorID = "MotorID";
 	const path Offset = "Offset";
 	const path LimitMin = "LimitMin";
 	const path LimitMax = "LimitMax";
+    const path Speed = "Speed";
 }
 
 /** \brief Load an XML file for subsequent parsing operations
@@ -84,7 +87,7 @@ string XmlParser::getStringValue(path xPath) const
  * \return std::vector<string>: Vector of the retrieved values
  *
  */
-std::vector<std::string> XmlParser::getStringValues(path xPath) const
+std::vector<std::string> XmlParser::getChildrenStringValues(path xPath) const
 {
     std::vector<std::string> values;
 	if (_document.empty()) { return values; }

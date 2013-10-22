@@ -18,11 +18,11 @@ class Logger
    public:
       enum LogLvl
       {
-		   DEBUG = 0,
-         INFO = 1,
-         WARN = 2,
-         ERROR = 3,
-         SHUTUP = 4
+         DEBUG = 0,
+         INFO,
+         WARN,
+         ERROR,
+         SHUTUP
       };
  
       static Logger& getInstance();     
