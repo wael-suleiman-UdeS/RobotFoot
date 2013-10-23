@@ -41,19 +41,20 @@ namespace EigenUtils
 	    Eigen::MatrixXf mxbMatrixBA = MXB(matrixA.row(i), matrixB.row(j), increment, offset);
 
 	    //Append both step trajectories
-	    Eigen::MatrixXf mxbMatrix;
 	    if(matrixA.rows() > i+1)
 	    {
 			//Create a matrix with zmp trajectory from B to A
 	        Eigen::MatrixXf mxbMatrixAB = MXB(matrixB.row(j), matrixA.row(i+1), increment, offset);
-	        mxbMatrix = AppendMatrixRow(mxbMatrixBA, mxbMatrixAB);
+
+	        Eigen::MatrixXf mxbMatrix(mxbMatrixBA.rows()+mxbMatrixAB.rows(), mxbMatrixBA.cols());
+	        mxbMatrix << mxbMatrixBA, mxbMatrixAB;
+
+	        return mxbMatrix;
 	    }
 	    else
 	    {
-	        mxbMatrix = mxbMatrixBA;
+	        return mxbMatrixBA;
 	    }
-
-		return mxbMatrix;
 	}
 
 }

@@ -3,7 +3,6 @@ SRC =  test1.cpp
 
 SRC += Trajectory.cpp
 SRC += Kinematics.cpp
-SRC += ZMP.cpp
 SRC += EigenUtils.cpp
 
 
