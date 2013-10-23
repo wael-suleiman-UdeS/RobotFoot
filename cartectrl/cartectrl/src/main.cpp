@@ -12,48 +12,7 @@
 
 #include "CortexM4.h"
 #include "herkulex.h"
-#include "EmergencyStop.h"
-
-/* This funcion shows how to initialize
- * the GPIO pins on GPIOD and how to configure
- * them as inputs and outputs
- */
-
-void init_GPIO(void)
-{
-    /* This TypeDef is a structure defined in the
-     * ST's library and it contains all the properties
-     * the corresponding peripheral has, such as output mode,
-     * pullup / pulldown resistors etc.
-     *
-     * These structures are defined for every peripheral so
-     * every peripheral has it's own TypeDef. The good news is
-     * they always work the same so once you've got a hang
-     * of it you can initialize any peripheral.
-     *
-     * The properties of the periperals can be found in the corresponding
-     * header file e.g. stm32f4xx_gpio.h and the source file stm32f4xx_gpio.c
-     */
-    GPIO_InitTypeDef GPIO_InitStruct;
-
-
-    /* This enables the peripheral clock to
-     * the GPIOA IO module
-     */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-
-    /* Here the GPIOA module is initialized.
-     * We want to use PA0 as an input because
-     * the USER button on the board is connected
-     * between this pin and VCC.
-     */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;              // we want to configure PA0
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;     // we want it to be an input
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;//this sets the GPIO modules clock speed
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;   // this sets the pin type to push / pull (as opposed to open drain)
-    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;   // this enables the pulldown resistor --> we want to detect a high level
-    GPIO_Init(GPIOC, &GPIO_InitStruct);                   // this passes the configuration to the Init function which takes care of the low level stuff
-}
+//#include "EmergencyStop.h"
 
 /* This funcion initializes the USART1 peripheral
  *
@@ -134,11 +93,11 @@ void init_USART1(uint32_t baudrate){
 void initialize()
 {
     init_USART1(115200);
-    init_GPIO();
     LED1.set();
     LED2.set();
-    EmergencyStop emergencyStop;
-    emergencyStop.StartEmergencyButton();}
+    //EmergencyStop emergencyStop;
+    //emergencyStop.StartEmergencyButton();
+}
 
 int main(void)
 {

@@ -224,12 +224,6 @@ void OTG_HS_EP1_OUT_IRQHandler(void)
   USBD_OTG_EP1OUT_ISR_Handler (&USB_OTG_dev);
 }
 #endif
-// HACK!
-void ButtonTimer(void);
-void TIM5_IRQHandler(void)
-{
-    ButtonTimer();
-}
 
 /******************************************************************************/
 /*                 STM32Fxxx Peripherals Interrupt Handlers                   */
