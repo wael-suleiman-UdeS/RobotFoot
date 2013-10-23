@@ -70,7 +70,7 @@ public:
       */
     bool state() const
     {
-        return Parent::input() != static_cast<bool>(level);
+        return Parent::input() == static_cast<bool>(level);
     }
     /**
       * @brief  Read the pin
