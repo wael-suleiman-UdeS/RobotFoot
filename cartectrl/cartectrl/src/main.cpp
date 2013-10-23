@@ -12,7 +12,7 @@
 
 #include "CortexM4.h"
 #include "herkulex.h"
-//#include "EmergencyStop.h"
+#include "EmergencyStop.h"
 
 /* This funcion initializes the USART1 peripheral
  *
@@ -95,8 +95,7 @@ void initialize()
     init_USART1(115200);
     LED1.set();
     LED2.set();
-    //EmergencyStop emergencyStop;
-    //emergencyStop.StartEmergencyButton();
+    EmergencyStop::install();
 }
 
 int main(void)
