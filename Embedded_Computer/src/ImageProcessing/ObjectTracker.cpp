@@ -104,7 +104,8 @@ void ObjectTracker::track(Point objectPosition)
 
 void ObjectTracker::readHeadAngles() {
 	std::vector<double> angles;
-	_mc->ReadPositions(angles, MotorControl::Config::HEAD);
+	//_mc->ReadPositions(angles, MotorControl::Config::HEAD);
+	_mc->HardGet(angles, MotorControl::Config::HEAD);
 	_currentAngle.x = angles[0];
 	_currentAngle.y = angles[1];
 	_newAngle = _currentAngle;
@@ -114,7 +115,8 @@ void ObjectTracker::setHeadAngles() {
 	std::vector<double> angles;
 	angles.push_back(_newAngle.x);
 	angles.push_back(_newAngle.y);
-	_mc->SetPositions(angles, MotorControl::Config::HEAD);
+	//_mc->SetPositions(angles, MotorControl::Config::HEAD);
+	_mc->HardSet(angles, MotorControl::Config::HEAD);
 }
 
 void ObjectTracker::scan() {

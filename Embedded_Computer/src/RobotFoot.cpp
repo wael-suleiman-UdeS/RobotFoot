@@ -95,7 +95,7 @@ int main(int argc, char * argv[])
         MotorControl motorControl(threadManager, config);
         
         // Starting Head task
-        //HeadControlTask headTask(threadManager, config, motorControl);
+        HeadControlTask headControlTask(threadManager, config, motorControl);
         
         // Init Walk task
         StaticWalk staticWalk(threadManager, motorControl);
@@ -103,6 +103,7 @@ int main(int argc, char * argv[])
         staticWalk.initPosition(7000);
 
         // Start tasks
+	threadManager->create(10,boost::bind(&HeadControlTask::run, &headControlTask),ThreadManager::Task::HEAD_CONTROL);
         threadManager->create(90, boost::bind(&StaticWalk::run, &staticWalk,
                                                      config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
                                                      ThreadManager::Task::LEGS_CONTROL);
