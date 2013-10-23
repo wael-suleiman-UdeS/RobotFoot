@@ -6,6 +6,8 @@
 #include "Utilities/XmlParser.h"
 
 #include <vector>
+#include <boost/thread/mutex.hpp>
+#include <memory> // shared_ptr
 
 class Motor
 {
@@ -45,7 +47,7 @@ public:
       NUM_TEST
    };
 
-   MotorControl(ThreadManager *threadManager, const XmlParser &config);
+   MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config);
    ~MotorControl();
 
    void run();
@@ -75,8 +77,9 @@ private:
    void WriteAll();
 
    STM32F4 *_stm32f4;
-   ThreadManager *_threadManager;
-    
+   std::shared_ptr<ThreadManager> _threadManager;
+   boost::mutex _io_mutex;
+
    std::map<std::string, Motor*> _motors;
    std::map<Config, std::vector<Motor*>> _configurations;
 };

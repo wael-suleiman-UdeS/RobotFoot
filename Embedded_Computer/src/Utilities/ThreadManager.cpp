@@ -46,11 +46,11 @@ boost::thread::id ThreadManager::create(unsigned int priority, const boost::func
     int policy;
     struct sched_param param;
     pthread_t threadID = (pthread_t) newThread->native_handle();
-   
+    
     if ((retcode = pthread_getschedparam(threadID, &policy, &param)) != 0)
     {
         Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_getschedparam -- " << retcode << std::endl;
-        exit(EXIT_FAILURE);
+        //exit(EXIT_FAILURE);
     }
 
     // SCHED_RR policy
@@ -59,11 +59,10 @@ boost::thread::id ThreadManager::create(unsigned int priority, const boost::func
     // Threads have a priority from 1 to 99 and higher priority threads always preempt lower priority threads
     policy = SCHED_RR;
     param.sched_priority = priority;
-
     if ((retcode = pthread_setschedparam(threadID, policy, &param)) != 0)
     {
         Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_setschedparam -- " << retcode << std::endl;
-        exit(EXIT_FAILURE);
+        //exit(EXIT_FAILURE);
     }
     return newThread->get_id();
 }

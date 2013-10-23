@@ -85,8 +85,8 @@ void Motor::Write()
     }
 }
 
-MotorControl::MotorControl( ThreadManager *threadManager, const XmlParser &config ) :
- _threadManager(threadManager)
+MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config ) :
+ _threadManager(threadManager_ptr)
 {
     try
     {
@@ -95,7 +95,7 @@ MotorControl::MotorControl( ThreadManager *threadManager, const XmlParser &confi
         boost::asio::io_service boost_io;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
         _stm32f4 = new STM32F4(port_name, boost_io);
-        threadManager->create(50, boost::bind(&boost::asio::io_service::run, &boost_io));
+        _threadManager->create(50, boost::bind(&boost::asio::io_service::run, &boost_io));
     }
     catch (std::exception& e)
     {
@@ -325,7 +325,8 @@ bool MotorControl::SetPositions(const std::vector<double>& pos, const Config con
 }
 
 void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
-{    
+{  
+   boost::mutex::scoped_lock lock(_io_mutex);
    auto itrJoint = _configurations[config].begin();
    const auto endJoint = _configurations[config].end();
    auto itrPos = pos.begin();
@@ -340,6 +341,7 @@ void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
 
 void MotorControl::HardGet(std::vector<double>& pos, const Config config)
 {
+   boost::mutex::scoped_lock lock(_io_mutex);
    auto itrJoint = _configurations[config].begin();
    const auto endJoint = _configurations[config].end();
    

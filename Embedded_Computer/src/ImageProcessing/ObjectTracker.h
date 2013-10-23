@@ -1,12 +1,14 @@
 #ifndef OBJECTTRACKER_H
 #define OBJECTTRACKER_H
 
-#include <opencv/cvaux.h>
-#include "../Control/MotorControl_2.h"
-#include "../Utilities/XmlParser.h"
-#include "../Utilities/logger.h"
-#include "../Utilities/PID.h"
+#include "Control/MotorControl_2.h"
+#include "Utilities/XmlParser.h"
+#include "Utilities/logger.h"
+#include "Utilities/PID.h"
+
 #include <vector>
+#include <memory> // shared_ptr
+#include <opencv/cvaux.h>
 
 //TODO :crap
 #include <boost/filesystem.hpp>
@@ -21,7 +23,7 @@
 class ObjectTracker
 {
 public:
-	ObjectTracker(MotorControl* mc, cv::Point center);
+	ObjectTracker(std::shared_ptr<MotorControl> mc_ptr, cv::Point center);
 	~ObjectTracker() {}
 
 	void track(cv::Point objectPosition);
@@ -35,7 +37,7 @@ private:
 	void readHeadAngles();
 	void setHeadAngles();
 
-	MotorControl* _mc;
+    std::shared_ptr<MotorControl> _mc;
 	cv::Point _centerPosition;
 	cv::Point _objectError;
 	int _noObjectCount;

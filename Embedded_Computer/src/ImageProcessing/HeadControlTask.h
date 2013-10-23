@@ -10,6 +10,7 @@
  * \version 0.1
  */
 #include <iostream>
+#include <memory> // shared_ptr
 
 #include "ImageProcessing/ColorFinder.h"
 #include "ImageProcessing/ObjectTracker.h"
@@ -20,17 +21,17 @@
 class HeadControlTask
 {
 public:
-   HeadControlTask(ThreadManager *threadManager, XmlParser &config, MotorControl &mc);
+   HeadControlTask(std::shared_ptr<ThreadManager> threadManager_ptr, XmlParser &config, std::shared_ptr<MotorControl> mc_ptr);
    ~HeadControlTask();
 
    void run();
 
 private:
-    ThreadManager *_threadManager;
+    std::shared_ptr<ThreadManager> _threadManager;
 	cv::Point _ballPosition;
-	CircleSpec *_circle;
-	ColorFinder *_finder;
-	ObjectTracker *_tracker;
+    std::shared_ptr <CircleSpec> _circle;
+    std::shared_ptr <ColorFinder> _finder;
+    std::shared_ptr<ObjectTracker> _tracker;
 	bool _guiEnabled;
 	double _durationMean;
 	int _durationIndex;

@@ -18,8 +18,8 @@ using boost::filesystem::path;
  * \param colorName : The string of the color of the ball
  * \param mc : An instance of the micro controller
  */
-HeadControlTask::HeadControlTask(ThreadManager *threadManager, XmlParser &config, MotorControl &mc) : 
-_threadManager(threadManager)
+HeadControlTask::HeadControlTask(std::shared_ptr<ThreadManager> threadManager_ptr, XmlParser &config, std::shared_ptr<MotorControl> mc_ptr) : 
+_threadManager(threadManager_ptr)
 {
 	// Initialize capture
 	Logger::getInstance() << "Initializing capture device..." << std::endl;
@@ -31,15 +31,15 @@ _threadManager(threadManager)
 
 	_durationMean = 0;
 	_durationIndex = 0;
-	_guiEnabled = false;
+	_guiEnabled = true;
 
 	string colorName = config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::ActiveColor);
 
 	HSVcolor color(config, colorName);
-	_circle = new CircleSpec(config, colorName);
-	_finder = new ColorFinder(&color);
-	_tracker = new ObjectTracker(&mc, Camera::getInstance().getCenter());
-	_tracker->initializeHack(config); // todo: holy hack
+	_circle = std::make_shared<CircleSpec>(config, colorName);
+	_finder = std::make_shared<ColorFinder>(&color);
+	_tracker = std::make_shared<ObjectTracker>(mc_ptr, Camera::getInstance().getCenter());	
+    _tracker->initializeHack(config); // todo: holy hack
 	_tracker->initializeHackPID(config);
 
 	if (_guiEnabled)
@@ -51,9 +51,6 @@ _threadManager(threadManager)
 
 HeadControlTask::~HeadControlTask()
 {
-	delete _circle;
-	delete _finder;
-	delete _tracker;
 	cvDestroyAllWindows();
 }
 
@@ -67,8 +64,10 @@ void HeadControlTask::run()
 			boost::this_thread::interruption_point();
 	      	boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 			Camera::getInstance().captureFrame();
+            Logger::getInstance() << "After capture frame" << std::endl;
 
-			_ballPosition = _finder->getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV), *_circle);
+			_ballPosition = _finder->getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV), _circle);
+            Logger::getInstance() << "After getCirclePosition" << std::endl;
 
 			if (_guiEnabled)
 			{
@@ -83,6 +82,7 @@ void HeadControlTask::run()
 			}
 
 			_tracker->track(_ballPosition);
+            Logger::getInstance() << "track" << std::endl;
 
 			boost::this_thread::sleep(boost::posix_time::millisec(10));
 

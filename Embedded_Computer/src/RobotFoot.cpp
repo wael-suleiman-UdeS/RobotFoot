@@ -7,6 +7,7 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/chrono.hpp>
+#include <memory> // shared_ptr
 
 // TODO Remove from here
 #include "ImageProcessing/Camera.h"
@@ -89,30 +90,32 @@ int main(int argc, char * argv[])
     {
         // Init IO_service for ThreadManager
         boost::asio::io_service boost_io;
-        ThreadManager *threadManager = new ThreadManager(boost_io, config);
-        //threadManager->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
+        std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager(boost_io, config));
+        //threadManager_ptr->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
 
-        MotorControl motorControl(threadManager, config);
+        std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config));
+
         
         // Starting Head task
-        HeadControlTask headControlTask(threadManager, config, motorControl);
-        
+        HeadControlTask headControlTask(threadManager_ptr, config, motorControl_ptr);
+        headControlTask.run(); 
         // Init Walk task
-        StaticWalk staticWalk(threadManager, motorControl);
-        staticWalk.init("config/input.txt", false, true, true);
-        staticWalk.initPosition(7000);
-
+        //StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
+        //staticWalk.init("config/inputBackup.txt", false, true, true);
+        
+        // Head Task
+        //threadManager_ptr->create(50,boost::bind(&HeadControlTask::run, &headControlTask),ThreadManager::Task::HEAD_CONTROL);
+        //staticWalk.initPosition(7000);
         // Start tasks
-	threadManager->create(10,boost::bind(&HeadControlTask::run, &headControlTask),ThreadManager::Task::HEAD_CONTROL);
-        threadManager->create(90, boost::bind(&StaticWalk::run, &staticWalk,
-                                                     config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
-                                                     ThreadManager::Task::LEGS_CONTROL);
-        threadManager->attach(ThreadManager::Task::LEGS_CONTROL);
-        //threadManager->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);
-        //threadManager->timer(); // Start timer
+        //threadManager_ptr->create(90, boost::bind(&StaticWalk::run, &staticWalk,
+        //                                             config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
+        //                                             ThreadManager::Task::LEGS_CONTROL);
+        //threadManager_ptr->attach(ThreadManager::Task::LEGS_CONTROL);
+        //threadManager_ptr->attach(ThreadManager::Task::HEAD_CONTROL);
+        //threadManager_ptr->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);
+        //threadManager_ptr->timer(); // Start timer
         
         Logger::getInstance() << "END" << std::endl;
-        delete threadManager;
     }
     catch (std::exception& e)
     {

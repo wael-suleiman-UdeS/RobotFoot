@@ -5,12 +5,13 @@
 
 #include <string>
 #include <vector>
+#include <memory> // shared_ptr
 
 class StaticWalk
 {
 public:
 
-    StaticWalk(ThreadManager *threadManager, MotorControl &mc);
+    StaticWalk(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr);
     ~StaticWalk();
 
     void init(const std::string filename, const bool isUsingAlgorithm, const bool isMotorActivated, const bool isStandAlone);
@@ -27,6 +28,6 @@ private:
     std::vector<std::vector<double>>::iterator itrPos;
     std::vector<std::vector<double>>::iterator itrEnd;
 	
-    MotorControl _motion;
-    ThreadManager *_threadManager;
+    std::shared_ptr<ThreadManager> _threadManager;
+    std::shared_ptr<MotorControl> _motion;
 };

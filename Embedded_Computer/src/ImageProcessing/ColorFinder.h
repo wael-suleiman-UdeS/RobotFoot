@@ -56,7 +56,7 @@ public:
 	ColorFinder(const HSVcolor* color);
 	~ColorFinder() {}
 
-	cv::Point getCirclePosition(const cv::Mat& frame, const CircleSpec spec);
+	cv::Point getCirclePosition(const cv::Mat& frame, std::shared_ptr<CircleSpec> spec);
 
 private:
 	const HSVcolor* _color; /**< Color to find */

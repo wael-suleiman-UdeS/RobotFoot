@@ -1,5 +1,7 @@
 #include "ColorFinder.h"
+#include "Utilities/logger.h"
 #include <climits>
+#include <boost/thread.hpp>
 
 using boost::filesystem::path;
 using cv::Mat;
@@ -71,22 +73,25 @@ ColorFinder::ColorFinder(const HSVcolor* color)
  * \return Point: Position of the first found circle
  *
  */
-Point ColorFinder::getCirclePosition(const Mat& frame, CircleSpec spec)
+Point ColorFinder::getCirclePosition(const Mat& frame, std::shared_ptr<CircleSpec> spec)
 {
 	Point circlePosition = Point(-1, -1);
 
 	if (frame.empty()) { return circlePosition; }
 
 	filter(frame);
-
-	ImageProcessing::erode(_resultFrame, _resultFrame, spec.erosionIterations);
-	ImageProcessing::dilate(_resultFrame, _resultFrame, spec.dilationIterations);
-	ImageProcessing::smooth(_resultFrame, _resultFrame, spec.smoothingApertureSize);
-	
+    
+	ImageProcessing::erode(_resultFrame, _resultFrame, spec->erosionIterations);
+	ImageProcessing::dilate(_resultFrame, _resultFrame, spec->dilationIterations);
+    Logger::getInstance() << "test 3" << std::endl;
+	ImageProcessing::smooth(_resultFrame, _resultFrame, spec->smoothingApertureSize);
+    Logger::getInstance() << "test 4" << std::endl;
+    
+	boost::this_thread::sleep(boost::posix_time::millisec(10000));
 	vector<Vec3f> circles;
 	HoughCircles(_resultFrame, circles, CV_HOUGH_GRADIENT,
-		spec.resolutionDivisor, spec.minDistance, spec.edgeThreshold,
-		spec.centerThreshold, spec.minRadius, spec.maxRadius);
+		spec->resolutionDivisor, spec->minDistance, spec->edgeThreshold,
+		spec->centerThreshold, spec->minRadius, spec->maxRadius);
 
 	if (circles.size())
 	{

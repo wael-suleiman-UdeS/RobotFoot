@@ -71,7 +71,7 @@
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
   <Motion>
-    <IterationTimeMs value="100"/>
+    <IterationTimeMs value="15"/>
     <Motors>
       <Head>
         <HEAD_PAN>

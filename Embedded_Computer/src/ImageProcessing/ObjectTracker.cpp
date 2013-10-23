@@ -46,9 +46,10 @@ void ObjectTracker::initializeHackPID(const XmlParser& config) {
  * \param center Point: Center of the camera used for calibration
  *
  */
-ObjectTracker::ObjectTracker(MotorControl* mc, Point center)
+ObjectTracker::ObjectTracker(std::shared_ptr<MotorControl> mc_ptr, Point center)
+:
+    _mc(mc_ptr)
 {
-	_mc = mc;
 	_objectError = Point(-1, -1);
 	_currentAngle = Point(-1, -1);
 	_newAngle = Point(-1, -1);
