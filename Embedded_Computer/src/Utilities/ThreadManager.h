@@ -15,10 +15,12 @@
 #include <map>
 #include <string>
 
+#include "Utilities/XmlParser.h"
+
 class ThreadManager
 {
     public:
-        ThreadManager(boost::asio::io_service &boost_io);
+        ThreadManager(boost::asio::io_service &boost_io, XmlParser &config);
         ~ThreadManager();
 
         enum Task
@@ -37,15 +39,17 @@ class ThreadManager
         void attach(boost::thread::id thread_id);
         void attach(Task task);
 
-        void resume(boost::thread::id thread_id);
-        void resume(Task task);
+        bool resume(boost::thread::id thread_id);
+        bool resume(Task task);
 
         void wait();
+        void end();
+        void timer();
         int calculate_the_answer_to_life_the_universe_and_everything();     
     private:
-        void timer();
+        boost::posix_time::milliseconds _timeoutMs;
         boost::asio::deadline_timer _timer;
-
+            
         std::map<boost::thread::id, boost::thread*> _threads;
         std::map<boost::thread::id, boost::condition_variable*> _cond_variables;
         std::map<Task, boost::thread::id> _tasks; 

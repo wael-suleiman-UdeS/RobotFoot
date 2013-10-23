@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/chrono.hpp>
 
+using boost::filesystem::path;
 
 /*!
  * \brief Constructor for the tracking of the ball
@@ -32,15 +33,14 @@ _threadManager(threadManager)
 	_durationIndex = 0;
 	_guiEnabled = false;
 
-	path basePath = XmlPath::Root / XmlPath::ImageProcessing;
-	string colorName = config.getStringValue(basePath / XmlPath::ActiveColor);
+	string colorName = config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::ActiveColor);
 
 	HSVcolor color(config, colorName);
 	_circle = new CircleSpec(config, colorName);
 	_finder = new ColorFinder(&color);
 	_tracker = new ObjectTracker(&mc, Camera::getInstance().getCenter());
-	_tracker.initializeHack(config); // todo: holy hack
-	_tracker.initializeHackPID(config);
+	_tracker->initializeHack(config); // todo: holy hack
+	_tracker->initializeHackPID(config);
 
 	if (_guiEnabled)
 	{
@@ -57,45 +57,48 @@ HeadControlTask::~HeadControlTask()
 	cvDestroyAllWindows();
 }
 
-void HeadControlTask::start()
+void HeadControlTask::run()
 {
 	Logger::getInstance() << "Tracking process started" << std::endl;
-	while(true)
+	try
 	{
-      	boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
-		Camera::getInstance().captureFrame();
-
-		_ballPosition = _finder.getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV), _circle);
-
-		//Logger::getInstance() << "Ball position: " << _ballPosition.x << ", " << _ballPosition.y << std::endl;
-
-		if (_guiEnabled)
+		while(true)
 		{
-			if (_ballPosition.x > -1 && _ballPosition.y > -1)
+			boost::this_thread::interruption_point();
+	      	boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
+			Camera::getInstance().captureFrame();
+
+			_ballPosition = _finder->getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV), *_circle);
+
+			if (_guiEnabled)
 			{
-				cv::Scalar circleColor = cvScalar(255, 0, 0);
-				cv::circle(Camera::getInstance().getFrame(Camera::ColorSpace::BGR), _ballPosition, 5, circleColor);
+				if (_ballPosition.x > -1 && _ballPosition.y > -1)
+				{
+					cv::Scalar circleColor = cvScalar(255, 0, 0);
+					cv::circle(Camera::getInstance().getFrame(Camera::ColorSpace::BGR), _ballPosition, 5, circleColor);
+				}
+
+				cv::imshow("BGR", Camera::getInstance().getFrame(Camera::ColorSpace::BGR));
+				cv::imshow("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
 			}
 
-			cv::imshow("BGR", Camera::getInstance().getFrame(Camera::ColorSpace::BGR));
-			cv::imshow("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
+			_tracker->track(_ballPosition);
+
+			boost::this_thread::sleep(boost::posix_time::millisec(10));
+
+			boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+			_durationMean += sec.count();
+			_durationIndex++;
+			if(!(_durationIndex <= 99))
+			{
+				Logger::getInstance(Logger::LogLvl::INFO) << "took " << _durationMean/100 << " seconds\n";
+				_durationMean = 0;
+				_durationIndex = 0;
+			}
 		}
-
-		_tracker.trackPID(_ballPosition);		
-
-		if((cvWaitKey(10) & 255) == 27) break;
-
-        boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-		if(_guiEnabled)
-		{      		
-			durationMean += sec.count();
-		        durationIndex++;
-		        if(!(durationIndex <= 99)) 
-      			{
-	      	  		std::cout << "took " << durationMean/100 << " seconds\n";
-		     		durationMean = 0;
-		    		durationIndex = 0;
-      			}
-		}
+	}
+	catch(const boost::thread_interrupted& e)
+	{
+		Logger::getInstance() << "Catch an exeption in HeadControlTask.run()" << std::endl;
 	}
 }

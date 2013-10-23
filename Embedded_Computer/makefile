@@ -16,8 +16,10 @@ SRC += ImageProcessing/ColorFinder.cpp
 SRC += ImageProcessing/ImageProcessing.cpp
 SRC += ImageProcessing/HeadControlTask.cpp
 SRC += Control/STM32F4.cpp
-SRC += Control/MotorControl.cpp
-#SRC += Control/MotorControl_2.cpp
+SRC += Control/MotorControl_2.cpp
+SRC += Demo/StaticWalking/StaticWalk.cpp
+SRC += Demo/StaticWalking/WalkStatus.cpp
+SRC += Demo/StaticWalking/matrixpinv.cpp
 
 # Libs directories
 LIBDIR_ARM =  -LThirdParty/boost_1_54_0/stage/arm_lib/

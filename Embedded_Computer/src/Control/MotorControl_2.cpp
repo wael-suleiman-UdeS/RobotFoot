@@ -7,6 +7,7 @@
 #include <functional>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 using boost::filesystem::path;
 
@@ -23,7 +24,7 @@ namespace
 	const double dInvAngleConvertion = 1/dAngleConvertion;
 }
 
-Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int speed)
+Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime)
 :
 _stm32f4(stm32f4),
 _name(name),
@@ -31,9 +32,9 @@ _id(id),
 _offset(offset),
 _min(min),
 _max(max),
-_speed(speed),
-_currentPos(-1),
-_nextPos(-1)
+_playTime(playTime),
+_lastPos(-1),
+_currentPos(-1)
 {    
 }
 
@@ -43,7 +44,7 @@ Motor::~Motor()
 
 void Motor::setPos(double pos)
 {
-    _nextPos = pos;
+    _currentPos = pos;
 }
 
 const double Motor::getPos()
@@ -58,7 +59,7 @@ void Motor::setTorque(bool value)
 
 int Motor::Angle2Value(const double angle)
 {
-	int value = (angle*dInvAngleConvertion) + _offset;
+    int value = (angle*dInvAngleConvertion) + _offset;
 	return clamp(value, _min, _max);
 }
 
@@ -70,13 +71,18 @@ double Motor::Value2Angle(const int value)
 
 void Motor::Read()
 {
-    _currentPos = Value2Angle(_stm32f4->read(_id));
+    std::int16_t value = _stm32f4->read(_id);
+    if (value > 0)
+        _currentPos = Value2Angle(value);
 }
 
 void Motor::Write()
 {
-    if (_currentPos != _nextPos)
-        _stm32f4->setMotor(_id, Angle2Value(_nextPos));
+    if (_currentPos != _lastPos)
+    {
+        _lastPos = _currentPos;
+        _stm32f4->setMotor(_id, Angle2Value(_currentPos), _playTime);
+    }
 }
 
 MotorControl::MotorControl( ThreadManager *threadManager, const XmlParser &config ) :
@@ -105,14 +111,40 @@ MotorControl::~MotorControl()
 
 }
 
-void MotorControl::Start()
+void MotorControl::run()
 {
-    // Main task reading and sending data
-    ReadAll();
-    _threadManager->resume(ThreadManager::Task::LEGS_CONTROL);
-    _threadManager->wait();
-    WriteAll();
-    _threadManager->wait(); 
+    try
+    {
+
+        boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
+        while(1)
+        {
+            boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+            Logger::getInstance(Logger::LogLvl::DEBUG) << "ALL took " << sec.count() << " seconds" << std::endl;
+            start = boost::chrono::system_clock::now();
+
+            // Main task reading and sending data
+            Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : ReadAll" << std::endl;
+            ReadAll();
+            if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
+            {
+                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : wait for StaticWalk" << std::endl;
+                _threadManager->wait();
+            }
+            else
+            {
+                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : Resume LEGS_CONTROL fail" << std::endl;
+            }
+
+            Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : WriteAll" << std::endl;
+            WriteAll();
+                        _threadManager->wait(); 
+        }
+    }
+    catch(boost::thread_interrupted const &e)
+    {
+        Logger::getInstance() << "MOTOR_CONTROL task Interrupted. " << std::endl;
+    }  
 }
 
 // Populate the motor list
@@ -134,12 +166,12 @@ void MotorControl::InitializeMotors(const XmlParser &config)
 
 	for (auto it = paths.begin(); it != paths.end(); ++it)
 	{
-	    int id     = config.getIntValue(it->second / XmlPath::MotorID);
-		int offset = config.getIntValue(it->second / XmlPath::Offset);
-		int min    = config.getIntValue(it->second / XmlPath::LimitMin);
-		int max    = config.getIntValue(it->second / XmlPath::LimitMax);
-        int speed  = config.getIntValue(it->second / XmlPath::Speed);    
-        Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, speed);
+	    int id        = config.getIntValue(it->second / XmlPath::MotorID);
+		int offset    = config.getIntValue(it->second / XmlPath::Offset);
+		int min       = config.getIntValue(it->second / XmlPath::LimitMin);
+		int max       = config.getIntValue(it->second / XmlPath::LimitMax);
+        int playTime  = config.getIntValue(it->second / XmlPath::PlayTime);    
+        Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, playTime);
 	    _motors.insert(std::make_pair(it->first, motor));
     }
 }
@@ -148,11 +180,11 @@ void MotorControl::InitializeMotors(const XmlParser &config)
 void MotorControl::InitializeConfigurations(const XmlParser &config)
 {
     std::map<Config, path> paths;
-    paths.insert(std::make_pair(Config::ALL_MOTORS, XmlPath::Configurations / "ALL_MOTORS"));
-    paths.insert(std::make_pair(Config::ALL_LEGS, XmlPath::Configurations / "ALL_LEGS"));
-    paths.insert(std::make_pair(Config::RIGHT_LEG, XmlPath::Configurations / "RIGHT_LEG"));
-    paths.insert(std::make_pair(Config::LEFT_LEG, XmlPath::Configurations / "LEFT_LEG"));
-    paths.insert(std::make_pair(Config::HEAD, XmlPath::Configurations / "HEAD"));
+    paths.insert(std::make_pair(Config::ALL_MOTORS, XmlPath::MotorsConfig / "ALL_MOTORS"));
+    paths.insert(std::make_pair(Config::ALL_LEGS, XmlPath::MotorsConfig / "ALL_LEGS"));
+    paths.insert(std::make_pair(Config::RIGHT_LEG, XmlPath::MotorsConfig / "RIGHT_LEG"));
+    paths.insert(std::make_pair(Config::LEFT_LEG, XmlPath::MotorsConfig / "LEFT_LEG"));
+    paths.insert(std::make_pair(Config::HEAD, XmlPath::MotorsConfig / "HEAD"));
 
     for (auto it = paths.begin(); it != paths.end(); ++it)
     {
@@ -170,7 +202,7 @@ void MotorControl::InitializeConfigurations(const XmlParser &config)
 bool MotorControl::SetTorque(bool value, const Config config)
 {
    bool status = true;
-   if (_configurations.find(config) != _configurations.end())
+   if (_configurations.find(config) == _configurations.end())
    {
        Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetTorque\" : Configuration is invalid." << std::endl;
        return false;
@@ -180,14 +212,11 @@ bool MotorControl::SetTorque(bool value, const Config config)
    {
        // TODO : Grab motor status
        (*it)->setTorque(value);
-      //_cm730->WriteByte(*itr, MX28::P_P_GAIN, JointData::P_GAIN_DEFAULT, 0);
-      //_cm730->WriteByte(*itr, MX28::P_I_GAIN, JointData::I_GAIN_DEFAULT, 0);
-      //_cm730->WriteByte(*itr, MX28::P_D_GAIN, JointData::D_GAIN_DEFAULT, 0);
    }
    return status;
 }
 
-bool MotorControl::InitPosition(const std::vector<double>& desiredPos, const Config config,
+bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Config config,
 				                const double msTotalTime /*= 10000.0*/,
 				                const double msDt /*= 16*/ )
 {
@@ -293,6 +322,32 @@ bool MotorControl::SetPositions(const std::vector<double>& pos, const Config con
       Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
 #endif
    return status;
+}
+
+void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
+{    
+   auto itrJoint = _configurations[config].begin();
+   const auto endJoint = _configurations[config].end();
+   auto itrPos = pos.begin();
+   const auto endPos = pos.end();
+
+   for ( ; itrJoint != endJoint && itrPos != endPos; itrJoint++, itrPos++ )
+   {
+       (*itrJoint)->setPos(*itrPos);
+       (*itrJoint)->Write();
+   }
+}
+
+void MotorControl::HardGet(std::vector<double>& pos, const Config config)
+{
+   auto itrJoint = _configurations[config].begin();
+   const auto endJoint = _configurations[config].end();
+   
+   for ( ; itrJoint != endJoint; itrJoint++)
+   {
+       (*itrJoint)->Read();
+       pos.push_back((*itrJoint)->getPos());
+   }
 }
 
 const double MotorControl::ReadPosition(std::string name)

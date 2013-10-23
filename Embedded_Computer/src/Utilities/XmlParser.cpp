@@ -21,13 +21,14 @@ namespace XmlPath
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";
+    const path IterationTimeMs = "IterationTimeMs";
     const path Configurations = "Configurations";
 	const path Head = "Head";
 	const path Legs = "Legs";
 
 	// Head
-	const path Pan = "Pan";
-	const path Tilt = "Tilt";
+	const path HEAD_PAN = "HEAD_PAN";
+	const path HEAD_TILT = "HEAD_TILT";
 
 	const path Threshold = "Threshold";
 
@@ -45,13 +46,13 @@ namespace XmlPath
 	const path L_ANKLE_ROLL = "L_ANKLE_ROLL";
 
 	const path LegsMotors = Root / Motion / Motors / Legs;
-    const path MotorsConfig = Root / Motion / Motors / Configurations;
+    const path MotorsConfig = Root / Motion / Configurations;
 
 	const path MotorID = "MotorID";
 	const path Offset = "Offset";
 	const path LimitMin = "LimitMin";
 	const path LimitMax = "LimitMax";
-    const path Speed = "Speed";
+    const path PlayTime = "PlayTime";
 }
 
 /** \brief Load an XML file for subsequent parsing operations

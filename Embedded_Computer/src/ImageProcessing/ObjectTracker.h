@@ -2,10 +2,11 @@
 #define OBJECTTRACKER_H
 
 #include <opencv/cvaux.h>
-#include "../Control/STM32F4.h"
+#include "../Control/MotorControl_2.h"
 #include "../Utilities/XmlParser.h"
 #include "../Utilities/logger.h"
 #include "../Utilities/PID.h"
+#include <vector>
 
 //TODO :crap
 #include <boost/filesystem.hpp>
@@ -20,10 +21,10 @@
 class ObjectTracker
 {
 public:
-	ObjectTracker(STM32F4* controller, cv::Point center);
+	ObjectTracker(MotorControl* mc, cv::Point center);
 	~ObjectTracker() {}
 
-	void track(cv::Point position);
+	void track(cv::Point objectPosition);
 
 	// TODO: remove hack
 	void initializeHack(const XmlParser& config);
@@ -31,19 +32,17 @@ public:
 
 private:
 	void scan();
-	void readMotors();
-	cv::Point limitAngle(cv::Point angle);
+	void readHeadAngles();
+	void setHeadAngles();
 
-	STM32F4* _controller;
+	MotorControl* _mc;
 	cv::Point _centerPosition;
 	cv::Point _objectError;
 	int _noObjectCount;
-	ObjectTracker() {}
 
 	// todo: Values to be in a motor object
 	cv::Point _currentAngle;
-	std::uint8_t _panId;
-	std::uint8_t _tiltId;
+	cv::Point _newAngle;
 	int _threshold;
 	int _minPan;
 	int _maxPan;

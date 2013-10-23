@@ -19,107 +19,7 @@
 #include "Utilities/ThreadManager.h"
 #include "Control/MotorControl_2.h"
 #include "ImageProcessing/HeadControlTask.h"
-
-/*!
- * \brief Track the ball
- *
- * A test function for the tracking of the ball
- *
- * \param mc : An instance of the micro controller
- * \param debug : Acivate some debug option
- * \param PID : Activate the use of PID
- * \param colorName : The string of the color of the ball
- */
-void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
-{
-	Logger::getInstance().addStream(std::cout);
-	Logger::getInstance() << "Initializing USB interface..." << std::endl;
-
-	Logger::getInstance() << "Starting tracking demo." << std::endl;
-
-	// Load config
-	Logger::getInstance() << "Loading configuration file..." << std::endl;
-	XmlParser config;
-	if (!config.loadFile("config/config.xml"))
-	{
-		Logger::getInstance() << "Error while loading configuration file." << std::endl;
-		return;
-	}
-
-	// Initialize capture
-	Logger::getInstance() << "Initializing capture device..." << std::endl;
-	if (!Camera::getInstance().initialize(config))
-	{
-		Logger::getInstance() << "Error while initializing capture device." << std::endl;
-		return;
-	}
-
-	double durationMean = 0;
-	int durationIndex = 0;
-
-	cv::Point ballPosition;
-	HSVcolor color(config, colorName);
-	CircleSpec circle(config, colorName);
-	ColorFinder finder(&color);
-	ObjectTracker tracker(&mc, Camera::getInstance().getCenter());
-	tracker.initializeHack(config); // todo: holy hack
-	if (PID)
-	{
-		tracker.initializeHackPID(config);
-	}
-
-	if (debug)
-	{
-		cv::namedWindow("BGR", CV_WINDOW_AUTOSIZE);
-		cv::namedWindow("HSV", CV_WINDOW_AUTOSIZE);
-	}
-
-	Logger::getInstance() << "Tracking process started" << std::endl;
-	while(true)
-	{
-      boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
-		Camera::getInstance().captureFrame();
-
-		ballPosition = finder.getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV),
-			circle);
-
-		//Logger::getInstance() << "Ball position: " << ballPosition.x << ", " << ballPosition.y << std::endl;
-
-		if (debug)
-		{
-			if (ballPosition.x > -1 && ballPosition.y > -1)
-			{
-				cv::Scalar circleColor = cvScalar(255, 0, 0);
-				cv::circle(Camera::getInstance().getFrame(Camera::ColorSpace::BGR), ballPosition, 5, circleColor);
-			}
-
-			cv::imshow("BGR", Camera::getInstance().getFrame(Camera::ColorSpace::BGR));
-			cv::imshow("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
-		}
-
-		if (!PID)
-		{
-			tracker.track(ballPosition);
-		}
-		else
-		{
-			tracker.trackPID(ballPosition);
-		}
-
-		if((cvWaitKey(10) & 255) == 27) break;
-      boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-      durationMean += sec.count();
-      durationIndex++;
-      if(!(durationIndex <= 99)) 
-      {
-      	  std::cout << "took " << durationMean/100 << " seconds\n";
-	  durationMean = 0;
-	  durationIndex = 0;
-      }
-	}
-
-	cvDestroyAllWindows();
-}
+#include "Demo/StaticWalking/StaticWalk.h"
 
 /*!
  * \brief Use for the demo
@@ -128,7 +28,7 @@ void testTracking(STM32F4& mc, bool debug, bool PID, string colorName)
  *
  *  \param mc : An instance of the micro controller
  */
-void hardSet(STM32F4& mc)
+/*void hardSet(STM32F4& mc)
 {
 	using boost::filesystem::path;
 
@@ -165,7 +65,7 @@ void hardSet(STM32F4& mc)
 
 		if((cvWaitKey(10) & 255) == 27) break;
 	}
-}
+}*/
 
 int main(int argc, char * argv[])
 { 
@@ -189,72 +89,34 @@ int main(int argc, char * argv[])
     {
         // Init IO_service for ThreadManager
         boost::asio::io_service boost_io;
-        ThreadManager *threadManager = new ThreadManager(boost_io);
-        threadManager->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
+        ThreadManager *threadManager = new ThreadManager(boost_io, config);
+        //threadManager->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
 
         MotorControl motorControl(threadManager, config);
         
         // Starting Head task
-        HeadControlTask headTask(threadManager, config, motorControl);
+        HeadControlTask headControlTask(threadManager, config, motorControl);
+        
+        // Init Walk task
+        StaticWalk staticWalk(threadManager, motorControl);
+        staticWalk.init("config/input.txt", false, true, true);
+        staticWalk.initPosition(7000);
+
+        // Start tasks
+	threadManager->create(10,boost::bind(&HeadControlTask::run, &headControlTask),ThreadManager::Task::HEAD_CONTROL);
+        threadManager->create(90, boost::bind(&StaticWalk::run, &staticWalk,
+                                                     config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
+                                                     ThreadManager::Task::LEGS_CONTROL);
+        threadManager->attach(ThreadManager::Task::LEGS_CONTROL);
+        //threadManager->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);
+        //threadManager->timer(); // Start timer
+        
+        Logger::getInstance() << "END" << std::endl;
+        delete threadManager;
     }
     catch (std::exception& e)
     {
         Logger::getInstance(Logger::LogLvl::ERROR) << "Exception while initialising ThreadManager : " << e.what() << std::endl;
     }
     return 0;
-}
-
-// Deprecated main
-int main_old(int argc, char* argv[])
-{
-
-	try
-	{
-		boost::asio::io_service io;
-		STM32F4 mc(argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyACM0"), io);
-		boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
-
-		string color = "red";
-
-		if (argc > 4)
-		{
-			color = argv[4];
-		}
-
-		if (argc > 3 && *argv[3] != 'b')
-		{
-			if (*argv[3] == 'h')
-			{
-				hardSet(mc);
-			}
-			else if (*argv[3] == 'p')
-			{
-				testTracking(mc, false, true, color);
-			}
-		}
-		else
-		{ 
-			testTracking(mc, false, false, color);
-		}
-
-	}
-	catch (std::exception& e)
-    {
-        std::cerr << "Exception :" << e.what() << std::endl;
-    }
-	// Initialize USB
-	// TODO: handle USB exception
-	//{
-	//	boost::asio::io_service io_service;
-	//	USBInterface usb(io_service, argc > 1 ? std::string("/dev/") + argv[1] : std::string("/dev/ttyUSB0"), 115200);
-	//	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
-
-	//	testTracking(true, usb);
-	//}
- //   catch (std::exception& e)
- //   {
- //       std::cerr << "Exception :" << e.what() << std::endl;
- //   }*/
-
-	return 0;
 }

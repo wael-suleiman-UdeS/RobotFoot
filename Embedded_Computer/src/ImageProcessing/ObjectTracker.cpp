@@ -6,15 +6,14 @@ using boost::filesystem::path;
 // todo: remove hack
 void ObjectTracker::initializeHack(const XmlParser& config)
 {
+	// TODO: use values of MotorControl
 	path headPath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head;
 
-	_panId = config.getIntValue(headPath / XmlPath::Pan / XmlPath::MotorID);
-	_minPan = config.getIntValue(headPath / XmlPath::Pan / XmlPath::LimitMin);
-	_maxPan = config.getIntValue(headPath / XmlPath::Pan / XmlPath::LimitMax);
+	_minPan = config.getIntValue(headPath / XmlPath::HEAD_PAN / XmlPath::LimitMin);
+	_maxPan = config.getIntValue(headPath / XmlPath::HEAD_PAN / XmlPath::LimitMax);
 
-	_tiltId = config.getIntValue(headPath / XmlPath::Tilt / XmlPath::MotorID);
-	_minTilt = config.getIntValue(headPath / XmlPath::Tilt / XmlPath::LimitMin);
-	_maxTilt = config.getIntValue(headPath / XmlPath::Tilt / XmlPath::LimitMax);
+	_minTilt = config.getIntValue(headPath / XmlPath::HEAD_TILT / XmlPath::LimitMin);
+	_maxTilt = config.getIntValue(headPath / XmlPath::HEAD_TILT / XmlPath::LimitMax);
 
 	_threshold = config.getIntValue(headPath / XmlPath::Threshold);
 
@@ -22,12 +21,12 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 
 	_noObjectMaxCount = config.getIntValue(headPath / "NoObjectMaxCount");
 
-	_controller->setTorque(_panId, STM32F4::TorqueOn);
-	_controller->setTorque(_tiltId, STM32F4::TorqueOn);
+	_mc->SetTorque(true, MotorControl::Config::HEAD);
+
 }
 
 void ObjectTracker::initializeHackPID(const XmlParser& config) {
-
+	// TODO: put PID outside of this class
 	path basePath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head / "PID";
 
 	_kp = config.getIntValue(basePath / "P");
@@ -47,24 +46,26 @@ void ObjectTracker::initializeHackPID(const XmlParser& config) {
  * \param center Point: Center of the camera used for calibration
  *
  */
-ObjectTracker::ObjectTracker(STM32F4* controller, Point center)
+ObjectTracker::ObjectTracker(MotorControl* mc, Point center)
 {
-	_controller = controller;
+	_mc = mc;
 	_objectError = Point(-1, -1);
+	_currentAngle = Point(-1, -1);
+	_newAngle = Point(-1, -1);
     _noObjectCount = 0;
 	_centerPosition = center;
 }
 
-void ObjectTracker::track(Point position)
+void ObjectTracker::track(Point objectPosition)
 {
 
-    Logger::getInstance() << "Position: " << position.x << ", " << position.y << std::endl;
+    Logger::getInstance() << "Object position: " << objectPosition.x << ", " << objectPosition.y << std::endl;
     Logger::getInstance() << "No object count: " << _noObjectCount << "/" << _noObjectMaxCount << std::endl;
 
-    readMotors(); // TODO: this is for now
+    readHeadAngles();
 
-    if ( position.x > 0 && position.y > 0) {
-		_objectError = _centerPosition - position;
+    if ( objectPosition.x > 0 && objectPosition.y > 0) {
+		_objectError = _centerPosition - objectPosition;
 		_noObjectCount = 0;
     }
     else if(_noObjectCount > _noObjectMaxCount) {
@@ -82,36 +83,40 @@ void ObjectTracker::track(Point position)
 		return;
 	}
 
-	Point newAngle(-1,-1);
-
-	if (_currentAngle.x >= 0 && abs(_objectError.x) > _threshold)
+	if (abs(_objectError.x) > _threshold)
 	{
-		newAngle.x = _currentAngle.x + _pids["Pan"].process_PID(_objectError.x);
+		_newAngle.x = _currentAngle.x + _pids["Pan"].process_PID(_objectError.x);
 	}
 
-	if (_currentAngle.y >= 0 && abs(_objectError.y) > _threshold)
+	if (abs(_objectError.y) > _threshold)
 	{
-		newAngle.y = _currentAngle.y + _pids["Tilt"].process_PID(_objectError.y);
+		_newAngle.y = _currentAngle.y + _pids["Tilt"].process_PID(_objectError.y);
 	}
 
-	limitAngle(newAngle);
-	if (newAngle.x > 0) { _controller->setMotor(_panId, newAngle.x); }
-	if (newAngle.y > 0) { _controller->setMotor(_tiltId, newAngle.y); }
+	setHeadAngles();
 
     Logger::getInstance() << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
     Logger::getInstance() << "Current angle: " << _currentAngle.x << ", " << _currentAngle.y << std::endl;
-    Logger::getInstance() << "New angle: " << newAngle.x << ", " << newAngle.y << std::endl;
+    Logger::getInstance() << "New angle: " << _newAngle.x << ", " << _newAngle.y << std::endl;
     Logger::getInstance() << "-------------------" << std::endl;
 
 }
 
-void ObjectTracker::readMotors() {
-	// If I don't put data in int16, I get high values instead of negative values
-	int16_t x = _controller->read(_panId);
-	int16_t y = _controller->read(_tiltId);
-    Logger::getInstance() << "Current angle (16bits): " << x << ", " << y << std::endl;
-	_currentAngle.x = x;
-	_currentAngle.y = y;
+void ObjectTracker::readHeadAngles() {
+	std::vector<double> angles;
+	//_mc->ReadPositions(angles, MotorControl::Config::HEAD);
+	_mc->HardGet(angles, MotorControl::Config::HEAD);
+	_currentAngle.x = angles[0];
+	_currentAngle.y = angles[1];
+	_newAngle = _currentAngle;
+}
+
+void ObjectTracker::setHeadAngles() {
+	std::vector<double> angles;
+	angles.push_back(_newAngle.x);
+	angles.push_back(_newAngle.y);
+	//_mc->SetPositions(angles, MotorControl::Config::HEAD);
+	_mc->HardSet(angles, MotorControl::Config::HEAD);
 }
 
 void ObjectTracker::scan() {
@@ -133,15 +138,5 @@ void ObjectTracker::scan() {
 	{
 		_objectError.y = (_maxPan - _minPan) * 0.75 - _currentAngle.y;
 	}
-}
-
-Point ObjectTracker::limitAngle(Point angle) {
-	if (angle.x < _minPan) { angle.x = _minPan; _pids["Pan"].reset(); }
-	else if (angle.x > _maxPan) { angle.x = _maxPan; _pids["Pan"].reset(); }
-
-	if (angle.y < _minTilt) { angle.y = _minTilt; _pids["Tilt"].reset(); }
-	else if (angle.y > _maxTilt) { angle.y = _maxTilt; _pids["Tilt"].reset(); }
-
-	return angle;
 }
 

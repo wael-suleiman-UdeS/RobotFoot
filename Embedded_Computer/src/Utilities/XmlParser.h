@@ -36,13 +36,14 @@ namespace XmlPath
 
 	extern const fs::path Motion;
 	extern const fs::path Motors;
+    extern const fs::path IterationTimeMs;
     extern const fs::path Configurations;
 	extern const fs::path Head;
 	extern const fs::path Threshold;
 
 	// Head
-	extern const fs::path Pan;
-	extern const fs::path Tilt;
+	extern const fs::path HEAD_PAN;
+	extern const fs::path HEAD_TILT;
 
 	extern const fs::path R_HIP_YAW;
 	extern const fs::path L_HIP_YAW;
@@ -64,7 +65,7 @@ namespace XmlPath
 	extern const fs::path Offset;
 	extern const fs::path LimitMin;
 	extern const fs::path LimitMax;
-    extern const fs::path Speed;
+    extern const fs::path PlayTime;
 }
 
 /** @brief Class for XML parsing

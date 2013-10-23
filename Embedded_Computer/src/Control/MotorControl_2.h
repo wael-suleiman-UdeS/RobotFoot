@@ -10,7 +10,7 @@
 class Motor
 {
     public:  
-        Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int speed);
+        Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime);
         ~Motor();
         void setPos(double pos);
         const double getPos();
@@ -28,8 +28,9 @@ class Motor
         int _min;
         int _max;
         int _speed;
+        int _playTime;
+        double _lastPos;
         double _currentPos;
-        double _nextPos;
 };
 
 class MotorControl
@@ -47,22 +48,25 @@ public:
    MotorControl(ThreadManager *threadManager, const XmlParser &config);
    ~MotorControl();
 
-   void Start();
+   void run();
 
    bool SetTorque(bool value, const Config config);
    bool SetTorque(bool value, const std::string name);
   
-   bool InitPosition( const std::vector<double>& vPos,
+   bool InitPositions( const std::vector<double>& vPos,
                       const Config config,
                       const double msTotalTime = 10000.0,
                       const double msDt = 16);
-   
+  
    bool SetPosition(double pos, std::string name); 
    const double ReadPosition(std::string name);
    
    bool SetPositions(const std::vector<double>& pos, const Config config);
    bool ReadPositions(std::vector<double>& pos, const Config config);
 
+   // TODO Do not look
+   void HardSet(const std::vector<double>& pos, const Config config);
+   void HardGet(std::vector<double>& pos, const Config config);
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);

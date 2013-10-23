@@ -4,12 +4,13 @@
 
 #include <iostream>
 #include <fstream>
-
+#include <boost/thread.hpp>
 #include <sstream>
 #include <iterator>
 
-StaticWalk::StaticWalk(STM32F4* mc):
-    motion(mc)
+StaticWalk::StaticWalk(ThreadManager *threadManager, MotorControl &mc):
+    _motion(mc),
+    _threadManager(threadManager)
 {
 
 }
@@ -19,10 +20,11 @@ StaticWalk::~StaticWalk()
 
 }
 
-void StaticWalk::init(const std::string filename, const bool isUsingAlgorithm, const bool isMotorActivated)
+void StaticWalk::init(const std::string filename, const bool isUsingAlgorithm, const bool isMotorActivated, const bool isStandAlone)
 {
     bIsMotorActivated = isMotorActivated;
     bIsUsingAlgorithm = isUsingAlgorithm;
+    bIsStandAlone = isStandAlone;
    
     std::string strLine;
     std::ifstream file;
@@ -59,7 +61,7 @@ void StaticWalk::init(const std::string filename, const bool isUsingAlgorithm, c
 void StaticWalk::initPosition(const int msInitializationTime)
 {
     // Enable Torque
-    if( bIsMotorActivated && !motion.SetTorque( MotorControl::ALL_LEGS ) )
+    if( bIsMotorActivated && !_motion.SetTorque(true, MotorControl::Config::ALL_LEGS ) )
     {
         Logger::getInstance() << "SetTorque Failed\n";
         return;
@@ -67,7 +69,7 @@ void StaticWalk::initPosition(const int msInitializationTime)
    
     if(bIsMotorActivated)
     {
-        if( itrPos != itrEnd && !motion.InitPosition( *itrPos, MotorControl::ALL_LEGS, msInitializationTime ) )
+        if( itrPos != itrEnd && !_motion.InitPositions( *itrPos, MotorControl::Config::ALL_LEGS, msInitializationTime ) )
         {
            Logger::getInstance() << "InitPosition Failed\n";
            return;
@@ -76,87 +78,118 @@ void StaticWalk::initPosition(const int msInitializationTime)
 
 }
 
-void StaticWalk::run(const double uDt)
+void StaticWalk::run(double uDt)
 {
-    if(!bIsUsingAlgorithm)
+    try
     {
-        // Process mouvement with file as input
-        for(;itrPos != itrEnd; ++itrPos)
+        if(!bIsUsingAlgorithm)
         {
-            if(bIsMotorActivated)
+            // Process mouvement with file as input
+            for(;itrPos != itrEnd; ++itrPos)
             {
-                if(!motion.SetPosition( *itrPos, MotorControl::ALL_LEGS ) )
+                if (!bIsStandAlone)
                 {
-                    Logger::getInstance() << "SetPosition Failed\n";
-                    break;
+                    boost::this_thread::interruption_point();
+                    Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : wait for MotorControl" << std::endl;
+                    _threadManager->wait();
                 }
-            }
-            for(std::vector<double>::iterator it = itrPos->begin(); it != itrPos->end(); ++it)
-            {
-                Logger::getInstance() << *it << " ";
-            }
-            Logger::getInstance() << std::endl;
+                boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 
-            usleep(uDt*1000*1000);
-        } 
-    }
-    else
-    { 
-        //Process mouvement with algorithm
-
-        //TODO remove HardCoded
-        const double tf = 3.1;
-        double dt = uDt;
-        WalkStatus calculR(2);
-        //const int numberOfExecution = 1;
-
-        //for( int i = 0; i < numberOfExecution; i++ )
-        //{  
-        //if( i % 2 == 0 )
-        //{
-        calculR.initAllTrajParam(0.03, 0.02);
-        //calculL.initAllTrajParam(-0.03, 0.00);
-        //}
-        //else
-        //{
-        //calculR.initAllTrajParam(-0.03, 0.00);
-        //calculL.initAllTrajParam(0.03, 0.02);
-        //}
-
-        std::vector<double> vPos;
-        for( double time = 0.0; time <= tf + dt; time += dt )
-        {
-            boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
-
-            // Right Leg movement
-            if(bIsMotorActivated)
-            {
-                vPos.clear();
-                motion.ReadPosition( vPos, MotorControl::RIGHT_LEGS );
-            }
-
-            calculR.Process( time, vPos );
-            calculR.getMotorPosition( vPos );
-
-            if(bIsMotorActivated)
-            {
-                if( !motion.SetPosition( vPos, MotorControl::RIGHT_LEGS ) )
+                if (bIsMotorActivated)
                 {
-                    break;
+                    if (bIsStandAlone)
+                    {
+                        Logger::getInstance() << "StaticWalk : HardSet" << std::endl;
+                        _motion.HardSet( *itrPos, MotorControl::Config::ALL_LEGS );
+                        Logger::getInstance() << "StaticWalk : After HardSet" << std::endl;
+                    }                    
+                    else
+                    {    
+                        if(!_motion.SetPositions( *itrPos, MotorControl::Config::ALL_LEGS ) )
+                        {
+                            Logger::getInstance() << "SetPosition Failed\n";
+                            break;
+                        }
+                    }
                 }
-            }
-            for(std::vector<double>::iterator it = vPos.begin(); it != vPos.end(); ++it)
-            {
-                Logger::getInstance() << *it << " ";
-            }
-            Logger::getInstance() << std::endl;
+                for(std::vector<double>::iterator it = itrPos->begin(); it != itrPos->end(); ++it)
+                {
+                    Logger::getInstance() << *it << " ";
+                }
+                Logger::getInstance() << std::endl;
 
-            boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-            std::cout << "took " << sec.count() << " seconds\n";
-            ////TODO Left leg movement should be calculated in the calcul algorithm.
+                if (bIsStandAlone)
+                    //usleep(uDt*1000*1000);
+                    usleep(uDt);
+                else
+                {
+                    _threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
+                    Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : Iteration done" << std::endl;
+                    _threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
+                }
+                boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+                Logger::getInstance(Logger::LogLvl::DEBUG) << "took " << sec.count() << " seconds" << std::endl;
+            } 
+        }
+        else
+        { 
+            //Process mouvement with algorithm
+
+            //TODO remove HardCoded
+            const double tf = 3.1;
+            double dt = uDt;
+            WalkStatus calculR(2);
+            //const int numberOfExecution = 1;
+
+            //for( int i = 0; i < numberOfExecution; i++ )
+            //{  
+            //if( i % 2 == 0 )
+            //{
+            calculR.initAllTrajParam(0.03, 0.02);
+            //calculL.initAllTrajParam(-0.03, 0.00);
+            //}
+            //else
+            //{
+            //calculR.initAllTrajParam(-0.03, 0.00);
+            //calculL.initAllTrajParam(0.03, 0.02);
+            //}
+
+            std::vector<double> vPos;
+            for( double time = 0.0; time <= tf + dt; time += dt )
+            {
+                //boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();i
+                boost::this_thread::interruption_point();
+                _threadManager->wait();
+
+                // Right Leg movement
+                if(bIsMotorActivated)
+                {
+                    vPos.clear();
+                    _motion.ReadPositions( vPos, MotorControl::Config::RIGHT_LEG );
+                }
+
+                calculR.Process( time, vPos );
+                calculR.getMotorPosition( vPos );
+
+                if(bIsMotorActivated)
+                {
+                    if( !_motion.SetPositions( vPos, MotorControl::Config::RIGHT_LEG ) )
+                    {
+                        break;
+                    }
+                }
+                for(std::vector<double>::iterator it = vPos.begin(); it != vPos.end(); ++it)
+                {
+                    Logger::getInstance() << *it << " ";
+                }
+                Logger::getInstance() << std::endl;
+
+                //boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+                //std::cout << "took " << sec.count() << " seconds\n";
+                ////TODO Left leg movement should be calculated in the calcul algorithm.
 //            // Left Leg movement
 //            vPos.clear();
-//            motion.ReadPosition( vPos, MotorControl::LEFT_LEGS );
+//            _motion.ReadPositions( vPos, MotorControl::LEFT_LEG );
 //            // Reverse motor angles
 //            std::vector<double>::iterator itr = vPos.begin();
 //            const std::vector<double>::iterator end = vPos.end();
@@ -172,14 +205,20 @@ void StaticWalk::run(const double uDt)
 //            {
 //             *itr = -*itr;
 //             }
-//             if( !motion.SetPosition( vPos, MotorControl::LEFT_LEGS ) )
+//             if( !_motion.SetPositions( vPos, MotorControl::LEFT_LEG ) )
 //             {
 //             break;
 //             }
 
-            usleep(dt*1000*1000);
-        }   
+                //usleep(dt*1000*1000);
+                _threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
+            }   
         //}
+        }
     }
+    catch(boost::thread_interrupted const &e)
+    {
+        Logger::getInstance() << "LEGS_CONTROL task Interrupted. " << std::endl;
+    } 
 }
 
