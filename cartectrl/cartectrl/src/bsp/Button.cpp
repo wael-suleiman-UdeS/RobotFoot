@@ -1,32 +1,20 @@
 /**
   ******************************************************************************
-  * @file    LEDs.cpp
+  * @file    Button.cpp
   * @author  James-Adam Renquinha Henri (Jarhmander)
   * @version 1.0
   * @date    2013-10-22
-  * @brief   Contains definitions to LED objects.
+  * @brief   Code to read I/Os as buttons (rather low level, should not be used
+  *          by user-level code)
   ******************************************************************************
   */
 
 //------------------------------------------------------------------------------
-#include <LEDs.hpp>
+#include "bsp/Button.hpp"
 //------------------------------------------------------------------------------
 
 
-namespace bsp
-{
+/// File is empty on purpose.
 
-#if STM32F4DISCOVERY_TEST
-LED<gpio::d, 12> LED1 {};
-LED<gpio::d, 13> LED2 {};
-LED<gpio::d, 14> LED3 {};
-LED<gpio::d, 15> LED4 {};
-#else
-LED<gpio::e, 15> LED1 {};
-LED<gpio::e, 14> LED2 {};
-#endif
-
-
-}
 
 //------------------------------------------------------------------------------

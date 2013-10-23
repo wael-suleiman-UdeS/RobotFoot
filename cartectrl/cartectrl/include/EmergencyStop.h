@@ -4,14 +4,9 @@
 
 class EmergencyStop
 {
-    public:
-        EmergencyStop();
-        virtual ~EmergencyStop();
-
-        void StartEmergencyButton();
-    protected:
-    private:
-        void initBtnPollingTimer();
+public:
+    void operator()();
+    static void install();
 };
 
 #endif // EMERGENCYSTOP_H
