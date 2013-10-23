@@ -17,22 +17,6 @@ namespace EigenUtils
 		return result;
 	}
 
-	Eigen::MatrixXf AppendMatrixRow(Eigen::MatrixXf matrixA, Eigen::MatrixXf matrixB)
-	{
-	    Eigen::MatrixXf appendedMatrix(matrixA.rows()+matrixB.rows(), matrixA.cols());
-	    appendedMatrix << matrixA, matrixB;
-
-	    return appendedMatrix;
-	}
-
-	Eigen::MatrixXf AppendMatrixColumn(Eigen::MatrixXf matrixA, Eigen::MatrixXf matrixB)
-	{
-	    Eigen::MatrixXf appendedMatrix(matrixA.rows(), matrixA.cols()+matrixB.cols());
-	    appendedMatrix << matrixA, matrixB;
-
-	    return appendedMatrix;
-	}
-
 	//************This method could be used only when there are many steps, otherwise it might be removed*******************************************//
 	//Create a combined mxb matrix for trajectories from A to B to A
 	Eigen::MatrixXf CreateCombinedMXBMatrix(Eigen::MatrixXf matrixA, Eigen::MatrixXf matrixB, float increment, int i, int j, int offset)

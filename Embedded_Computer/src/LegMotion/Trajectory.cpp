@@ -538,14 +538,18 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 		//Trajectory from left to right to left foot steps
 		Eigen::MatrixXf mxbMatrix = EigenUtils::CreateCombinedMXBMatrix(leftSteps, rightSteps, m_dTime, i, j);
 
-        Eigen::MatrixXf tempMatrix = EigenUtils::AppendMatrixRow(trajectory, mxbMatrix);
+        Eigen::MatrixXf tempMatrix(trajectory.rows()+mxbMatrix.rows(), trajectory.cols());
+        tempMatrix << trajectory, mxbMatrix;
         trajectory.swap(tempMatrix);
     }
 
     //Append the last step (left foot) to pointD
     Eigen::Vector2f finalPoint = (leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2;
     Eigen::MatrixXf finalStepTraj = EigenUtils::MXB(leftSteps.row(leftSteps.rows()-1), finalPoint, m_dTime);
-    Eigen::MatrixXf tempMatrix = EigenUtils::AppendMatrixRow(trajectory, finalStepTraj);
+
+    Eigen::MatrixXf tempMatrix(trajectory.rows()+finalStepTraj.rows(), trajectory.cols());
+    tempMatrix << trajectory, finalStepTraj;
+
     trajectory.swap(tempMatrix);
 
     return trajectory;
