@@ -338,6 +338,18 @@ void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
    }
 }
 
+void MotorControl::HardGet(std::vector<double>& pos, const Config config)
+{
+   auto itrJoint = _configurations[config].begin();
+   const auto endJoint = _configurations[config].end();
+   
+   for ( ; itrJoint != endJoint; itrJoint++)
+   {
+       (*itrJoint)->Read();
+       pos.push_back((*itrJoint)->getPos());
+   }
+}
+
 const double MotorControl::ReadPosition(std::string name)
 {
     if (_motors.find(name) == _motors.end())

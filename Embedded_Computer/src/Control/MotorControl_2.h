@@ -66,6 +66,7 @@ public:
 
    // TODO Do not look
    void HardSet(const std::vector<double>& pos, const Config config);
+   void HardGet(std::vector<double>& pos, const Config config);
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
