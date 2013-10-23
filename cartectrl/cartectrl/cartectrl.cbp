@@ -144,9 +144,11 @@
 		</Unit>
 		<Unit filename="include/CortexM4.h" />
 		<Unit filename="include/EmergencyStop.h" />
+		<Unit filename="include/Input.hpp" />
 		<Unit filename="include/LED.hpp" />
 		<Unit filename="include/LEDs.hpp" />
 		<Unit filename="include/Tools.h" />
+		<Unit filename="include/bsp/Button.hpp" />
 		<Unit filename="include/bsp/GPIO.hpp" />
 		<Unit filename="include/herkulex.h" />
 		<Unit filename="include/initClock.h" />
@@ -162,9 +164,11 @@
 		<Unit filename="linker/stm32f4_linker.ld" />
 		<Unit filename="src/CortexM4.cpp" />
 		<Unit filename="src/EmergencyStop.cpp" />
+		<Unit filename="src/Input.cpp" />
 		<Unit filename="src/LED.cpp" />
 		<Unit filename="src/LEDs.cpp" />
 		<Unit filename="src/Tools.cpp" />
+		<Unit filename="src/bsp/Button.cpp" />
 		<Unit filename="src/bsp/GPIO.cpp" />
 		<Unit filename="src/herkulex.cpp" />
 		<Unit filename="src/initClock.c">

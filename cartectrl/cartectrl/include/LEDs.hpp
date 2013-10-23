@@ -24,8 +24,8 @@ extern LED<gpio::d, 13> LED2;
 extern LED<gpio::d, 14> LED3;   // < Avoid use of these
 extern LED<gpio::d, 15> LED4;   // <
 #else
-extern LED<gpio::e, 14> LED1;
-extern LED<gpio::e, 15> LED2;
+extern LED<gpio::e, 15> LED1;
+extern LED<gpio::e, 14> LED2;
 #endif
 
 }
