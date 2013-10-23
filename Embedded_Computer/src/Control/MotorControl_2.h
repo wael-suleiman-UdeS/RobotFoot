@@ -64,6 +64,8 @@ public:
    bool SetPositions(const std::vector<double>& pos, const Config config);
    bool ReadPositions(std::vector<double>& pos, const Config config);
 
+   // TODO Do not look
+   void HardSet(const std::vector<double>& pos, const Config config);
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);

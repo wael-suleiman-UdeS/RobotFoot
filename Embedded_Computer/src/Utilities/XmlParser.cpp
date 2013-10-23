@@ -21,6 +21,7 @@ namespace XmlPath
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";
+    const path IterationTimeMs = "IterationTimeMs";
     const path Configurations = "Configurations";
 	const path Head = "Head";
 	const path Legs = "Legs";
@@ -45,7 +46,7 @@ namespace XmlPath
 	const path L_ANKLE_ROLL = "L_ANKLE_ROLL";
 
 	const path LegsMotors = Root / Motion / Motors / Legs;
-    const path MotorsConfig = Root / Motion / Motors / Configurations;
+    const path MotorsConfig = Root / Motion / Configurations;
 
 	const path MotorID = "MotorID";
 	const path Offset = "Offset";

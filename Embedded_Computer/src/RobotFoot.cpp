@@ -28,7 +28,7 @@
  *
  *  \param mc : An instance of the micro controller
  */
-void hardSet(STM32F4& mc)
+/*void hardSet(STM32F4& mc)
 {
 	using boost::filesystem::path;
 
@@ -65,7 +65,7 @@ void hardSet(STM32F4& mc)
 
 		if((cvWaitKey(10) & 255) == 27) break;
 	}
-}
+}*/
 
 int main(int argc, char * argv[])
 { 
@@ -89,8 +89,8 @@ int main(int argc, char * argv[])
     {
         // Init IO_service for ThreadManager
         boost::asio::io_service boost_io;
-        ThreadManager *threadManager = new ThreadManager(boost_io);
-        threadManager->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
+        ThreadManager *threadManager = new ThreadManager(boost_io, config);
+        //threadManager->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
 
         MotorControl motorControl(threadManager, config);
         
@@ -99,12 +99,18 @@ int main(int argc, char * argv[])
         
         // Init Walk task
         StaticWalk staticWalk(threadManager, motorControl);
-        staticWalk.init("file", false, true);
+        staticWalk.init("config/input.txt", false, true, true);
         staticWalk.initPosition(7000);
 
         // Start tasks
-        threadManager->create(90, boost::bind(&StaticWalk::run, &staticWalk, 25));
-        threadManager->attach(threadManager->create(90, boost::bind(&MotorControl::run, &motorControl)));
+        threadManager->create(90, boost::bind(&StaticWalk::run, &staticWalk,
+                                                     config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
+                                                     ThreadManager::Task::LEGS_CONTROL);
+        threadManager->attach(ThreadManager::Task::LEGS_CONTROL);
+        //threadManager->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);
+        //threadManager->timer(); // Start timer
+        
+        Logger::getInstance() << "END" << std::endl;
         delete threadManager;
     }
     catch (std::exception& e)

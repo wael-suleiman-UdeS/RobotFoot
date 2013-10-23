@@ -113,16 +113,38 @@ MotorControl::~MotorControl()
 
 void MotorControl::run()
 {
-    boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
-    
-    // Main task reading and sending data
-    ReadAll();
-    if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
-        _threadManager->wait();
-    WriteAll();
-    boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-    Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl took " << sec.count() << " seconds" << std::endl;
-    _threadManager->wait(); 
+    try
+    {
+
+        boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
+        while(1)
+        {
+            boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+            Logger::getInstance(Logger::LogLvl::DEBUG) << "ALL took " << sec.count() << " seconds" << std::endl;
+            start = boost::chrono::system_clock::now();
+
+            // Main task reading and sending data
+            Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : ReadAll" << std::endl;
+            ReadAll();
+            if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
+            {
+                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : wait for StaticWalk" << std::endl;
+                _threadManager->wait();
+            }
+            else
+            {
+                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : Resume LEGS_CONTROL fail" << std::endl;
+            }
+
+            Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : WriteAll" << std::endl;
+            WriteAll();
+                        _threadManager->wait(); 
+        }
+    }
+    catch(boost::thread_interrupted const &e)
+    {
+        Logger::getInstance() << "MOTOR_CONTROL task Interrupted. " << std::endl;
+    }  
 }
 
 // Populate the motor list
@@ -158,11 +180,11 @@ void MotorControl::InitializeMotors(const XmlParser &config)
 void MotorControl::InitializeConfigurations(const XmlParser &config)
 {
     std::map<Config, path> paths;
-    paths.insert(std::make_pair(Config::ALL_MOTORS, XmlPath::Configurations / "ALL_MOTORS"));
-    paths.insert(std::make_pair(Config::ALL_LEGS, XmlPath::Configurations / "ALL_LEGS"));
-    paths.insert(std::make_pair(Config::RIGHT_LEG, XmlPath::Configurations / "RIGHT_LEG"));
-    paths.insert(std::make_pair(Config::LEFT_LEG, XmlPath::Configurations / "LEFT_LEG"));
-    paths.insert(std::make_pair(Config::HEAD, XmlPath::Configurations / "HEAD"));
+    paths.insert(std::make_pair(Config::ALL_MOTORS, XmlPath::MotorsConfig / "ALL_MOTORS"));
+    paths.insert(std::make_pair(Config::ALL_LEGS, XmlPath::MotorsConfig / "ALL_LEGS"));
+    paths.insert(std::make_pair(Config::RIGHT_LEG, XmlPath::MotorsConfig / "RIGHT_LEG"));
+    paths.insert(std::make_pair(Config::LEFT_LEG, XmlPath::MotorsConfig / "LEFT_LEG"));
+    paths.insert(std::make_pair(Config::HEAD, XmlPath::MotorsConfig / "HEAD"));
 
     for (auto it = paths.begin(); it != paths.end(); ++it)
     {
@@ -180,7 +202,7 @@ void MotorControl::InitializeConfigurations(const XmlParser &config)
 bool MotorControl::SetTorque(bool value, const Config config)
 {
    bool status = true;
-   if (_configurations.find(config) != _configurations.end())
+   if (_configurations.find(config) == _configurations.end())
    {
        Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetTorque\" : Configuration is invalid." << std::endl;
        return false;
@@ -190,9 +212,6 @@ bool MotorControl::SetTorque(bool value, const Config config)
    {
        // TODO : Grab motor status
        (*it)->setTorque(value);
-      //_cm730->WriteByte(*itr, MX28::P_P_GAIN, JointData::P_GAIN_DEFAULT, 0);
-      //_cm730->WriteByte(*itr, MX28::P_I_GAIN, JointData::I_GAIN_DEFAULT, 0);
-      //_cm730->WriteByte(*itr, MX28::P_D_GAIN, JointData::D_GAIN_DEFAULT, 0);
    }
    return status;
 }
@@ -303,6 +322,20 @@ bool MotorControl::SetPositions(const std::vector<double>& pos, const Config con
       Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
 #endif
    return status;
+}
+
+void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
+{    
+   auto itrJoint = _configurations[config].begin();
+   const auto endJoint = _configurations[config].end();
+   auto itrPos = pos.begin();
+   const auto endPos = pos.end();
+
+   for ( ; itrJoint != endJoint && itrPos != endPos; itrJoint++, itrPos++ )
+   {
+       (*itrJoint)->setPos(*itrPos);
+       (*itrJoint)->Write();
+   }
 }
 
 const double MotorControl::ReadPosition(std::string name)

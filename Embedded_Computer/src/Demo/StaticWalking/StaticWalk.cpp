@@ -20,10 +20,11 @@ StaticWalk::~StaticWalk()
 
 }
 
-void StaticWalk::init(const std::string filename, const bool isUsingAlgorithm, const bool isMotorActivated)
+void StaticWalk::init(const std::string filename, const bool isUsingAlgorithm, const bool isMotorActivated, const bool isStandAlone)
 {
     bIsMotorActivated = isMotorActivated;
     bIsUsingAlgorithm = isUsingAlgorithm;
+    bIsStandAlone = isStandAlone;
    
     std::string strLine;
     std::ifstream file;
@@ -86,16 +87,29 @@ void StaticWalk::run(double uDt)
             // Process mouvement with file as input
             for(;itrPos != itrEnd; ++itrPos)
             {
-                boost::this_thread::interruption_point();
-                _threadManager->wait();
+                if (!bIsStandAlone)
+                {
+                    boost::this_thread::interruption_point();
+                    Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : wait for MotorControl" << std::endl;
+                    _threadManager->wait();
+                }
                 boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 
-                if(bIsMotorActivated)
+                if (bIsMotorActivated)
                 {
-                    if(!_motion.SetPositions( *itrPos, MotorControl::Config::ALL_LEGS ) )
+                    if (bIsStandAlone)
                     {
-                        Logger::getInstance() << "SetPosition Failed\n";
-                        break;
+                        Logger::getInstance() << "StaticWalk : HardSet" << std::endl;
+                        _motion.HardSet( *itrPos, MotorControl::Config::ALL_LEGS );
+                        Logger::getInstance() << "StaticWalk : After HardSet" << std::endl;
+                    }                    
+                    else
+                    {    
+                        if(!_motion.SetPositions( *itrPos, MotorControl::Config::ALL_LEGS ) )
+                        {
+                            Logger::getInstance() << "SetPosition Failed\n";
+                            break;
+                        }
                     }
                 }
                 for(std::vector<double>::iterator it = itrPos->begin(); it != itrPos->end(); ++it)
@@ -104,10 +118,17 @@ void StaticWalk::run(double uDt)
                 }
                 Logger::getInstance() << std::endl;
 
-                //usleep(uDt*1000*1000);
+                if (bIsStandAlone)
+                    //usleep(uDt*1000*1000);
+                    usleep(uDt);
+                else
+                {
+                    _threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
+                    Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : Iteration done" << std::endl;
+                    _threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
+                }
                 boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
                 Logger::getInstance(Logger::LogLvl::DEBUG) << "took " << sec.count() << " seconds" << std::endl;
-                _threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
             } 
         }
         else

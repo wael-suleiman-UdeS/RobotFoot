@@ -13,7 +13,7 @@ public:
     StaticWalk(ThreadManager *threadManager, MotorControl &mc);
     ~StaticWalk();
 
-    void init(const std::string filename, const bool isUsingAlgorithm, const bool isMotorActivated);
+    void init(const std::string filename, const bool isUsingAlgorithm, const bool isMotorActivated, const bool isStandAlone);
 
     void initPosition(const int msInitializationTime);
     void run(double uDt);
@@ -21,6 +21,7 @@ public:
 private:
     bool bIsUsingAlgorithm;
     bool bIsMotorActivated;
+    bool bIsStandAlone;
 
     std::vector<std::vector<double>> vPosition;
     std::vector<std::vector<double>>::iterator itrPos;

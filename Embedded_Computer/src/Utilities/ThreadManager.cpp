@@ -7,19 +7,11 @@
 #include "logger.h"
 #include "ThreadManager.h"
 
-ThreadManager::ThreadManager(boost::asio::io_service &boost_io)
+ThreadManager::ThreadManager(boost::asio::io_service &boost_io, XmlParser &config)
 :
-_timer(boost_io, boost::posix_time::milliseconds(25))
+_timeoutMs(config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
+_timer(boost_io, _timeoutMs)
 {
-    try
-    {
-        // Time task
-        timer();
-    }
-    catch (std::exception& e)
-    {
-        Logger::getInstance(Logger::LogLvl::ERROR) << "Exception in ThreadManager.cpp while initialising timer task : " << e.what() << std::endl;
-    }
 }
 
 ThreadManager::~ThreadManager()
@@ -32,7 +24,9 @@ ThreadManager::~ThreadManager()
 
 void ThreadManager::timer()
 {
+    Logger::getInstance() << "ThreadManager timer()" << std::endl;
     resume(Task::MOTOR_CONTROL);
+    _timer.expires_from_now(_timeoutMs);
     _timer.async_wait(boost::bind(&ThreadManager::timer, this));
 }
 
@@ -106,7 +100,7 @@ void ThreadManager::attach(Task task)
 
 bool ThreadManager::resume(boost::thread::id thread_id)
 {
-    Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Resuming thread " << boost::lexical_cast<std::string>(thread_id) << std::endl;
+    //Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Resuming thread " << boost::lexical_cast<std::string>(thread_id) << std::endl;
     if (_cond_variables.find(thread_id) != _cond_variables.end())
     {
         _cond_variables[thread_id]->notify_one();

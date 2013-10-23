@@ -1,6 +1,6 @@
 <RobotFoot>
   <Logging>
-    <LogLvl value="INFO" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
+    <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <ImageProcessing>
     <Camera>
@@ -71,6 +71,7 @@
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
   <Motion>
+    <IterationTimeMs value="100"/>
     <Motors>
       <Head>
         <HEAD_PAN>
@@ -105,9 +106,9 @@
         <NoObjectMaxCount value="15"/>
         
         <PID>
-          <P value="0.4" />
-          <I value="0.03" />
-          <D value="0.02" />
+          <P value="0.2" />0.4
+          <I value="0" />0.03
+          <D value="0" />0.02
           <dt value="0.2" />
           <Epsilon value="0" />
         </PID>

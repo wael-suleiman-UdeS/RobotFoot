@@ -36,6 +36,7 @@ namespace XmlPath
 
 	extern const fs::path Motion;
 	extern const fs::path Motors;
+    extern const fs::path IterationTimeMs;
     extern const fs::path Configurations;
 	extern const fs::path Head;
 	extern const fs::path Threshold;
