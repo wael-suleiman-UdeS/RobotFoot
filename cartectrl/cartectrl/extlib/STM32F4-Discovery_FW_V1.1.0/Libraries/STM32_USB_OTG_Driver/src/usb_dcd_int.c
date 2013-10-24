@@ -59,6 +59,7 @@
 /** @defgroup USB_DCD_INT_Private_Variables
 * @{
 */
+static uint32_t usb_in_token_cnt;
 /**
 * @}
 */
@@ -206,6 +207,10 @@ uint32_t USBD_OTG_EP1IN_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
 }
 #endif
 
+uint32_t USBD_OTG_In_Token_Cnt()
+{
+    return usb_in_token_cnt;
+}
 /**
 * @brief  STM32_USBF_OTG_ISR_Handler
 *         handles all USB Interrupts
@@ -232,6 +237,7 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
 
     if (gintr_status.b.inepint)
     {
+      usb_in_token_cnt++;
       retval |= DCD_HandleInEP_ISR(pdev);
     }
 

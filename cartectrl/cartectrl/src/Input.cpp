@@ -16,6 +16,7 @@
 #include <stm32f4xx_tim.h>
 #include <stm32f4xx_rcc.h>
 #include "bsp/Button.hpp"
+#include "bsp/TimedTasks.hpp"
 //------------------------------------------------------------------------------
 
 using std::array;
@@ -102,31 +103,8 @@ public:
         init();
     }
 private:
-    void init()
-    {
-        // Code from EmergencyStop.cpp
+    void init();
 
-        // Might eventually use the Systick timer, and the timing might be
-        // shared by anything that needs a specific timing
-        RCC_APB1PeriphClockCmd(RCC_APB1ENR_TIM5EN, ENABLE);
-        TIM_DeInit(TIM5);
-
-        TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-        TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
-        TIM_TimeBaseStructure.TIM_Period = 1680000; // hundredth of a second
-        TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Down;
-        TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
-
-        TIM_Cmd(TIM5, ENABLE);
-        TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
-
-        NVIC_InitTypeDef NVIC_InitStructure;
-        NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
-        NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-        NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-        NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-        NVIC_Init(&NVIC_InitStructure);
-    }
 
     Button_info &access(button b)
     {
@@ -158,7 +136,39 @@ inman;
 
 InputMan &inputMan = inman;
 
+//------------------------------------------------------------------------------
+static auto inputTask = bsp::make_Task([]
+{
+    enum { reload = 100-1 };
+    static unsigned cnt = reload;
 
+    if (!cnt)
+    {
+        cnt = reload;
+
+        // Read all buttons
+        button_reader<num_buttons-1>::read(Buttons, Buttons_state);
+
+        // call handlers
+        for (auto &e : Buttons_state)
+        {
+            if (e.newval)
+            {
+                e.handlers.at(Button_info::i_downHandler)();
+                if (e.stateChanged())
+                    e.handlers.at(Button_info::i_pressedHandler)();
+            }
+            else
+            {
+                e.handlers.at(Button_info::i_upHandler)();
+                if (e.stateChanged())
+                    e.handlers.at(Button_info::i_releasedHandler)();
+            }
+        }
+    }
+    else
+        --cnt;
+});
 //------------------------------------------------------------------------------
 Input &Input::read()
 {
@@ -167,31 +177,9 @@ Input &Input::read()
     return *this;
 }
 //------------------------------------------------------------------------------
-extern "C" void TIM5_IRQHandler(void)
+void InputMan_imp::init()
 {
-    // Acknowledge the IRQ.
-    TIM_ClearFlag(TIM5, TIM_FLAG_Update);
-
-    // Read all buttons
-    button_reader<num_buttons-1>::read(Buttons, Buttons_state);
-
-    // call handlers
-    for (auto &e : Buttons_state)
-    {
-        if (e.newval)
-        {
-            e.handlers.at(Button_info::i_downHandler)();
-            if (e.stateChanged())
-                e.handlers.at(Button_info::i_pressedHandler)();
-        }
-        else
-        {
-            e.handlers.at(Button_info::i_upHandler)();
-            if (e.stateChanged())
-                e.handlers.at(Button_info::i_releasedHandler)();
-        }
-    }
+    bsp::TimedTasks::GetInstance()->add(inputTask);
 }
-
 //------------------------------------------------------------------------------
 

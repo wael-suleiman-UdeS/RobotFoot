@@ -38,13 +38,15 @@
 //------------------------------------------------------------------------------
 #ifndef HERKULEX_H
 #define HERKULEX_H
-
-
 //------------------------------------------------------------------------------
 #include <cstdint>
-
+#include <initializer_list>
+#include <new>
+#include "UARTinterface.hpp"
 //------------------------------------------------------------------------------
-//#define HERKULEX_DEBUG
+#include "herkulex/internals.hpp"
+//------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 // Herkulex ROM Register
@@ -149,18 +151,6 @@
 #define RAM_DESIRED_VELOCITY                72 // 2Byte
 
 //------------------------------------------------------------------------------
-// Request Packet [To Servo Module]
-#define CMD_ROM_WRITE  0x01    // Write Length number of values to EEP Register Address
-#define CMD_ROM_READ   0x02    // Request Length number of values from EEP Register Address
-#define CMD_RAM_WRITE  0x03    // Write Length number of values to RAM Register Address
-#define CMD_RAM_READ   0x04    // Request Lenght number of values from RAM Register Address
-#define CMD_I_JOG      0x05    // Able to send JOG command to maximum 43 servos (operate timing of individual Servo)
-#define CMD_S_JOG      0x06    // Able to send JOG command to maximum 53 servos (operate simultaneously at same time)
-#define CMD_STAT       0x07    // Status Error, Status Detail request
-#define CMD_ROLLBACK   0x08    // Change all EEP Regsters to Factory Default value
-#define CMD_REBOOT     0x09    // Request Reboot
-
-//------------------------------------------------------------------------------
 // ACK Packet [To Controller(ACK)]
 #define CMD_ACK_MASK   0x40 // ACK Packet CMD is Request Packet CMD + 0x40
 #define CMD_EEP_WRITE_ACK   (CMD_EEP_WRITE|CMD_ACK_MASK)
@@ -195,15 +185,7 @@
 #define MOTOR_ON_FLAG                   = 0x40;
 
 //------------------------------------------------------------------------------
-// Header
-#define HEADER                              0xFF
 
-// Size
-#define MIN_PACKET_SIZE                     7
-#define MIN_ACK_PACKET_SIZE                 9
-#define WRITE_PACKET_SIZE                   13
-#define MAX_PACKET_SIZE                     223
-#define MAX_DATA_SIZE                       (MAX_PACKET_SIZE-MIN_PACKET_SIZE)
 
 // ID
 #define MAX_PID                             0xFD
@@ -218,10 +200,6 @@
 #define TORQUE_FREE                         0x00
 #define BREAK_ON                            0x40
 #define TORQUE_ON                           0x60
-
-// Register Size
-#define BYTE1                               1
-#define BYTE2                               2
 
 // Jog Set CMD
 #define STOP                                0x01
@@ -260,46 +238,172 @@
  * @endcode
  */
 //------------------------------------------------------------------------------
-class Herkulex
+
+
+
+//------------------------------------------------------------------------------
+class Herkulex : private UART_Callback
 {
 public:
+    /**@brief Create an Herkulex servo object
+     *
+     * @param com UART pointer object.
+     */
+    Herkulex(UARTInterface *com);
 
-    enum
-    {
-            ID_R_HIP_YAW            = 1,
-            ID_L_HIP_YAW            = 2,
-            ID_R_HIP_ROLL           = 3,
-            ID_L_HIP_ROLL           = 4,
-            ID_R_HIP_PITCH          = 5,
-            ID_L_HIP_PITCH          = 6,
-            ID_R_KNEE               = 7,
-            ID_L_KNEE               = 8,
-            ID_R_ANKLE_PITCH        = 9,
-            ID_L_ANKLE_PITCH        = 10,
-            ID_R_ANKLE_ROLL         = 11,
-            ID_L_ANKLE_ROLL         = 12,
-            ID_HEAD_PAN             = 13,
-            ID_HEAD_TILT            = 14,
-            NUMBER_OF_JOINTS
-    };
-
-    /** Destroy an Herkulex servo object
+    /**
+    * @brief Destroy an Herkulex servo object
      */
     ~Herkulex();
 
-    static Herkulex* GetInstance() ;
+
+
+    /******** Very low level Herkulex manipulation *********/
+
+    template <typename MsgType>
+     struct wrapped_fifo_ptr : public fifo_ptr
+    {
+        wrapped_fifo_ptr(fifo_ptr &&fptr) : fifo_ptr(std::move(fptr)) {}
+
+        MsgType &operator*()  { return *static_cast<MsgType *>(this->get()); }
+        MsgType *operator->() { return &**this; };
+    };
+    template <servocmd scmd, typename ...Args>
+     wrapped_fifo_ptr<msgtype<scmd>> newMsg(uint8_t id, uint8_t len,
+                                                                Args ...args)
+    {
+        fifo_ptr p;
+        do {
+            p = com->alloc(msgtraits<scmd>::len(len));
+        } while (!p);
+        new (p.get()) msgtype<scmd>(id, len, args...);
+        return {std::move(p)};
+    }
+
+    void sendPacket(fifo_ptr &);
+
+    void sendPacket(fifo_ptr &&p)
+    {
+        return sendPacket(p);
+    }
+
+
+
+
+
+
+    /*********** Low level Herkulex manipulation ***********/
+
+    /**@brief Write into EEPROM
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_eep_write(uint8_t id, uint8_t addr, const uint8_t *beg,
+                                                  const uint8_t *end);
+
+    /**@brief Write into EPPROM (initializer list overload)
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_epp_write(uint8_t id, uint8_t addr,
+                                    std::initializer_list<uint8_t> il)
+    {
+        return send_eep_write(id, addr, il.begin(), il.end());
+    }
+
+    /**@brief Read from EEPROM
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_eep_read(uint8_t id, uint8_t addr, uint8_t len);
+
+    /**@brief Write into RAM
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_ram_write(uint8_t id, uint8_t addr, const uint8_t *beg,
+                                                  const uint8_t *end);
+
+    /**@brief Write into RAM (initializer list overload)
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_ram_write(uint8_t id, uint8_t addr,
+                                    std::initializer_list<uint8_t> il)
+    {
+        return send_ram_write(id, addr, il.begin(), il.end());
+    }
+
+    /**@brief Read from RAM
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_ram_read(uint8_t id, uint8_t addr, uint8_t len);
+
+    /**@brief Independent control of several servos
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_i_jog(uint8_t id, const i_jog_part *beg, const i_jog_part *end);
+
+    /**@brief Independent control of several servos (initializer list overload)
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_i_jog(uint8_t id, std::initializer_list<i_jog_part> il)
+    {
+        return send_i_jog(id, il.begin(), il.end());
+    }
+
+    /**@brief Synchronized control of several servos
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_s_jog(uint8_t id, uint8_t time,
+                                const s_jog_part *beg, const s_jog_part *end);
+
+    /**@brief Synchronized control of several servos (initializer list overload)
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_s_jog(uint8_t id, uint8_t time,
+                                std::initializer_list<s_jog_part> il)
+    {
+        return send_s_jog(id, time, il.begin(), il.end());
+    }
+
+    /**@brief Get status
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_stat(uint8_t id);
+
+    /**@brief Reset EEPROM settings
+     *
+     * @param id        The herkulex servo ID.
+     * @param keepID    Preserve ID in EEPROM.
+     * @param keepBaud  Preserve Baud rate in EEPROM.
+     */
+    void send_rollback(uint8_t id, bool keepID, bool keepBaud);
+
+    /**@brief Reboot servos
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_reboot(uint8_t id);
+
+
+
+
+
+
+    /*********** High level Herkulex manipulation **********/
 
     /**@brief Clear error status
      *
      * @param id The herkulex servo ID.
      */
      void clear(uint8_t id);
-
-    /**@brief Reboot servos
-     *
-     * @param id The herkulex servo ID.
-     */
-    void reboot(uint8_t id);
 
     /**@brief Set torque setting
      *
@@ -339,38 +443,78 @@ public:
      */
     int16_t getPos(uint8_t id);
 
-private :
-
-    /**@brief Create an Herkulex servo object
-     *
-     * @param tx Transmit pin.
-     * @param rx Receive pin.
-     * @param baudRate The serial tx/rx speed.
-     */
-    Herkulex(/*PinNameint tx, PinNameint rx, uint32_t baudRate*/);
-
-    /**@brief Transmit packet datas with UART
-     *
-     * @param packetSize The packet size.
-     * @param data The transmit packet data array.
-     */
-    void txPacket(uint8_t packetSize, uint8_t* data);
-
-    template <std::size_t L>
-    void txPacket(uint8_t (&arr)[L])
+    struct MsgHandler
     {
-        return txPacket(L, arr);
-    }
-    /** Receive packet data with UART
-     *
-     * @param packetSize The packet size.
-     * @param data The receive packet data array.
-     */
-    bool rxPacket(uint8_t packetSize, uint8_t* data);
+        virtual void err_header(msgPacket *)    {}
+        virtual void err_checksum(msgPacket *)  {}
 
+        virtual void unknownPacket(msgPacket *) {}
+
+        virtual void stat    (msgStat *)     {}
+        virtual void eep_read(msgEEP_read *) {}
+        virtual void ram_read(msgRAM_read *) {}
+    };
+
+    class fwd_MsgHandler : public MsgHandler
+    {
+        MsgHandler *next;
+    public:
+        using base = MsgHandler;
+
+        fwd_MsgHandler(base *b) : next(b) {}
+
+        void err_header(msgPacket *m) override
+        {
+            return next->err_header(m);
+        }
+        void err_checksum(msgPacket *m) override
+        {
+            return next->err_checksum(m);
+        }
+
+        void unknownPacket(msgPacket *m) override
+        {
+            return next->unknownPacket(m);
+        }
+
+        void stat(msgStat *m) override
+        {
+            return next->stat(m);
+        }
+        void eep_read(msgEEP_read *m) override
+        {
+            return next->eep_read(m);
+        }
+        void ram_read(msgRAM_read *m) override
+        {
+            return next->ram_read(m);
+        }
+    };
+
+    void        handler(MsgHandler *h);
+    MsgHandler *handler() const        { return mhandler; }
+
+    void        resetHandler(MsgHandler *h = nullptr)
+    {
+        return handler(h);
+    }
+
+private :
+    using fifo_ptr = ::fifo_ptr;
+
+    UARTInterface *com;
+
+    MsgHandler *mhandler;
+
+    // UART_Callback:
+    void rx(int) override;
+
+    size_t idx = 0;
+    uint8_t buffer[256];
 };
 
 //------------------------------------------------------------------------------
 #endif  // HERKULEX_H
+
 
 //------------------------------------------------------------------------------

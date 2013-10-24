@@ -46,6 +46,10 @@ size_t usb_rx(uint8_t *buf,       size_t len);
 
 void usb_resume_out_xfer(void);
 
+unsigned usb_interrupt_cnt();
+
+void usb_reset_buffers(void);
+
 #ifdef __cplusplus
  }
 #endif

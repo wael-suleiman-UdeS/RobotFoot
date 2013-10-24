@@ -206,7 +206,7 @@ VSense::VSense()
     // Configure DMA interrupts
     NVIC_InitTypeDef nvic[1];
     nvic->NVIC_IRQChannel = DMA2_Stream0_IRQn;
-    nvic->NVIC_IRQChannelPreemptionPriority = 7;
+    nvic->NVIC_IRQChannelPreemptionPriority = 10;
     nvic->NVIC_IRQChannelSubPriority = 7;
     nvic->NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(nvic);

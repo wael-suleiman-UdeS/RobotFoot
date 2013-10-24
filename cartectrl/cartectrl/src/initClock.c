@@ -14,6 +14,7 @@
 #include "stm32f4xx_pwr.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_flash.h"
+#include "misc.h"
 
 /** @addtogroup Init
   * @{
@@ -49,6 +50,9 @@ void initClock(void)
 
     // Deinit the RCC registers
     RCC_DeInit();
+
+    // Configure Priority in NVIC
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);
 
     // Enable Prefetch Buffer and set Flash Latency
     FLASH_SetLatency(FLASH_Latency_6);

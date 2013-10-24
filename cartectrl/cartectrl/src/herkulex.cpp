@@ -40,295 +40,354 @@
 //------------------------------------------------------------------------------
 #include <cstdint>
 #include <algorithm>
+#include <iterator>
 #include "Tools.h"
-
-#include <stm32f4xx.h>
-#include <misc.h>
-
-
-namespace{
-
-#define MAX_LEN 20 // FIXME : Maximum msg length (WHY 20?? Check documentation)
-volatile uint8_t receivedMsg[MAX_LEN]; // RX msg
-volatile bool waitingForData = false;
-
-}
+#include "scope_exit.hpp"
+//------------------------------------------------------------------------------
 
 using std::size_t;
 
-struct msgPacket_base
-{
-    static
-    uint16_t calcCheckSum(uint8_t const *const buf, std::size_t len)
-    {
-        uint8_t chksum1 = 0, chksum2;
-        for (size_t i= 0; i < len; ++i)
-        {
-            chksum1 ^= buf[i];
-        }
-        chksum2 = ~chksum1;
-        return (chksum1 << 8 | chksum2) & 0xFEFE;
-    }
-    static
-    uint16_t calcCheckSum(uint8_t *const buf, std::size_t len, uint8_t *res)
-    {
-        auto r = calcCheckSum(buf, len);
-        *res++ = (r >> 8) & 0xFF;
-        *res   = r & 0xFF;
-        return r;
-    }
-    static
-    bool verifyCheckSum(uint8_t const *const buf, std::size_t len)
-    {
-        return (buf[idx::checksum1] & 0xFE) == (~buf[idx::checksum2] & 0xFE)
-            && (calcCheckSum(buf, len) & 0xFE) == buf[idx::checksum1];
-    }
-    enum idx {
-           header_packet_1, header_packet_2,
-           packet_size,
-           motor_id,
-           command,
-           checksum1, checksum2,
-           data };
-};
+//------------------------------------------------------------------------------
 
-template <size_t L>
- struct msgPacket : msgPacket_base
-{
-    static_assert(L >= MIN_PACKET_SIZE, "Packet size is too small.");
-    typedef msgPacket_base Parent;
-    uint8_t buffer[L] = {HEADER, HEADER};
-    msgPacket(uint8_t id, uint8_t cmd)
-    {
-        buffer[idx::packet_size] = L;
-        buffer[idx::motor_id]    = id;
-        buffer[idx::command]     = cmd;
-    }
-    void calcCheckSum()
-    {
-        std::fill_n(buffer + idx::checksum1, 2, 0);
-        Parent::calcCheckSum(buffer, L, buffer + idx::checksum1);
-    }
-};
 
 //------------------------------------------------------------------------------
-Herkulex::Herkulex(/*PinName tx, PinName rx, uint32_t baudRate*/)
-{
-}
+// This object is empty and hence cannot be modified.
+static Herkulex::MsgHandler defaulthandler;
 
+
+//------------------------------------------------------------------------------
+struct wait_protocol : Herkulex::fwd_MsgHandler
+{
+    wait_protocol(MsgHandler *f)
+    : fwd_MsgHandler{f} {}
+    bool wait() volatile
+    {
+        while (waitf) {}
+        return true;
+    }
+protected:
+    volatile bool waitf = true;
+};
+//------------------------------------------------------------------------------
+template <typename F>
+struct override_stat : wait_protocol
+{
+    F f;
+
+    override_stat(MsgHandler *mh, F &&f)
+     : wait_protocol(mh), f(std::move(f)) {}
+
+    virtual void stat(msgStat *m) override
+    {
+        bool waitb = waitf;
+        f(waitb, m);
+        fwd_MsgHandler::stat(m);
+        waitf = waitb;
+    }
+};
+//------------------------------------------------------------------------------
+template <typename F>
+struct override_read : wait_protocol
+{
+    F f;
+    override_read(MsgHandler *mh, F &&f)
+     : wait_protocol(mh), f(std::move(f)) {}
+
+    virtual void ram_read(msgRAM_read *m) override
+    {
+        bool waitb = waitf;
+        f(waitb, m);
+        fwd_MsgHandler::ram_read(m);
+        waitf = waitb;
+    }
+};
+//------------------------------------------------------------------------------
+template <typename F>
+ auto make_override_read(Herkulex::MsgHandler *mh, F &&f) -> override_read<F>
+{
+    return {mh, std::move(f)};
+}
+//------------------------------------------------------------------------------
+template <typename F>
+ auto make_override_stat(Herkulex::MsgHandler *mh, F &&f) -> override_stat<F>
+{
+    return {mh, std::move(f)};
+}
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+Herkulex::Herkulex(UARTInterface *com)
+ : com{com}, mhandler{&defaulthandler}
+{
+    com->configure(666666);
+    com->callback(this);
+}
 //------------------------------------------------------------------------------
 Herkulex::~Herkulex()
 {
+    com->resetRxHandler();
+}
+//---------------------------------------------------------------------------
+void Herkulex::sendPacket(fifo_ptr &ptr)
+{
+    static_cast<msgPacket *>(ptr.get())->setCheckSum();
+    com->push(ptr);
 }
 //------------------------------------------------------------------------------
-Herkulex* Herkulex::GetInstance()
+void Herkulex::send_eep_write(uint8_t id, uint8_t addr,
+                              const uint8_t *beg, const uint8_t *end)
 {
-    static Herkulex instance[1] = {{}};
-    return instance;
-}
+    constexpr auto cmd = servocmd::eep_write;
 
+    auto msg = newMsg<cmd>(id, (end-beg), addr);
+
+    for (auto &v : *msg)
+    {
+        v = *beg++;
+    }
+    sendPacket(msg);
+}
+//------------------------------------------------------------------------------
+void Herkulex::send_eep_read(uint8_t id, uint8_t addr, uint8_t len)
+{
+    constexpr auto cmd = servocmd::eep_read;
+
+    auto msg = newMsg<cmd>(id, len, addr);
+    sendPacket(msg);
+}
+//------------------------------------------------------------------------------
+void Herkulex::send_ram_write(uint8_t id, uint8_t addr,
+                              const uint8_t *beg, const uint8_t *end)
+{
+    constexpr auto cmd = servocmd::ram_write;
+
+    auto msg = newMsg<cmd>(id, (end-beg), addr);
+
+    for (auto &v : *msg)
+    {
+        v = *beg++;
+    }
+    sendPacket(msg);
+}
+//------------------------------------------------------------------------------
+void Herkulex::send_ram_read(uint8_t id, uint8_t addr, uint8_t len)
+{
+    constexpr auto cmd = servocmd::ram_read;
+
+    auto msg = newMsg<cmd>(id, len, addr);
+    sendPacket(msg);
+}
+//------------------------------------------------------------------------------
+void Herkulex::send_i_jog(uint8_t id, const i_jog_part *beg,
+                                      const i_jog_part *end)
+{
+    constexpr auto cmd = servocmd::i_jog;
+
+    auto msg = newMsg<cmd>(id, (end-beg));
+
+    for (auto &v : *msg)
+    {
+        v = *beg++;
+    }
+    sendPacket(msg);
+}
+//------------------------------------------------------------------------------
+void Herkulex::send_s_jog(uint8_t id, uint8_t time,
+                          const s_jog_part *beg, const s_jog_part *end)
+{
+    constexpr auto cmd = servocmd::s_jog;
+
+    auto msg = newMsg<cmd>(id, (end-beg));
+
+    msg->time() = time;
+    for (auto &v : *msg)
+    {
+        v = *beg++;
+    }
+    sendPacket(msg);
+}
+//------------------------------------------------------------------------------
+void Herkulex::send_stat(uint8_t id)
+{
+    constexpr auto cmd = servocmd::stat;
+
+    auto msg = newMsg<cmd>(id, 0);
+    sendPacket(msg);
+}
+//------------------------------------------------------------------------------
+void Herkulex::send_rollback(uint8_t id, bool keepID, bool keepBaud)
+{
+    constexpr auto cmd = servocmd::rollback;
+
+    auto msg = newMsg<cmd>(id, 0, keepID, keepBaud);
+    sendPacket(msg);
+}
+//------------------------------------------------------------------------------
+void Herkulex::send_reboot(uint8_t id)
+{
+    constexpr auto cmd = servocmd::reboot;
+
+    auto msg = newMsg<cmd>(id, 0);
+    sendPacket(msg);
+}
 //------------------------------------------------------------------------------
 void Herkulex::clear(uint8_t id)
 {
-    msgPacket<11> txBuf(id, CMD_RAM_WRITE);
-
-    txBuf.buffer[7] = RAM_STATUS_ERROR;    // Address 48DEBUG
-    txBuf.buffer[8] = BYTE2;               // Length
-    txBuf.buffer[9] = 0;                   // Clear RAM_STATUS_ERROR
-    txBuf.buffer[10]= 0;                   // Clear RAM_STATUS_DETAIL
-
-    txPacket(txBuf.buffer);
-}
-//------------------------------------------------------------------------------
-void Herkulex::reboot(uint8_t id)
-{
-    msgPacket<MIN_PACKET_SIZE> txBuf(id, CMD_REBOOT);
-    txPacket(txBuf.buffer);
+    send_ram_write(id, RAM_STATUS_ERROR, {0, 0});
 }
 //------------------------------------------------------------------------------
 void Herkulex::setTorque(uint8_t id, uint8_t cmdTorque)
 {
-    msgPacket<10> txBuf(id, CMD_RAM_WRITE);
-
-    txBuf.buffer[7] = RAM_TORQUE_CONTROL;  // Address 52
-    txBuf.buffer[8] = BYTE1;               // Length
-    txBuf.buffer[9] = cmdTorque;           // Torque ON
-
-    txPacket(txBuf.buffer);
+    send_ram_write(id, RAM_TORQUE_CONTROL, {cmdTorque});
 }
-
 //------------------------------------------------------------------------------
 void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime,
                                                                 uint8_t setLED)
 {
-    if (position > 1023) return;
-
-    msgPacket<12> txBuf(id, CMD_S_JOG);
-
-    txBuf.buffer[7]  = playtime;               // Playtime
-    txBuf.buffer[8]  = position & 0x00FF;      // Position (LSB, Least Significant Bit)
-    txBuf.buffer[9]  =(position & 0xFF00) >> 8;// position (MSB, Most Significanct Bit)
-    txBuf.buffer[10] = POS_MODE | setLED;      // Pos Mode and LED on/off
-    txBuf.buffer[11] = id;                     // Servo ID
-
-    txPacket(txBuf.buffer);
+    send_s_jog(id, playtime,
+               {{position, static_cast<uint8_t>(POS_MODE | setLED), id}}
+               );
 }
 
 //------------------------------------------------------------------------------
 void Herkulex::velocityControl(uint8_t id, int16_t speed, uint8_t setLED)
 {
-    if (speed > 1023 || speed < -1023) return;
-
-    msgPacket<12> txBuf(id, CMD_S_JOG);
-
-    txBuf.buffer[7]  = 0;                      // Playtime, unmeaningful in turn mode
-    txBuf.buffer[8]  = speed & 0x00FF;         // Speed (LSB, Least Significant Bit)
-    txBuf.buffer[9]  =(speed & 0xFF00) >> 8;   // Speed (MSB, Most Significanct Bit)
-    txBuf.buffer[10] = TURN_MODE | setLED;     // Turn Mode and LED on/off
-    txBuf.buffer[11] = id;                     // Servo ID
-
-    txPacket(txBuf.buffer);
+    send_s_jog(id, 0,
+               {{speed, static_cast<uint8_t>(TURN_MODE | setLED), id}}
+               );
 }
 
 //------------------------------------------------------------------------------
 int8_t Herkulex::getStatus(uint8_t id)
 {
-    uint8_t status;
-    msgPacket<7> txBuf(id, CMD_STAT);
-
-    txPacket(txBuf.buffer);
-
-    uint8_t rxBuf[9];
-    if( !rxPacket(9, rxBuf) ) return -1;
-
-
-    // Checksum1
-    uint8_t chksum1 = (rxBuf[2]^rxBuf[3]^rxBuf[4]^rxBuf[7]^rxBuf[8]) & 0xFE;
-    if (chksum1 != rxBuf[5])
+    const auto old_hnd = mhandler;
+    auto se = scope_exit([=]
     {
-        return -1;
-    }
+        this->mhandler = old_hnd;
+    });
 
-    // Checksum2
-    uint8_t chksum2 = (~rxBuf[5]&0xFE);
-    if (chksum2 != rxBuf[6])
+    uint8_t val;
+    auto new_hnd = make_override_stat(old_hnd,
+    [id, &val](bool &wait, msgStat *m)
     {
-        return -1;
-    }
+        if (m->buffer[msgPacket::idx::motor_id] == id)
+        {
+            val  = m->buffer[msgPacket::idx::data];
+            wait = false;
+        }
+    });
 
-    status = rxBuf[7];  // Status Error
-  //status = rxBuf[8];  // Status Detail
+    mhandler=&new_hnd;
 
-    return status;
+    send_stat(id);
+
+    new_hnd.wait();
+    return val;
 }
 
 //------------------------------------------------------------------------------
 int16_t Herkulex::getPos(uint8_t id)
 {
-    uint16_t position = 0;
+    enum { len = 2 };
 
-    msgPacket<9> txBuf(id, CMD_RAM_READ);
-
-    txBuf.buffer[7] = RAM_CALIBRATED_POSITION; // Address 52
-    txBuf.buffer[8] = BYTE2;                   // Address 52 and 53
-
-    txPacket(txBuf.buffer);
-
-    uint8_t rxBuf[13];
-    if( !rxPacket(13, rxBuf) ) return -1;
-
-    // Checksum1
-    uint8_t chksum1 = (rxBuf[2]^rxBuf[3]^rxBuf[4]^rxBuf[7]^rxBuf[8]^rxBuf[9]^rxBuf[10]^rxBuf[11]^rxBuf[12]) & 0xFE;
-    if (chksum1 != rxBuf[5])
+    const auto old_hnd = mhandler;
+    auto se = scope_exit([=]
     {
-        return -1;
-    }
+        this->mhandler = old_hnd;
+    });
 
-    // Checksum2
-    uint8_t chksum2 = (~rxBuf[5]&0xFE);
-    if (chksum2 != rxBuf[6])
+    int16_t val = -1;
+
+    auto new_hnd = make_override_read(old_hnd,
+    [id, &val](bool &wait, msgRAM_read *m)
     {
-        return -1;
-    }
-
-    position = ((rxBuf[10]&0x03)<<8) | rxBuf[9];
-
-    return position;
-}
-
-//------------------------------------------------------------------------------
-void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
-{
-    // To change.
-    //txBuf.calcCheckSum();
-
-    for(uint8_t i = 0; i < packetSize ; i++)
-    {
-        while ( !USART_GetFlagStatus(USART3, USART_FLAG_TC) );
-        USART_SendData(USART3, *data++);
-    }
-}
-
-//------------------------------------------------------------------------------
-bool Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
-{
-    waitingForData = true;
-
-    // TODO : Timeout time depends on baudrate
-    if ( Tools::Timeout( 15000, waitingForData ) )
-    {
-        return false;
-    }
-    std::copy_n(receivedMsg, packetSize, data);
-
-    return true;
-}
-
-
-//------------------------------------------------------------------------------
-
-// This is the interrupt request handler (IRQ) for ALL USART3 interrupts
-extern "C" void USART3_IRQHandler(void){
-
-	// Check if the USART3 receive interrupt flag was set
-	if( USART_GetITStatus(USART3, USART_IT_RXNE) ){
-
-        // This implementation is specific for Herkulex message reception.
-        bool status = true;
-		static uint8_t cnt = 0;
-		static uint8_t msgLength = MAX_LEN;
-		uint8_t data = USART3->DR; // the character from the USART3 data register is saved in t
-
-        // Check is first two data are HEADER
-        if( cnt == 0 || cnt == 1 )
+        if (    m->buffer[msgPacket::idx::motor_id] == id
+            and m->buffer[msgPacket::idx::data+0]   == RAM_CALIBRATED_POSITION
+            and m->buffer[msgPacket::idx::data+1]   == len)
         {
-            if( data != HEADER ){ //FIXME : Should trigger an error!
-                status = false;
-            }
+            val  = m->buffer[msgPacket::idx::data+2]
+                 + (m->buffer[msgPacket::idx::data+3] << 8);
+            wait = false;
         }
-        // Check the msg length
-        else if( cnt == 2 )
-        {
-            if( data > MAX_LEN ){ //FIXME : Should trigger an error!
-                status = false;
-            }
-            else
-                msgLength = data;
-        }
+    });
 
-        // Fill the msg buffer
-		if( status && cnt < msgLength - 1 ){
-			receivedMsg[cnt] = data;
-			cnt++;
-		}
-		// Reset cnt
-		else{
-		    if( status ){
-		        // If status is fine, we fill the buffer with last data before reset
-                receivedMsg[cnt] = data;
-		    }
-			cnt = 0;
-			waitingForData = false;
-		}
-	}
+    mhandler=&new_hnd;
+
+    send_ram_read(id, RAM_CALIBRATED_POSITION, len);
+
+    new_hnd.wait();
+    return val;
 }
+//------------------------------------------------------------------------------
+ void Herkulex::handler(MsgHandler *h)
+ {
+     mhandler = h ? h : &defaulthandler;
+ }
+//------------------------------------------------------------------------------
+void Herkulex::rx(int ch)
+{
+    // This implementation is specific for Herkulex message reception.
+
+    // Store first
+    buffer[idx] = ch;
+
+    const auto msg     = reinterpret_cast<msgPacket *>(buffer);
+
+    // Warning: these variable are not valid at all times, read them only when
+    // there are updated.
+
+    const uint8_t &len = buffer[msgPacket::packet_size];
+    const uint8_t &cmd = buffer[msgPacket::idx::command];
+
+    switch (idx++)
+    {
+        case msgPacket::idx::header_packet_1:
+        case msgPacket::idx::header_packet_2:
+            if (ch != HEADER)
+            {
+                idx = 0;
+                // ERROR header
+                mhandler->err_header(msg);
+            }
+            break;
+        case msgPacket::idx::packet_size:
+            if (ch == 255)
+            {
+                idx = 0;
+                // ERROR size (considered a header error)
+                mhandler->err_header(msg);
+            }
+            break;
+        default:
+            if (idx >= len)
+            {
+                if (msg->verifyCheckSum())
+                {
+                    // OK, call handlers
+                    switch (cmd)
+                    {
+                    case CMD_EEP_READ_ACK:
+                        mhandler->eep_read(static_cast<msgEEP_read *>(msg));
+                        break;
+                    case CMD_RAM_READ_ACK:
+                        mhandler->ram_read(static_cast<msgRAM_read *>(msg));
+                        break;
+                    case CMD_STAT_ACK:
+                        mhandler->stat(static_cast<msgStat *>(msg));
+                        break;
+                    default:
+                        mhandler->unknownPacket(msg);
+                        break;
+                    }
+                }
+                else
+                {
+                    // ERROR checksum
+                    mhandler->err_checksum(msg);
+                }
+                idx = 0;
+            }
+            break;
+    }
+}
+//------------------------------------------------------------------------------
