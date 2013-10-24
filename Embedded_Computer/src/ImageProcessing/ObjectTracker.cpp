@@ -86,7 +86,7 @@ void ObjectTracker::track(Point objectPosition)
 		if (_noObjectCount > _noObjectMaxCount) {
 			_pids["Pan"].reset();
 			if (_objectError.x <= 0) { _objectError.x = _scanningError; }
-			if (_objectError.x > 0) { _objectError.x = -_scanningError; }
+			else if (_objectError.x > 0) { _objectError.x = -_scanningError; }
 		}
 	    Logger::getInstance() << "-------------------" << std::endl;
 		return;
