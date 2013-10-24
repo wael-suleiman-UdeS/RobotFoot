@@ -349,8 +349,6 @@ private :
      */
     Herkulex(/*PinNameint tx, PinNameint rx, uint32_t baudRate*/);
 
-    static Herkulex* instance;
-
     /**@brief Transmit packet datas with UART
      *
      * @param packetSize The packet size.

@@ -111,8 +111,6 @@ template <size_t L>
     }
 };
 
-Herkulex* Herkulex::instance = new Herkulex();
-
 //------------------------------------------------------------------------------
 Herkulex::Herkulex(/*PinName tx, PinName rx, uint32_t baudRate*/)
 {
@@ -125,6 +123,7 @@ Herkulex::~Herkulex()
 //------------------------------------------------------------------------------
 Herkulex* Herkulex::GetInstance()
 {
+    static Herkulex instance[1] = {{}};
     return instance;
 }
 
