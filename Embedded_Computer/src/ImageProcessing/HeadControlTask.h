@@ -31,7 +31,7 @@ private:
 	cv::Point _ballPosition;
     std::shared_ptr <CircleSpec> _circle;
     std::shared_ptr <ColorFinder> _finder;
-    std::shared_ptr<ObjectTracker> _tracker;
+    std::shared_ptr <ObjectTracker> _tracker;
 	bool _guiEnabled;
 	double _durationMean;
 	int _durationIndex;

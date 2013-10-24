@@ -45,6 +45,7 @@ class ThreadManager
         void wait();
         void end();
         void timer();
+
         int calculate_the_answer_to_life_the_universe_and_everything();     
     private:
         boost::posix_time::milliseconds _timeoutMs;

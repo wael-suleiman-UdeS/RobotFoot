@@ -84,6 +84,7 @@ void StaticWalk::run(double msDt)
     {
         if(!bIsUsingAlgorithm)
         {
+            boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
             // Process mouvement with file as input
             for(;itrPos != itrEnd; ++itrPos)
             {
@@ -93,7 +94,11 @@ void StaticWalk::run(double msDt)
                     Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : wait for MotorControl" << std::endl;
                     _threadManager->wait();
                 }
-                boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
+                
+                boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+                Logger::getInstance(Logger::LogLvl::DEBUG) << "took " << sec.count() << " seconds" << std::endl;
+
+                start = boost::chrono::system_clock::now();
 
                 if (bIsMotorActivated)
                 {
@@ -126,9 +131,7 @@ void StaticWalk::run(double msDt)
                     Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : Iteration done" << std::endl;
                     _threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
                 }
-                boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-                Logger::getInstance(Logger::LogLvl::DEBUG) << "took " << sec.count() << " seconds" << std::endl;
-            } 
+                            } 
         }
         else
         { 

@@ -26,10 +26,6 @@ namespace XmlPath
 	const path Head = "Head";
 	const path Legs = "Legs";
 
-	// Head
-	const path HEAD_PAN = "HEAD_PAN";
-	const path HEAD_TILT = "HEAD_TILT";
-
 	const path Threshold = "Threshold";
 
 	const path R_HIP_YAW = "R_HIP_YAW";
@@ -44,8 +40,11 @@ namespace XmlPath
 	const path L_ANKLE_PITCH = "L_ANKLE_PITCH";
 	const path R_ANKLE_ROLL = "R_ANKLE_ROLL";
 	const path L_ANKLE_ROLL = "L_ANKLE_ROLL";
+	const path HEAD_PAN = "HEAD_PAN";
+	const path HEAD_TILT = "HEAD_TILT";
 
 	const path LegsMotors = Root / Motion / Motors / Legs;
+	const path HeadMotors = Root / Motion / Motors / Head;
     const path MotorsConfig = Root / Motion / Configurations;
 
 	const path MotorID = "MotorID";

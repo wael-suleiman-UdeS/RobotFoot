@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <boost/filesystem.hpp>
+#include <memory>
 #include "ImageProcessing.h"
 #include "../Utilities/XmlParser.h"
 
@@ -53,17 +54,17 @@ public:
 class ColorFinder
 {
 public:
-	ColorFinder(const HSVcolor* color);
+	ColorFinder(std::shared_ptr<HSVcolor> color);
 	~ColorFinder() {}
 
 	cv::Point getCirclePosition(const cv::Mat& frame, std::shared_ptr<CircleSpec> spec);
 
 private:
-	const HSVcolor* _color; /**< Color to find */
+	std::shared_ptr<HSVcolor> _color; /**< Color to find */
 	cv::Mat _resultFrame; /**< Processed frame used to find the position of a shape */
 
 	ColorFinder() {};
-	void setColor(const HSVcolor* color);
+	void setColor(std::shared_ptr<HSVcolor> color);
 	void filter(const cv::Mat& sourceFrame);
 };
 

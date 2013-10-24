@@ -9,11 +9,19 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 	// TODO: use values of MotorControl
 	path headPath = XmlPath::Root / XmlPath::Motion / XmlPath::Motors / XmlPath::Head;
 
-	_minPan = config.getIntValue(headPath / XmlPath::HEAD_PAN / XmlPath::LimitMin);
-	_maxPan = config.getIntValue(headPath / XmlPath::HEAD_PAN / XmlPath::LimitMax);
+	std::vector<double> minAngles;
+	std::vector<double> maxAngles;
+ 	_mc->HardGetMinAngles(minAngles, MotorControl::Config::HEAD);
+	_mc->HardGetMaxAngles(maxAngles, MotorControl::Config::HEAD);
 
-	_minTilt = config.getIntValue(headPath / XmlPath::HEAD_TILT / XmlPath::LimitMin);
-	_maxTilt = config.getIntValue(headPath / XmlPath::HEAD_TILT / XmlPath::LimitMax);
+	if (minAngles.size() >= 2 && maxAngles.size() >= 2)
+	{
+		_minPan = minAngles[0];
+		_maxPan = maxAngles[0];
+
+		_minTilt = minAngles[1];
+		_maxTilt = maxAngles[1];
+	}
 
 	_threshold = config.getIntValue(headPath / XmlPath::Threshold);
 
@@ -94,6 +102,7 @@ void ObjectTracker::track(Point objectPosition)
 		_newAngle.y = _currentAngle.y + _pids["Tilt"].process_PID(_objectError.y);
 	}
 
+
 	setHeadAngles();
 
     Logger::getInstance() << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
@@ -107,8 +116,12 @@ void ObjectTracker::readHeadAngles() {
 	std::vector<double> angles;
 	//_mc->ReadPositions(angles, MotorControl::Config::HEAD);
 	_mc->HardGet(angles, MotorControl::Config::HEAD);
-	_currentAngle.x = angles[0];
-	_currentAngle.y = angles[1];
+
+	if (angles.size() >= 2)
+	{
+		_currentAngle.x = angles[0];
+		_currentAngle.y = angles[1];
+	}
 	_newAngle = _currentAngle;
 }
 
@@ -116,6 +129,7 @@ void ObjectTracker::setHeadAngles() {
 	std::vector<double> angles;
 	angles.push_back(_newAngle.x);
 	angles.push_back(_newAngle.y);
+
 	//_mc->SetPositions(angles, MotorControl::Config::HEAD);
 	_mc->HardSet(angles, MotorControl::Config::HEAD);
 }

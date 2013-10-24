@@ -25,8 +25,7 @@ HSVcolor::HSVcolor(const XmlParser& config, string colorName)
 	hue = config.getIntValue(basePath / "Hue");
 	hueTolerance = config.getIntValue(basePath / "HueTolerance");
 	saturation = config.getIntValue(basePath / "Saturation");
-	brightness = config.getIntValue(basePath / "Brightness");
-}
+	brightness = config.getIntValue(basePath / "Brightness"); }
 
 /** \brief Initialigze the circle specifications from the XML configuration
  *
@@ -61,9 +60,9 @@ CircleSpec::CircleSpec(const XmlParser& config, string colorName)
  * \param color const HSVcolor*: HSV Color to find
  *
  */
-ColorFinder::ColorFinder(const HSVcolor* color)
+ColorFinder::ColorFinder(std::shared_ptr<HSVcolor> color) :
+    _color(color)
 {
-	_color = color;
 }
 
 /** \brief Retrieve the position of a circle in the frame
@@ -83,11 +82,8 @@ Point ColorFinder::getCirclePosition(const Mat& frame, std::shared_ptr<CircleSpe
     
 	ImageProcessing::erode(_resultFrame, _resultFrame, spec->erosionIterations);
 	ImageProcessing::dilate(_resultFrame, _resultFrame, spec->dilationIterations);
-    Logger::getInstance() << "test 3" << std::endl;
 	ImageProcessing::smooth(_resultFrame, _resultFrame, spec->smoothingApertureSize);
-    Logger::getInstance() << "test 4" << std::endl;
-    
-	boost::this_thread::sleep(boost::posix_time::millisec(10000));
+
 	vector<Vec3f> circles;
 	HoughCircles(_resultFrame, circles, CV_HOUGH_GRADIENT,
 		spec->resolutionDivisor, spec->minDistance, spec->edgeThreshold,
@@ -106,7 +102,7 @@ Point ColorFinder::getCirclePosition(const Mat& frame, std::shared_ptr<CircleSpe
  * \param color const HSVcolor*: Color to find
  *
  */
-void ColorFinder::setColor(const HSVcolor* color)
+void ColorFinder::setColor(std::shared_ptr<HSVcolor> color)
 {
 	_color = color;
 }

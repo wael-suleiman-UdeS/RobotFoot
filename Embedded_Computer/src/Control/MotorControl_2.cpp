@@ -33,8 +33,8 @@ _offset(offset),
 _min(min),
 _max(max),
 _playTime(playTime),
-_lastPos(-1),
-_currentPos(-1)
+_lastPos(0),
+_currentPos(0)
 {    
 }
 
@@ -69,11 +69,23 @@ double Motor::Value2Angle(const int value)
 	return double(clampedValue - _offset)*dAngleConvertion;
 }
 
+const double Motor::getMinAngle()
+{
+	return Value2Angle(_min);
+}
+
+const double Motor::getMaxAngle()
+{
+	return Value2Angle(_max);
+}
+
 void Motor::Read()
 {
     std::int16_t value = _stm32f4->read(_id);
     if (value > 0)
         _currentPos = Value2Angle(value);
+    else
+    	Logger::getInstance() << __FILE__ << " : Read Error Id : " << _id << std::endl;
 }
 
 void Motor::Write()
@@ -95,7 +107,7 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
         boost::asio::io_service boost_io;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
         _stm32f4 = new STM32F4(port_name, boost_io);
-        _threadManager->create(50, boost::bind(&boost::asio::io_service::run, &boost_io));
+        _threadManager->create(90, boost::bind(&boost::asio::io_service::run, &boost_io));
     }
     catch (std::exception& e)
     {
@@ -163,6 +175,8 @@ void MotorControl::InitializeMotors(const XmlParser &config)
 	paths.insert(std::make_pair("L_ANKLE_PITCH", XmlPath::LegsMotors / XmlPath::L_ANKLE_PITCH));
 	paths.insert(std::make_pair("R_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::R_ANKLE_ROLL));
 	paths.insert(std::make_pair("L_ANKLE_ROLL", XmlPath::LegsMotors / XmlPath::L_ANKLE_ROLL));
+	paths.insert(std::make_pair("HEAD_PAN", XmlPath::HeadMotors / XmlPath::HEAD_PAN));
+	paths.insert(std::make_pair("HEAD_TILT", XmlPath::HeadMotors / XmlPath::HEAD_TILT));
 
 	for (auto it = paths.begin(); it != paths.end(); ++it)
 	{
@@ -342,6 +356,11 @@ void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
 void MotorControl::HardGet(std::vector<double>& pos, const Config config)
 {
    boost::mutex::scoped_lock lock(_io_mutex);
+   if (_configurations.find(config) == _configurations.end())
+   {
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"HardGet\" : Configuration is invalid." << std::endl;
+       return;
+   }
    auto itrJoint = _configurations[config].begin();
    const auto endJoint = _configurations[config].end();
    
@@ -350,6 +369,38 @@ void MotorControl::HardGet(std::vector<double>& pos, const Config config)
        (*itrJoint)->Read();
        pos.push_back((*itrJoint)->getPos());
    }
+}
+
+void MotorControl::HardGetMaxAngles(std::vector<double>& angles, const Config config)
+{
+	if (_configurations.find(config) == _configurations.end())
+	{
+	   Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"HardGetMaxAngles\" : Configuration is invalid." << std::endl;
+	   return;
+    }
+	auto itrJoint = _configurations[config].begin();
+	const auto endJoint = _configurations[config].end();
+
+    for ( ; itrJoint != endJoint; itrJoint++)
+    {
+    	angles.push_back((*itrJoint)->getMaxAngle());
+    }
+}
+
+void MotorControl::HardGetMinAngles(std::vector<double>& angles, const Config config)
+{
+	if (_configurations.find(config) == _configurations.end())
+	{
+	   Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"HardGetMinAngles\" : Configuration is invalid." << std::endl;
+	   return;
+    }
+	auto itrJoint = _configurations[config].begin();
+	const auto endJoint = _configurations[config].end();
+
+    for ( ; itrJoint != endJoint; itrJoint++)
+    {
+    	angles.push_back((*itrJoint)->getMinAngle());
+    }
 }
 
 const double MotorControl::ReadPosition(std::string name)

@@ -241,7 +241,7 @@ bool MotorControl::SetPosition( const std::vector<double>& pos, const Option opt
    for( ; itrJoint != endJoint && itrPos != endPos && status ; itrJoint++, itrPos++ )
    {
 		Motor motor = *itrJoint;
-		_stm32f4->setMotor(motor.id,Angle2Value(motor, *itrPos));
+		_stm32f4->setMotor(motor.id,Angle2Value(motor, *itrPos),0);
    }
 #endif
 

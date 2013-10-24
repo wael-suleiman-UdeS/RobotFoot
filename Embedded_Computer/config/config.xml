@@ -2,11 +2,11 @@
   <Logging>
     <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
-  <ImageProcessing>
+  <ImageProcessing value="1">
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
-    <ActiveColor name="red" />
+    <ActiveColor value="red" />
     <Colors>
 	  <Color name="red">
 		<HSVcolor>
@@ -70,22 +70,22 @@
   <USB_Interface>
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
-  <Motion>
+  <Motion value="0">
     <IterationTimeMs value="15"/>
     <Motors>
       <Head>
         <HEAD_PAN>
           <MotorID value="13"/>
-          <Offset value="0"/>
-          <LimitMin value="200"/>
-          <LimitMax value="800"/>
+          <Offset value="513"/>
+          <LimitMin value="243"/>92
+          <LimitMax value="793"/>-87
           <PlayTime value="70"/>
         </HEAD_PAN>
         <HEAD_TILT>
           <MotorID value="14"/>
-          <Offset value="0"/>
-          <LimitMin value="350"/>
-          <LimitMax value="800"/>
+          <Offset value="511"/>
+          <LimitMin value="239"/>24
+          <LimitMax value="500"/>-3
           <PlayTime value="70"/>
         </HEAD_TILT>
         <!--DEPRECATED-->
@@ -103,12 +103,14 @@
         <AngleH value="115" />
         <AngleV value="115" />
         <Threshold value="20" />
-        <NoObjectMaxCount value="15"/>
+        <NoObjectMaxCount value="500000000"/>
         
         <PID>
-          <P value="0.2" />0.4
-          <I value="0" />0.03
-          <D value="0" />0.02
+          <P value="0.2" />
+          <!--P value="0.4" -->
+
+          <I value="0.03" />
+          <D value="0.02" />
           <dt value="0.2" />
           <Epsilon value="0" />
         </PID>

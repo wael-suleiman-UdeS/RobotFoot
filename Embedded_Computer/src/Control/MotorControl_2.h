@@ -16,6 +16,8 @@ class Motor
         ~Motor();
         void setPos(double pos);
         const double getPos();
+        const double getMinAngle();
+        const double getMaxAngle();
         void setTorque(bool value);
         void Read();
         void Write();
@@ -38,7 +40,7 @@ class Motor
 class MotorControl
 {
 public:
-   enum Config {
+   enum class Config {
       ALL_MOTORS = 0,
       ALL_LEGS,
       RIGHT_LEG,
@@ -69,6 +71,9 @@ public:
    // TODO Do not look
    void HardSet(const std::vector<double>& pos, const Config config);
    void HardGet(std::vector<double>& pos, const Config config);
+   void HardGetMaxAngles(std::vector<double>& angles, const Config config);
+   void HardGetMinAngles(std::vector<double>& angles, const Config config);
+
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);

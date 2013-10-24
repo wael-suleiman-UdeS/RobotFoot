@@ -26,7 +26,7 @@ _threadManager(threadManager_ptr)
 	if (!Camera::getInstance().initialize(config))
 	{
 		Logger::getInstance() << "Error while initializing capture device." << std::endl;
-		return;
+		std::exit(1);
 	}
 
 	_durationMean = 0;
@@ -35,18 +35,14 @@ _threadManager(threadManager_ptr)
 
 	string colorName = config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::ActiveColor);
 
-	HSVcolor color(config, colorName);
+    std::shared_ptr<HSVcolor> color(new HSVcolor(config, colorName));
 	_circle = std::make_shared<CircleSpec>(config, colorName);
-	_finder = std::make_shared<ColorFinder>(&color);
+	_finder = std::make_shared<ColorFinder>(color);
 	_tracker = std::make_shared<ObjectTracker>(mc_ptr, Camera::getInstance().getCenter());	
     _tracker->initializeHack(config); // todo: holy hack
 	_tracker->initializeHackPID(config);
 
-	if (_guiEnabled)
-	{
-		cv::namedWindow("BGR", CV_WINDOW_AUTOSIZE);
-		cv::namedWindow("HSV", CV_WINDOW_AUTOSIZE);
-	}
+
 }
 
 HeadControlTask::~HeadControlTask()
@@ -59,15 +55,20 @@ void HeadControlTask::run()
 	Logger::getInstance() << "Tracking process started" << std::endl;
 	try
 	{
+		if (_guiEnabled)
+		{
+			cv::namedWindow("BGR", CV_WINDOW_AUTOSIZE);
+			cv::namedWindow("HSV", CV_WINDOW_AUTOSIZE);
+		}
+
+
 		while(true)
 		{
 			boost::this_thread::interruption_point();
-	      	boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
+	      	//boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 			Camera::getInstance().captureFrame();
-            Logger::getInstance() << "After capture frame" << std::endl;
 
 			_ballPosition = _finder->getCirclePosition(Camera::getInstance().getFrame(Camera::ColorSpace::HSV), _circle);
-            Logger::getInstance() << "After getCirclePosition" << std::endl;
 
 			if (_guiEnabled)
 			{
@@ -82,11 +83,12 @@ void HeadControlTask::run()
 			}
 
 			_tracker->track(_ballPosition);
-            Logger::getInstance() << "track" << std::endl;
 
-			boost::this_thread::sleep(boost::posix_time::millisec(10));
 
-			boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+
+			//boost::this_thread::sleep(boost::posix_time::millisec(10));
+			/*
+			 boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 			_durationMean += sec.count();
 			_durationIndex++;
 			if(!(_durationIndex <= 99))
@@ -95,6 +97,7 @@ void HeadControlTask::run()
 				_durationMean = 0;
 				_durationIndex = 0;
 			}
+			*/
 		}
 	}
 	catch(const boost::thread_interrupted& e)
