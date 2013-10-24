@@ -99,19 +99,19 @@ int main(int argc, char * argv[])
         // Starting Head task
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
         bool isKicking  = config.getIntValue(XmlPath::Root / XmlPath::Motion);
-        //if (isTracking)
-        //{
+        if (isTracking)
+        {
         	HeadControlTask headControlTask(threadManager_ptr, config, motorControl_ptr);
-        	//threadManager_ptr->create(50, [headControlTask]() mutable {headControlTask.run();},ThreadManager::Task::HEAD_CONTROL);
+        	threadManager_ptr->create(50, [headControlTask]() mutable {headControlTask.run();},ThreadManager::Task::HEAD_CONTROL);
         	//threadManager_ptr->create(50, boost::bind(&HeadControlTask::run, &headControlTask),ThreadManager::Task::HEAD_CONTROL);
-        	headControlTask.run();
-        //}
+        	//headControlTask.run();
+        }
 
+        StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
         if (isKicking)
         {
         	// Init Walk task
-        	StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
-        	staticWalk.init("config/inputBackup.txt", false, true, true);
+        	staticWalk.init("config/input.txt", false, true, true);
         
         	// Head Task
         	staticWalk.initPosition(7000);
@@ -121,9 +121,9 @@ int main(int argc, char * argv[])
                                       ThreadManager::Task::LEGS_CONTROL));
         }
 
-        /*if (isTracking)
+        if (isTracking)
         	threadManager_ptr->attach(ThreadManager::Task::HEAD_CONTROL);
-		*/
+		
 
 
         //threadManager_ptr->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);

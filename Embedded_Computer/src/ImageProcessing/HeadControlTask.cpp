@@ -84,7 +84,7 @@ void HeadControlTask::run()
 
 			_tracker->track(_ballPosition);
 
-
+            cvWaitKey(10);
 
 			//boost::this_thread::sleep(boost::posix_time::millisec(10));
 			/*
