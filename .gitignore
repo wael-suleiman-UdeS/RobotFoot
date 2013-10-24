@@ -7,7 +7,6 @@
 
 # eclipse
 .metadata
-/.metadata
 
 # Compiled Dynamic libraries
 *.dylib
@@ -28,3 +27,5 @@
 *.sdf
 *.opensdf
 
+# Vi editor
+*.swp

@@ -32,39 +32,47 @@ void ThreadManager::timer()
 
 boost::thread::id ThreadManager::create(unsigned int priority, const boost::function0<void>& thread_func, Task task)
 {
-    Logger::getInstance(Logger::LogLvl::DEBUG) << "Creating new thread with priority : " << priority << std::endl;
-    boost::thread* newThread = new boost::thread(thread_func);
-    _threads.insert(std::make_pair(newThread->get_id(), newThread));
-
-    boost::condition_variable* cond = new boost::condition_variable(); 
-    _cond_variables.insert(std::make_pair(newThread->get_id(), cond));
-
-    if (task != Task::UNKNOW)
-        _tasks.insert(std::make_pair(task, newThread->get_id()));
-
-    int retcode;
-    int policy;
-    struct sched_param param;
-    pthread_t threadID = (pthread_t) newThread->native_handle();
-    
-    if ((retcode = pthread_getschedparam(threadID, &policy, &param)) != 0)
+    try
     {
-        Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_getschedparam -- " << retcode << std::endl;
-        //exit(EXIT_FAILURE);
-    }
+        Logger::getInstance(Logger::LogLvl::DEBUG) << "Creating new thread with priority : " << priority << std::endl;
+        std::shared_ptr<boost::thread> newThread(new boost::thread(thread_func));
+        _threads.insert(std::make_pair(newThread->get_id(), newThread));
 
-    // SCHED_RR policy
-    // Each thread is allowed to run for a limited time period. If the thread exceeds that time, it is returned to the list for its priority.
-    // Priority :
-    // Threads have a priority from 1 to 99 and higher priority threads always preempt lower priority threads
-    policy = SCHED_RR;
-    param.sched_priority = priority;
-    if ((retcode = pthread_setschedparam(threadID, policy, &param)) != 0)
-    {
-        Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_setschedparam -- " << retcode << std::endl;
-        //exit(EXIT_FAILURE);
+        std::shared_ptr<boost::condition_variable> cond(new boost::condition_variable()); 
+        _cond_variables.insert(std::make_pair(newThread->get_id(), cond));
+
+        if (task != Task::UNKNOW)
+            _tasks.insert(std::make_pair(task, newThread->get_id()));
+
+        int retcode;
+        int policy;
+        struct sched_param param;
+        pthread_t threadID = (pthread_t) newThread->native_handle();
+
+        if ((retcode = pthread_getschedparam(threadID, &policy, &param)) != 0)
+        {
+            Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_getschedparam -- " << retcode << std::endl;
+            //exit(EXIT_FAILURE);
+        }
+
+        // SCHED_RR policy
+        // Each thread is allowed to run for a limited time period. If the thread exceeds that time, it is returned to the list for its priority.
+        // Priority :
+        // Threads have a priority from 1 to 99 and higher priority threads always preempt lower priority threads
+        policy = SCHED_RR;
+        param.sched_priority = priority;
+        if ((retcode = pthread_setschedparam(threadID, policy, &param)) != 0)
+        {
+            Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_setschedparam -- " << retcode << std::endl;
+            //exit(EXIT_FAILURE);
+        }
+        return newThread->get_id();
     }
-    return newThread->get_id();
+    catch (std::exception& e)
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "Exception while setting thread priorities : " << e.what() << std::endl;
+        std::exit(1);
+    }
 }
 
 void ThreadManager::stop(boost::thread::id thread_id)
