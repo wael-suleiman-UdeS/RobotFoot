@@ -57,8 +57,8 @@ void HeadControlTask::run()
 	{
 		if (_guiEnabled)
 		{
-			cv::namedWindow("BGR", CV_WINDOW_AUTOSIZE);
 			cv::namedWindow("HSV", CV_WINDOW_AUTOSIZE);
+			cv::namedWindow("BGR", CV_WINDOW_AUTOSIZE);
 		}
 
 
@@ -78,8 +78,8 @@ void HeadControlTask::run()
 					cv::circle(Camera::getInstance().getFrame(Camera::ColorSpace::BGR), _ballPosition, 5, circleColor);
 				}
 
-				cv::imshow("BGR", Camera::getInstance().getFrame(Camera::ColorSpace::BGR));
 				cv::imshow("HSV", Camera::getInstance().getFrame(Camera::ColorSpace::HSV));
+				cv::imshow("BGR", Camera::getInstance().getFrame(Camera::ColorSpace::BGR));
 			}
 
 			_tracker->track(_ballPosition);

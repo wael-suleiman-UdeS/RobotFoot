@@ -77,15 +77,15 @@
         <HEAD_PAN>
           <MotorID value="13"/>
           <Offset value="513"/>
-          <LimitMin value="243"/>92
-          <LimitMax value="793"/>-87
+          <LimitMin value="243"/>
+          <LimitMax value="793"/>
           <PlayTime value="70"/>
         </HEAD_PAN>
         <HEAD_TILT>
           <MotorID value="14"/>
           <Offset value="511"/>
-          <LimitMin value="239"/>24
-          <LimitMax value="500"/>-3
+          <LimitMin value="239"/>
+          <LimitMax value="500"/>
           <PlayTime value="70"/>
         </HEAD_TILT>
         <!--DEPRECATED-->
@@ -103,15 +103,19 @@
         <AngleH value="115" />
         <AngleV value="115" />
         <Threshold value="20" />
-        <NoObjectMaxCount value="500000000"/>
+        <NoObjectMaxCount value="5000000" />
+        <ScanningError value="100" />
         
         <PID>
-          <P value="0.2" />
-          <!--P value="0.4" -->
-
-          <I value="0.03" />
-          <D value="0.02" />
+          <Pz value="0.08" />
+          <Iz value="0.06" />
+          <Dz value="0.04" />
           <dt value="0.2" />
+          
+          <P value="0.13" />
+          <I value="0.0098" />0.0098
+          <D value="0.0065" />0.0065 
+          
           <Epsilon value="0" />
         </PID>
       </Head>

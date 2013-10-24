@@ -97,11 +97,17 @@ void ObjectTracker::track(Point objectPosition)
 		_newAngle.x = _currentAngle.x + _pids["Pan"].process_PID(_objectError.x);
 	}
 
-	if (abs(_objectError.y) > _threshold)
+	if(_noObjectCount > _noObjectMaxCount) // todo: remove hack
+	{
+		_newAngle.y = -45;
+	}
+	else if (abs(_objectError.y) > _threshold)
 	{
 		_newAngle.y = _currentAngle.y + _pids["Tilt"].process_PID(_objectError.y);
 	}
 
+	if (_newAngle.x < _minPan || _newAngle.x > _maxPan) { _pids["Pan"].reset(); }
+	if (_newAngle.y < _minTilt || _newAngle.y > _maxTilt) { _pids["Tilt"].reset(); }
 
 	setHeadAngles();
 
@@ -128,30 +134,22 @@ void ObjectTracker::readHeadAngles() {
 void ObjectTracker::setHeadAngles() {
 	std::vector<double> angles;
 	angles.push_back(_newAngle.x);
-	angles.push_back(_newAngle.y);
+	//angles.push_back(_newAngle.y);
 
 	//_mc->SetPositions(angles, MotorControl::Config::HEAD);
 	_mc->HardSet(angles, MotorControl::Config::HEAD);
 }
 
 void ObjectTracker::scan() {
-	if (_currentAngle.x >= 0)
-	{
-	    if (_currentAngle.x < _minPan + _threshold) {
-			_pids["Pan"].reset();
-			_objectError.x = _scanningError;
-		    Logger::getInstance() << "Start scanning to the right" << std::endl;
-		} else if (_currentAngle.x > _maxPan - _threshold) {
-			_pids["Pan"].reset();
-			_objectError.x = -_scanningError;
-		    Logger::getInstance() << "Start scanning to the left" << std::endl;
-		}
-
+	if (_currentAngle.x < _minPan + _threshold) {
+		_pids["Pan"].reset();
+		_objectError.x = _scanningError;
+		Logger::getInstance() << "Start scanning to the right" << std::endl;
+	} else if (_currentAngle.x > _maxPan - _threshold) {
+		_pids["Pan"].reset();
+		_objectError.x = -_scanningError;
+		Logger::getInstance() << "Start scanning to the left" << std::endl;
 	}
 
-	if (_currentAngle.y >= 0)
-	{
-		_objectError.y = (_maxPan - _minPan) * 0.75 - _currentAngle.y;
-	}
 }
 
