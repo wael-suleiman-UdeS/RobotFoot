@@ -7,7 +7,6 @@
 
 # eclipse
 .metadata
-/.metadata
 
 # Compiled Dynamic libraries
 *.dylib
