@@ -136,7 +136,6 @@ void MotorControl::run()
             start = boost::chrono::system_clock::now();
 
             // Main task reading and sending data
-            Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : ReadAll" << std::endl;
             ReadAll();
             if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
             {
@@ -148,9 +147,8 @@ void MotorControl::run()
                 Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : Resume LEGS_CONTROL fail" << std::endl;
             }
 
-            Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : WriteAll" << std::endl;
             WriteAll();
-                        _threadManager->wait(); 
+            _threadManager->wait(); 
         }
     }
     catch(boost::thread_interrupted const &e)

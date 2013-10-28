@@ -37,6 +37,11 @@ SerialInterface::~SerialInterface()
     _serialPort.close();
 }
 
+void SerielInterface::start()
+{
+
+}
+
 void SerialInterface::write(std::vector<char> command)
 {
 	if(!_serialPort.is_open()) { return; }
