@@ -25,12 +25,16 @@ class SerialInterface
                    unsigned int baud);
       ~SerialInterface();
 
-      void write(std::vector<char> command);
-      std::vector<char> read_sync(std::vector<char> command);
-      void read_asyc(std::vector<char> command);
+      typedef std::function<void(std::vector<char>)> CallBackFunction;
+      void start_read(const CallBackFunction &function);
 
+      void write(std::vector<char> command);
+      std::vector<char> read_sync(std::vector<char> command); // Deprecated
     private:
+      void read_async(const CallBackFunction &function);
+      
       boost::asio::io_service& _io_service;
       boost::asio::serial_port _serialPort;
+      char _read_msg[MAX_SIZE];
 };
 #endif

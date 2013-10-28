@@ -37,9 +37,9 @@ SerialInterface::~SerialInterface()
     _serialPort.close();
 }
 
-void SerielInterface::start()
+void SerialInterface::start_read(const CallBackFunction &function)
 {
-
+    read_async(function);
 }
 
 void SerialInterface::write(std::vector<char> command)
@@ -53,6 +53,7 @@ void SerialInterface::write(std::vector<char> command)
     boost::asio::write(_serialPort, streamBuffer);
 }
 
+// Deprecated
 std::vector<char> SerialInterface::read_sync(std::vector<char> command)
 {
 	if(!_serialPort.is_open()) { return std::vector<char>(); }
@@ -69,10 +70,22 @@ std::vector<char> SerialInterface::read_sync(std::vector<char> command)
 	return std::vector<char>(start_ptr, start_ptr + streamBuffer.size());
 }
 
-void SerialInterface::read_asyc(std::vector<char> command)
+void SerialInterface::read_async(const CallBackFunction &function)
 {
 	if(!_serialPort.is_open()) { return; }
-    // TODO
+    _serialPort.async_read_some(boost::asio::buffer(_read_msg, MAX_SIZE),
+        [this, &function](boost::system::error_code ec, std::size_t length)
+        {
+            if (!ec)
+            {
+                function(std::vector<char>(_read_msg, _read_msg + sizeof(_read_msg) / sizeof(char)));
+                read_async(function);  
+            }
+            else
+            {
+                Logger::getInstance(Logger::LogLvl::ERROR) << "Error in SerialInterface::read_async : " << ec.message() << std::endl;
+            }
+        }); 
 }
 
 
