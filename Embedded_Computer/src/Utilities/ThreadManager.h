@@ -14,6 +14,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <map>
 #include <string>
+#include <memory>
 
 #include "Utilities/XmlParser.h"
 
@@ -51,8 +52,8 @@ class ThreadManager
         boost::posix_time::milliseconds _timeoutMs;
         boost::asio::deadline_timer _timer;
             
-        std::map<boost::thread::id, boost::thread*> _threads;
-        std::map<boost::thread::id, boost::condition_variable*> _cond_variables;
+        std::map<boost::thread::id, std::shared_ptr<boost::thread>> _threads;
+        std::map<boost::thread::id, std::shared_ptr<boost::condition_variable>> _cond_variables;
         std::map<Task, boost::thread::id> _tasks; 
 };
 #endif

@@ -38,7 +38,7 @@ _threadManager(threadManager_ptr)
     std::shared_ptr<HSVcolor> color(new HSVcolor(config, colorName));
 	_circle = std::make_shared<CircleSpec>(config, colorName);
 	_finder = std::make_shared<ColorFinder>(color);
-	_tracker = std::make_shared<ObjectTracker>(mc_ptr, Camera::getInstance().getCenter());	
+	_tracker = std::make_shared<ObjectTracker>(_threadManager, mc_ptr, Camera::getInstance().getCenter());	
     _tracker->initializeHack(config); // todo: holy hack
 	_tracker->initializeHackPID(config);
 
