@@ -26,7 +26,7 @@ Td2 = [0; 0; 0];
 file_id = fopen('input.txt', 'w');
 
 [Size,dt,T,RightFootTraj,LeftFootTraj,PelvisTraj] = GenerateTrajectory();
-FixedFoot = 1;  % If FixedFoot = 0 then the right foot is fixed,
+FixedFoot = 1 ;  % If FixedFoot = 0 then the right foot is fixed,
                 % If FixedFoot = 1 then the left foot is fixed.
            % It should be replace by a function to alternate walking foot
 
@@ -96,7 +96,7 @@ for i = 1:Size
             
             if CalculDone 
                 displayQ = [q(6) -q(5) q(4) q(3) -q(2) q(1) q(7) q(8) q(9) q(10) -q(11) -q(12)];
-                displayQ = displayQ * 180/pi;
+                displayQ = displayQ * 180/pi
                 fprintf(file_id,'%6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f\r\n', displayQ);
 
                 TableQPos = [TableQPos;displayQ] ;
