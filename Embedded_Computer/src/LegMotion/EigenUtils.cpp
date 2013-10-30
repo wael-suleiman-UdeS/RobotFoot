@@ -2,6 +2,7 @@
 
 namespace EigenUtils
 {
+	const float dampingPinv = 0.1f;
 
 	Eigen::MatrixXf MXB(Eigen::Vector2f pointA, Eigen::Vector2f pointB, float increment, int offset)
 	{
@@ -39,6 +40,13 @@ namespace EigenUtils
 	    {
 	        return mxbMatrixBA;
 	    }
+	}
+
+	Eigen::MatrixXf PseudoInverse(Eigen::MatrixXf matrix)
+	{
+		Eigen::Matrix3f squaredMatrix = matrix*(matrix.transpose());
+		Eigen::Matrix3f dampedIdentity = pow(dampingPinv,2)*Eigen::Matrix3f::Identity();
+		return matrix.transpose()*((squaredMatrix+dampedIdentity).inverse());// NOT VERFIED, MAY CAUSE BUGS!
 	}
 
 }

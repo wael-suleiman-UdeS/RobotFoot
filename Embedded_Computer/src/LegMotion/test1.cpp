@@ -1,6 +1,14 @@
 #include "Trajectory.h"
+#include "MotionControl.h"
+#include "EigenUtils.h"
+#include "DenavitHartenberg.h"
 
 #include "../../ThirdParty/Eigen/Dense"
+
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+using namespace std;
 
 int main(int argc, char* argv[]) {
 	Eigen::Vector2f pointA(0, 0);
@@ -8,9 +16,34 @@ int main(int argc, char* argv[]) {
 	Eigen::Vector2f startAngle(0, 0);
 	Eigen::Vector2f endAngle(0, 0);
 
+
+	ofstream myfile;
+	std::system("pwd");
+	myfile.open ("matrix.txt");
+
 	Trajectory* traj = new Trajectory();
 	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD, startAngle,
 			endAngle);
+
+	for(int i = 0; i < matrix.rows(); ++i)
+	{
+		myfile << matrix.row(i) << endl;
+	}
+
+	myfile.close();
+
+	/*
+	MotionControl* motion = new MotionControl();
+	motion->Walk(matrix);
+
+	Eigen::MatrixXf matrice(3, 6);
+	matrice << -0.1747, -0.1747, -0.0874, 0, 0,0,
+			0, 0, -0.0319, 0, 0, 0,
+			0, 0, 0, 0, 0, 0;
+
+
+	Eigen::MatrixXf testPseudoInv = EigenUtils::PseudoInverse(matrice);*/
+
 
 	/*	float a1 = matrix(0,0);
 	 float a2 = matrix(0,1);

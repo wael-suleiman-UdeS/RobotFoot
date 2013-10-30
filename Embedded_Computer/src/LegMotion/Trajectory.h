@@ -33,13 +33,14 @@ void GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int stepCount,
 Eigen::MatrixXf GenerateParabollicTrajParams(Eigen::Vector4f initialPos, Eigen::Vector4f finalPos, float stepTimeLapse);
 Eigen::Vector3f GenerateParabollicTrajectory(Eigen::MatrixXf params, float currentTime);
 
-Eigen::MatrixXf GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize);
+Eigen::MatrixXf GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps);
 
 float m_singleStepTime;
 float m_dLeg;
 float m_dStep;
 float m_stepHeight;
 float m_dTime;
+float m_ZMPHeight;
 int m_nbTrajectoryPoints;
 };
 
