@@ -78,9 +78,10 @@ for i = 1:Size
             q(1:6) = q(1:6) + k*(priorite1' + priorite2') ;
             q(7:12)= q(7:12)+ k*(priorite3' + priorite4') ;        
         elseif FixedFoot == 1
-            q(1:6) = q(1:6) + k*(priorite1' + priorite2') ;
-            q(7:12)= q(7:12)+ k*(priorite3' + priorite4') ;  
-            q = q(end:-1:1) ;
+            TempQ = q(end:-1:1) ;
+            TempQ(1:6) = TempQ(1:6) + k*(priorite1' + priorite2') ;
+            TempQ(7:12)= TempQ(7:12)+ k*(priorite3' + priorite4') ;  
+            q = TempQ(end:-1:1) ;
         end 
              if  FixedFoot == 0 
                  [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, Td1, Td2);
@@ -96,7 +97,7 @@ for i = 1:Size
             
             if CalculDone 
                 displayQ = [q(6) -q(5) q(4) q(3) -q(2) q(1) q(7) q(8) q(9) q(10) -q(11) -q(12)];
-                displayQ = displayQ * 180/pi
+                displayQ = displayQ * 180/pi;
                 fprintf(file_id,'%6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f\r\n', displayQ);
 
                 TableQPos = [TableQPos;displayQ] ;
@@ -148,3 +149,7 @@ figure()
 plot(T,TableETheta2);
 title('TableETheta2')
 
+EPos1Max = max(TableEPos1)
+EPos2Max = max(TableEPos2)
+ETheta1Max = max(TableETheta1)
+ETheta2Max = max(TableETheta2)

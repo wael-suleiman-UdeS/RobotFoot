@@ -27,3 +27,5 @@
 *.sdf
 *.opensdf
 
+# Vi editor
+*.swp

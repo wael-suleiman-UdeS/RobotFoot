@@ -1,4 +1,4 @@
-function [ Te ] = UpdateTeDG1( q )
+function [ Te ] = UpdateTeGD1( q )
 
     Te = [0 0 0]';
 	Te(1) = q(7);
