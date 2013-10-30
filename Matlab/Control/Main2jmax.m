@@ -26,7 +26,7 @@ Td2 = [0; 0; 0];
 file_id = fopen('input.txt', 'w');
 
 [Size,dt,T,RightFootTraj,LeftFootTraj,PelvisTraj] = GenerateTrajectory();
-FixedFoot = 1;  % If FixedFoot = 0 then the right foot is fixed,
+FixedFoot = 1 ;  % If FixedFoot = 0 then the right foot is fixed,
                 % If FixedFoot = 1 then the left foot is fixed.
            % It should be replace by a function to alternate walking foot
 
@@ -78,9 +78,10 @@ for i = 1:Size
             q(1:6) = q(1:6) + k*(priorite1' + priorite2') ;
             q(7:12)= q(7:12)+ k*(priorite3' + priorite4') ;        
         elseif FixedFoot == 1
-            q(1:6) = q(1:6) + k*(priorite1' + priorite2') ;
-            q(7:12)= q(7:12)+ k*(priorite3' + priorite4') ;  
-            q = q(end:-1:1) ;
+            TempQ = q(end:-1:1) ;
+            TempQ(1:6) = TempQ(1:6) + k*(priorite1' + priorite2') ;
+            TempQ(7:12)= TempQ(7:12)+ k*(priorite3' + priorite4') ;  
+            q = TempQ(end:-1:1) ;
         end 
              if  FixedFoot == 0 
                  [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, Td1, Td2);
@@ -148,3 +149,7 @@ figure()
 plot(T,TableETheta2);
 title('TableETheta2')
 
+EPos1Max = max(TableEPos1)
+EPos2Max = max(TableEPos2)
+ETheta1Max = max(TableETheta1)
+ETheta2Max = max(TableETheta2)
