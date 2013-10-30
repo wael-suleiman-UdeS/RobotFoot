@@ -138,13 +138,13 @@
 		  <MotorID value="3"/>
 		  <Offset value="615"/>
 		  <LimitMin value="324"/>
-		  <LimitMax value="615"/>
+		  <LimitMax value="670"/>
           <PlayTime value="0"/>
 	    </R_HIP_ROLL>
 	    <L_HIP_ROLL>
 		  <MotorID value="4"/>
 		  <Offset value="511"/>
-		  <LimitMin value="511"/>
+		  <LimitMin value="450"/>
 		  <LimitMax value="792"/>
           <PlayTime value="0"/>
 	    </L_HIP_ROLL>

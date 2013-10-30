@@ -59,14 +59,20 @@ void Motor::setTorque(bool value)
 
 int Motor::Angle2Value(const double angle)
 {
-	//return clamp(angle, _min, _max);
     int value = (angle*dInvAngleConvertion) + _offset;
-	return clamp(value, _min, _max);
+	if(value < _min || value > _max)
+    {
+        Logger::getInstance() << __FILE__ << " : Angle2Value : Value off limits.";
+    }
+    return clamp(value, _min, _max);
 }
 
 double Motor::Value2Angle(const int value)
 {
-	//return clamp(value, _min, _max);
+	if(value < _min || value > _max)
+    {
+        Logger::getInstance() << __FILE__ << " : Angle2Value : Value off limits.";
+    }
 	int clampedValue = clamp(value, _min, _max);
 	return double(clampedValue - _offset)*dAngleConvertion;
 }
