@@ -59,12 +59,14 @@ void Motor::setTorque(bool value)
 
 int Motor::Angle2Value(const double angle)
 {
+	//return clamp(angle, _min, _max);
     int value = (angle*dInvAngleConvertion) + _offset;
 	return clamp(value, _min, _max);
 }
 
 double Motor::Value2Angle(const int value)
 {
+	//return clamp(value, _min, _max);
 	int clampedValue = clamp(value, _min, _max);
 	return double(clampedValue - _offset)*dAngleConvertion;
 }
@@ -345,12 +347,14 @@ void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
    const auto endJoint = _configurations[config].end();
    auto itrPos = pos.begin();
    const auto endPos = pos.end();
-
+   //Logger::getInstance() << " HardSet : ";
    for ( ; itrJoint != endJoint && itrPos != endPos; itrJoint++, itrPos++ )
    {
        (*itrJoint)->setPos(*itrPos);
        (*itrJoint)->Write();
+       //Logger::getInstance() << *itrPos << " ";
    }
+   //Logger::getInstance() << std::endl;
 }
 
 void MotorControl::HardGet(std::vector<double>& pos, const Config config)
@@ -363,12 +367,14 @@ void MotorControl::HardGet(std::vector<double>& pos, const Config config)
    }
    auto itrJoint = _configurations[config].begin();
    const auto endJoint = _configurations[config].end();
-   
+   Logger::getInstance() << "HardGet : ";
    for ( ; itrJoint != endJoint; itrJoint++)
    {
        (*itrJoint)->Read();
        pos.push_back((*itrJoint)->getPos());
+       Logger::getInstance() << (*itrJoint)->getPos() << " ";
    }
+   Logger::getInstance() << std::endl;
 }
 
 void MotorControl::HardGetMaxAngles(std::vector<double>& angles, const Config config)

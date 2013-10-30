@@ -5,6 +5,7 @@
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
 #include "Utilities/PID.h"
+#include "Utilities/ThreadManager.h"
 
 #include <vector>
 #include <memory> // shared_ptr
@@ -23,7 +24,7 @@
 class ObjectTracker
 {
 public:
-	ObjectTracker(std::shared_ptr<MotorControl> mc_ptr, cv::Point center);
+	ObjectTracker(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, cv::Point center);
 	~ObjectTracker() {}
 
 	void track(cv::Point objectPosition);
@@ -37,6 +38,7 @@ private:
 	void readHeadAngles();
 	void setHeadAngles();
 
+    std::shared_ptr<ThreadManager> _threadManager;
     std::shared_ptr<MotorControl> _mc;
 	cv::Point _centerPosition;
 	cv::Point _objectError;

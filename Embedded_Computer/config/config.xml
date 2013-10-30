@@ -70,7 +70,7 @@
   <USB_Interface>
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
-  <Motion value="0">
+  <Motion value="1">
     <IterationTimeMs value="15"/>
     <Motors>
       <Head>
@@ -103,8 +103,8 @@
         <AngleH value="115" />
         <AngleV value="115" />
         <Threshold value="20" />
-        <NoObjectMaxCount value="5000000" />
-        <ScanningError value="100" />
+        <NoObjectMaxCount value="15" />
+        <ScanningError value="300" />
         
         <PID>
           <Pz value="0.08" />
@@ -112,9 +112,9 @@
           <Dz value="0.04" />
           <dt value="0.2" />
           
-          <P value="0.13" />
-          <I value="0.0098" />0.0098
-          <D value="0.0065" />0.0065 
+          <P value="0.130909093" />0.4
+          <I value="0.009818182" />0.03
+          <D value="0.006545455" />0.02 
           
           <Epsilon value="0" />
         </PID>
