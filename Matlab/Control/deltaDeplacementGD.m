@@ -1,9 +1,9 @@
 function [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i,L4,L5,LTX,LTZ, q, RightFootTraj, PelvisTraj, Td1, Td2)
 
 
-M_RP_1 = [0 1 0 LTX ; 0 0 1 0 ; 1 0 0 LTZ ; 0 0 0 1];
+M_RP_1 = [0 1 0 0 ; 0 0 1 0 ; 1 0 0 LTZ ; 0 0 0 1];
 M_PR_1 = [0 0 1 0 ; 1 0 0 0 ; 0 1 0 0 ; 0 0 0 1];
-M_PR_1_fin = [1 0 0 -LTX ; 0 1 0 0 ; 0 0 1 -LTZ ; 0 0 0 1];
+M_PR_1_fin = [1 0 0 0 ; 0 1 0 0 ; 0 0 1 -LTZ ; 0 0 0 1];
 M_RP_2 = [1 0 0 LTX ; 0 1 0 0 ; 0 0 1 -LTZ ; 0 0 0 1 ];
 M_PR_2_fin = [1 0 0 -LTX ; 0 1 0 0 ; 0 0 1 LTZ ; 0 0 0 1];
 

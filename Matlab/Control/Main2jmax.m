@@ -26,7 +26,7 @@ Td2 = [0; 0; 0];
 file_id = fopen('input.txt', 'w');
 
 [Size,dt,T,RightFootTraj,LeftFootTraj,PelvisTraj] = GenerateTrajectory();
-FixedFoot = 1 ;  % If FixedFoot = 0 then the right foot is fixed,
+FixedFoot = 0 ;  % If FixedFoot = 0 then the right foot is fixed,
                 % If FixedFoot = 1 then the left foot is fixed.
            % It should be replace by a function to alternate walking foot
 
@@ -149,7 +149,7 @@ figure()
 plot(T,TableETheta2);
 title('TableETheta2')
 
-EPos1Max = max(TableEPos1)
-EPos2Max = max(TableEPos2)
-ETheta1Max = max(TableETheta1)
-ETheta2Max = max(TableETheta2)
+EPos1Max = max(TableEPos1);
+EPos2Max = max(TableEPos2);
+ETheta1Max = max(TableETheta1);
+ETheta2Max = max(TableETheta2);
