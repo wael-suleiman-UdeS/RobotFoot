@@ -1,3 +1,12 @@
+/**
+******************************************************************************^M
+* @file    StaticWalk.cpp
+* @author  Mathieu Drapeau
+* @date    2013-09-20
+* @brief   Class to test mouvement on robot
+******************************************************************************^M
+*/
+
 #include "StaticWalk.h" 
 
 #include "WalkStatus.h"

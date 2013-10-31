@@ -1,3 +1,11 @@
+/**
+******************************************************************************^M
+* @file    test1.cpp
+* @author  Mathieu Drapeau
+* @date    2013-09-20
+* @brief   Quick tools to communicate with motors
+******************************************************************************^M
+*/
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
@@ -5,6 +13,7 @@
 
 #include "../../Control/STM32F4.h"
 
+// Read current position and set a new position
 void setPosition(STM32F4& mc)
 {
 	int id;
@@ -22,6 +31,7 @@ void setPosition(STM32F4& mc)
 	mc.setTorque(id,STM32F4::TorqueOff);
 }
 
+// Read motor status
 void readStatus(STM32F4& mc)
 {
 	int id;
@@ -33,6 +43,7 @@ void readStatus(STM32F4& mc)
 	std::cout << "Status is : " << mc.readStatus(id) << std::endl;
 }
 
+// Clear motor status
 void clearStatus(STM32F4& mc)
 {
 	int id;
@@ -44,6 +55,7 @@ void clearStatus(STM32F4& mc)
 	mc.clearStatus(id);
 }
 
+// Clear all motor status
 void clearAllStatus(STM32F4& mc)
 {
 	for(int id = 1; id < 15; id++)
