@@ -79,7 +79,9 @@ private:
    void InitializeConfigurations(const XmlParser &config);
 
    void ReadAll();
+public:
    void WriteAll();
+private:
 
    STM32F4 *_stm32f4;
    std::shared_ptr<ThreadManager> _threadManager;
