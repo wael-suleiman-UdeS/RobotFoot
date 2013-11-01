@@ -89,6 +89,77 @@ void Trajectory::GenerateKick()
 
 }
 
+Eigen::MatrixXf Trajectory::GenerateMovement(Eigen::Vector4f& rightFootInitialPos, Eigen::Vector4f& rightFootFinalPos, Eigen::Vector4f& leftFootInitialPos,
+		Eigen::Vector4f& leftFootFinalPos, Eigen::Vector4f& pelvisInitialPos, Eigen::Vector4f& pelvisFinalPos, float timeLapse)
+{
+	//final matrix
+	int finalMatrixSize = timeLapse/m_dTime;
+	Eigen::MatrixXf finalMatrix(finalMatrixSize, 13);
+
+	Eigen::MatrixXf paramsRightFoot(4,3);
+	Eigen::MatrixXf paramsLeftFoot(4,3);
+	Eigen::MatrixXf paramsPelvis(4,3);
+
+	paramsRightFoot = GenerateParabollicTrajParams(rightFootInitialPos, rightFootFinalPos, timeLapse);
+	paramsLeftFoot = GenerateParabollicTrajParams(leftFootInitialPos, leftFootFinalPos, timeLapse);
+	paramsPelvis = GenerateParabollicTrajParams(pelvisInitialPos, pelvisFinalPos, timeLapse);
+
+	Eigen::Vector3f currentRightFootPos;
+	Eigen::Vector3f currentLeftFootPos;
+	Eigen::Vector3f currentPelvisPos;
+
+	//Determine grounded foot
+	//If the right foot is moving, set the left foot as grounded (even if the left foot is also moving for protection)
+	bool groundedFoot = (rightFootFinalPos - rightFootInitialPos).norm() > 0.01;
+
+	for(int time = 0; time < finalMatrixSize; time ++)
+	{
+		if(groundedFoot)
+			currentRightFootPos = GenerateParabollicTrajectory(paramsRightFoot, m_dTime*time);
+		else
+			currentLeftFootPos = GenerateParabollicTrajectory(paramsLeftFoot, m_dTime*time);
+		currentPelvisPos = GenerateParabollicTrajectory(paramsPelvis, m_dTime*time);
+
+		if(groundedFoot == 1)	//Left foot is 1, right foot is moving
+		{
+			//Right foot moving
+			finalMatrix(time, 1) = currentRightFootPos(0);	//x
+			finalMatrix(time, 2) = currentRightFootPos(1);	//y
+			finalMatrix(time, 3) = currentRightFootPos(2);	//z
+			finalMatrix(time, 4) = rightFootInitialPos(3) + ((rightFootFinalPos(3) - rightFootInitialPos(3))/timeLapse)*time;	//angle
+			//Left foot position on the ground
+			finalMatrix(time, 5) = leftFootInitialPos(0);	//x
+			finalMatrix(time, 6) = leftFootInitialPos(1);	//y
+			finalMatrix(time, 7) = leftFootInitialPos(2);	//z
+			finalMatrix(time, 8) = leftFootInitialPos(3);	//angle
+		}
+		else	//Right foot is 0, left foot is moving
+		{
+			//Right foot position on the ground
+			finalMatrix(time, 1) = rightFootInitialPos(0);	//x
+			finalMatrix(time, 2) = rightFootInitialPos(1);	//y
+			finalMatrix(time, 3) = rightFootInitialPos(2);	//z
+			finalMatrix(time, 4) = rightFootInitialPos(3);	//angle
+			//Left foot moving
+			finalMatrix(time, 5) = currentLeftFootPos(0);	//x
+			finalMatrix(time, 6) = currentLeftFootPos(1);	//y
+			finalMatrix(time, 7) = currentLeftFootPos(2);	//z
+			finalMatrix(time, 8) = leftFootInitialPos(3) + ((leftFootFinalPos(3) - leftFootInitialPos(3))/timeLapse)*time;	//angle
+		}
+
+		//time
+		finalMatrix(time, 0) = time*m_dTime;
+		//grounded foot
+		finalMatrix(time, 9) = groundedFoot;	// 0 = right, 1 = left foot
+		//pelvis
+		finalMatrix(time, 10) = currentPelvisPos(0);	//x
+		finalMatrix(time, 11) = currentPelvisPos(1);	//y
+		finalMatrix(time, 12) = currentPelvisPos(2);	//z
+	}
+
+	return finalMatrix;
+}
+
 /** \brief Generate a trajectory for a 2nd degree Bezier curve
  *
  * \param xTrajectory Eigen::VectorXf&: Points in X for the trajectory
