@@ -34,8 +34,10 @@ _offset(offset),
 _min(min),
 _max(max),
 _playTime(playTime),
-_lastPos(0),
-_currentPos(0),
+_posToRead(0.0),
+_readDirty(false),
+_posToWrite(0.0),
+_writeDirty(false),
 _torqueOn(false),
 _torqueDirty(false)
 {    
@@ -47,24 +49,28 @@ Motor::~Motor()
 
 void Motor::setPos(double pos)
 {
-    _currentPos = pos;
-    Write();
+    if(_posToWrite != pos)
+    {
+        _posToWrite = pos;
+        _writeDirty = true;
+        Write();
+    }
 }
 
 const double Motor::getPos()
 {
-    return _currentPos;
+    _readDirty = false;
+    return _posToRead;
 }
 
 void Motor::setTorque(bool value)
 {
-    //_stm32f4->setTorque(_id, value ? STM32F4::TorqueOn : STM32F4::TorqueOff);
    if(_torqueOn != value)
    {
       _torqueOn = value;
       _torqueDirty = true;
+      Write();
    }  
-   Write();
 }
 
 const bool Motor::getTorque()
@@ -94,7 +100,7 @@ const double Motor::getMaxAngle()
 	return Value2Angle(_max);
 }
 
-void Motor::Read()
+void Motor::Read(const std::vector<char>& msg)
 {
     //TODO finish
     /*
@@ -108,25 +114,28 @@ std::int16_t value = _stm32f4->read(_id);
 
 void Motor::Write()
 {
-    std::vector<std::uint8_t> msg;
-    msg.push_back(Protocol::MotorHeader);
-    msg.push_back(_id);
-    msg.push_back(static_cast<std::uint8_t>(_torqueOn));
+    std::vector<char> data;
+    data.push_back(_id);
+    data.push_back(static_cast<char>(_torqueOn));
 
-    if (_currentPos != _lastPos)
+    if (_writeDirty)
     {
-        _lastPos = _currentPos;
-        _torqueDirty = false;
-       
-        msg.push_back(_currentPos);
-        msg.push_back(_playTime);
- 
-        _stm32f4->AddMsg(msg);
+        char posLSB, posMSB;
+	    int pos = Angle2Value(_posToWrite);
+        Protocol::Separate2Bytes(pos, posLSB, posMSB);
+	    
+	    data.push_back(posLSB);
+        data.push_back(posMSB);
+        data.push_back(_playTime);
+        
     }
-    else if (_torqueDirty)
+    if(_writeDirty || _torqueDirty)
     {
         _torqueDirty = false;
+        _writeDirty = false;
 
+        std::vector<char> msg;
+        Protocol::GenerateDataMsg(Protocol::MotorHeader,data,msg);
         _stm32f4->AddMsg(msg);
     }
 }
@@ -398,7 +407,7 @@ void MotorControl::HardGet(std::vector<double>& pos, const Config config)
    
    for ( ; itrJoint != endJoint; itrJoint++)
    {
-       (*itrJoint)->Read();
+       //(*itrJoint)->Read();
        pos.push_back((*itrJoint)->getPos());
    }
 }
@@ -468,7 +477,7 @@ void MotorControl::ReadAll()
 {
     for (auto it = _motors.begin(); it != _motors.end(); ++it)
     {
-        it->second->Read();
+        //it->second->Read();
     }
 }
 

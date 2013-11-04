@@ -1,8 +1,9 @@
 #ifndef MOTOR_CONTROL_H
 #define MOTOR_CONTROL_H
 
-#include "Utilities/ThreadManager.h"
 #include "Control/STM32F4_2.h"
+
+#include "Utilities/ThreadManager.h"
 #include "Utilities/XmlParser.h"
 
 #include <vector>
@@ -20,7 +21,7 @@ class Motor
         const double getMaxAngle();
         void setTorque(bool value);
         const bool getTorque();
-        void Read();
+        void Read(const std::vector<char>& msg);
         void Write();
     private:
         int Angle2Value(const double angle);
@@ -34,8 +35,10 @@ class Motor
         int _max;
         int _speed;
         int _playTime;
-        double _lastPos;
-        double _currentPos;
+        double _posToRead;
+        bool _readDirty;
+        double _posToWrite;
+        bool _writeDirty;
         bool _torqueOn;
         bool _torqueDirty;
 };

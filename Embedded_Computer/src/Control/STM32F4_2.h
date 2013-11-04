@@ -8,19 +8,19 @@
 
 class STM32F4
 {
-public:
-	STM32F4(std::string portName, boost::asio::io_service& io);
-	~STM32F4();
-   
-   void RegisterRead(/*lambda*/);
+    public:
+        STM32F4(std::string portName, boost::asio::io_service& io);
+        ~STM32F4();
 
-   void AddMsg(const std::vector<std::uint8_t>& msg);
-   void SendMsg();
-	
-private:
-	SerialInterface _usb;
-   std::vector<char> _msg;
-   //std::vector<std::shared_ptr<ComComponent>> _readComponent;
+        void RegisterRead(/*lambda*/);
+
+        void AddMsg(const std::vector<char>& msg);
+        void SendMsg();
+
+    private:
+        SerialInterface _usb;
+        std::vector<char> _data;
+        //std::vector<std::shared_ptr<ComComponent>> _readComponent;
 };
 
 #endif // STM32F4_H
