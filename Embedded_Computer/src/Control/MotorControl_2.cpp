@@ -1,4 +1,5 @@
 #include "Control/MotorControl_2.h"
+#include "Control/Protocol.h"
 #include "Utilities/logger.h"
 
 #include <iostream>
@@ -34,7 +35,9 @@ _min(min),
 _max(max),
 _playTime(playTime),
 _lastPos(0),
-_currentPos(0)
+_currentPos(0),
+_torqueOn(false),
+_torqueDirty(false)
 {    
 }
 
@@ -54,7 +57,17 @@ const double Motor::getPos()
 
 void Motor::setTorque(bool value)
 {
-    _stm32f4->setTorque(_id, value ? STM32F4::TorqueOn : STM32F4::TorqueOff);
+    //_stm32f4->setTorque(_id, value ? STM32F4::TorqueOn : STM32F4::TorqueOff);
+   if(_torqueOn != value)
+   {
+      _torqueOn = value;
+      _torqueDirty = true;
+   }  
+}
+
+const bool Motor:getTorque()
+{
+   return _torqueOn;
 }
 
 int Motor::Angle2Value(const double angle)
@@ -90,10 +103,26 @@ void Motor::Read()
 
 void Motor::Write()
 {
+    std::vector<std::uint8_t> msg;
+    msg.push_back(Protocol::MotorHeader);
+    msg.push_back(_id);
+    msg.push_back(static_cast<std::uint8_t>(_torqueOn));
+
     if (_currentPos != _lastPos)
     {
         _lastPos = _currentPos;
-        _stm32f4->setMotor(_id, Angle2Value(_currentPos), _playTime);
+        _torqueDirty = false;
+       
+        msg.push_back(_currentPos);
+        msg.push_back(_playTime);
+ 
+        _stm32f4->AddMsg(msg);
+    }
+    else if (_torqueDirty)
+    {
+        _torqueDirty = false;
+
+        _stm32f4->AddMsg(msg);
     }
 }
 

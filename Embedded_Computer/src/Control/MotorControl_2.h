@@ -2,7 +2,7 @@
 #define MOTOR_CONTROL_H
 
 #include "Utilities/ThreadManager.h"
-#include "Control/STM32F4.h"
+#include "Control/STM32F4_2.h"
 #include "Utilities/XmlParser.h"
 
 #include <vector>
@@ -19,6 +19,7 @@ class Motor
         const double getMinAngle();
         const double getMaxAngle();
         void setTorque(bool value);
+        const bool getTorque();
         void Read();
         void Write();
     private:
@@ -35,6 +36,8 @@ class Motor
         int _playTime;
         double _lastPos;
         double _currentPos;
+        bool _torqueOn;
+        bool _torqueDirty;
 };
 
 class MotorControl
