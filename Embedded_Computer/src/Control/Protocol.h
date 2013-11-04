@@ -5,7 +5,7 @@
 
 namespace Protocol
 {
-   const std::uint8_t MotorHead = '\x0a';
+   const std::uint8_t MotorHeader = '\x0a';
 }
 
 #endif //PROTOCOL_H

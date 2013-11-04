@@ -48,6 +48,7 @@ Motor::~Motor()
 void Motor::setPos(double pos)
 {
     _currentPos = pos;
+    Write();
 }
 
 const double Motor::getPos()
@@ -63,9 +64,10 @@ void Motor::setTorque(bool value)
       _torqueOn = value;
       _torqueDirty = true;
    }  
+   Write();
 }
 
-const bool Motor:getTorque()
+const bool Motor::getTorque()
 {
    return _torqueOn;
 }
@@ -94,11 +96,14 @@ const double Motor::getMaxAngle()
 
 void Motor::Read()
 {
-    std::int16_t value = _stm32f4->read(_id);
+    //TODO finish
+    /*
+std::int16_t value = _stm32f4->read(_id);
     if (value > 0)
         _currentPos = Value2Angle(value);
     else
     	Logger::getInstance() << __FILE__ << " : Read Error Id : " << _id << std::endl;
+*/
 }
 
 void Motor::Write()
@@ -176,7 +181,7 @@ void MotorControl::run()
                 Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : Resume LEGS_CONTROL fail" << std::endl;
             }
 
-            WriteAll();
+            _stm32f4->SendMsg();
             _threadManager->wait(); 
         }
     }
@@ -309,7 +314,7 @@ bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Co
       std::transform(pos.begin(), pos.end(), posDt.begin(), pos.begin(), std::plus<double>());
 
       SetPositions(pos, config);
-      WriteAll();
+      _stm32f4->SendMsg();
       usleep(msDt*1000);
    }
    return true;
@@ -376,8 +381,8 @@ void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
    for ( ; itrJoint != endJoint && itrPos != endPos; itrJoint++, itrPos++ )
    {
        (*itrJoint)->setPos(*itrPos);
-       (*itrJoint)->Write();
    }
+   _stm32f4->SendMsg();
 }
 
 void MotorControl::HardGet(std::vector<double>& pos, const Config config)
@@ -467,10 +472,3 @@ void MotorControl::ReadAll()
     }
 }
 
-void MotorControl::WriteAll()
-{
-    for (auto it = _motors.begin(); it != _motors.end(); ++it)
-    {
-        it->second->Write();
-    }
-}
