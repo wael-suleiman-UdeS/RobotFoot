@@ -62,7 +62,7 @@ int Motor::Angle2Value(const double angle)
     int value = (angle*dInvAngleConvertion) + _offset;
 	if(value < _min || value > _max)
     {
-        Logger::getInstance() << __FILE__ << " : Angle2Value : Value off limits.";
+        Logger::getInstance() << __FILE__ << " : Angle2Value : Value off limits." << std::endl;
     }
     return clamp(value, _min, _max);
 }
@@ -71,7 +71,7 @@ double Motor::Value2Angle(const int value)
 {
 	if(value < _min || value > _max)
     {
-        Logger::getInstance() << __FILE__ << " : Angle2Value : Value off limits.";
+        Logger::getInstance() << __FILE__ << " : Angle2Value : Value off limits." << std::endl;
     }
 	int clampedValue = clamp(value, _min, _max);
 	return double(clampedValue - _offset)*dAngleConvertion;
