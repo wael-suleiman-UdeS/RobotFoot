@@ -63,6 +63,8 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 
 	ofstream myfileETHETA2;
 	myfileETHETA2.open ("eTheta2.txt");
+
+	Eigen::VectorXf qToDisplay(12);
 	//*****************************************************************************//
 
 	for(int i = 0; i < trajectoryMatrix.rows(); ++i)
@@ -128,8 +130,12 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 			//*******************A enlever plus tard*************************//
 			calculationDone = NbIterations >= m_nbIterationMax;
 
+			qToDisplay.tail(6) = m_q.tail(6);
+			m_q.reverseInPlace();
+			qToDisplay.head(6) = m_q.tail(6);
+			m_q.reverseInPlace();
 
-			myfileQ << m_q.transpose() << endl;
+			myfileQ << qToDisplay.transpose() << endl;
 			myfileEPOS1 << ePosToPelvis << endl;
 			myfileEPOS2 << ePosToFoot << endl;
 			myfileETHETA1 << eThetaToPelvis << endl;
