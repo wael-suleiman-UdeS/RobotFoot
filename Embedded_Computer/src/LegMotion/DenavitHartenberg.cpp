@@ -208,7 +208,6 @@ Eigen::Matrix4f DenavitHartenberg::MatrixHomogene_Vector(Eigen::VectorXf vector)
 	return A;
 }
 
-//Soooo not cool
 //Return choice:
 //1: complete
 //2: position

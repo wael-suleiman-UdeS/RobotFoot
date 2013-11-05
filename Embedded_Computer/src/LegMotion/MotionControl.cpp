@@ -84,7 +84,7 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 
 			DH->Update(m_q);
 
-			CalculateError(ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot, trajectoryMatrix, DH, i);
+			CalculateError(ePosToPelvis, eThetaToPelvis, ePosToFoot, eThetaToFoot, trajectoryMatrix, DH, i);
 
 			Eigen::MatrixXf jacobienne = DH->Jacobian(DenavitHartenberg::DHSection::ToPelvis, 1);
 			Eigen::MatrixXf J1inv = EigenUtils::PseudoInverse(jacobienne.topRows(3));
@@ -106,14 +106,14 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 			if(trajectoryMatrix(i, 9) == DenavitHartenberg::Leg::GroundLeft)
 			{
 				m_q.reverseInPlace();
-				m_q.head(6) = m_q.head(6) + damping * (tachePriorite1/* + tachePriorite2*/);
-				m_q.tail(6) = m_q.tail(6) + damping * (tachePriorite3/* + tachePriorite4*/);
+				m_q.head(6) = m_q.head(6) + damping * (tachePriorite1 + tachePriorite2);
+				m_q.tail(6) = m_q.tail(6) + damping * (tachePriorite3 + tachePriorite4);
 				m_q.reverseInPlace();
 			}
 			else
 			{
-				m_q.head(6) = m_q.head(6) + damping * (tachePriorite1 /*+ tachePriorite2*/);
-				m_q.tail(6) = m_q.tail(6) + damping * (tachePriorite3 /*+ tachePriorite4*/);
+				m_q.head(6) = m_q.head(6) + damping * (tachePriorite1 + tachePriorite2);
+				m_q.tail(6) = m_q.tail(6) + damping * (tachePriorite3 + tachePriorite4);
 			}
 
 			DH->Update(m_q);
@@ -154,13 +154,10 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	/////////////////////////////////////////////////////////////////
 	//Ground foot to pelvis
 	/////////////////////////////////////////////////////////////////
-	Eigen::Matrix4f tempPeToPelvis = Eigen::Matrix4f::Identity();
-	tempPeToPelvis = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToPelvis);
-	Eigen::Vector3f PeToPelvis(tempPeToPelvis(0,3), tempPeToPelvis(1,3), tempPeToPelvis(2,3)); 		//Position of End effector (pelvis) from ground foot
+	Eigen::Vector3f PeToPelvis = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToPelvis).topRightCorner(3,1);//Position of End effector (pelvis) from ground foot
 
 	Eigen::Matrix4f tempPdToPelvis = Eigen::Matrix4f::Identity();
 	tempPdToPelvis.col(3) = Eigen::Vector4f(trajectoryMatrix(i,10), trajectoryMatrix(i,11), trajectoryMatrix(i,12), 1);
-
 	tempPdToPelvis = DH->GetPR1() * tempPdToPelvis * DH->GetPR1Fin();
 	Eigen::Vector3f PdToPelvis =  tempPdToPelvis.topRightCorner(3,1); 								//Position Desired for the end effector (pelvis) from ground foot
 
@@ -172,27 +169,32 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	/////////////////////////////////////////////////////////////////
 	//Pelvis to moving foot
 	/////////////////////////////////////////////////////////////////
+	Eigen::Matrix4f tempPeToPelvis = Eigen::Matrix4f::Identity();
+	tempPeToPelvis.topRightCorner(3,1) = PeToPelvis;
 	tempPeToPelvis = DH->GetRP1() * tempPeToPelvis;
-	Eigen::Vector3f PeToPelvisp = tempPeToPelvis.topRightCorner(3,1);
+	Eigen::Vector3f PeToPelvisP = tempPeToPelvis.topRightCorner(3,1);
 
 	Eigen::Matrix4f tempPeToFootp = Eigen::Matrix4f::Identity();
 	tempPeToFootp.col(3) = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToFoot).col(3);
 	tempPeToFootp = DH->GetRP2() * tempPeToFootp;
-	Eigen::Vector3f PeToFootp = PeToPelvisp + tempPeToFootp.topRightCorner(3,1);
+	Eigen::Vector3f PeToFootp = PeToPelvisP + tempPeToFootp.topRightCorner(3,1);
 
 	Eigen::Matrix4f tempPeToFoot = Eigen::Matrix4f::Identity();
-	tempPeToFoot.topRightCorner(3,1) = PeToFootp - PeToPelvisp;
+	tempPeToFoot.topRightCorner(3,1) = PeToFootp - PeToPelvisP;
 	tempPeToFoot = tempPeToFoot * DH->GetPR2Fin();
-	Eigen::Vector3f PeToFoot = PeToPelvisp + tempPeToFoot.topRightCorner(3,1); 						//Position of End effector (foot) for moving foot
+	Eigen::Vector3f PeToFoot = tempPeToFoot.topRightCorner(3,1); 									//Position of End effector (foot) for moving foot
 
 	Eigen::Matrix4f tempPdToFoot = Eigen::Matrix4f::Identity();
 	if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
 	{
-		tempPdToFoot.col(3) = Eigen::Vector4f(trajectoryMatrix(i,1), trajectoryMatrix(i,2), trajectoryMatrix(i,3), 1);
+		tempPdToFoot.col(3) = Eigen::Vector4f(trajectoryMatrix(i,rightFootPosX)-PeToPelvisP(0),
+				trajectoryMatrix(i,rightFootPosY)-PeToPelvisP(1), trajectoryMatrix(i,rightFootPosZ)-PeToPelvisP(2), 1);
 	}
 	else
 	{
-		tempPdToFoot.col(3) = Eigen::Vector4f(trajectoryMatrix(i,5), trajectoryMatrix(i,6), trajectoryMatrix(i,7), 1);
+		float x = trajectoryMatrix(i,leftFootPosX);
+		tempPdToFoot.col(3) = Eigen::Vector4f(trajectoryMatrix(i,leftFootPosX)-PeToPelvisP(0),
+				trajectoryMatrix(i,leftFootPosY)-PeToPelvisP(1), trajectoryMatrix(i,leftFootPosZ)-PeToPelvisP(2), 1);
 	}
 
 	tempPdToFoot = tempPdToFoot * DH->GetPR2Fin();
