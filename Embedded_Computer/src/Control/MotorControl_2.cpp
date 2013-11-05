@@ -179,7 +179,7 @@ void MotorControl::run()
             start = boost::chrono::system_clock::now();
 
             // Main task reading and sending data
-            ReadAll();
+            //ReadAll();
             if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
             {
                 Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : wait for StaticWalk" << std::endl;
@@ -296,7 +296,7 @@ bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Co
    Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
 #endif   
 
-   ReadAll();
+   //ReadAll();
 
    std::vector<double> pos;
    if (!ReadPositions(pos, config))
@@ -473,11 +473,11 @@ bool MotorControl::ReadPositions(std::vector<double>& pos, const Config config)
    return status;
 }
 
-void MotorControl::ReadAll()
+void MotorControl::Read(const std::vector<char>& msg)
 {
-    for (auto it = _motors.begin(); it != _motors.end(); ++it)
-    {
-        //it->second->Read();
-    }
+    // Check for Header
+    // Check size and isolate msg
+    // Check ID
+    // Interprate msg with with correct Motor 
 }
 

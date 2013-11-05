@@ -84,8 +84,7 @@ private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
 
-   void ReadAll();
-   void WriteAll();
+   void Read(const std::vector<char>& msg);
 
    STM32F4 *_stm32f4;
    std::shared_ptr<ThreadManager> _threadManager;

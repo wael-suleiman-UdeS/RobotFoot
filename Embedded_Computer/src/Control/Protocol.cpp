@@ -44,3 +44,25 @@ void Protocol::GenerateDataMsg(std::int16_t header, const std::vector<char>& dat
 
     result.insert(result.end(), data.begin(), data.end());
 }
+
+int Protocol::ReadMsg(std::int16_t header,
+        std::vector<char>::const_iterator mainItr, 
+        std::vector<char>::const_iterator mainEnd,
+        std::vector<char>::const_iterator resultBegin,
+        std::vector<char>::const_iterator resultEnd)
+{
+    char headerMSB, headerLSB;
+    Separate2Bytes(header,headerLSB,headerMSB);
+
+    for(;mainItr != mainEnd; ++mainItr)
+    {
+        if(headerLSB == *(mainItr) && headerMSB == *(++mainItr))
+        {
+            
+        }
+                // Compare with header 
+        // Get size 
+        // Set Begin and end
+    }
+}
+

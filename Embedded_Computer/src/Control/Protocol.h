@@ -17,6 +17,14 @@ namespace Protocol
     char CalculCheckSum(const std::vector<char>& msg);
 
     void GenerateDataMsg(std::int16_t header, const std::vector<char>& data, std::vector<char>& result);
+
+//    int ReadMsg(std::int16_t header, const std::vector<char>& msg, std::vector<char>& result);
+    int ReadMsg(std::int16_t header,
+            std::vector<char>::const_iterator mainItr, 
+            std::vector<char>::const_iterator mainEnd,
+            std::vector<char>::const_iterator resultBegin,
+            std::vector<char>::const_iterator resultEnd);
+
 }
 
 #endif //PROTOCOL_H
