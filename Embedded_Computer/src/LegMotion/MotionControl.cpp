@@ -134,6 +134,7 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 			m_q.reverseInPlace();
 			qToDisplay.head(6) = m_q.tail(6);
 			m_q.reverseInPlace();
+			qToDisplay*180/M_PI;
 
 			myfileQ << qToDisplay.transpose() << endl;
 			myfileEPOS1 << ePosToPelvis << endl;
