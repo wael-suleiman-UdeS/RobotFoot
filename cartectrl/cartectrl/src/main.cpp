@@ -65,20 +65,119 @@ uint16_t GYACC_txrx(bool which, uint16_t data)
 }
 enum { USE_GYRO, USE_ACC };
 
-int main(void)
+
+#include "usb/usb_com.hpp"
+#include <cstring>
+#include <sstream>
+#include <iomanip>
+
+void usbsend(const char *s)
 {
-    Herkulex    herk    = {&UART3i};
-    HerkulexMan herkman = {&herk};
-    USBProtocol app     = {&herkman};
+    auto e = std::strlen(s);
+    const char *const endp = s + e;
 
-    herk.send_reboot(BROADCAST_ID);
-
-    bsp::vsense.setLimits(7.2f, 9.5f);
-    // wait
-    Tools::Delay(Tools::DELAY_AROUND_1S/10);
-
-    // Application loop
-    app.loop();
+    while(s != endp)
+    {
+        auto r = usb::write(s,endp-s);
+        if (r > 0) s+= r;
+    }
 }
+
+void usbread(char *s, unsigned len)
+{
+    char *const endp = s + len;
+
+    while(s != endp)
+    {
+        auto r = usb::read(s,endp-s);
+        if (r > 0) s+= r;
+    }
+}
+void usbreadlf(char *s, unsigned len)
+{
+    char *const endp = s + len;
+
+    while(s != endp)
+    {
+        auto r = usb::read(s,1);
+        if (r > 0)
+        {
+            if (*s == '\r') { *s = 0; break; }
+            else { usb::write(s, 1); ++s; }
+        }
+    }
+}
+
+int GYACC_read(bool b, unsigned axes)
+{
+    if (axes > 2u) axes = 2u;
+
+    const uint16_t base = 0xA800 + (axes << 9);
+
+    int out = (GYACC_txrx(b, base) & 0xFF);
+    Tools::Delay(1);
+    out |= ((GYACC_txrx(b, base+0x10) & 0xFF) << 8);
+    if (out & 0x8000) out |= 0xFFFF0000;
+    return out;
+}
+
+extern "C" int _open() { return -1; }
 //------------------------------------------------------------------------------
 
+int main(void)
+{
+    init_GYACC();
+    usb::init();
+
+    bsp::vsense.setLimits(6.8f, 9.1f);
+    char bbb[128] = {0};
+
+    GYACC_txrx(USE_ACC,  0x2037);
+    GYACC_txrx(USE_GYRO, 0x200F);
+
+    for (;;)
+    {
+        usbsend("(GYRO/ACC  READ ADDR HEX)> ");
+        usbreadlf(bbb, sizeof bbb);
+        usbsend("\r\n");
+        if (bbb[std::strspn(bbb," 0123456789ABCDEFabcdef")])
+        {
+            usbsend("GARBAGE DETECTED...\r\n");
+        }
+        else if (bbb[sizeof bbb - 1])
+        {
+            usbsend("TOO LONG LINE...\r\n");
+        }
+        else
+        {
+            int g = 0, d = 0;
+            std::stringstream ss(bbb);
+            ss >> std::hex >> g >> d;
+            if (ss)
+            {
+                d = ((d & 0x2F) << 8) | 0x8000;
+                const int r = GYACC_txrx(g, d);
+                int c = r;
+                bbb[0]='0';
+                bbb[1]='x';
+                for (int i=4; i--;)
+                {
+                    bbb[2+i] = "0123456789ABCDEF"[c&0xF];
+                    c >>= 4;
+                }
+                bbb[6]=0;
+
+                usbsend("RESULT: ");
+                usbsend(bbb);
+                usbsend("\r\n");
+            }
+            else
+            {
+                usbsend("EXTRACTION ERROR.\r\n");
+            }
+        }
+    }
+
+//    unsigned g = GYACC_txrx(USE_GYRO, 0x8F00);
+//    unsigned a = GYACC_txrx(USE_ACC,  0xA000);
+}
