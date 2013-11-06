@@ -129,7 +129,7 @@ int main(void)
     init_GYACC();
     usb::init();
 
-    bsp::vsense.setLimits(6.8f, 9.1f);
+    bsp::vsense.setLimits(7.2f, 9.5f);
     char bbb[128] = {0};
 
     GYACC_txrx(USE_ACC,  0x2037);
