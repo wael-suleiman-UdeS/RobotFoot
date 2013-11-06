@@ -12,11 +12,10 @@
  *
  */
 Trajectory::Trajectory()
-: m_singleStepTime(1.0f)
-, m_dLeg(0.1f)
-, m_dStep(0.3f)
-, m_stepHeight(0.02f)
+: m_dLeg(0.07f)
+, m_dStep(0.03f)
 , m_dTime(0.01f)
+, m_ZMPHeight(0.2f)
 , m_nbTrajectoryPoints(101)
 {}
 
@@ -39,7 +38,6 @@ Trajectory::~Trajectory()
  */
 Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goalPoint, Eigen::Vector2f goalAngle, Eigen::Vector2f startingAngle, float stepTime, float stepHeight)
 {
-	m_ZMPHeight = 0.20f;
 	m_singleStepTime = stepTime;
 	m_stepHeight = stepHeight;
 
@@ -605,12 +603,12 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 	Eigen::Vector2f initialPoint = (leftSteps.row(0) + rightSteps.row(0))/2;
 
 	//Trajectory from point A to left footprint
-    Eigen::MatrixXf trajectory = EigenUtils::MXB(initialPoint, leftSteps.row(0), m_dTime);
+    Eigen::MatrixXf trajectory = EigenUtils::MXB(initialPoint, leftSteps.row(0), m_dTime/m_singleStepTime);
 
     for(int i =0, j = 1; i < rightSteps.rows() - 1; ++i, ++j)
     {
 		//Trajectory from left to right to left foot steps
-		Eigen::MatrixXf mxbMatrix = EigenUtils::CreateCombinedMXBMatrix(leftSteps, rightSteps, m_dTime, i, j);
+		Eigen::MatrixXf mxbMatrix = EigenUtils::CreateCombinedMXBMatrix(leftSteps, rightSteps, m_dTime/m_singleStepTime, i, j);
 
         Eigen::MatrixXf tempMatrix(trajectory.rows()+mxbMatrix.rows(), trajectory.cols());
         tempMatrix << trajectory, mxbMatrix;
@@ -619,7 +617,7 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 
     //Append the last step (left foot) to pointD
     Eigen::Vector2f finalPoint = (leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2;
-    Eigen::MatrixXf finalStepTraj = EigenUtils::MXB(leftSteps.row(leftSteps.rows()-1), finalPoint, m_dTime);
+    Eigen::MatrixXf finalStepTraj = EigenUtils::MXB(leftSteps.row(leftSteps.rows()-1), finalPoint, m_dTime/m_singleStepTime);
 
     Eigen::MatrixXf tempMatrix(trajectory.rows()+finalStepTraj.rows(), trajectory.cols() + 1);
     tempMatrix << trajectory, Eigen::VectorXf::Constant(trajectory.rows(), m_ZMPHeight), finalStepTraj, Eigen::VectorXf::Constant(finalStepTraj.rows(), m_ZMPHeight);

@@ -11,7 +11,7 @@ Trajectory();
 ~Trajectory();
 
 Eigen::MatrixXf GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goalPoint, Eigen::Vector2f goalAngle,
-		Eigen::Vector2f startingAngle, float stepTime = 1.0f, float stepHeight = 0.02f);
+		Eigen::Vector2f startingAngle, float stepTime = 3.0f, float stepHeight = 0.02f);
 void GenerateKick();
 Eigen::MatrixXf GenerateMovement(Eigen::Vector4f& rightFootInitialPos, Eigen::Vector4f& rightFootFinalPos, Eigen::Vector4f& leftFootInitialPos,
 		Eigen::Vector4f& leftFootFinalPos, Eigen::Vector4f& pelvisInitialPos, Eigen::Vector4f& pelvisFinalPos, float timeLapse);
