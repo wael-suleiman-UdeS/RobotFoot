@@ -84,14 +84,14 @@ private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
 
-   void ReadAll();
-   void WriteAll();
+   void Read(const std::vector<char>& msg);
 
    STM32F4 *_stm32f4;
    std::shared_ptr<ThreadManager> _threadManager;
    boost::mutex _io_mutex;
 
-   std::map<std::string, Motor*> _motors;
+   std::map<std::string, Motor*> _mapStrMotors;
+   std::map<int, Motor*> _mapIdMotors;
    std::map<Config, std::vector<Motor*>> _configurations;
 };
 #endif  //MOTOR_CONTROL_H

@@ -7,6 +7,13 @@ void Protocol::Separate2Bytes(const std::int16_t value, char& valueLSB, char& va
     valueLSB = value;
 }
 
+void Protocol::Unify2Bytes(std::int16_t& value, const char valueLSB, const char valueMSB)
+{
+    value = 0;
+    value = valueMSB << 8;
+    value = value | valueLSB;
+}
+
 char Protocol::CalculCheckSum(const std::vector<char>& msg)
 {
     uint8_t checkSum(0);
@@ -44,3 +51,29 @@ void Protocol::GenerateDataMsg(std::int16_t header, const std::vector<char>& dat
 
     result.insert(result.end(), data.begin(), data.end());
 }
+
+void Protocol::ReadPacket(std::int16_t header,
+        std::vector<char>::const_iterator& mainItr, 
+        const std::vector<char>::const_iterator& mainEnd,
+        std::vector<char>& result)
+{
+    char headerMSB, headerLSB;
+    std::int16_t size(0);
+    Separate2Bytes(header,headerLSB,headerMSB);
+
+    for(;mainItr != mainEnd && mainItr+1 != mainEnd; ++mainItr)
+    {
+        if(headerLSB == *(mainItr) && headerMSB == *(mainItr+1))
+        {
+            mainItr+=2;
+            char sizeLSB = *(mainItr);
+            char sizeMSB = *(++mainItr); 
+            Unify2Bytes(size, sizeLSB, sizeMSB);
+            break;
+        }
+    }
+    std::vector<char>::const_iterator packetBegin = ++mainItr;
+    mainItr += size;
+    result.assign(packetBegin,mainItr);
+}
+
