@@ -35,7 +35,6 @@ _min(min),
 _max(max),
 _playTime(playTime),
 _posToRead(0.0),
-_readDirty(false),
 _posToWrite(0.0),
 _writeDirty(false),
 _torqueOn(false),
@@ -59,7 +58,6 @@ void Motor::setPos(double pos)
 
 const double Motor::getPos()
 {
-    _readDirty = false;
     return _posToRead;
 }
 
@@ -102,25 +100,24 @@ const double Motor::getMaxAngle()
 
 void Motor::Read(const std::vector<char>& msg)
 {
-    int size = msg.size();
-    if(size >= 2)
-    {
-        
-    } 
-    
-    //Read torque
-    //Read Pos
-    //Read Dt or not..
-    //Read Status
-    
-    //TODO finish
-    /*
-       std::int16_t value = _stm32f4->read(_id);
-       if (value > 0)
-       _currentPos = Value2Angle(value);
-       else
-       Logger::getInstance() << __FILE__ << " : Read Error Id : " << _id << std::endl;
-     */
+   int msgSize = msg.size();
+   switch(msgSize)
+   {
+      case 3:
+      case 6:
+         Logger::getInstance() << __FILE__ << " Motor::Read : Invalid msg size " << std::endl;
+       return;
+      default:
+       break;
+   }
+
+   size_t size = std::min(msgSize*sizeof(char),sizeof(ReadData));
+   memcpy(&_readData,msg.data(),size);
+
+   if (_readData.pos > 0)
+      _posToRead = Value2Angle(_readData.pos);
+   else
+      Logger::getInstance() << __FILE__ << " Motor::Read : Read position error " << _id << std::endl;
 }
 
 void Motor::Write()

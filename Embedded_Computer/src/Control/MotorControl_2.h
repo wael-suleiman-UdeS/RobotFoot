@@ -26,7 +26,16 @@ class Motor
     private:
         int Angle2Value(const double angle);
         double Value2Angle(const int value);
-        
+
+        struct ReadData
+        {
+           char dummyId;
+           char torqueOn;
+           std::uint16_t pos;
+           char dummyDt;
+           std::uint16_t status;
+        } _readData;
+
         STM32F4 *_stm32f4; 
         std::string _name;
         int _id;
@@ -36,7 +45,6 @@ class Motor
         int _speed;
         int _playTime;
         double _posToRead;
-        bool _readDirty;
         double _posToWrite;
         bool _writeDirty;
         bool _torqueOn;
