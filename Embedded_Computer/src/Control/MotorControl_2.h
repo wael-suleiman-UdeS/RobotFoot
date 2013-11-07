@@ -12,7 +12,7 @@
 class Motor
 {
     public:  
-        Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime);
+        Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime, bool isInversed);
         ~Motor();
         void setPos(double pos);
         const double getPos();
@@ -35,6 +35,7 @@ class Motor
         int _playTime;
         double _lastPos;
         double _currentPos;
+        bool _isInversed;
 };
 
 class MotorControl
