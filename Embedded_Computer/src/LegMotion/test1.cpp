@@ -12,10 +12,10 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 	Eigen::Vector2f pointA(0, 0);
-	//Eigen::Vector2f pointD(0.5, 0.5);
-	Eigen::Vector2f pointD(1, 1.3);
-//	Eigen::Vector2f startAngle(0, 0);
-	Eigen::Vector2f startAngle(90, 90);
+	Eigen::Vector2f pointD(0.5, 0.5);
+	//Eigen::Vector2f pointD(1, 1.3);
+	Eigen::Vector2f startAngle(0, 0);
+	//Eigen::Vector2f startAngle(90, 90);
 	Eigen::Vector2f endAngle(0, 0);
 
 

@@ -12,10 +12,10 @@
  *
  */
 Trajectory::Trajectory()
-: m_dLeg(0.1f)
-//: m_dLeg(0.037f)
-//, m_dStep(0.03f)
-, m_dStep(0.1f)
+//: m_dLeg(0.1f)
+: m_dLeg(0.037f)
+, m_dStep(0.03f)
+//, m_dStep(0.1f)
 , m_dTime(0.01f)
 , m_ZMPHeight(0.2f)
 , m_nbTrajectoryPoints(101)
@@ -266,11 +266,18 @@ void Trajectory::ParallelCurve(Eigen::VectorXf &xInner, Eigen::VectorXf &yInner,
 
 	for(int i = 0; i < x.innerSize(); ++i)
 	{
+		/*
 		xInner(i) = x(i) - unv(i, 0)*m_dLeg;
 		yInner(i) = y(i) - unv(i, 1)*m_dLeg;
 
 		xOuter(i) = x(i) + unv(i, 0)*m_dLeg;
 		yOuter(i) = y(i) + unv(i, 1)*m_dLeg;
+		*/
+		yInner(i) = x(i) - unv(i, 0)*m_dLeg;
+		xInner(i) = y(i) - unv(i, 1)*m_dLeg;
+
+		yOuter(i) = x(i) + unv(i, 0)*m_dLeg;
+		xOuter(i) = y(i) + unv(i, 1)*m_dLeg;
 	}
 }
 
@@ -291,13 +298,17 @@ void Trajectory::GenerateSteps(Eigen::MatrixXf &rightSteps, Eigen::MatrixXf &lef
 		Eigen::Vector2f startingPoint, Eigen::Vector2f startAngle, Eigen::VectorXf& angles)
 {
 	Eigen::Vector3f currentLeftStepPos;
-	currentLeftStepPos(0) = startingPoint(0) - (m_dLeg*sin(startAngle(0)*M_PI/180.0));
-	currentLeftStepPos(1) = startingPoint(1) + (m_dLeg*cos(startAngle(1)*M_PI/180.0));
+//	currentLeftStepPos(0) = startingPoint(0) - (m_dLeg*sin(startAngle(0)*M_PI/180.0));
+//	currentLeftStepPos(1) = startingPoint(1) + (m_dLeg*cos(startAngle(1)*M_PI/180.0));
+	currentLeftStepPos(0) = startingPoint(1) + (m_dLeg*cos(startAngle(1)*M_PI/180.0));
+	currentLeftStepPos(1) = startingPoint(0) - (m_dLeg*sin(startAngle(0)*M_PI/180.0));
 	currentLeftStepPos(2) = angles(0);
 
 	Eigen::Vector3f currentRightStepPos;
-	currentRightStepPos(0) = startingPoint(0) + (m_dLeg*sin(startAngle(0)*M_PI/180.0));
-	currentRightStepPos(1) = startingPoint(1) - (m_dLeg*cos(startAngle(1)*M_PI/180.0));
+//	currentRightStepPos(0) = startingPoint(0) + (m_dLeg*sin(startAngle(0)*M_PI/180.0));
+//	currentRightStepPos(1) = startingPoint(1) - (m_dLeg*cos(startAngle(1)*M_PI/180.0));
+	currentRightStepPos(0) = startingPoint(1) - (m_dLeg*cos(startAngle(1)*M_PI/180.0));
+	currentRightStepPos(1) = startingPoint(0) + (m_dLeg*sin(startAngle(0)*M_PI/180.0));
 	currentRightStepPos(2) = angles(0);
 
 	Eigen::MatrixXf trajL(xInner.rows() + 1, 3);
