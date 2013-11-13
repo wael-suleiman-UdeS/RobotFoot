@@ -470,7 +470,7 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 		}
 	}
 
-	int offset = 1/m_dTime;
+	int offset = m_singleStepTime/m_dTime;
 	//Add an initial state (repeat the first position for the first elements so that the zmp can be set correctly before moving the legs)
 	Eigen::VectorXf initialState = finalMatrix.row(offset);
 	Eigen::VectorXf finalState = finalMatrix.row(finalMatrixSize - offset - 1);
@@ -526,7 +526,7 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 		currentFootPos = GenerateParabollicTrajectory(params, parabolicTrajTime);
 
 		//Time
-		int offset = timeMultiplier+time + 1/m_dTime;
+		int offset = timeMultiplier+time + m_singleStepTime/m_dTime;
 
 		if(groundedFoot == 1)	//Left foot is 1, right foot is moving
 		{
