@@ -12,14 +12,16 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 	Eigen::Vector2f pointA(0, 0);
-	Eigen::Vector2f pointD(0.5, 0.5);
-	Eigen::Vector2f startAngle(0, 0);
+	//Eigen::Vector2f pointD(0.5, 0.5);
+	Eigen::Vector2f pointD(1, 1.3);
+//	Eigen::Vector2f startAngle(0, 0);
+	Eigen::Vector2f startAngle(90, 90);
 	Eigen::Vector2f endAngle(0, 0);
 
 
 	Trajectory* traj = new Trajectory();
-	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD, startAngle,
-			endAngle);
+	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
+			endAngle, startAngle);
 /*
 
 	Eigen::Vector4f rightInit(0.037, 0, 0, 0);
