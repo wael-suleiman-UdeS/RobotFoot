@@ -59,7 +59,7 @@ public:
     /**
      * @brief Set the volume.
      * @param vol Volume to set.
-     *        @c 0xFFFF → ~0dB 
+     *        @c 0xFFFF → ~0dB
      *        @c 0x0000 → -Inf dB
      *        Thus, it is like a 16-bit unsigned fractional number that goes
      *        from 0 to almost 1.
@@ -89,7 +89,7 @@ private:
 
 
     state        status_      = stopped;
-    std::int16_t volume_      = 0xC800;
+    std::int16_t volume_      = 0xE200;
 };
 
 /**

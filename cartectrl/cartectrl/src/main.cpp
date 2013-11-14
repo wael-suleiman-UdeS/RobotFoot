@@ -5,6 +5,7 @@
 
 #include "initClock.h"
 #include "LEDs.hpp"
+#include "vsense.hpp"
 
 #include "Tools.h"
 #include "stm32f4xx_conf.h"
@@ -13,6 +14,7 @@
 #include "CortexM4.h"
 #include "herkulex.h"
 #include "EmergencyStop.h"
+
 
 /* This funcion initializes the USART1 peripheral
  *
@@ -93,15 +95,18 @@ void init_USART1(uint32_t baudrate){
 void initialize()
 {
     init_USART1(115200);
-    LED1.set();
     LED2.set();
     EmergencyStop::install();
+
 }
 
 int main(void)
 {
     initialize();
 
+    bsp::vsense.setLimits(6.8f, 9.1f);
+
     CortexM4 cortexM4;
     cortexM4.read();
+
 }

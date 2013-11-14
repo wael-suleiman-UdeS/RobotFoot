@@ -162,6 +162,7 @@
 		<Unit filename="include/usb/usbd_cdc.h" />
 		<Unit filename="include/usb/usbd_conf.h" />
 		<Unit filename="include/usb/usbd_desc.h" />
+		<Unit filename="include/vsense.hpp" />
 		<Unit filename="linker/stm32f4_linker.ld" />
 		<Unit filename="src/CortexM4.cpp" />
 		<Unit filename="src/EmergencyStop.cpp" />
@@ -208,6 +209,7 @@
 		<Unit filename="src/usb/usbd_usr.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="src/vsense.cpp" />
 		<Unit filename="startup/startup_stm32f4xx.s">
 			<Option compiler="armnoneeabi_gnu_gcc" use="1" buildCommand="$compiler -x assembler-with-cpp -ggdb $includes -c $file -o $object" />
 		</Unit>
