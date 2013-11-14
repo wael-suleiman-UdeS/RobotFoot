@@ -67,6 +67,11 @@ Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::V
 	//Calculate ZMP
 	int finalMatrixSize = (m_singleStepTime/m_dTime)*(rightSteps.rows() + leftSteps.rows());
 	Eigen::MatrixXf zmp = GenerateZMP(rightSteps, leftSteps);
+	/*Eigen::VectorXf x = Eigen::VectorXf::Constant(9300, 0.0f);
+	Eigen::VectorXf y = Eigen::VectorXf::Constant(9300, 0.0f);
+	Eigen::VectorXf z = Eigen::VectorXf::Constant(9300, m_ZMPHeight);
+	Eigen::MatrixXf zmp(9300, 3);
+	zmp << x, y, z;*/
 
 	//Create trajectory for moving foot
 	Eigen::MatrixXf trajectoryMatrix = GenerateParabollicStepsTrajectories(rightSteps, leftSteps, finalMatrixSize);
@@ -175,6 +180,9 @@ Eigen::MatrixXf Trajectory::GenerateMovement(Eigen::Vector4f& rightFootInitialPo
 void Trajectory::BezierDegre2(Eigen::VectorXf& xTrajectory, Eigen::VectorXf& yTrajectory, Eigen::VectorXf& angles,
 	Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::Vector2f startAngle, Eigen::Vector2f endAngle, float dist)
 {
+	//Problem solve?
+	dist = (pointD - pointA).norm()/2;
+
 	Eigen::Vector2f pointB(
 		pointA(0) + dist*cos(startAngle(0)*M_PI/180.0),
 		pointA(1) + dist*sin(startAngle(1)*M_PI/180.0));
@@ -453,7 +461,7 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 		if(leftSteps.rows() > (i+1))
 		{
 			//Rise the left foot
-			groundedFoot << rightSteps(i + 1, 0), rightSteps(i + 1, 1), 0.0f, rightSteps(i + 1, 2);
+			groundedFoot << endStepPos;
 			startingStepPos << leftSteps(i, 0), leftSteps(i, 1), 0.0f, leftSteps(i, 2);
 			endStepPos << ((leftSteps(i + 1, 0) - leftSteps(i, 0))/2) + leftSteps(i, 0),
 					((leftSteps(i + 1, 1) - leftSteps(i, 1))/2) + leftSteps(i, 1), m_stepHeight, (leftSteps(i + 1, 2) - leftSteps(i, 2))/2 + leftSteps(i, 2);
@@ -470,7 +478,7 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 		}
 	}
 
-	int offset = m_singleStepTime/m_dTime;
+	int offset = nbSteppingTimeStamps;
 	//Add an initial state (repeat the first position for the first elements so that the zmp can be set correctly before moving the legs)
 	Eigen::VectorXf initialState = finalMatrix.row(offset);
 	Eigen::VectorXf finalState = finalMatrix.row(finalMatrixSize - offset - 1);
@@ -555,7 +563,7 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 			finalMatrix(offset, 7) = startingStepPos(3) + ((endingStepPos(3) - startingStepPos(3))/((endTime - startTime)))*(time-startTime);		//angle
 		}
 
-		finalMatrix(timeMultiplier+time, 8) = groundedFoot;	// 0 = right, 1 = left foot
+		finalMatrix(offset, 8) = groundedFoot;	// 0 = right, 1 = left foot
 	}
 }
 

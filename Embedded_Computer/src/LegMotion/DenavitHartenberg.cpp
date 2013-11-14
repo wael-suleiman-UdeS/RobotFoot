@@ -54,7 +54,7 @@ void DenavitHartenberg::Init(Eigen::VectorXf q)
 		m_DHtoPelvis(1,0) = L5;
 		m_DHtoPelvis(2,0) = L4;
 		m_DHtoPelvis(0,1) = -M_PI_2;
-		m_DHtoPelvis(1,1) = M_PI_2;
+		m_DHtoPelvis(3,1) = M_PI_2;
 		m_DHtoPelvis(4,1) = -M_PI_2;
 		m_DHtoPelvis(0,3) = q(11);
 		m_DHtoPelvis(1,3) = q(10);
