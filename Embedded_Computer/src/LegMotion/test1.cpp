@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 
 	Trajectory* traj = new Trajectory();
 	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
-			endAngle, startAngle);
+			endAngle, startAngle, 1.0f);
 
 /*
 	Eigen::Vector4f rightInit(-0.037, 0.2919, 0, 0);
