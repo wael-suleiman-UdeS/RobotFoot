@@ -37,6 +37,7 @@
 			<Add option="-gdwarf-2" />
 			<Add option="-mthumb" />
 			<Add option="-fverbose-asm" />
+			<Add option="-ffunction-sections" />
 			<Add option="-std=gnu++11" />
 			<Add option="-DSTM32F4XX" />
 			<Add option="-DUSE_STDPERIPH_DRIVER" />
@@ -58,6 +59,8 @@
 			<Add option="-mthumb" />
 			<Add option="-nostartfiles" />
 			<Add option="-T./linker/stm32f4_linker.ld" />
+			<Add option="-ffunction-sections" />
+			<Add option="-Wl,-gc-sections" />
 			<Add option="-Wl,--no-warn-mismatch" />
 			<Add option="-Wl,--cref,-Map=$(TARGET_OUTPUT_FILE).map" />
 			<Add option="-mfloat-abi=hard" />
