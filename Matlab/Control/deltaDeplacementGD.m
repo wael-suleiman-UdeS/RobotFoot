@@ -4,7 +4,6 @@ function [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i,L4,
 M_RP_1 = [0 1 0 0 ; 0 0 1 0 ; 1 0 0 LTZ ; 0 0 0 1];
 M_PR_1 = [0 0 1 0 ; 1 0 0 0 ; 0 1 0 0 ; 0 0 0 1];
 M_PR_1_fin = [1 0 0 0 ; 0 1 0 0 ; 0 0 1 -LTZ ; 0 0 0 1];
-M_RP_2 = [1 0 0 LTX ; 0 1 0 0 ; 0 0 1 -LTZ ; 0 0 0 1 ];
 M_PR_2_fin = [1 0 0 -LTX ; 0 1 0 0 ; 0 0 1 LTZ ; 0 0 0 1];
 
 % Update DH
@@ -27,14 +26,6 @@ M_PR_2_fin = [1 0 0 -LTX ; 0 1 0 0 ; 0 0 1 LTZ ; 0 0 0 1];
     Pe1p = M_RP_1*Pe1p;
 	Pe1p = Pe1p(1:3,4);
 
-	Pe2p = [1 0 0 Pe2(1) ; 0 1 0 Pe2(2) ; 0 0 1 Pe2(3) ; 0 0 0 1];
-    Pe2p = M_RP_2*Pe2p;
-	Pe2p = Pe1p + Pe2p(1:3,4);
-
-    Pe2 = [1 0 0 Pe2p(1)-Pe1p(1) ; 0 1 0 Pe2p(2)-Pe1p(2) ; 0 0 1 Pe2p(3)-Pe1p(3) ; 0 0 0 1];
-	Pe2 = Pe2 * M_PR_2_fin;
-	Pe2 = Pe2(1:3,4);
-
     % Update desired position
     Pd1p = PelvisTraj(i,:);
 	Pd1 = [1 0 0 Pd1p(1) ; 0 1 0 Pd1p(2) ; 0 0 1 Pd1p(3) ; 0 0 0 1];
@@ -44,7 +35,7 @@ M_PR_2_fin = [1 0 0 -LTX ; 0 1 0 0 ; 0 0 1 LTZ ; 0 0 0 1];
 	ePos1 = Pd1-Pe1;
 	eTheta1 = Td1-Te1;
 
-	Pd2p = RightFootTraj(i,:); 
+	Pd2p = RightFootTraj(i,:);
 	Pd2 = [1 0 0 Pd2p(1)-Pe1p(1) ; 0 1 0 Pd2p(2)-Pe1p(2) ; 0 0 1 Pd2p(3)-Pe1p(3) ; 0 0 0 1];
 	Pd2 = Pd2 * M_PR_2_fin;
 	Pd2 = Pd2(1:3,4);

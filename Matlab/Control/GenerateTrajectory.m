@@ -1,9 +1,10 @@
-function [Size,Dt,T,RightFootTraj,LeftFootTraj,PelvisTraj] = GenerateTrajectory()
+function [Size,Dt,T,RightFootTraj,LeftFootTraj,PelvisTraj,FixedFootTraj] = GenerateTrajectory()
 
 Dt = 0.01;
 % Time for each following trajectory
 %Tf = [1;1;0.2; 0.5;0.2; 0.5;0.5; 0.2;1];
 Tf = [0.3;1;0.3;0.5;1;0.3;0.2;0.5];
+%Tf = [0.3;1;0.3;0.5];
 
 % Goal Position for each Trajectory
 RightFootPos = [ 0.037,0,0 ;
@@ -22,11 +23,11 @@ LeftFootPos = [  -0.037,0,0 ;
                  -0.037,0,0 ;
                  -0.037,0,0 ;
                  -0.037,0,0 ;
-                 -0.037,0,0.01 ;
-                 -0.037,-0.08,0.01 ;
-                 -0.037,-0.08,0.01 ;
-                 -0.037,0.1,0.01 ;
-                 -0.037,0.1,0.01 ];
+                 -0.037,0,0.04 ;
+                 -0.037,-0.08,0.04 ;
+                 -0.037,-0.08,0.04 ;
+                 -0.037,0.1,0.04 ;
+                 -0.037,0.1,0.04 ];
            
  PelvisPos =   [  0.0,0,0.29672 ;
                   0.0,0,0.29672 ;
@@ -40,16 +41,25 @@ LeftFootPos = [  -0.037,0,0 ;
                   0.05,0,0.29672 ;
                   0.05,0,0.29672 ];
 
-%Tf = [1];
-%
-%RightFootPos = [ 0.037,0,0 ;
-%                 0.037,0,0 ];
-%
-%LeftFootPos = [ -0.037,0,0 ;
-%                -0.037,0,0 ];
-%
-%PelvisPos =   [  0.0,0,0.29672 ;
-%                 -0.05,0.0,0.29672 ];
+Tf = [1;1;1;1];
+FixedFoot  = [0;0;1;1];
+RightFootPos = [ 0.037,0,0 ;
+                 0.037,0,0
+                 0.037,0,0
+                 0.037,0,0.03
+                 0.037,0,0 ];
+
+LeftFootPos = [ -0.037,0,0 ;
+                -0.037,0,0.03
+                -0.037,0,0.00
+                -0.037,0,0.00
+                -0.037,0,0.00 ];
+
+PelvisPos =   [  0.0,0,0.29672 ;
+                 0.0,0,0.29672
+                 0.0,0,0.29672
+                 0.0,0,0.29672
+                 0.0,0,0.29672 ];
 
 for i = 1:size(Tf,1)
    RightFootParams(:,(i-1)*3+1) = FunctionParameter(RightFootPos(i,1),RightFootPos(i+1,1),Tf(i));
@@ -69,6 +79,7 @@ RightFootTraj = [];
 LeftFootTraj = [];
 PelvisTraj = [];
 T = [];
+FixedFootTraj = [];
 saveT = 0;
 for i = 1:size(Tf,1)
    for t = 0:Dt:Tf(i)-Dt
@@ -77,6 +88,7 @@ for i = 1:size(Tf,1)
       PelvisTraj = [PelvisTraj; Trajectory(PelvisParams(:,(i-1)*3+1:(i-1)*3+3),t)];
    
       T = [T;saveT];
+      FixedFootTraj = [FixedFootTraj; FixedFoot(i)];
       saveT = saveT+Dt;
    end
 end
