@@ -12,10 +12,8 @@
  *
  */
 Trajectory::Trajectory()
-//: m_dLeg(0.1f)
 : m_dLeg(0.037f)
 , m_dStep(0.03f)
-//, m_dStep(0.1f)
 , m_dTime(0.01f)
 , m_ZMPHeight(0.3f)
 , m_nbTrajectoryPoints(101)
@@ -67,11 +65,6 @@ Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::V
 	//Calculate ZMP
 	int finalMatrixSize = (m_singleStepTime/m_dTime)*(rightSteps.rows() + leftSteps.rows());
 	Eigen::MatrixXf zmp = GenerateZMP(rightSteps, leftSteps);
-	/*Eigen::VectorXf x = Eigen::VectorXf::Constant(9300, 0.0f);
-	Eigen::VectorXf y = Eigen::VectorXf::Constant(9300, 0.0f);
-	Eigen::VectorXf z = Eigen::VectorXf::Constant(9300, m_ZMPHeight);
-	Eigen::MatrixXf zmp(9300, 3);
-	zmp << x, y, z;*/
 
 	//Create trajectory for moving foot
 	Eigen::MatrixXf trajectoryMatrix = GenerateParabollicStepsTrajectories(rightSteps, leftSteps, finalMatrixSize);

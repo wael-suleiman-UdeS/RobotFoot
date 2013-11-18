@@ -20,21 +20,21 @@ int main(int argc, char* argv[]) {
 
 
 	Trajectory* traj = new Trajectory();
-	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
-			endAngle, startAngle, 1.0f);
+	/*Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
+			endAngle, startAngle, 1.0f);*/
 
-/*
-	Eigen::Vector4f rightInit(-0.037, 0.2919, 0, 0);
-	Eigen::Vector4f rightFinal(-0.037, 0.2919, 0, 0);
 
-	Eigen::Vector4f leftInit(0.037, 0.2613, 0, 0);
-	Eigen::Vector4f leftFinal(0.037, 0.3247, 0, 0);
+	Eigen::Vector4f rightInit(0.037, 0.0, 0, 0);
+	Eigen::Vector4f rightFinal(0.037, 0.03, 0, 0);
 
-	Eigen::Vector4f pelvisInit(-0.037, 0.2919, 0.2, 0);
-	Eigen::Vector4f pelvisFinal(0.037, 0.3247, 0.2, 0);
+	Eigen::Vector4f leftInit(-0.037, 0.0, 0, 0);
+	Eigen::Vector4f leftFinal(-0.037, 0.0, 0, 0);
+
+	Eigen::Vector4f pelvisInit(0.037, 0.0, 0.2967, 0);
+	Eigen::Vector4f pelvisFinal(0.037, 0.0, 0.2967, 0);
 
 	Eigen::MatrixXf matrix = traj->GenerateMovement(rightInit, rightFinal, leftInit, leftFinal, pelvisInit, pelvisFinal, 1);
-*/
+
 	MotionControl* motion = new MotionControl();
 	motion->Walk(matrix);
 

@@ -16,8 +16,8 @@ using namespace std;
 
 namespace
 {
-	const float ANGLE1 = -0.35;
-	const float ANGLE2 = 0.7;
+	const float ANGLE1 = 0.35;
+	const float ANGLE2 = -0.7;
 }
 
 MotionControl::MotionControl()
@@ -28,7 +28,7 @@ MotionControl::MotionControl()
 	m_TdToPelvis = Eigen::Vector3f(0,0,0);
 	m_TdToFoot = Eigen::Vector3f(0,0,0);
 	m_q.resize(12);
-	m_q << 0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f, 0.0f, 0.0f, 0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f;
+	m_q << 0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f, 0.0f, 0.0f, 0.0f, -ANGLE1, -ANGLE2, -ANGLE1, 0.0f;
 }
 
 MotionControl::~MotionControl()
@@ -181,15 +181,7 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	tempPeToPelvis = DH->GetRP1() * tempPeToPelvis;
 	Eigen::Vector3f PeToPelvisP = tempPeToPelvis.topRightCorner(3,1);
 
-	Eigen::Matrix4f tempPeToFootp = Eigen::Matrix4f::Identity();
-	tempPeToFootp.col(3) = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToFoot).col(3);
-	tempPeToFootp = DH->GetRP2() * tempPeToFootp;
-	Eigen::Vector3f PeToFootp = PeToPelvisP + tempPeToFootp.topRightCorner(3,1);
-
-	Eigen::Matrix4f tempPeToFoot = Eigen::Matrix4f::Identity();
-	tempPeToFoot.topRightCorner(3,1) = PeToFootp - PeToPelvisP;
-	tempPeToFoot = tempPeToFoot * DH->GetPR2Fin();
-	Eigen::Vector3f PeToFoot = tempPeToFoot.topRightCorner(3,1); 									//Position of End effector (foot) for moving foot
+	Eigen::MatrixXf PeToFoot = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToFoot).topRightCorner(3,1);
 
 	Eigen::Matrix4f tempPdToFoot = Eigen::Matrix4f::Identity();
 	if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
@@ -199,7 +191,6 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	}
 	else
 	{
-		float x = trajectoryMatrix(i,leftFootPosX);
 		tempPdToFoot.col(3) = Eigen::Vector4f(trajectoryMatrix(i,leftFootPosX)-PeToPelvisP(0),
 				trajectoryMatrix(i,leftFootPosY)-PeToPelvisP(1), trajectoryMatrix(i,leftFootPosZ)-PeToPelvisP(2), 1);
 	}

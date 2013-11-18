@@ -42,8 +42,6 @@ void DenavitHartenberg::Init(Eigen::VectorXf q)
 			0.0f, 0.0f, 1.0f, -LTZ,
 			0.0f, 0.0f, 0.0f, 1.0f;
 
-	m_RP_2 = m_PR_1_fin;
-
 	m_PR_2_fin = m_PR_1_fin;
 
 	m_DHtoPelvis = Eigen::MatrixXf::Zero(6,4);
@@ -55,12 +53,12 @@ void DenavitHartenberg::Init(Eigen::VectorXf q)
 		m_DHtoPelvis(2,0) = L4;
 		m_DHtoPelvis(0,1) = -M_PI_2;
 		m_DHtoPelvis(3,1) = M_PI_2;
-		m_DHtoPelvis(4,1) = -M_PI_2;
+		m_DHtoPelvis(4,1) = M_PI_2;
 		m_DHtoPelvis(0,3) = q(11);
 		m_DHtoPelvis(1,3) = q(10);
 		m_DHtoPelvis(2,3) = q(9);
 		m_DHtoPelvis(3,3) = q(8);
-		m_DHtoPelvis(4,3) = q(7)-M_PI_2;
+		m_DHtoPelvis(4,3) = q(7)+M_PI_2;
 		m_DHtoPelvis(5,3) = q(6);
 
 		//Pelvis to right foot
@@ -77,7 +75,6 @@ void DenavitHartenberg::Init(Eigen::VectorXf q)
 		m_DHtoFoot(5,3) = q(0);
 
 		//*******Left to right
-		m_RP_2(0, 3) = LTX;
 		m_PR_2_fin(0, 3) = -LTX;
 		m_PR_2_fin(2, 3) = LTZ;
 	}
@@ -86,31 +83,32 @@ void DenavitHartenberg::Init(Eigen::VectorXf q)
 		//Right foot to pelvis
 		m_DHtoPelvis(1,0) = L5;
 		m_DHtoPelvis(2,0) = L4;
-		m_DHtoPelvis(0,1) = M_PI_2;
-		m_DHtoPelvis(3,1) = -M_PI_2;
-		m_DHtoPelvis(4,1) = M_PI_2;
+		m_DHtoPelvis(0,1) = -M_PI_2;
+		m_DHtoPelvis(3,1) = M_PI_2;
+		m_DHtoPelvis(4,1) = -M_PI_2;
 		m_DHtoPelvis(0,3) = q(0);
 		m_DHtoPelvis(1,3) = q(1);
 		m_DHtoPelvis(2,3) = q(2);
 		m_DHtoPelvis(3,3) = q(3);
-		m_DHtoPelvis(4,3) = q(4)+M_PI_2;
+		m_DHtoPelvis(4,3) = q(4)-M_PI_2;
 		m_DHtoPelvis(5,3) = q(5);
 
 		//Pelvis to left foot
 		m_DHtoFoot(2,0) = -L4;
 		m_DHtoFoot(3,0) = -L5;
-		m_DHtoFoot(0,1) = -M_PI_2;
-		m_DHtoFoot(1,1) = M_PI_2;
-		m_DHtoFoot(4,1) = -M_PI_2;
+		m_DHtoFoot(0,1) = M_PI_2;
+		m_DHtoFoot(1,1) = -M_PI_2;
+		m_DHtoFoot(4,1) = M_PI_2;
 		m_DHtoFoot(0,3) = q(6);
-		m_DHtoFoot(1,3) = q(7)-M_PI_2;
+		m_DHtoFoot(1,3) = q(7)+M_PI_2;
 		m_DHtoFoot(2,3) = q(8);
 		m_DHtoFoot(3,3) = q(9);
 		m_DHtoFoot(4,3) = q(10);
 		m_DHtoFoot(5,3) = q(11);
 
 		//*******Right to left
-		m_RP_2(0, 3) = -LTX;
+		m_RP_1(0, 1) = -1.0f;
+		m_PR_1(1, 0) = -1.0f;
 		m_PR_2_fin(0, 3) = LTX;
 		m_PR_2_fin(2, 3) = LTZ;
 	}
@@ -125,7 +123,7 @@ void DenavitHartenberg::Update(Eigen::VectorXf q)
 		m_DHtoPelvis(1,3) = q(10);
 		m_DHtoPelvis(2,3) = q(9);
 		m_DHtoPelvis(3,3) = q(8);
-		m_DHtoPelvis(4,3) = q(7)-M_PI_2;
+		m_DHtoPelvis(4,3) = q(7)+M_PI_2;
 		m_DHtoPelvis(5,3) = q(6);
 
 		//Pelvis to right foot
@@ -143,12 +141,12 @@ void DenavitHartenberg::Update(Eigen::VectorXf q)
 		m_DHtoPelvis(1,3) = q(1);
 		m_DHtoPelvis(2,3) = q(2);
 		m_DHtoPelvis(3,3) = q(3);
-		m_DHtoPelvis(4,3) = q(4)+M_PI_2;
+		m_DHtoPelvis(4,3) = q(4)-M_PI_2;
 		m_DHtoPelvis(5,3) = q(5);
 
 		//Pelvis to left foot
 		m_DHtoFoot(0,3) = q(6);
-		m_DHtoFoot(1,3) = q(7)-M_PI_2;
+		m_DHtoFoot(1,3) = q(7)+M_PI_2;
 		m_DHtoFoot(2,3) = q(8);
 		m_DHtoFoot(3,3) = q(9);
 		m_DHtoFoot(4,3) = q(10);
@@ -165,8 +163,8 @@ void DenavitHartenberg::UpdateTe(Eigen::VectorXf q)
 	}
 	else
 	{
-		m_TeToPelvis = Eigen::Vector3f(q(5), -q(1)-q(2)-q(3), q(0)+q(4));
-		m_TeToFoot = Eigen::Vector3f(-q(8)-q(9)-q(10), q(7)+q(11), q(6));
+		m_TeToPelvis = Eigen::Vector3f(q(5), q(1)+q(2)+q(3), q(0)+q(4));
+		m_TeToFoot = Eigen::Vector3f(-q(8)-q(9)-q(10), -q(7)-q(11), q(6));
 	}
 }
 

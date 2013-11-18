@@ -13,7 +13,6 @@ public:
 	DenavitHartenberg(Eigen::VectorXf q, Leg grounedLeg);
 	~DenavitHartenberg();
 
-	Eigen::MatrixXf GetDH();
 	void Update(Eigen::VectorXf q);
 	void UpdateTe(Eigen::VectorXf q);
 	Eigen::Matrix4f MatrixHomogene(DHSection section);
