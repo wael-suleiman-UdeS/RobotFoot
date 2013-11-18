@@ -52,7 +52,7 @@ void Protocol::GenerateDataMsg(std::int16_t header, const std::vector<char>& dat
     result.insert(result.end(), data.begin(), data.end());
 }
 
-void Protocol::ReadPacket(std::int16_t header,
+bool Protocol::ReadPacket(std::int16_t header,
         std::vector<char>::const_iterator& mainItr, 
         const std::vector<char>::const_iterator& mainEnd,
         std::vector<char>& result)

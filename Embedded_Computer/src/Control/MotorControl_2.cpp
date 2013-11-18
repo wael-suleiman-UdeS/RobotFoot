@@ -6,147 +6,12 @@
 #include <iterator>
 #include <algorithm>
 #include <functional>
-#include <boost/algorithm/clamp.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-using boost::filesystem::path;
-
-//#define DEBUG_TEST_MOTION
-
-using boost::algorithm::clamp;
-
-
 #define DANGER_TEST_MOTION
 
-namespace
-{
-	const double dAngleConvertion = 0.325;
-	const double dInvAngleConvertion = 1/dAngleConvertion;
-}
-
-Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime)
-:
-_stm32f4(stm32f4),
-_name(name),
-_id(id),
-_offset(offset),
-_min(min),
-_max(max),
-_playTime(playTime),
-_posToRead(0.0),
-_posToWrite(0.0),
-_writeDirty(false),
-_torqueOn(false),
-_torqueDirty(false)
-{    
-}
-
-Motor::~Motor()
-{
-}
-
-void Motor::setPos(double pos)
-{
-    if(_posToWrite != pos)
-    {
-        _posToWrite = pos;
-        _writeDirty = true;
-        Write();
-    }
-}
-
-const double Motor::getPos()
-{
-    return _posToRead;
-}
-
-void Motor::setTorque(bool value)
-{
-   if(_torqueOn != value)
-   {
-      _torqueOn = value;
-      _torqueDirty = true;
-      Write();
-   }  
-}
-
-const bool Motor::getTorque()
-{
-   return _torqueOn;
-}
-
-int Motor::Angle2Value(const double angle)
-{
-    int value = (angle*dInvAngleConvertion) + _offset;
-	return clamp(value, _min, _max);
-}
-
-double Motor::Value2Angle(const int value)
-{
-	int clampedValue = clamp(value, _min, _max);
-	return double(clampedValue - _offset)*dAngleConvertion;
-}
-
-const double Motor::getMinAngle()
-{
-	return Value2Angle(_min);
-}
-
-const double Motor::getMaxAngle()
-{
-	return Value2Angle(_max);
-}
-
-void Motor::Read(const std::vector<char>& msg)
-{
-   int msgSize = msg.size();
-   switch(msgSize)
-   {
-      case 3:
-      case 6:
-         Logger::getInstance() << __FILE__ << " Motor::Read : Invalid msg size " << std::endl;
-       return;
-      default:
-       break;
-   }
-
-   size_t size = std::min(msgSize*sizeof(char),sizeof(ReadData));
-   memcpy(&_readData,msg.data(),size);
-
-   if (_readData.pos > 0)
-      _posToRead = Value2Angle(_readData.pos);
-   else
-      Logger::getInstance() << __FILE__ << " Motor::Read : Read position error " << _id << std::endl;
-}
-
-void Motor::Write()
-{
-    std::vector<char> data;
-    data.push_back(_id);
-    data.push_back(static_cast<char>(_torqueOn));
-
-    if (_writeDirty)
-    {
-        char posLSB, posMSB;
-	    int pos = Angle2Value(_posToWrite);
-        Protocol::Separate2Bytes(pos, posLSB, posMSB);
-	    
-	    data.push_back(posLSB);
-        data.push_back(posMSB);
-        data.push_back(_playTime);
-        
-    }
-    if(_writeDirty || _torqueDirty)
-    {
-        _torqueDirty = false;
-        _writeDirty = false;
-
-        std::vector<char> msg;
-        Protocol::GenerateDataMsg(Protocol::MotorHeader,data,msg);
-        _stm32f4->AddMsg(msg);
-    }
-}
+using boost::filesystem::path;
 
 MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config ) :
  _threadManager(threadManager_ptr)
@@ -157,14 +22,16 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
         Logger::getInstance() << "Initializing USB interface..." << std::endl;
         boost::asio::io_service boost_io;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
-        _stm32f4 = new STM32F4(port_name, boost_io);
+        _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io);
+
+        // Set Callback function for async read
+        _stm32f4->RegisterRead(boost::bind(&MotorControl::Update, this));
         _threadManager->create(90, boost::bind(&boost::asio::io_service::run, &boost_io));
     }
     catch (std::exception& e)
     {
         Logger::getInstance(Logger::LogLvl::ERROR) << "Exception in MotorControl.cpp while initialising USB interface : " << e.what() << std::endl;
     }
-
     InitializeMotors(config);
     InitializeConfigurations(config);
 }
@@ -263,21 +130,26 @@ void MotorControl::InitializeConfigurations(const XmlParser &config)
     }
 }
 
-bool MotorControl::SetTorque(bool value, const Config config)
+void MotorControl::Update(const std::vector<char>& msg)
 {
-   bool status = true;
-   if (_configurations.find(config) == _configurations.end())
+   int msgSize = msg.size();
+   switch(msgSize)
    {
-       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetTorque\" : Configuration is invalid." << std::endl;
-       return false;
+      case 3:
+      case 6:
+         Logger::getInstance(Logger::LogLvl::Error) << __FILE__ << " Motor::Read : Invalid msg size " << std::endl;
+         return;
+      default:
+         break;
    }
 
-   for (auto it = _configurations[config].begin(); it != _configurations[config].end() && status; ++it)
-   {
-       // TODO : Grab motor status
-       (*it)->setTorque(value);
-   }
-   return status;
+   size_t size = std::min(msgSize*sizeof(char),sizeof(ReadData));
+   memcpy(&_readData,msg.data(),size);
+
+   if (_readData.pos > 0)
+      _posToRead = Value2Angle(_readData.pos);
+   else
+      Logger::getInstance(Logger::LogLvl::Error) << __FILE__ << " Motor::Read : Read position error " << _id << std::endl;
 }
 
 bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Config config,
