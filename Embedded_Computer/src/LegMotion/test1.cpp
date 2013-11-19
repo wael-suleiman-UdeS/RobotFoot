@@ -11,8 +11,8 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-	Eigen::Vector2f pointA(0.0, 0);
-	Eigen::Vector2f pointD(0.25, 0);
+	Eigen::Vector2f pointA(0, 0);
+	Eigen::Vector2f pointD(1, 0);
 	//Eigen::Vector2f pointD(1, 1.3);
 	Eigen::Vector2f startAngle(0, 0);
 	//Eigen::Vector2f startAngle(90, 90);
@@ -20,10 +20,10 @@ int main(int argc, char* argv[]) {
 
 
 	Trajectory* traj = new Trajectory();
-	/*Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
-			endAngle, startAngle, 1.0f);*/
+	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
+			endAngle, startAngle, 1.0f);
 
-
+/*
 	Eigen::Vector4f rightInit(0.037, 0.0, 0, 0);
 	Eigen::Vector4f rightFinal(0.037, 0.03, 0, 0);
 
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 	Eigen::Vector4f pelvisFinal(0.037, 0.0, 0.2967, 0);
 
 	Eigen::MatrixXf matrix = traj->GenerateMovement(rightInit, rightFinal, leftInit, leftFinal, pelvisInit, pelvisFinal, 1);
-
+*/
 	MotionControl* motion = new MotionControl();
 	motion->Walk(matrix);
 

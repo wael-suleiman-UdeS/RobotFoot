@@ -63,7 +63,7 @@ Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::V
 	GenerateSteps(rightSteps, leftSteps, xInner, yInner, xOuter, yOuter, startingPoint, startingAngle, angles);
 
 	//Calculate ZMP
-	int finalMatrixSize = (m_singleStepTime/m_dTime)*(rightSteps.rows() + leftSteps.rows());
+	int finalMatrixSize = (m_singleStepTime/m_dTime)*(rightSteps.rows() + leftSteps.rows() - 2)*2 + (m_singleStepTime/m_dTime);
 	Eigen::MatrixXf zmp = GenerateZMP(rightSteps, leftSteps);
 
 	//Create trajectory for moving foot
@@ -461,6 +461,16 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 
 		stepCount++;
 
+		int timeMultiplier = nbSteppingTimeStamps*stepCount;
+		Eigen::MatrixXf noMovement(nbSteppingTimeStamps, finalMatrix.cols());
+		for(int i = 0; i < nbSteppingTimeStamps; i++)
+		{
+			int offset = timeMultiplier + i + m_singleStepTime/m_dTime;
+			finalMatrix.row(offset) = finalMatrix.row(timeMultiplier + m_singleStepTime/m_dTime - 1);
+		}
+
+		stepCount++;
+
 		//*******left foot**********//
 		if(leftSteps.rows() > (i+1))
 		{
@@ -479,6 +489,15 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 					m_singleStepTime/2, nbSteppingTimeStamps/2, nbSteppingTimeStamps, 0);
 
 			stepCount++;
+
+			int timeMultiplier = nbSteppingTimeStamps*stepCount;
+			for(int i = 0; i < nbSteppingTimeStamps; i++)
+			{
+				int offset = timeMultiplier + i + m_singleStepTime/m_dTime;
+				finalMatrix.row(offset) = finalMatrix.row(timeMultiplier + m_singleStepTime/m_dTime - 1);
+			}
+
+			stepCount++;
 		}
 	}
 
@@ -489,7 +508,7 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 	for(int i = 0; i < offset; i++)
 	{
 		finalMatrix.row(i) = initialState;
-		finalMatrix.row(finalMatrixSize-1-i) = finalState;
+		//finalMatrix.row(finalMatrixSize-1-i) = finalState;
 	}
 
 	return finalMatrix;
@@ -630,24 +649,40 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 	//Trajectory from point A to left footprint
     Eigen::MatrixXf trajectory = EigenUtils::MXB(initialPoint, leftSteps.row(0), m_dTime/m_singleStepTime);
 
-    for(int i =0, j = 1; i < rightSteps.rows() - 1; ++i, ++j)
+	Eigen::MatrixXf noZMPMovement(trajectory.rows(), trajectory.cols());
+	for(int i = 0; i < trajectory.rows(); i++)
+	{
+		noZMPMovement.row(i) = trajectory.bottomRows(1);
+	}
+
+    Eigen::MatrixXf tempMatrix(trajectory.rows()+noZMPMovement.rows(), trajectory.cols());
+    tempMatrix << trajectory, noZMPMovement;
+    trajectory.swap(tempMatrix);
+
+    for(int i =0, j = 1; i < leftSteps.rows() - 1; ++i, ++j)
     {
 		//Trajectory from left to right to left foot steps
 		Eigen::MatrixXf mxbMatrix = EigenUtils::CreateCombinedMXBMatrix(leftSteps, rightSteps, m_dTime/m_singleStepTime, i, j);
+		Eigen::MatrixXf noZMPMovement(mxbMatrix.rows(), mxbMatrix.cols());
+		/*
+		for(int i = 0; i < mxbMatrix.rows(); i++)
+		{
+			noZMPMovement.row(i) = mxbMatrix.bottomRows(1);
+		}*/
 
-        Eigen::MatrixXf tempMatrix(trajectory.rows()+mxbMatrix.rows(), trajectory.cols());
-        tempMatrix << trajectory, mxbMatrix;
-        trajectory.swap(tempMatrix);
+        Eigen::MatrixXf tempMatrix2(trajectory.rows()+mxbMatrix.rows(), trajectory.cols());
+        tempMatrix2 << trajectory, mxbMatrix;//, noZMPMovement;
+        trajectory.swap(tempMatrix2);
     }
 
     //Append the last step (left foot) to pointD
     Eigen::Vector2f finalPoint = (leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2;
     Eigen::MatrixXf finalStepTraj = EigenUtils::MXB(leftSteps.row(leftSteps.rows()-1), finalPoint, m_dTime/m_singleStepTime);
 
-    Eigen::MatrixXf tempMatrix(trajectory.rows()+finalStepTraj.rows(), trajectory.cols() + 1);
-    tempMatrix << trajectory, Eigen::VectorXf::Constant(trajectory.rows(), m_ZMPHeight), finalStepTraj, Eigen::VectorXf::Constant(finalStepTraj.rows(), m_ZMPHeight);
+    Eigen::MatrixXf tempMatrix3(trajectory.rows()+finalStepTraj.rows(), trajectory.cols() + 1);
+    tempMatrix3 << trajectory, Eigen::VectorXf::Constant(trajectory.rows(), m_ZMPHeight), finalStepTraj, Eigen::VectorXf::Constant(finalStepTraj.rows(), m_ZMPHeight);
 
-    trajectory.swap(tempMatrix);
+    trajectory.swap(tempMatrix3);
 
     return trajectory;
 }
