@@ -8,6 +8,7 @@
 #include <boost/algorithm/clamp.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <cmath>
 
 using boost::filesystem::path;
 
@@ -62,7 +63,7 @@ int Motor::Angle2Value(const double angle)
     int value = (angle*dInvAngleConvertion) + _offset;
 	if(value < _min || value > _max)
     {
-        Logger::getInstance() << __FILE__ << " : Angle2Value : Value off limits.";
+        Logger::getInstance(Logger::LogLvl::DEBUG) << __FILE__ << " : Angle2Value : Value off limits.";
     }
     return clamp(value, _min, _max);
 }
@@ -71,7 +72,7 @@ double Motor::Value2Angle(const int value)
 {
 	if(value < _min || value > _max)
     {
-        Logger::getInstance() << __FILE__ << " : Angle2Value : Value off limits.";
+        Logger::getInstance(Logger::LogLvl::DEBUG) << __FILE__ << " : Angle2Value : Value off limits.";
     }
 	int clampedValue = clamp(value, _min, _max);
 	return double(clampedValue - _offset)*dAngleConvertion;
@@ -93,7 +94,7 @@ void Motor::Read()
     if (value > 0)
         _currentPos = Value2Angle(value);
     else
-    	Logger::getInstance() << __FILE__ << " : Read Error Id : " << _id << std::endl;
+    	Logger::getInstance(Logger::LogLvl::DEBUG) << __FILE__ << " : Read Error Id : " << _id << std::endl;
 }
 
 void Motor::Write()
@@ -105,17 +106,19 @@ void Motor::Write()
     }
 }
 
-MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config ) :
+MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io) :
  _threadManager(threadManager_ptr)
 {
     try
     {
         // Init USB interface with STM32F4
         Logger::getInstance() << "Initializing USB interface..." << std::endl;
-        boost::asio::io_service boost_io;
+
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
+
         _stm32f4 = new STM32F4(port_name, boost_io);
         _threadManager->create(90, boost::bind(&boost::asio::io_service::run, &boost_io));
+        _robotHeight = config.getIntValue(XmlPath::Root / XmlPath::Sizes / "RobotHeight");
     }
     catch (std::exception& e)
     {
@@ -124,6 +127,7 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
 
     InitializeMotors(config);
     InitializeConfigurations(config);
+
 }
 
 MotorControl::~MotorControl()
@@ -458,4 +462,26 @@ void MotorControl::WriteAll()
     {
         it->second->Write();
     }
+}
+
+Position MotorControl::getObjectDistance()
+{
+
+	// todo: replace hard gets
+
+	std::vector<double> angles;
+	//_mc->ReadPositions(angles, MotorControl::Config::HEAD);
+	HardGet(angles, MotorControl::Config::HEAD);
+
+	angles[0] = angles[0] * M_PI/180;
+	angles[1] = std::abs(angles[1] * M_PI/180);
+
+	double euclidianDistance = _robotHeight * std::tan((M_PI/2)-angles[1]);
+	_objectDistance.x = euclidianDistance * std::sin(angles[0]);
+	_objectDistance.y = euclidianDistance * std::cos(angles[0]);
+
+	Logger::getInstance() << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
+
+
+	return _objectDistance;
 }

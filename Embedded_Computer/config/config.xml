@@ -1,9 +1,9 @@
 <RobotFoot>
   <Logging>
-    <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
+    <LogLvl value="INFO" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <Sizes>
-  	<HeadHeight value="44" />
+  	<RobotHeight value="36" />
   </Sizes>
   <ImageProcessing value="1">
     <Camera>
@@ -24,7 +24,7 @@
 		  <SmoothingApertureSize value="9" />
 		  <ResolutionDivisor value="2" />
 		  <MinDistance value="120" />
-		  <EdgeThreshold value="100" />
+		  <EdgeThreshold value="15" />
 		  <CenterThreshold value="10" />
 		  <MinRadius value="10" />
 		  <MaxRadius value="400" />
@@ -73,7 +73,7 @@
   <USB_Interface>
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
-  <Motion value="1">
+  <Motion value="0">
     <IterationTimeMs value="15"/>
     <Motors>
       <Head>
@@ -110,14 +110,10 @@
         <ScanningError value="300" />
         
         <PID>
-          <Pz value="0.08" />
-          <Iz value="0.06" />
-          <Dz value="0.04" />
+          <P value="0.03" />0.130909093
+          <I value="0" />0.009818182
+          <D value="0" />0.006545455
           <dt value="0.2" />
-          
-          <P value="0.130909093" />0.4
-          <I value="0.009818182" />0.03
-          <D value="0.006545455" />0.02 
           
           <Epsilon value="0" />
         </PID>
