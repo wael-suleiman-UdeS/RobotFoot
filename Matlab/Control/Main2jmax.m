@@ -49,9 +49,9 @@ for i = 1:Size
     while ~CalculDone
         NbIteration = NbIteration + 1;
         if  FixedFoot(i) == 0 
-            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, Td1, Td2);
+            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, Td1, Td2);
         elseif FixedFoot(i) == 1
-            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, Td1, Td2);
+            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, Td1, Td2);
         end 
             % Cacul Jacobian
             k = 0.9;
@@ -85,9 +85,9 @@ for i = 1:Size
             q = TempQ(end:-1:1) ;
         end 
              if  FixedFoot(i) == 0 
-                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, Td1, Td2);
+                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, Td1, Td2);
              elseif FixedFoot(i) == 1
-                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, Td1, Td2);
+                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, Td1, Td2);
              end
              
              CalculDone = VerifyError(DistanceThreshold,ePos1,DistanceThreshold,ePos2,AngleThreshold,eTheta1(1),AngleThreshold,eTheta1(2),AngleThreshold,eTheta1(3),AngleThreshold,eTheta2(1),AngleThreshold,eTheta2(2),AngleThreshold,eTheta2(3));
@@ -117,39 +117,39 @@ for i = 1:Size
 end
 fclose(file_id);
 
-figure()
-plot(T,TableQPos);
-title('TableQPos');
-figure()
-plot(T,TableQDot);
-title('TableQDot');
-figure()
-plot(T,TableNbIteration);
-title('TableNbIteration');
-figure()
-plot(T,LeftFootTraj);
-title('LeftFootTraj');
-legend('Position en x', 'Position en y', 'Position en z')
-figure()
-plot(T,RightFootTraj);
-title('RightFootTraj');
-legend('Position en x', 'Position en y', 'Position en z')
-figure()
-plot(T,PelvisTraj);
-title('PelvisTraj');
-legend('Position en x', 'Position en y', 'Position en z')
-figure()
-plot(T,TableEPos1);
-title('TableEPos1');
-figure()
-plot(T,TableEPos2);
-title('TableEPos2')
-figure()
-plot(T,TableETheta1);
-title('TableETheta1')
-figure()
-plot(T,TableETheta2);
-title('TableETheta2')
+%figure()
+%plot(T,TableQPos);
+%title('TableQPos');
+%figure()
+%plot(T,TableQDot);
+%title('TableQDot');
+%figure()
+%plot(T,TableNbIteration);
+%title('TableNbIteration');
+%figure()
+%plot(T,LeftFootTraj);
+%title('LeftFootTraj');
+%legend('Position en x', 'Position en y', 'Position en z')
+%figure()
+%plot(T,RightFootTraj);
+%title('RightFootTraj');
+%legend('Position en x', 'Position en y', 'Position en z')
+%figure()
+%plot(T,PelvisTraj);
+%title('PelvisTraj');
+%legend('Position en x', 'Position en y', 'Position en z')
+%figure()
+%plot(T,TableEPos1);
+%title('TableEPos1');
+%figure()
+%plot(T,TableEPos2);
+%title('TableEPos2')
+%figure()
+%plot(T,TableETheta1);
+%title('TableETheta1')
+%figure()
+%plot(T,TableETheta2);
+%title('TableETheta2')
 
 EPos1Max = max(TableEPos1)
 EPos2Max = max(TableEPos2)
