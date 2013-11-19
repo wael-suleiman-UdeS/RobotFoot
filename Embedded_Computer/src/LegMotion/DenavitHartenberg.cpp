@@ -27,22 +27,21 @@ DenavitHartenberg::~DenavitHartenberg()
 void DenavitHartenberg::Init(Eigen::VectorXf q)
 {
 	//Matrice de rotation du repère de robot vers le repère global
-	m_RP_1 << 0.0f, 1.0f, 0.0f, 0.0f,
+	m_RP_1 << 0.0f, 1.0f, 0.0f, LTX,
 			0.0f, 0.0f, 1.0f, 0.0f,
 			1.0f, 0.0f, 0.0f, LTZ,
 			0.0f, 0.0f, 0.0f, 1.0f;
 
-	m_PR_1 << 0.0f, 0.0f, 1.0f, 0.0f,
-			1.0f, 0.0f, 0.0f, 0.0f,
+	m_PR_1 << 0.0f, 0.0f, 1.0f, -LTZ,
+			1.0f, 0.0f, 0.0f, -LTX,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 0.0f, 1.0f;
 
-	m_PR_1_fin << 1.0f, 0.0f, 0.0f, 0.0f,
+	m_PR_2_fin << 1.0f, 0.0f, 0.0f, LTX,
 			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, -LTZ,
+			0.0f, 0.0f, 1.0f, LTZ,
 			0.0f, 0.0f, 0.0f, 1.0f;
 
-	m_PR_2_fin = m_PR_1_fin;
 
 	m_DHtoPelvis = Eigen::MatrixXf::Zero(6,4);
 	m_DHtoFoot = Eigen::MatrixXf::Zero(6,4);
@@ -76,7 +75,6 @@ void DenavitHartenberg::Init(Eigen::VectorXf q)
 
 		//*******Left to right
 		m_PR_2_fin(0, 3) = -LTX;
-		m_PR_2_fin(2, 3) = LTZ;
 	}
 	else
 	{
@@ -108,9 +106,11 @@ void DenavitHartenberg::Init(Eigen::VectorXf q)
 
 		//*******Right to left
 		m_RP_1(0, 1) = -1.0f;
+		m_RP_1(0, 3) = -LTX;
+		m_RP_1(1, 2) = -1.0f;
+
 		m_PR_1(1, 0) = -1.0f;
-		m_PR_2_fin(0, 3) = LTX;
-		m_PR_2_fin(2, 3) = LTZ;
+		m_PR_1(2, 1) = -1.0f;
 	}
 }
 

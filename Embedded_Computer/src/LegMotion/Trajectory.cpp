@@ -400,7 +400,7 @@ void Trajectory::GenerateSteps(Eigen::MatrixXf &rightSteps, Eigen::MatrixXf &lef
 
 	//Alternate between right and left step
 	int stepIndex = 1;
-	for(int i = 1; i < trajLSize - 1; i++)
+	for(int i = 1; i < trajLSize; i++)
 	{
 		if(i % 2)
 			rightSteps.row(stepIndex) = trajR.row(i);

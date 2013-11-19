@@ -158,15 +158,22 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3f& eThetaToPelvis, Eigen::Vector3f& ePosToFoot,
 		Eigen::Vector3f& eThetaToFoot, Eigen::MatrixXf& trajectoryMatrix, DenavitHartenberg* DH, int i)
 {
+	//Fixed foot position
+	Eigen::Vector3f Pe0p;
+	if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
+		Pe0p = Eigen::Vector3f(trajectoryMatrix(i, leftFootPosX), trajectoryMatrix(i, leftFootPosY), trajectoryMatrix(i, leftFootPosZ));
+	else
+		Pe0p = Eigen::Vector3f(trajectoryMatrix(i, rightFootPosX), trajectoryMatrix(i, rightFootPosY), trajectoryMatrix(i, rightFootPosZ));
+
 	/////////////////////////////////////////////////////////////////
 	//Ground foot to pelvis
 	/////////////////////////////////////////////////////////////////
 	Eigen::Vector3f PeToPelvis = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToPelvis).topRightCorner(3,1);//Position of End effector (pelvis) from ground foot
 
 	Eigen::Matrix4f tempPdToPelvis = Eigen::Matrix4f::Identity();
-	tempPdToPelvis.col(3) = Eigen::Vector4f(trajectoryMatrix(i,10), trajectoryMatrix(i,11), trajectoryMatrix(i,12), 1);
-	tempPdToPelvis = DH->GetPR1() * tempPdToPelvis * DH->GetPR1Fin();
-	Eigen::Vector3f PdToPelvis =  tempPdToPelvis.topRightCorner(3,1); 								//Position Desired for the end effector (pelvis) from ground foot
+	tempPdToPelvis.topRightCorner(3,1) = Eigen::Vector3f(trajectoryMatrix(i,10), trajectoryMatrix(i,11), trajectoryMatrix(i,12)) - Pe0p;
+	tempPdToPelvis = DH->GetPR1() * tempPdToPelvis;
+	Eigen::Vector3f PdToPelvis =  tempPdToPelvis.topRightCorner(3,1);						//Position Desired for the end effector (pelvis) from ground foot
 
 	DH->UpdateTe(m_q);
 
@@ -179,7 +186,7 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	Eigen::Matrix4f tempPeToPelvis = Eigen::Matrix4f::Identity();
 	tempPeToPelvis.topRightCorner(3,1) = PeToPelvis;
 	tempPeToPelvis = DH->GetRP1() * tempPeToPelvis;
-	Eigen::Vector3f PeToPelvisP = tempPeToPelvis.topRightCorner(3,1);
+	Eigen::Vector3f PeToPelvisP = tempPeToPelvis.topRightCorner(3,1) + Pe0p;
 
 	Eigen::MatrixXf PeToFoot = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToFoot).topRightCorner(3,1);
 
