@@ -2,6 +2,9 @@
   <Logging>
     <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
+  <Sizes>
+  	<HeadHeight value="44" />
+  </Sizes>
   <ImageProcessing value="1">
     <Camera>
       <DeviceIndex value="0" />

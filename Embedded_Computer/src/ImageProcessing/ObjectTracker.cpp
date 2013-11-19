@@ -78,10 +78,6 @@ void ObjectTracker::track(Point objectPosition)
 		_objectError = _centerPosition - objectPosition;
 		_noObjectCount = 0;
 
-		if (_newAngle.y < -65 && _newAngle.x < 40 && _newAngle.x > 20) {
-			_threadManager->resume(ThreadManager::Task::LEGS_CONTROL);
-		}
-
     }
     else if(_noObjectCount > _noObjectMaxCount) {
 		scan();

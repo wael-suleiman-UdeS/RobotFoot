@@ -123,8 +123,6 @@ int main(int argc, char * argv[])
 
         if (isTracking)
         	threadManager_ptr->attach(ThreadManager::Task::HEAD_CONTROL);
-		
-
 
         //threadManager_ptr->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);
         //threadManager_ptr->timer(); // Start timer
