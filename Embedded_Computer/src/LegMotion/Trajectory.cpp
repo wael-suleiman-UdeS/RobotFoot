@@ -267,20 +267,6 @@ void Trajectory::ParallelCurve(Eigen::VectorXf &xInner, Eigen::VectorXf &yInner,
 
 	for(int i = 0; i < x.innerSize(); ++i)
 	{
-		/*
-		xInner(i) = x(i) - unv(i, 0)*m_dLeg;
-		yInner(i) = y(i) - unv(i, 1)*m_dLeg;
-
-		xOuter(i) = x(i) + unv(i, 0)*m_dLeg;
-		yOuter(i) = y(i) + unv(i, 1)*m_dLeg;
-		*/
-		/*
-		yInner(i) = x(i) - unv(i, 0)*m_dLeg;
-		xInner(i) = y(i) - unv(i, 1)*m_dLeg;
-
-		yOuter(i) = x(i) + unv(i, 0)*m_dLeg;
-		xOuter(i) = y(i) + unv(i, 1)*m_dLeg;
-		*/
 		yInner(i) = x(i) + unv(i, 0)*m_dLeg;
 		xInner(i) = y(i) + unv(i, 1)*m_dLeg;
 
@@ -306,19 +292,11 @@ void Trajectory::GenerateSteps(Eigen::MatrixXf &rightSteps, Eigen::MatrixXf &lef
 		Eigen::Vector2f startingPoint, Eigen::Vector2f startAngle, Eigen::VectorXf& angles)
 {
 	Eigen::Vector3f currentLeftStepPos;
-//	currentLeftStepPos(0) = startingPoint(0) - (m_dLeg*sin(startAngle(0)*M_PI/180.0));
-//	currentLeftStepPos(1) = startingPoint(1) + (m_dLeg*cos(startAngle(1)*M_PI/180.0));
-//	currentLeftStepPos(0) = startingPoint(1) + (m_dLeg*cos(startAngle(1)*M_PI/180.0));
-//	currentLeftStepPos(1) = startingPoint(0) - (m_dLeg*sin(startAngle(0)*M_PI/180.0));
 	currentLeftStepPos(0) = startingPoint(1) - (m_dLeg*cos(startAngle(1)*M_PI/180.0));
 	currentLeftStepPos(1) = startingPoint(0) + (m_dLeg*sin(startAngle(0)*M_PI/180.0));
 	currentLeftStepPos(2) = angles(0);
 
 	Eigen::Vector3f currentRightStepPos;
-//	currentRightStepPos(0) = startingPoint(0) + (m_dLeg*sin(startAngle(0)*M_PI/180.0));
-//	currentRightStepPos(1) = startingPoint(1) - (m_dLeg*cos(startAngle(1)*M_PI/180.0));
-//	currentRightStepPos(0) = startingPoint(1) - (m_dLeg*cos(startAngle(1)*M_PI/180.0));
-//	currentRightStepPos(1) = startingPoint(0) + (m_dLeg*sin(startAngle(0)*M_PI/180.0));
 	currentRightStepPos(0) = startingPoint(1) + (m_dLeg*cos(startAngle(1)*M_PI/180.0));
 	currentRightStepPos(1) = startingPoint(0) - (m_dLeg*sin(startAngle(0)*M_PI/180.0));
 	currentRightStepPos(2) = angles(0);
@@ -504,11 +482,9 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 	int offset = nbSteppingTimeStamps;
 	//Add an initial state (repeat the first position for the first elements so that the zmp can be set correctly before moving the legs)
 	Eigen::VectorXf initialState = finalMatrix.row(offset);
-	Eigen::VectorXf finalState = finalMatrix.row(finalMatrixSize - offset - 1);
 	for(int i = 0; i < offset; i++)
 	{
 		finalMatrix.row(i) = initialState;
-		//finalMatrix.row(finalMatrixSize-1-i) = finalState;
 	}
 
 	return finalMatrix;
@@ -664,14 +640,9 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 		//Trajectory from left to right to left foot steps
 		Eigen::MatrixXf mxbMatrix = EigenUtils::CreateCombinedMXBMatrix(leftSteps, rightSteps, m_dTime/m_singleStepTime, i, j);
 		Eigen::MatrixXf noZMPMovement(mxbMatrix.rows(), mxbMatrix.cols());
-		/*
-		for(int i = 0; i < mxbMatrix.rows(); i++)
-		{
-			noZMPMovement.row(i) = mxbMatrix.bottomRows(1);
-		}*/
 
         Eigen::MatrixXf tempMatrix2(trajectory.rows()+mxbMatrix.rows(), trajectory.cols());
-        tempMatrix2 << trajectory, mxbMatrix;//, noZMPMovement;
+        tempMatrix2 << trajectory, mxbMatrix;
         trajectory.swap(tempMatrix2);
     }
 

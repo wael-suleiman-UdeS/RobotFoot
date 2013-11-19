@@ -11,8 +11,7 @@ public:
 	MotionControl();
 	~MotionControl();
 
-	void Walk(Eigen::MatrixXf trajectoryMatrix);
-	void Kick(Eigen::MatrixXf kickMatrix);
+	void Move(Eigen::MatrixXf trajectoryMatrix);
 
 private:
 

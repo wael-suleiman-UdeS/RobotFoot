@@ -7,12 +7,13 @@
 #include "../../ThirdParty/Eigen/Dense"
 
 
-//**********************for tests*****************//
+#define Debug
+#ifdef Debug
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 using namespace std;
-//***************************************************//
+#endif
 
 namespace
 {
@@ -36,7 +37,7 @@ MotionControl::~MotionControl()
 
 }
 
-void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
+void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 {
 	float damping = 0.9f;
 
@@ -45,6 +46,8 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 
 	DenavitHartenberg* DH;
 
+
+#ifdef Debug
 	//*****************write to a file for tests************************************//
 	ofstream myfile;
 	myfile.open ("matrixPositions.txt");
@@ -65,7 +68,7 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 	myfileETHETA2.open ("eTheta2.txt");
 
 	Eigen::VectorXf qToDisplay(12);
-	//*****************************************************************************//
+#endif
 
 	for(int i = 0; i < trajectoryMatrix.rows(); ++i)
 	{
@@ -136,14 +139,17 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 			m_q.reverseInPlace();
 			qToDisplay = qToDisplay*=180/M_PI;
 
+#ifdef Debug
 			myfileQ << qToDisplay.transpose() << endl;
 			myfileEPOS1 << ePosToPelvis << endl;
 			myfileEPOS2 << ePosToFoot << endl;
 			myfileETHETA1 << eThetaToPelvis << endl;
 			myfileETHETA2 << eThetaToFoot << endl;
+#endif
 		}
 	}
 
+#ifdef Debug
 	//*****************write to a file for tests************************************//
 	myfile.close();
 	myfileQ.close();
@@ -151,7 +157,7 @@ void MotionControl::Walk(Eigen::MatrixXf trajectoryMatrix)
 	myfileEPOS2.close();
 	myfileETHETA1.close();
 	myfileETHETA2.close();
-	//*****************************************************************************//
+#endif
 }
 
 //Check right left*****************************************

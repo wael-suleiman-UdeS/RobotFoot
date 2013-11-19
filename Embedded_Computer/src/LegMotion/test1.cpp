@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 	Eigen::MatrixXf matrix = traj->GenerateMovement(rightInit, rightFinal, leftInit, leftFinal, pelvisInit, pelvisFinal, 1);
 */
 	MotionControl* motion = new MotionControl();
-	motion->Walk(matrix);
+	motion->Move(matrix);
 
 
 	ofstream myfiletraj;
