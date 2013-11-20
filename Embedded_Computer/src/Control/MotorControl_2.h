@@ -78,6 +78,7 @@ public:
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
+   void InitPID(const XmlParser &config);
 
    void ReadAll();
 public:

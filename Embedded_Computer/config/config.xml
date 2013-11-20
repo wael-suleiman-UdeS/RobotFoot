@@ -71,7 +71,10 @@
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
   <Motion value="1">
-    <IterationTimeMs value="15"/>
+    <IterationTimeMs value="30"/>
+    <KP value="1000"/>
+    <KD value="16000"/>
+    <KI value="0"/>
     <Motors>
       <Head>
         <HEAD_PAN>
@@ -152,7 +155,7 @@
 		  <LimitMin value="450"/>
 		  <LimitMax value="792"/>
           <PlayTime value="0"/>
-          <IsInversed value="0"/>
+          <IsInversed value="1"/>
 	    </L_HIP_ROLL>
 	    <R_HIP_PITCH>
 		  <MotorID value="253"/>
@@ -160,7 +163,7 @@
 		  <LimitMin value="141"/>
 		  <LimitMax value="579"/>
           <PlayTime value="0"/>
-          <IsInversed value="0"/>
+          <IsInversed value="1"/>
 	    </R_HIP_PITCH>
 	    <L_HIP_PITCH>
 		  <MotorID value="6"/>
@@ -176,7 +179,7 @@
 		  <LimitMin value="494"/>
 		  <LimitMax value="887"/>
           <PlayTime value="0"/>
-          <IsInversed value="0"/>
+          <IsInversed value="1"/>
 	    </R_KNEE>
 	    <L_KNEE>
 		  <MotorID value="8"/>
@@ -192,7 +195,7 @@
 		  <LimitMin value="203"/>
 		  <LimitMax value="671"/>
           <PlayTime value="0"/>
-          <IsInversed value="1"/>
+          <IsInversed value="0"/>
 	    </R_ANKLE_PITCH>
 	    <L_ANKLE_PITCH>
 		  <MotorID value="10"/>
@@ -216,7 +219,7 @@
 		  <LimitMin value="242"/>
 		  <LimitMax value="855"/>
           <PlayTime value="0"/>
-          <IsInversed value="1"/>
+          <IsInversed value="0"/>
 	    </L_ANKLE_ROLL>
       </Legs>
     </Motors>

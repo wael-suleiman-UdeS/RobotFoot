@@ -23,6 +23,10 @@ public:
 	int readStatus(std::uint8_t id);
 	
 	void clearStatus(std::uint8_t id);
+   
+    void writeRAM(std::uint8_t id, std::uint8_t adress, std::uint8_t value);
+  
+    int readRAM(std::uint8_t id, std::uint8_t adress);
 private:
 	SerialInterface _usb;
 };

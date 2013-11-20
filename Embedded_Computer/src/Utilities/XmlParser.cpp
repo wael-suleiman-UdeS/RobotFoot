@@ -25,6 +25,9 @@ namespace XmlPath
     const path Configurations = "Configurations";
 	const path Head = "Head";
 	const path Legs = "Legs";
+    const path KP = "KP";
+    const path KD = "KD";
+    const path KI = "KI";
 
 	const path Threshold = "Threshold";
 

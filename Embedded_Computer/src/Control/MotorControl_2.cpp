@@ -212,6 +212,34 @@ void MotorControl::InitializeMotors(const XmlParser &config)
         Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, playTime, isInversed);
 	    _motors.insert(std::make_pair(it->first, motor));
     }
+    
+    InitPID(config);
+}
+
+void MotorControl::InitPID(const XmlParser &config)
+{
+    int KP1 = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::KP);
+    int KP2 = KP1 >> 8;
+    int KD1 = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::KD);
+    int KD2 = KD1 >> 8;
+    int KI1 = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::KI);
+    int KI2 = KI1 >> 8;
+
+	for(int id = 1; id < 15; id++)
+	{
+		_stm32f4->writeRAM(id,24,KP1);
+		_stm32f4->writeRAM(id,25,KP2);
+		_stm32f4->writeRAM(id,26,KD1);
+		_stm32f4->writeRAM(id,27,KD2);
+		_stm32f4->writeRAM(id,28,KI1);
+		_stm32f4->writeRAM(id,29,KI2);
+	}
+	_stm32f4->writeRAM(253,24,KP1);
+	_stm32f4->writeRAM(253,25,KP2);
+	_stm32f4->writeRAM(253,26,KD1);
+	_stm32f4->writeRAM(253,27,KD2);
+	_stm32f4->writeRAM(253,28,KI1);
+	_stm32f4->writeRAM(253,29,KI2);
 }
 
 // Populate the configuration list

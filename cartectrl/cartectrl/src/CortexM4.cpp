@@ -20,8 +20,9 @@ enum CMD
     CMD_MOTOR_READ_POS = 2,
     CMD_MOTOR_SET_TORQUE = 3,
     CMD_MOTOR_READ_STATUS = 4,
-    CMD_MOTOR_CLEAR_STATUS = 5
-
+    CMD_MOTOR_CLEAR_STATUS = 5,
+    CMD_MOTOR_WRITE_RAM = 6,
+    CMD_MOTOR_READ_RAM = 7
 };
 
 }
@@ -210,6 +211,29 @@ void CortexM4::sendCommand( uint8_t* data, uint32_t n )
             if( n >= 2 ) //TODO : Should be == instead
             {
                 Herkulex::GetInstance()->clear( data[1] );
+            }
+            break;
+        case CMD_MOTOR_WRITE_RAM:
+            if( n >= 4 ) //TODO : Should be == instead
+            {
+                Herkulex::GetInstance()->writeRAM1( data[1], data[2], data[3] );
+            }
+            break;
+        case CMD_MOTOR_READ_RAM:
+            if( n >= 3) //TODO : Should be == instead
+            {
+                uint8_t value = Herkulex::GetInstance()->readRAM1( data[1], data[2]);
+                // TODO : Change write protocol
+                uint32_t msgSize = 5;
+                uint8_t msg[msgSize];
+
+                msg[0] = CMD_MOTOR_READ_RAM;
+                msg[1] = data[1];
+                msg[2] = value;
+                msg[3] = '\r';
+                msg[4] = '\n';
+
+                CortexM4::write( msg, msgSize );
             }
             break;
     }
