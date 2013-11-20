@@ -1,3 +1,12 @@
+/**
+******************************************************************************^M
+* @file    DenavitHartenberg.cpp
+* @authors  Camille Hébert & Antoine Rioux
+* @date    2013-11-19
+* @brief   Class to calculate DH
+******************************************************************************^M
+*/
+
 #include "DenavitHartenberg.h"
 
 #define _USE_MATH_DEFINES
@@ -13,7 +22,7 @@ namespace
 	const float LF = 0.037f;
 }
 
-DenavitHartenberg::DenavitHartenberg(Eigen::VectorXf q, Leg grounedLeg)
+DenavitHartenberg::DenavitHartenberg(Eigen::VectorXf& q, Leg grounedLeg)
 {
 	m_groundedFoot = grounedLeg;
 	Init(q);
@@ -24,7 +33,7 @@ DenavitHartenberg::DenavitHartenberg(Eigen::VectorXf q, Leg grounedLeg)
 DenavitHartenberg::~DenavitHartenberg()
 {}
 
-void DenavitHartenberg::Init(Eigen::VectorXf q)
+void DenavitHartenberg::Init(Eigen::VectorXf& q)
 {
 	//Matrice de rotation du repère de robot vers le repère global
 	m_RP_1 << 0.0f, 1.0f, 0.0f, LTX,

@@ -35,7 +35,16 @@ int main(int argc, char* argv[]) {
 	Eigen::MatrixXf matrix = traj->GenerateMovement(rightInit, rightFinal, leftInit, leftFinal, pelvisInit, pelvisFinal, 1);
 */
 	MotionControl* motion = new MotionControl();
-	motion->Move(matrix);
+	//motion->Move(matrix);
+
+	std::vector<double> initialPos = motion->GetInitialQPosition();
+
+	std::vector<double> q;
+	for(int i = 0; i < matrix.rows(); ++i)
+	{
+		q = motion->UpdateQ((Eigen::VectorXf)matrix.row(i));
+	}
+
 
 
 	ofstream myfiletraj;

@@ -1,3 +1,13 @@
+/**
+******************************************************************************^M
+* @file    Trajectory.h
+* @authors  Camille Hébert & Antoine Rioux
+* @date    2013-11-19
+* @brief   Class to calculate leg and pelvis trajectories
+******************************************************************************^M
+*/
+
+
 #ifndef TRAJECTORY_H
 #define TRAJECTORY_H
 

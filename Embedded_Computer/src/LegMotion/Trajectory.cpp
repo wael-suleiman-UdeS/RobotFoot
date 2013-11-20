@@ -1,3 +1,13 @@
+/**
+******************************************************************************^M
+* @file    Trajectory.cpp
+* @authors  Camille Hébert & Antoine Rioux
+* @date    2013-11-19
+* @brief   Class to calculate leg and pelvis trajectories
+******************************************************************************^M
+*/
+
+
 #include "Trajectory.h"
 
 #include "EigenUtils.h"

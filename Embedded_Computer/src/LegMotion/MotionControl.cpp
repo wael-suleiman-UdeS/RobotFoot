@@ -1,19 +1,25 @@
+/**
+******************************************************************************^M
+* @file    MotionControl.cpp
+* @authors  Camille Hébert & Antoine Rioux
+* @date    2013-11-19
+* @brief   Class to control leg movements
+******************************************************************************^M
+*/
+
 #include "MotionControl.h"
 
 #include "Trajectory.h"
-#include "DenavitHartenberg.h"
 #include "EigenUtils.h"
-
-#include "../../ThirdParty/Eigen/Dense"
-
 
 #define Debug
 #ifdef Debug
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-using namespace std;
 #endif
+
+using namespace std;
 
 namespace
 {
@@ -28,27 +34,111 @@ MotionControl::MotionControl()
 {
 	m_TdToPelvis = Eigen::Vector3f(0,0,0);
 	m_TdToFoot = Eigen::Vector3f(0,0,0);
-	m_q.resize(12);
-	m_q << 0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f, 0.0f, 0.0f, 0.0f, -ANGLE1, -ANGLE2, -ANGLE1, 0.0f;
+	m_vInitialQPosition.resize(12);
+	m_vInitialQPosition << 0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f, 0.0f, 0.0f, 0.0f, -ANGLE1, -ANGLE2, -ANGLE1, 0.0f;
+	//m_q = m_vInitialQPosition;
+
+	m_damping = 0.9f;
+
+	m_DH_RightToLeft = DenavitHartenberg(m_vInitialQPosition, DenavitHartenberg::Leg::GroundRight);
+	m_DH_LeftToRight = DenavitHartenberg(m_vInitialQPosition, DenavitHartenberg::Leg::GroundLeft);
 }
 
 MotionControl::~MotionControl()
 {
-
+	delete m_DH;
+	//delete m_DH_LeftToRight;
+	//delete m_DH_RightToLeft;
 }
 
+std::vector<double> MotionControl::GetInitialQPosition()
+{
+	std::vector<double> initialQ = {0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f, 0.0f, 0.0f, 0.0f, -ANGLE1, -ANGLE2, -ANGLE1, 0.0f};
+	return initialQ;
+}
+
+std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatrixLine, std::vector<double> currentMotorsPosition)
+{
+	Eigen::VectorXf qMotors(12);
+	Eigen::VectorXf qToDisplay(12);
+
+	qMotors = Eigen::Map<Eigen::VectorXd>((double*)&currentMotorsPosition[0], 12).cast<float>();
+
+	bool calculationDone = false;
+	int NbIterations = 0;
+
+	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft) //1 is left foot fixed
+		m_DH = &m_DH_LeftToRight;
+	else
+		m_DH = &m_DH_RightToLeft;
+
+	Eigen::Vector3f ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot;
+	while(!calculationDone)
+	{
+		NbIterations++;
+
+		m_DH->Update(qMotors);
+
+		CalculateError(ePosToPelvis, eThetaToPelvis, ePosToFoot, eThetaToFoot, currentTrajectoryMatrixLine, qMotors);
+
+		Eigen::MatrixXf jacobienne = m_DH->Jacobian(DenavitHartenberg::DHSection::ToPelvis, 1);
+		Eigen::MatrixXf J1inv = EigenUtils::PseudoInverse(jacobienne.topRows(3));
+		Eigen::MatrixXf J2inv = EigenUtils::PseudoInverse(jacobienne.bottomRows(3));
+
+		Eigen::MatrixXf jacobienne2 = m_DH->Jacobian(DenavitHartenberg::DHSection::ToFoot, 1);
+		Eigen::MatrixXf J3inv = EigenUtils::PseudoInverse(jacobienne2.topRows(3));
+		Eigen::MatrixXf J4inv = EigenUtils::PseudoInverse(jacobienne2.bottomRows(3));
+
+		Eigen::VectorXf tachePriorite1 = J1inv * ePosToPelvis; 														//Position au sol
+		Eigen::VectorXf tachePriorite2 = J2inv * (eThetaToPelvis - (jacobienne.bottomRows(3) * tachePriorite1)); 	//Angle au sol
+		Eigen::VectorXf tachePriorite3 = J3inv * ePosToFoot; 														//Position en mouvement
+		Eigen::VectorXf tachePriorite4 = J4inv * (eThetaToFoot - (jacobienne2.bottomRows(3) * tachePriorite3)); 	//Angle en mouvement
+
+		if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
+		{
+			qMotors.reverseInPlace();
+			qMotors.head(6) = qMotors.head(6) + m_damping * (tachePriorite1 + tachePriorite2);
+			qMotors.tail(6) = qMotors.tail(6) + m_damping * (tachePriorite3 + tachePriorite4);
+			qMotors.reverseInPlace();
+		}
+		else
+		{
+			qMotors.head(6) = qMotors.head(6) + m_damping * (tachePriorite1 + tachePriorite2);
+			qMotors.tail(6) = qMotors.tail(6) + m_damping * (tachePriorite3 + tachePriorite4);
+		}
+
+		m_DH->Update(qMotors);
+
+		CalculateError(ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot, currentTrajectoryMatrixLine, qMotors);
+
+		calculationDone = ePosToPelvis.norm() < m_distanceThreshold && ePosToFoot.norm() < m_distanceThreshold &&
+				abs(eThetaToPelvis(0)) < m_angleThreshold && abs(eThetaToPelvis(1)) < m_angleThreshold && abs(eThetaToPelvis(2)) < m_angleThreshold &&
+				abs(eThetaToFoot(0)) < m_angleThreshold && abs(eThetaToFoot(1)) < m_angleThreshold && abs(eThetaToFoot(2)) < m_angleThreshold;
+
+
+		//*******************A enlever plus tard*************************//
+		calculationDone = NbIterations >= m_nbIterationMax;
+
+		qToDisplay.tail(6) = qMotors.tail(6);
+		qMotors.reverseInPlace();
+		qToDisplay.head(6) = qMotors.tail(6);
+		qMotors.reverseInPlace();
+		qToDisplay*=180/M_PI;
+	}
+
+	//std::vector<float> stdQToDisplay(12);
+	//Eigen::Map<Eigen::VectorXf>(stdQToDisplay.data(), 12) = qToDisplay;
+
+	std::vector<double> stdQToDisplay(12);
+	Eigen::Map<Eigen::VectorXd>(stdQToDisplay.data(), 12) = qToDisplay.cast<double>();
+
+	return stdQToDisplay;
+}
+
+/*
 void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 {
-	float damping = 0.9f;
-
-	DenavitHartenberg DH_LeftToRight(m_q, DenavitHartenberg::GroundLeft);
-	DenavitHartenberg DH_RightToLeft(m_q, DenavitHartenberg::GroundRight);
-
-	DenavitHartenberg* DH;
-
-
 #ifdef Debug
-	//*****************write to a file for tests************************************//
 	ofstream myfile;
 	myfile.open ("matrixPositions.txt");
 
@@ -76,9 +166,9 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 		int NbIterations = 0;
 
 		if(trajectoryMatrix(i, 9) == DenavitHartenberg::Leg::GroundLeft) //1 is left foot fixed
-			DH = &DH_LeftToRight;
+			m_DH = &m_DH_LeftToRight;
 		else
-			DH = &DH_RightToLeft;
+			m_DH = &m_DH_RightToLeft;
 
 		Eigen::Vector3f ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot;
 		while(!calculationDone)
@@ -87,19 +177,17 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 
 			Eigen::MatrixXf eclipseWatchSuck = m_q;
 
-			DH->Update(m_q);
+			m_DH->Update(m_q);
 
 			CalculateError(ePosToPelvis, eThetaToPelvis, ePosToFoot, eThetaToFoot, trajectoryMatrix, DH, i);
 
-			Eigen::MatrixXf jacobienne = DH->Jacobian(DenavitHartenberg::DHSection::ToPelvis, 1);
+			Eigen::MatrixXf jacobienne = m_DH->Jacobian(DenavitHartenberg::DHSection::ToPelvis, 1);
 			Eigen::MatrixXf J1inv = EigenUtils::PseudoInverse(jacobienne.topRows(3));
 			Eigen::MatrixXf J2inv = EigenUtils::PseudoInverse(jacobienne.bottomRows(3));
 
-			//*****************write to a file for tests************************************//
-			myfile << DH->positionMatrix << endl;
-			//*****************************************************************************//
+			myfile << m_DH->positionMatrix << endl;
 
-			Eigen::MatrixXf jacobienne2 = DH->Jacobian(DenavitHartenberg::DHSection::ToFoot, 1);
+			Eigen::MatrixXf jacobienne2 = m_DH->Jacobian(DenavitHartenberg::DHSection::ToFoot, 1);
 			Eigen::MatrixXf J3inv = EigenUtils::PseudoInverse(jacobienne2.topRows(3));
 			Eigen::MatrixXf J4inv = EigenUtils::PseudoInverse(jacobienne2.bottomRows(3));
 
@@ -111,33 +199,32 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 			if(trajectoryMatrix(i, 9) == DenavitHartenberg::Leg::GroundLeft)
 			{
 				m_q.reverseInPlace();
-				m_q.head(6) = m_q.head(6) + damping * (tachePriorite1 + tachePriorite2);
-				m_q.tail(6) = m_q.tail(6) + damping * (tachePriorite3 + tachePriorite4);
+				m_q.head(6) = m_q.head(6) + m_damping * (tachePriorite1 + tachePriorite2);
+				m_q.tail(6) = m_q.tail(6) + m_damping * (tachePriorite3 + tachePriorite4);
 				m_q.reverseInPlace();
 			}
 			else
 			{
-				m_q.head(6) = m_q.head(6) + damping * (tachePriorite1 + tachePriorite2);
-				m_q.tail(6) = m_q.tail(6) + damping * (tachePriorite3 + tachePriorite4);
+				m_q.head(6) = m_q.head(6) + m_damping * (tachePriorite1 + tachePriorite2);
+				m_q.tail(6) = m_q.tail(6) + m_damping * (tachePriorite3 + tachePriorite4);
 			}
 
-			DH->Update(m_q);
+			m_DH->Update(m_q);
 
-			CalculateError(ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot, trajectoryMatrix, DH, i);
+			CalculateError(ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot, trajectoryMatrix, i);
 
 			calculationDone = ePosToPelvis.norm() < m_distanceThreshold && ePosToFoot.norm() < m_distanceThreshold &&
 					abs(eThetaToPelvis(0)) < m_angleThreshold && abs(eThetaToPelvis(1)) < m_angleThreshold && abs(eThetaToPelvis(2)) < m_angleThreshold &&
 					abs(eThetaToFoot(0)) < m_angleThreshold && abs(eThetaToFoot(1)) < m_angleThreshold && abs(eThetaToFoot(2)) < m_angleThreshold;
 
 
-			//*******************A enlever plus tard*************************//
 			calculationDone = NbIterations >= m_nbIterationMax;
 
 			qToDisplay.tail(6) = m_q.tail(6);
 			m_q.reverseInPlace();
 			qToDisplay.head(6) = m_q.tail(6);
 			m_q.reverseInPlace();
-			qToDisplay = qToDisplay*=180/M_PI;
+			qToDisplay*=180/M_PI;
 
 #ifdef Debug
 			myfileQ << qToDisplay.transpose() << endl;
@@ -150,7 +237,6 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 	}
 
 #ifdef Debug
-	//*****************write to a file for tests************************************//
 	myfile.close();
 	myfileQ.close();
 	myfileEPOS1.close();
@@ -159,59 +245,60 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 	myfileETHETA2.close();
 #endif
 }
+*/
 
 //Check right left*****************************************
 void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3f& eThetaToPelvis, Eigen::Vector3f& ePosToFoot,
-		Eigen::Vector3f& eThetaToFoot, Eigen::MatrixXf& trajectoryMatrix, DenavitHartenberg* DH, int i)
+		Eigen::Vector3f& eThetaToFoot, Eigen::VectorXf& currentTrajectoryMatrixLine, Eigen::VectorXf qMotors)
 {
 	//Fixed foot position
 	Eigen::Vector3f Pe0p;
-	if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
-		Pe0p = Eigen::Vector3f(trajectoryMatrix(i, leftFootPosX), trajectoryMatrix(i, leftFootPosY), trajectoryMatrix(i, leftFootPosZ));
+	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
+		Pe0p = Eigen::Vector3f(currentTrajectoryMatrixLine(leftFootPosX), currentTrajectoryMatrixLine(leftFootPosY), currentTrajectoryMatrixLine(leftFootPosZ));
 	else
-		Pe0p = Eigen::Vector3f(trajectoryMatrix(i, rightFootPosX), trajectoryMatrix(i, rightFootPosY), trajectoryMatrix(i, rightFootPosZ));
+		Pe0p = Eigen::Vector3f(currentTrajectoryMatrixLine(rightFootPosX), currentTrajectoryMatrixLine(rightFootPosY), currentTrajectoryMatrixLine(rightFootPosZ));
 
 	/////////////////////////////////////////////////////////////////
 	//Ground foot to pelvis
 	/////////////////////////////////////////////////////////////////
-	Eigen::Vector3f PeToPelvis = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToPelvis).topRightCorner(3,1);//Position of End effector (pelvis) from ground foot
+	Eigen::Vector3f PeToPelvis = m_DH->MatrixHomogene(DenavitHartenberg::DHSection::ToPelvis).topRightCorner(3,1);//Position of End effector (pelvis) from ground foot
 
 	Eigen::Matrix4f tempPdToPelvis = Eigen::Matrix4f::Identity();
-	tempPdToPelvis.topRightCorner(3,1) = Eigen::Vector3f(trajectoryMatrix(i,10), trajectoryMatrix(i,11), trajectoryMatrix(i,12)) - Pe0p;
-	tempPdToPelvis = DH->GetPR1() * tempPdToPelvis;
+	tempPdToPelvis.topRightCorner(3,1) = Eigen::Vector3f(currentTrajectoryMatrixLine(pelvisPosX), currentTrajectoryMatrixLine(pelvisPosY), currentTrajectoryMatrixLine(pelvisPosZ)) - Pe0p;
+	tempPdToPelvis = m_DH->GetPR1() * tempPdToPelvis;
 	Eigen::Vector3f PdToPelvis =  tempPdToPelvis.topRightCorner(3,1);						//Position Desired for the end effector (pelvis) from ground foot
 
-	DH->UpdateTe(m_q);
+	m_DH->UpdateTe(qMotors);
 
 	ePosToPelvis = PdToPelvis - PeToPelvis;															//Error on the Position (pelvis) from ground foot
-	eThetaToPelvis = m_TdToPelvis - DH->GetTeToPelvis();											//Error on the Angle (pelvis) from ground foot
+	eThetaToPelvis = m_TdToPelvis - m_DH->GetTeToPelvis();											//Error on the Angle (pelvis) from ground foot
 
 	/////////////////////////////////////////////////////////////////
 	//Pelvis to moving foot
 	/////////////////////////////////////////////////////////////////
 	Eigen::Matrix4f tempPeToPelvis = Eigen::Matrix4f::Identity();
 	tempPeToPelvis.topRightCorner(3,1) = PeToPelvis;
-	tempPeToPelvis = DH->GetRP1() * tempPeToPelvis;
+	tempPeToPelvis = m_DH->GetRP1() * tempPeToPelvis;
 	Eigen::Vector3f PeToPelvisP = tempPeToPelvis.topRightCorner(3,1) + Pe0p;
 
-	Eigen::MatrixXf PeToFoot = DH->MatrixHomogene(DenavitHartenberg::DHSection::ToFoot).topRightCorner(3,1);
+	Eigen::MatrixXf PeToFoot = m_DH->MatrixHomogene(DenavitHartenberg::DHSection::ToFoot).topRightCorner(3,1);
 
 	Eigen::Matrix4f tempPdToFoot = Eigen::Matrix4f::Identity();
-	if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
+	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
 	{
-		tempPdToFoot.col(3) = Eigen::Vector4f(trajectoryMatrix(i,rightFootPosX)-PeToPelvisP(0),
-				trajectoryMatrix(i,rightFootPosY)-PeToPelvisP(1), trajectoryMatrix(i,rightFootPosZ)-PeToPelvisP(2), 1);
+		tempPdToFoot.col(3) = Eigen::Vector4f(currentTrajectoryMatrixLine(rightFootPosX)-PeToPelvisP(0),
+				currentTrajectoryMatrixLine(rightFootPosY)-PeToPelvisP(1), currentTrajectoryMatrixLine(rightFootPosZ)-PeToPelvisP(2), 1);
 	}
 	else
 	{
-		tempPdToFoot.col(3) = Eigen::Vector4f(trajectoryMatrix(i,leftFootPosX)-PeToPelvisP(0),
-				trajectoryMatrix(i,leftFootPosY)-PeToPelvisP(1), trajectoryMatrix(i,leftFootPosZ)-PeToPelvisP(2), 1);
+		tempPdToFoot.col(3) = Eigen::Vector4f(currentTrajectoryMatrixLine(leftFootPosX)-PeToPelvisP(0),
+				currentTrajectoryMatrixLine(leftFootPosY)-PeToPelvisP(1), currentTrajectoryMatrixLine(leftFootPosZ)-PeToPelvisP(2), 1);
 	}
 
-	tempPdToFoot = tempPdToFoot * DH->GetPR2Fin();
+	tempPdToFoot = tempPdToFoot * m_DH->GetPR2Fin();
 	Eigen::Vector3f PdToFoot =  tempPdToFoot.topRightCorner(3,1); 									//Position Desired for the end effector (foot) for moving foot
 
 	ePosToFoot = PdToFoot - PeToFoot;																//Error on the Position (foot) for moving foot
-	eThetaToFoot = m_TdToFoot - DH->GetTeToFoot();													//Error on the Angle (foot) for moving foot
+	eThetaToFoot = m_TdToFoot - m_DH->GetTeToFoot();													//Error on the Angle (foot) for moving foot
 }
 
