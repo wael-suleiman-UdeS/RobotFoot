@@ -55,7 +55,8 @@ std::vector<double> MotionControl::GetInitialQPosition()
 {
 	float dangle1 = 180/M_PI;
 	float dangle2 = 180/M_PI;
-	std::vector<double> initialQ = {0.0f, dangle1, dangle2, dangle1, 0.0f, 0.0f, 0.0f, 0.0f, -dangle1, -dangle2, -dangle1, 0.0f};
+	std::vector<double> initialQ = {0.0f, 0.0f, dangle1, dangle2, dangle1, 0.0f, 0.0f, 0.0f, -dangle1, -dangle2, -dangle1, 0.0f};
+
 	return initialQ;
 }
 
