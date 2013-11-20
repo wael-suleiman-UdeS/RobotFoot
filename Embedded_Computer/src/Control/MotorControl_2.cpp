@@ -25,7 +25,7 @@ namespace
 	const double dInvAngleConvertion = 1/dAngleConvertion;
 }
 
-Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime)
+Motor::Motor(STM32F4 *stm32f4, std::string name, int id, int offset, int min, int max, int playTime, bool isInversed)
 :
 _stm32f4(stm32f4),
 _name(name),
@@ -35,7 +35,8 @@ _min(min),
 _max(max),
 _playTime(playTime),
 _lastPos(0),
-_currentPos(0)
+_currentPos(0),
+_isInversed(isInversed)
 {    
 }
 
@@ -45,12 +46,26 @@ Motor::~Motor()
 
 void Motor::setPos(double pos)
 {
-    _currentPos = pos;
+    if(_isInversed)
+    {
+        _currentPos = -pos;
+    }
+    else
+    {
+        _currentPos = pos;
+    }
 }
 
 const double Motor::getPos()
 {
-    return _currentPos;
+    if(_isInversed)
+    {
+        return -_currentPos;
+    }
+    else
+    {
+        return _currentPos;
+    }
 }
 
 void Motor::setTorque(bool value)
@@ -197,7 +212,8 @@ void MotorControl::InitializeMotors(const XmlParser &config)
 		int min       = config.getIntValue(it->second / XmlPath::LimitMin);
 		int max       = config.getIntValue(it->second / XmlPath::LimitMax);
         int playTime  = config.getIntValue(it->second / XmlPath::PlayTime);    
-        Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, playTime);
+        bool isInversed = config.getIntValue(it->second / XmlPath::IsInversed);    
+        Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, playTime, isInversed);
 	    _motors.insert(std::make_pair(it->first, motor));
     }
 }

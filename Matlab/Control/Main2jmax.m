@@ -7,8 +7,8 @@ DistanceThreshold = 0.002;
 AngleThreshold = 1;
 NbIterationMax = 1;
 % Angle
-Angle1 = -0.35;
-Angle2 = 0.7;
+Angle1 = 0.35;
+Angle2 = -0.7;
 % Longueur
 L4 = 0.093;
 L5 = 0.093; 
@@ -17,7 +17,7 @@ LTZ = 0.122;  % "                     " LTY
 LTY = 0.005;  % "                     " LTX
 LF = 0.037;
 % Angle de depart
-q = [0 Angle1 Angle2 Angle1 0 0 0 0 Angle1 Angle2 Angle1 0];
+q = [0 Angle1 Angle2 Angle1 0 0 0 0 -Angle1 -Angle2 -Angle1 0];
 
 
 Td1 = [0; 0; 0];
@@ -25,10 +25,11 @@ Td2 = [0; 0; 0];
 
 file_id = fopen('input.txt', 'w');
 
-[Size,dt,T,RightFootTraj,LeftFootTraj,PelvisTraj] = GenerateTrajectory();
-FixedFoot = 0 ;  % If FixedFoot = 0 then the right foot is fixed,
-                % If FixedFoot = 1 then the left foot is fixed.
-           % It should be replace by a function to alternate walking foot
+[Size,dt,T,RightFootTraj,LeftFootTraj,PelvisTraj,FixedFoot] = GenerateTrajectory();
+%FixedFoot = 0 ;  
+% If FixedFoot = 0 then the right foot is fixed,
+% If FixedFoot = 1 then the left foot is fixed.
+% It should be replace by a function to alternate walking foot
 
 TableQPos = [];
 TableQDot = [0 0 0 0 0 0 0 0 0 0 0 0];
@@ -47,10 +48,10 @@ for i = 1:Size
 
     while ~CalculDone
         NbIteration = NbIteration + 1;
-        if  FixedFoot == 0 
-            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, Td1, Td2);
-        elseif FixedFoot == 1
-            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, Td1, Td2);
+        if  FixedFoot(i) == 0 
+            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, Td1, Td2);
+        elseif FixedFoot(i) == 1
+            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, Td1, Td2);
         end 
             % Cacul Jacobian
             k = 0.9;
@@ -74,19 +75,19 @@ for i = 1:Size
             priorite3 = J3inv * ePos2;
             priorite4 = J4inv * (eTheta2 - (J4 * priorite3));
             
-        if  FixedFoot == 0 
+        if  FixedFoot(i) == 0 
             q(1:6) = q(1:6) + k*(priorite1' + priorite2') ;
             q(7:12)= q(7:12)+ k*(priorite3' + priorite4') ;        
-        elseif FixedFoot == 1
+        elseif FixedFoot(i) == 1
             TempQ = q(end:-1:1) ;
             TempQ(1:6) = TempQ(1:6) + k*(priorite1' + priorite2') ;
             TempQ(7:12)= TempQ(7:12)+ k*(priorite3' + priorite4') ;  
             q = TempQ(end:-1:1) ;
         end 
-             if  FixedFoot == 0 
-                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, Td1, Td2);
-             elseif FixedFoot == 1
-                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, Td1, Td2);
+             if  FixedFoot(i) == 0 
+                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, Td1, Td2);
+             elseif FixedFoot(i) == 1
+                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, Td1, Td2);
              end
              
              CalculDone = VerifyError(DistanceThreshold,ePos1,DistanceThreshold,ePos2,AngleThreshold,eTheta1(1),AngleThreshold,eTheta1(2),AngleThreshold,eTheta1(3),AngleThreshold,eTheta2(1),AngleThreshold,eTheta2(2),AngleThreshold,eTheta2(3));
@@ -96,7 +97,8 @@ for i = 1:Size
             end
             
             if CalculDone 
-                displayQ = [q(6) -q(5) q(4) q(3) -q(2) q(1) q(7) q(8) q(9) q(10) -q(11) -q(12)];
+                %displayQ = [q(6) -q(5) q(4) q(3) -q(2) q(1) q(7) q(8) q(9) q(10) -q(11) -q(12)];
+                displayQ = [q(6) q(5) q(4) q(3) q(2) q(1) q(7) q(8) q(9) q(10) q(11) q(12)];
                 displayQ = displayQ * 180/pi;
                 fprintf(file_id,'%6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f\r\n', displayQ);
 
@@ -115,41 +117,41 @@ for i = 1:Size
 end
 fclose(file_id);
 
-figure()
-plot(T,TableQPos);
-title('TableQPos');
-figure()
-plot(T,TableQDot);
-title('TableQDot');
-figure()
-plot(T,TableNbIteration);
-title('TableNbIteration');
-figure()
-plot(T,LeftFootTraj);
-title('LeftFootTraj');
-legend('Position en x', 'Position en y', 'Position en z')
-figure()
-plot(T,RightFootTraj);
-title('RightFootTraj');
-legend('Position en x', 'Position en y', 'Position en z')
-figure()
-plot(T,PelvisTraj);
-title('PelvisTraj');
-legend('Position en x', 'Position en y', 'Position en z')
-figure()
-plot(T,TableEPos1);
-title('TableEPos1');
-figure()
-plot(T,TableEPos2);
-title('TableEPos2')
-figure()
-plot(T,TableETheta1);
-title('TableETheta1')
-figure()
-plot(T,TableETheta2);
-title('TableETheta2')
+%figure()
+%plot(T,TableQPos);
+%title('TableQPos');
+%figure()
+%plot(T,TableQDot);
+%title('TableQDot');
+%figure()
+%plot(T,TableNbIteration);
+%title('TableNbIteration');
+%figure()
+%plot(T,LeftFootTraj);
+%title('LeftFootTraj');
+%legend('Position en x', 'Position en y', 'Position en z')
+%figure()
+%plot(T,RightFootTraj);
+%title('RightFootTraj');
+%legend('Position en x', 'Position en y', 'Position en z')
+%figure()
+%plot(T,PelvisTraj);
+%title('PelvisTraj');
+%legend('Position en x', 'Position en y', 'Position en z')
+%figure()
+%plot(T,TableEPos1);
+%title('TableEPos1');
+%figure()
+%plot(T,TableEPos2);
+%title('TableEPos2')
+%figure()
+%plot(T,TableETheta1);
+%title('TableETheta1')
+%figure()
+%plot(T,TableETheta2);
+%title('TableETheta2')
 
-EPos1Max = max(TableEPos1);
-EPos2Max = max(TableEPos2);
-ETheta1Max = max(TableETheta1);
-ETheta2Max = max(TableETheta2);
+EPos1Max = max(TableEPos1)
+EPos2Max = max(TableEPos2)
+ETheta1Max = max(TableETheta1)
+ETheta2Max = max(TableETheta2)

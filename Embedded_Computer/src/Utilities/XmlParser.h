@@ -66,6 +66,7 @@ namespace XmlPath
 	extern const fs::path LimitMin;
 	extern const fs::path LimitMax;
     extern const fs::path PlayTime;
+    extern const fs::path IsInversed;
 }
 
 /** @brief Class for XML parsing

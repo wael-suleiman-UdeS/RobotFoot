@@ -131,8 +131,9 @@ int _close(int file)
 }
 
 /**
-  * @brief  Implementation of close.
+  * @brief  Implementation of fstat.
   * @param  file file number
+  * @param  st   stat structure
   * @return 0 if successful, -1 otherwise, and errno is set according to error
   * @note   It is a dummy implementation: it pretends the argument passed is a
   *         file descriptor that refer to a <em>character device</em>.
@@ -197,6 +198,55 @@ off_t _lseek(int fd, off_t offset, int whence)
 {
     errno = EBADF;
     return (off_t) -1;
+}
+
+/**
+  *  @brief Demangling routine.
+  *  From the GNU libstdc++ documentation:
+  *
+  *  @param __mangled_name A NUL-terminated character string
+  *  containing the name to be demangled.
+  *
+  *  @param __output_buffer A region of memory, allocated with
+  *  malloc, of @a *__length bytes, into which the demangled name is
+  *  stored.  If @a __output_buffer is not long enough, it is
+  *  expanded using realloc.  @a __output_buffer may instead be NULL;
+  *  in that case, the demangled name is placed in a region of memory
+  *  allocated with malloc.
+  *
+  *  @param __length If @a __length is non-NULL, the length of the
+  *   buffer containing the demangled name is placed in @a *__length.
+  *
+  *  @param __status @a *__status is set to one of the following values:
+  *   0: The demangling operation succeeded.
+  *  -1: A memory allocation failure occurred.
+  *  -2: @a mangled_name is not a valid name under the C++ ABI mangling rules.
+  *  -3: One of the arguments is invalid.
+  *
+  *  @return A pointer to the start of the NUL-terminated demangled
+  *  name, or NULL if the demangling fails.  The caller is
+  *  responsible for deallocating this memory using @c free.
+  *
+  *  The demangling is performed using the C++ ABI mangling rules,
+  *  with GNU extensions. For example, this function is used in
+  *  __gnu_cxx::__verbose_terminate_handler.
+  *
+  *  See http://gcc.gnu.org/onlinedocs/libstdc++/manual/bk01pt12ch39.html
+  *  for other examples of use.
+  *
+  *  @note This function is unlike the other ones above. We define this function
+  *        here not because it is needed and it's not provided, but rather it is
+  *        @e not needed and @e is provided. When I looked at the map file, I
+  *        found this pig to take a lot of space (> 32K). This dummy
+  *        implementation takes about no space and override the one in libstdc++
+  *        and the savings are huge. This function, albeit dummy, is conformant
+  *        and just acts as if no memory is available.
+  */
+char* __cxa_demangle(const char *mangled_name, char *output_buffer,
+                     size_t *length, int *status)
+{
+    if (status) *status = -1;
+    return 0;
 }
 
 

@@ -2,7 +2,8 @@
 SRC =  test1.cpp
 
 SRC += Trajectory.cpp
-SRC += Kinematics.cpp
+SRC += DenavitHartenberg.cpp
+SRC += MotionControl.cpp
 SRC += EigenUtils.cpp
 
 

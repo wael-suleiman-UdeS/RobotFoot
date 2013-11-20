@@ -53,6 +53,7 @@ namespace XmlPath
 	const path LimitMin = "LimitMin";
 	const path LimitMax = "LimitMax";
     const path PlayTime = "PlayTime";
+    const path IsInversed = "IsInversed";
 }
 
 /** \brief Load an XML file for subsequent parsing operations

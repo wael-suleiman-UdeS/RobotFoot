@@ -11,15 +11,17 @@ Trajectory();
 ~Trajectory();
 
 Eigen::MatrixXf GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goalPoint, Eigen::Vector2f goalAngle,
-		Eigen::Vector2f startingAngle, float stepTime = 1.0f, float stepHeight = 0.02f);
+		Eigen::Vector2f startingAngle, float stepTime = 3.0f, float stepHeight = 0.02f);
 void GenerateKick();
+Eigen::MatrixXf GenerateMovement(Eigen::Vector4f& rightFootInitialPos, Eigen::Vector4f& rightFootFinalPos, Eigen::Vector4f& leftFootInitialPos,
+		Eigen::Vector4f& leftFootFinalPos, Eigen::Vector4f& pelvisInitialPos, Eigen::Vector4f& pelvisFinalPos, float timeLapse);
 
 private:
 
 Eigen::MatrixXf ToList(Eigen::Vector2f PointA, Eigen::Vector2f PointD, Eigen::MatrixXf LeftTrajectory, Eigen::MatrixXf RightTrajectory);
 
 void BezierDegre2(Eigen::VectorXf& xPositionsVector, Eigen::VectorXf& yPositionsVector, Eigen::VectorXf& angles,
-						Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::Vector2f startAngle, Eigen::Vector2f endAngle, int dist = 1);
+						Eigen::Vector2f pointA, Eigen::Vector2f pointD, Eigen::Vector2f startAngle, Eigen::Vector2f endAngle, float dist = 0.5f);
 Eigen::Vector2f GetBezierTangent(Eigen::MatrixXf controlPoints, float t);
 float GetBezierAngle(Eigen::MatrixXf controlPoints, float t);
 void ParallelCurve(Eigen::VectorXf &xInner, Eigen::VectorXf &yInner, Eigen::VectorXf &xOuter, Eigen::VectorXf &yOuter, Eigen::VectorXf& x, Eigen::VectorXf& y);
@@ -33,13 +35,14 @@ void GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int stepCount,
 Eigen::MatrixXf GenerateParabollicTrajParams(Eigen::Vector4f initialPos, Eigen::Vector4f finalPos, float stepTimeLapse);
 Eigen::Vector3f GenerateParabollicTrajectory(Eigen::MatrixXf params, float currentTime);
 
-Eigen::MatrixXf GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize);
+Eigen::MatrixXf GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps);
 
 float m_singleStepTime;
 float m_dLeg;
 float m_dStep;
 float m_stepHeight;
 float m_dTime;
+float m_ZMPHeight;
 int m_nbTrajectoryPoints;
 };
 
