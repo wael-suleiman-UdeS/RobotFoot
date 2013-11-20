@@ -69,6 +69,7 @@ ObjectTracker::ObjectTracker(std::shared_ptr<ThreadManager> threadManager_ptr, s
 void ObjectTracker::track(Point objectPosition)
 {
 
+	Logger::getInstance() << "Object distance: " << _mc->getObjectDistance() << " cm" << std::endl;
     Logger::getInstance() << "Object position: " << objectPosition.x << ", " << objectPosition.y << std::endl;
     Logger::getInstance() << "No object count: " << _noObjectCount << "/" << _noObjectMaxCount << std::endl;
 
@@ -77,10 +78,6 @@ void ObjectTracker::track(Point objectPosition)
     if ( objectPosition.x > 0 && objectPosition.y > 0) {
 		_objectError = _centerPosition - objectPosition;
 		_noObjectCount = 0;
-
-		if (_newAngle.y < -65 && _newAngle.x < 40 && _newAngle.x > 20) {
-			_threadManager->resume(ThreadManager::Task::LEGS_CONTROL);
-		}
 
     }
     else if(_noObjectCount > _noObjectMaxCount) {
@@ -139,13 +136,16 @@ void ObjectTracker::setHeadAngles() {
 	angles.push_back(_newAngle.x);
 	angles.push_back(_newAngle.y);
 
-	Logger::getInstance() << "Start scanning to the left" << std::endl;
-
 	//_mc->SetPositions(angles, MotorControl::Config::HEAD);
 	_mc->HardSet(angles, MotorControl::Config::HEAD);
 }
 
 void ObjectTracker::scan() {
+
+	Logger::getInstance() << "_minPan + _threshold: " << _minPan + _threshold << std::endl;
+	Logger::getInstance() << "_maxPan + _threshold: " << _maxPan + _threshold << std::endl;
+
+
 	if (_currentAngle.x < _minPan + _threshold) {
 		_pids["Pan"].reset();
 		_objectError.x = _scanningError;

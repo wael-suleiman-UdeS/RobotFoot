@@ -89,11 +89,12 @@ int main(int argc, char * argv[])
     try
     {
         // Init IO_service for ThreadManager
-        boost::asio::io_service boost_io;
-        std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager(boost_io, config));
+        boost::asio::io_service timer_io;
+        std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager(timer_io, config));
         //threadManager_ptr->create(70, boost::bind(&boost::asio::io_service::run, &boost_io));
 
-        std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config));
+        boost::asio::io_service usb_io;
+        std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, usb_io));
 
         
         // Starting Head task
@@ -123,8 +124,6 @@ int main(int argc, char * argv[])
 
         if (isTracking)
         	threadManager_ptr->attach(ThreadManager::Task::HEAD_CONTROL);
-		
-
 
         //threadManager_ptr->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);
         //threadManager_ptr->timer(); // Start timer

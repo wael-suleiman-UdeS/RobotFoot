@@ -8,6 +8,26 @@
 #include <vector>
 #include <boost/thread/mutex.hpp>
 #include <memory> // shared_ptr
+#include <ostream>
+
+struct Position
+{
+public:
+	double x;
+	double y;
+};
+
+inline std::ostream & operator<<(std::ostream &os, const Position &position)
+{
+	os << position.x << "," << position.y;
+	return os;
+}
+
+inline std::ostream & operator<<(std::ostream &&os, const Position &position)
+{
+	return operator<<(os, position);
+}
+
 
 class Motor
 {
@@ -21,6 +41,7 @@ class Motor
         void setTorque(bool value);
         void Read();
         void Write();
+
     private:
         int Angle2Value(const double angle);
         double Value2Angle(const int value);
@@ -50,7 +71,7 @@ public:
       NUM_TEST
    };
 
-   MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config);
+   MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io);
    ~MotorControl();
 
    void run();
@@ -75,6 +96,8 @@ public:
    void HardGetMaxAngles(std::vector<double>& angles, const Config config);
    void HardGetMinAngles(std::vector<double>& angles, const Config config);
 
+   Position getObjectDistance();
+
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
@@ -91,5 +114,10 @@ private:
 
    std::map<std::string, Motor*> _motors;
    std::map<Config, std::vector<Motor*>> _configurations;
+
+   double _robotHeight;
+   Position _objectDistance;
+
+   boost::asio::io_service _boost_io;
 };
 #endif  //MOTOR_CONTROL_H
