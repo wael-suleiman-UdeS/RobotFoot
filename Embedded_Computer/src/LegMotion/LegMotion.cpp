@@ -191,7 +191,7 @@ void LegMotion::Run(double msDt)
 				if(m_bIsMotorActivated)
 				{
 					motorsPosition.clear();
-					m_motion->ReadPositions( motorsPosition, MotorControl::Config::ALL_LEGS );
+					m_motion->HardGet( motorsPosition, MotorControl::Config::ALL_LEGS );
 				}
 
 				//read motors
@@ -200,7 +200,8 @@ void LegMotion::Run(double msDt)
 				//set motors
 				if(m_bIsMotorActivated)
 				{
-					if( !m_motion->SetPositions( motorsPosition, MotorControl::Config::ALL_LEGS ) )
+					m_motion->HardSet( motorsPosition, MotorControl::Config::ALL_LEGS );
+					if( motorsPosition.empty() )
 					{
 						break;
 					}
