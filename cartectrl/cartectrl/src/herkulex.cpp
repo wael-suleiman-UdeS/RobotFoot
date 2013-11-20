@@ -251,6 +251,77 @@ int16_t Herkulex::getPos(uint8_t id)
 }
 
 //------------------------------------------------------------------------------
+void Herkulex::writeRAM1(uint8_t id, uint8_t adress, uint8_t value)
+{
+    uint8_t txBuf[10];
+
+    txBuf[0] = HEADER;              // Packet Header (0xFF)
+    txBuf[1] = HEADER;              // Packet Header (0xFF)
+    txBuf[2] = MIN_PACKET_SIZE + 3; // Packet Size
+    txBuf[3] = id;                  // Servo ID
+    txBuf[4] = CMD_RAM_WRITE;       // Command Ram Write (0x03)
+    txBuf[5] = 0;                   // Checksum1
+    txBuf[6] = 0;                   // Checksum2
+    txBuf[7] = adress;              // Address
+    txBuf[8] = BYTE1;               // Length
+    txBuf[9] = value;               // Torque ON
+
+    // Checksum1 = (PacketSize ^ pID ^ CMD ^ Data[0] ^ Data[1] ^ ... ^ Data[n]) & 0xFE
+    // Checksum2 = (~Checksum1)&0xFE
+    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]^txBuf[9]) & 0xFE;
+    txBuf[6] = (~txBuf[5])&0xFE;
+
+    // send packet (mbed -> herkulex)
+    txPacket(10, txBuf);
+}
+
+//------------------------------------------------------------------------------
+uint8_t Herkulex::readRAM1(uint8_t id, uint8_t adress)
+{
+    uint8_t value = 0;
+
+    uint8_t txBuf[9];
+
+    txBuf[0] = HEADER;                  // Packet Header (0xFF)
+    txBuf[1] = HEADER;                  // Packet Header (0xFF)
+    txBuf[2] = MIN_PACKET_SIZE + 2;     // Packet Size
+    txBuf[3] = id;                      // Servo ID
+    txBuf[4] = CMD_RAM_READ;            // Status Error, Status Detail request
+    txBuf[5] = 0;                       // Checksum1
+    txBuf[6] = 0;                       // Checksum2
+    txBuf[7] = adress;                  // Address
+    txBuf[8] = BYTE1;                   // Address
+
+    // Check Sum1 and Check Sum2
+    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]) & 0xFE;
+    txBuf[6] = (~txBuf[5])&0xFE;
+
+    // send packet (mbed -> herkulex)
+    txPacket(9, txBuf);
+
+    uint8_t rxBuf[13];
+    if( !rxPacket(13, rxBuf) ) return -1;
+
+    // Checksum1
+    uint8_t chksum1 = (rxBuf[2]^rxBuf[3]^rxBuf[4]^rxBuf[7]^rxBuf[8]^rxBuf[9]^rxBuf[10]^rxBuf[11]^rxBuf[12]) & 0xFE;
+    if (chksum1 != rxBuf[5])
+    {
+        return -1;
+    }
+
+    // Checksum2
+    uint8_t chksum2 = (~rxBuf[5]&0xFE);
+    if (chksum2 != rxBuf[6])
+    {
+        return -1;
+    }
+
+    value = rxBuf[9];
+
+    return value;
+}
+
+//------------------------------------------------------------------------------
 void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
 {
     for(uint8_t i = 0; i < packetSize ; i++)
@@ -278,7 +349,6 @@ bool Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
     }
     return true;
 }
-
 
 //------------------------------------------------------------------------------
 

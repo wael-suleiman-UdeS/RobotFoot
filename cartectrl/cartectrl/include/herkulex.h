@@ -317,6 +317,21 @@ public:
      */
     int16_t getPos(uint8_t id);
 
+    /**@brief Write on RAM
+     *
+     * @param id The herkulex servo ID.
+     *      adress Where to write
+     *      value What to write
+     */
+    void writeRAM1(uint8_t id, uint8_t adress, uint8_t value);
+
+     /**@brief Read on RAM
+     *
+     * @param id The herkulex servo ID.
+     *      adress Where to write
+     */
+    uint8_t readRAM1(uint8_t id, uint8_t adress);
+
 private :
 
     /**@brief Create an Herkulex servo object connected to the serial pins and baudrate

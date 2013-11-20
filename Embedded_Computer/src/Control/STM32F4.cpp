@@ -108,3 +108,41 @@ void STM32F4::clearStatus(std::uint8_t id)
    _usb.write(msg);
 }
 
+void STM32F4::writeRAM(std::uint8_t id, std::uint8_t adress, std::uint8_t value)
+{
+	std::vector<char> msg;
+	const uint8_t cmd = 0x06;
+	const uint8_t nb = 4;
+	const uint8_t checkSum = cmd + nb + id + adress + value;
+
+	msg.push_back('\xff');
+	msg.push_back(checkSum);
+	msg.push_back(nb);
+	msg.push_back(cmd);
+	msg.push_back(id);
+    msg.push_back(adress);
+    msg.push_back(value);
+   _usb.write(msg);
+}
+
+int STM32F4::readRAM(std::uint8_t id, std::uint8_t adress)
+{
+	std::vector<char> msg;
+	const uint8_t cmd = 0x07;
+	const uint8_t nb = 3;
+	const uint8_t checkSum = cmd + nb + id + adress;
+
+	msg.push_back('\xff');
+	msg.push_back(checkSum);
+	msg.push_back(nb);
+	msg.push_back(cmd);
+	msg.push_back(id);
+    msg.push_back(adress);
+	
+	msg = _usb.read_sync(msg);
+
+	if (msg.size() < 3) { return 0; }
+
+	return msg[2];
+}
+

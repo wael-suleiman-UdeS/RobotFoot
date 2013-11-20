@@ -2,7 +2,10 @@
   <Logging>
     <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
-  <ImageProcessing value="0">
+  <Sizes>
+  	<RobotHeight value="36" />
+  </Sizes>
+  <ImageProcessing value="1">
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
@@ -21,7 +24,7 @@
 		  <SmoothingApertureSize value="9" />
 		  <ResolutionDivisor value="2" />
 		  <MinDistance value="120" />
-		  <EdgeThreshold value="100" />
+		  <EdgeThreshold value="15" />
 		  <CenterThreshold value="10" />
 		  <MinRadius value="10" />
 		  <MaxRadius value="400" />
@@ -71,7 +74,10 @@
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
   <Motion value="1">
-    <IterationTimeMs value="15"/>
+    <IterationTimeMs value="30"/>
+    <KP value="1000"/>
+    <KD value="16000"/>
+    <KI value="0"/>
     <Motors>
       <Head>
         <HEAD_PAN>
@@ -109,14 +115,10 @@
         <ScanningError value="300" />
         
         <PID>
-          <Pz value="0.08" />
-          <Iz value="0.06" />
-          <Dz value="0.04" />
+          <P value="0.03" />0.130909093
+          <I value="0" />0.009818182
+          <D value="0" />0.006545455
           <dt value="0.2" />
-          
-          <P value="0.130909093" />0.4
-          <I value="0.009818182" />0.03
-          <D value="0.006545455" />0.02 
           
           <Epsilon value="0" />
         </PID>
@@ -152,7 +154,7 @@
 		  <LimitMin value="450"/>
 		  <LimitMax value="792"/>
           <PlayTime value="0"/>
-          <IsInversed value="0"/>
+          <IsInversed value="1"/>
 	    </L_HIP_ROLL>
 	    <R_HIP_PITCH>
 		  <MotorID value="253"/>
@@ -160,7 +162,7 @@
 		  <LimitMin value="141"/>
 		  <LimitMax value="579"/>
           <PlayTime value="0"/>
-          <IsInversed value="0"/>
+          <IsInversed value="1"/>
 	    </R_HIP_PITCH>
 	    <L_HIP_PITCH>
 		  <MotorID value="6"/>
@@ -176,7 +178,7 @@
 		  <LimitMin value="494"/>
 		  <LimitMax value="887"/>
           <PlayTime value="0"/>
-          <IsInversed value="0"/>
+          <IsInversed value="1"/>
 	    </R_KNEE>
 	    <L_KNEE>
 		  <MotorID value="8"/>
@@ -192,7 +194,7 @@
 		  <LimitMin value="203"/>
 		  <LimitMax value="671"/>
           <PlayTime value="0"/>
-          <IsInversed value="1"/>
+          <IsInversed value="0"/>
 	    </R_ANKLE_PITCH>
 	    <L_ANKLE_PITCH>
 		  <MotorID value="10"/>
@@ -216,7 +218,7 @@
 		  <LimitMin value="242"/>
 		  <LimitMax value="855"/>
           <PlayTime value="0"/>
-          <IsInversed value="1"/>
+          <IsInversed value="0"/>
 	    </L_ANKLE_ROLL>
       </Legs>
     </Motors>

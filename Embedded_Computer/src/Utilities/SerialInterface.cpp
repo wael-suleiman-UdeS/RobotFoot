@@ -8,7 +8,7 @@ SerialInterface::SerialInterface(boost::asio::io_service &io_service,
                            const std::string &port_name,
                            unsigned int baud)
 : _io_service(io_service),
-  _serialPort(io_service)
+  _serialPort(_io_service)
 {
 	try
 	{

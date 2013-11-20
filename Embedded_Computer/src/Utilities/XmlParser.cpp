@@ -11,6 +11,7 @@ namespace XmlPath
 
 	const path Root = "RobotFoot";
 
+	const path Sizes = "Sizes";
 	const path ImageProcessing = "ImageProcessing";
 	const path Camera = "Camera";
 	const path ActiveColor = "ActiveColor";
@@ -25,6 +26,9 @@ namespace XmlPath
     const path Configurations = "Configurations";
 	const path Head = "Head";
 	const path Legs = "Legs";
+    const path KP = "KP";
+    const path KD = "KD";
+    const path KI = "KI";
 
 	const path Threshold = "Threshold";
 

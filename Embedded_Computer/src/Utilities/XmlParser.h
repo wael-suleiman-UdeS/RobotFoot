@@ -26,6 +26,7 @@ namespace XmlPath
 
 	extern const fs::path Root;
 
+	extern const fs::path Sizes;
 	extern const fs::path ImageProcessing;
 	extern const fs::path Camera;
 	extern const fs::path ActiveColor;
@@ -40,6 +41,10 @@ namespace XmlPath
     extern const fs::path Configurations;
 	extern const fs::path Head;
 	extern const fs::path Threshold;
+
+    extern const fs::path KP;
+    extern const fs::path KD;
+    extern const fs::path KI;
 
 	extern const fs::path R_HIP_YAW;
 	extern const fs::path L_HIP_YAW;
