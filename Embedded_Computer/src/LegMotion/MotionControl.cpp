@@ -36,7 +36,6 @@ MotionControl::MotionControl()
 	m_TdToFoot = Eigen::Vector3f(0,0,0);
 	m_vInitialQPosition.resize(12);
 	m_vInitialQPosition << 0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f, 0.0f, 0.0f, 0.0f, -ANGLE1, -ANGLE2, -ANGLE1, 0.0f;
-	//m_q = m_vInitialQPosition;
 
 	m_damping = 0.9f;
 
@@ -47,14 +46,12 @@ MotionControl::MotionControl()
 MotionControl::~MotionControl()
 {
 	delete m_DH;
-	//delete m_DH_LeftToRight;
-	//delete m_DH_RightToLeft;
 }
 
 std::vector<double> MotionControl::GetInitialQPosition()
 {
-	float dangle1 = 180/M_PI;
-	float dangle2 = 180/M_PI;
+	float dangle1 = ANGLE1*180/M_PI;
+	float dangle2 = ANGLE2*180/M_PI;
 	std::vector<double> initialQ = {0.0f, 0.0f, dangle1, dangle2, dangle1, 0.0f, 0.0f, 0.0f, -dangle1, -dangle2, -dangle1, 0.0f};
 
 	return initialQ;
