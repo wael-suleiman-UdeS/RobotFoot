@@ -53,7 +53,9 @@ MotionControl::~MotionControl()
 
 std::vector<double> MotionControl::GetInitialQPosition()
 {
-	std::vector<double> initialQ = {0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f, 0.0f, 0.0f, 0.0f, -ANGLE1, -ANGLE2, -ANGLE1, 0.0f};
+	float dangle1 = 180/M_PI;
+	float dangle2 = 180/M_PI;
+	std::vector<double> initialQ = {0.0f, dangle1, dangle2, dangle1, 0.0f, 0.0f, 0.0f, 0.0f, -dangle1, -dangle2, -dangle1, 0.0f};
 	return initialQ;
 }
 
@@ -63,6 +65,8 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 	Eigen::VectorXf qToDisplay(12);
 
 	qMotors = Eigen::Map<Eigen::VectorXd>((double*)&currentMotorsPosition[0], 12).cast<float>();
+
+	qMotors*=M_PI/180;
 
 	bool calculationDone = false;
 	int NbIterations = 0;
