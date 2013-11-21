@@ -1,0 +1,3 @@
+# Run like this: '. setup'
+export PATH=`readlink -f .`:$PATH
+
