@@ -12,13 +12,14 @@
 #include "Trajectory.h"
 #include "EigenUtils.h"
 
+/*
 #define Debug
 #ifdef Debug
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #endif
-
+*/
 using namespace std;
 
 namespace
@@ -27,8 +28,8 @@ namespace
 	const float ANGLE2 = -0.7;
 }
 
-MotionControl::MotionControl()
-: m_distanceThreshold(0.002f)
+MotionControl::MotionControl(float distanceThreshold)
+: m_distanceThreshold(distanceThreshold)
 , m_angleThreshold(1)
 , m_nbIterationMax(1)
 {
@@ -36,16 +37,35 @@ MotionControl::MotionControl()
 	m_TdToFoot = Eigen::Vector3f(0,0,0);
 	m_vInitialQPosition.resize(12);
 	m_vInitialQPosition << 0.0f, ANGLE1, ANGLE2, ANGLE1, 0.0f, 0.0f, 0.0f, 0.0f, -ANGLE1, -ANGLE2, -ANGLE1, 0.0f;
+	m_q = m_vInitialQPosition;
 
 	m_damping = 0.9f;
 
 	m_DH_RightToLeft = DenavitHartenberg(m_vInitialQPosition, DenavitHartenberg::Leg::GroundRight);
 	m_DH_LeftToRight = DenavitHartenberg(m_vInitialQPosition, DenavitHartenberg::Leg::GroundLeft);
+
+
+
+#ifdef Debug
+	myfile.open ("matrixPositions.txt");
+	myfileQ.open ("matrixQ.txt");
+	myfileEPOS1.open ("ePos1.txt");
+	myfileEPOS2.open ("ePos2.txt");
+	myfileETHETA1.open ("eTheta1.txt");
+	myfileETHETA2.open ("eTheta2.txt");
+#endif
 }
 
 MotionControl::~MotionControl()
 {
-	delete m_DH;
+#ifdef Debug
+	myfile.close();
+	myfileQ.close();
+	myfileEPOS1.close();
+	myfileEPOS2.close();
+	myfileETHETA1.close();
+	myfileETHETA2.close();
+#endif
 }
 
 std::vector<double> MotionControl::GetInitialQPosition()
@@ -67,7 +87,7 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 	qMotors*=M_PI/180;
 
 	bool calculationDone = false;
-	int NbIterations = 0;
+	int NbIterations = 5;
 
 	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft) //1 is left foot fixed
 		m_DH = &m_DH_LeftToRight;
@@ -121,6 +141,7 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 		//*******************A enlever plus tard*************************//
 		calculationDone = NbIterations >= m_nbIterationMax;
 
+		//Change the order of Q so that it works with the motors
 		qToDisplay.tail(6) = qMotors.tail(6);
 		qMotors.reverseInPlace();
 		qToDisplay.head(6) = qMotors.tail(6);
@@ -134,10 +155,19 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 	std::vector<double> stdQToDisplay(12);
 	Eigen::Map<Eigen::VectorXd>(stdQToDisplay.data(), 12) = qToDisplay.cast<double>();
 
+
+#ifdef Debug
+			myfileQ << qToDisplay.transpose() << endl;
+			myfileEPOS1 << ePosToPelvis << endl;
+			myfileEPOS2 << ePosToFoot << endl;
+			myfileETHETA1 << eThetaToPelvis << endl;
+			myfileETHETA2 << eThetaToFoot << endl;
+#endif
+
 	return stdQToDisplay;
 }
 
-/*
+
 void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 {
 #ifdef Debug
@@ -177,11 +207,12 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 		{
 			NbIterations++;
 
-			Eigen::MatrixXf eclipseWatchSuck = m_q;
+			//Eigen::MatrixXf eclipseWatchSuck = m_q;
 
 			m_DH->Update(m_q);
 
-			CalculateError(ePosToPelvis, eThetaToPelvis, ePosToFoot, eThetaToFoot, trajectoryMatrix, DH, i);
+			Eigen::VectorXf matrixLine = trajectoryMatrix.row(i);
+			CalculateError(ePosToPelvis, eThetaToPelvis, ePosToFoot, eThetaToFoot, matrixLine, m_q);
 
 			Eigen::MatrixXf jacobienne = m_DH->Jacobian(DenavitHartenberg::DHSection::ToPelvis, 1);
 			Eigen::MatrixXf J1inv = EigenUtils::PseudoInverse(jacobienne.topRows(3));
@@ -213,7 +244,7 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 
 			m_DH->Update(m_q);
 
-			CalculateError(ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot, trajectoryMatrix, i);
+			CalculateError(ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot, matrixLine, m_q);
 
 			calculationDone = ePosToPelvis.norm() < m_distanceThreshold && ePosToFoot.norm() < m_distanceThreshold &&
 					abs(eThetaToPelvis(0)) < m_angleThreshold && abs(eThetaToPelvis(1)) < m_angleThreshold && abs(eThetaToPelvis(2)) < m_angleThreshold &&
@@ -247,7 +278,7 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 	myfileETHETA2.close();
 #endif
 }
-*/
+
 
 //Check right left*****************************************
 void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3f& eThetaToPelvis, Eigen::Vector3f& ePosToFoot,
@@ -283,7 +314,7 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	tempPeToPelvis = m_DH->GetRP1() * tempPeToPelvis;
 	Eigen::Vector3f PeToPelvisP = tempPeToPelvis.topRightCorner(3,1) + Pe0p;
 
-	Eigen::MatrixXf PeToFoot = m_DH->MatrixHomogene(DenavitHartenberg::DHSection::ToFoot).topRightCorner(3,1);
+	Eigen::Vector3f PeToFoot = m_DH->MatrixHomogene(DenavitHartenberg::DHSection::ToFoot).topRightCorner(3,1);
 
 	Eigen::Matrix4f tempPdToFoot = Eigen::Matrix4f::Identity();
 	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft)

@@ -33,7 +33,7 @@ public:
 		Kick
 	};
 
-	LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr);
+	LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, XmlParser& config);
     ~LegMotion();
 
     // Initialize configuration of mouvement
@@ -49,6 +49,7 @@ private:
 
     // Move robot to initial position
     void InitPosition(const int msInitializationTime);
+    void ReorderQ(std::vector<double>& qVector);
 
 
     // Use Algorithm if true and text file input if false to generate mouvement

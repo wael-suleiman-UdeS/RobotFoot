@@ -18,12 +18,15 @@
 #include "MotionControl.h"
 #include "Trajectory.h"
 
+#include "../Utilities/XmlParser.h"
 
-LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr):
+
+LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, XmlParser& config):
     m_threadManager(threadManager_ptr),
     m_motion(mc_ptr)
 {
-	m_motionControl = new MotionControl();
+	float distanceThreshold = config.getIntValue(XmlPath::LegsMotors / XmlPath::DISTANCETHRESHOLD);
+	m_motionControl = new MotionControl(distanceThreshold);
 }
 
 LegMotion::~LegMotion()
@@ -180,12 +183,16 @@ void LegMotion::Run(double msDt)
 		}
 		else
 		{
-			std::vector<double> motorsPosition;
+			std::vector<double> motorsPosition = m_vInitialPosition;
 			for(int i = 0; i < m_trajectoryMatrix.rows(); ++i)
 			{
 				//boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();i
-				boost::this_thread::interruption_point();
-				m_threadManager->wait();
+				if (!m_bIsStandAlone)
+				{
+					boost::this_thread::interruption_point();
+					Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : wait for MotorControl" << std::endl;
+					m_threadManager->wait();
+                }
 
 				// Right Leg movement
 				if(m_bIsMotorActivated)
@@ -194,20 +201,38 @@ void LegMotion::Run(double msDt)
 					m_motion->HardGet( motorsPosition, MotorControl::Config::ALL_LEGS );
 				}
 
-				//read motors
-				motorsPosition = m_motionControl->UpdateQ((Eigen::VectorXf)m_trajectoryMatrix.row(i), motorsPosition);
+				//Update Q
+				ReorderQ(motorsPosition);
+				motorsPosition = m_motionControl->UpdateQ(m_trajectoryMatrix.row(i), motorsPosition);
+				//m_motionControl->Move(m_trajectoryMatrix);
 
 				//set motors
 				if(m_bIsMotorActivated)
 				{
-					m_motion->HardSet( motorsPosition, MotorControl::Config::ALL_LEGS );
-					if( motorsPosition.empty() )
+					if (m_bIsStandAlone)
+                    {
+                        m_motion->HardSet( motorsPosition, MotorControl::Config::ALL_LEGS );
+                    }
+					else
 					{
-						break;
+						if(!m_motion->SetPositions( motorsPosition, MotorControl::Config::ALL_LEGS ) )
+						{
+							Logger::getInstance() << "SetPosition Failed\n";
+							break;
+						}
 					}
 				}
 
-				m_threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
+				if (m_bIsStandAlone)
+				{
+					usleep(msDt*1000);
+				}
+				else
+				{
+					m_threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
+					Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : Iteration done" << std::endl;
+					m_threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
+				}
 			}
 		}
     }
@@ -215,5 +240,17 @@ void LegMotion::Run(double msDt)
     {
         Logger::getInstance() << "LEGS_CONTROL task Interrupted. " << std::endl;
     }
+}
+
+
+void LegMotion::ReorderQ(std::vector<double>& qVector)
+{
+	std::vector<double> tempQVector = qVector;
+
+	for(int i = 0; i < 5; ++i)
+	{
+		tempQVector[i] = qVector[5-i];
+	}
+	qVector = tempQVector;
 }
 

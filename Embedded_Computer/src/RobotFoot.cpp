@@ -110,7 +110,7 @@ int main(int argc, char * argv[])
         }
 
         //StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
-        LegMotion legMotion(threadManager_ptr, motorControl_ptr);
+        LegMotion legMotion(threadManager_ptr, motorControl_ptr, config);
         if (isKicking)
         {
         	Eigen::Vector2f pointD(1, 0);

@@ -14,11 +14,19 @@
 #include "../../ThirdParty/Eigen/Dense"
 #include "DenavitHartenberg.h"
 
+
+#define Debug
+#ifdef Debug
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#endif
+
 class MotionControl
 {
 public:
 
-	MotionControl();
+	MotionControl(float distanceThreshold);
 	~MotionControl();
 
 	void Move(Eigen::MatrixXf trajectoryMatrix);
@@ -49,7 +57,7 @@ private:
 	void CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3f& eThetaToPelvis, Eigen::Vector3f& ePosToFoot, Eigen::Vector3f& eThetaToFoot,
 							Eigen::VectorXf& currentTrajectoryMatrixLine, Eigen::VectorXf qMotors);
 
-	//Eigen::VectorXf m_q;
+	Eigen::VectorXf m_q;
 	Eigen::VectorXf m_vInitialQPosition;
 	Eigen::Vector3f m_TdToPelvis;
 	Eigen::Vector3f m_TdToFoot;
@@ -63,6 +71,14 @@ private:
 	DenavitHartenberg m_DH_LeftToRight;
 
 	DenavitHartenberg* m_DH;
+
+
+	std::ofstream myfile;
+	std::ofstream myfileQ;
+	std::ofstream myfileEPOS1;
+	std::ofstream myfileEPOS2;
+	std::ofstream myfileETHETA1;
+	std::ofstream myfileETHETA2;
 
 };
 

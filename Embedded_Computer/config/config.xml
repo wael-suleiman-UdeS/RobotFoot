@@ -3,9 +3,10 @@
     <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <Sizes>
-  	<RobotHeight value="36" />
+  	<RobotHeight value="40" />
+  	<XOffset value="2.5" />
   </Sizes>
-  <ImageProcessing value="1">
+  <ImageProcessing value="0">
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
@@ -74,9 +75,9 @@
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
   <Motion value="1">
-    <IterationTimeMs value="30"/>
-    <KP value="1000"/>
-    <KD value="16000"/>
+    <IterationTimeMs value="20"/>
+    <KP value="440"/>
+    <KD value="8000"/>
     <KI value="0"/>
     <Motors>
       <Head>
@@ -115,15 +116,16 @@
         <ScanningError value="300" />
         
         <PID>
-          <P value="0.03" />0.130909093
-          <I value="0" />0.009818182
-          <D value="0" />0.006545455
+          <P value="0.130909093" />
+          <I value="0.009818182" />
+          <D value="0.006545455" />
           <dt value="0.2" />
           
           <Epsilon value="0" />
         </PID>
       </Head>
       <Legs>
+		 <DISTANCETHRESHOLD value = "0.002"/>
 	    <R_HIP_YAW>
 		  <MotorID value="1"/>
 		  <Offset value="547"/>
