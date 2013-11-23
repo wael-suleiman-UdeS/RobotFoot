@@ -20,7 +20,9 @@
  */
 //------------------------------------------------------------------------------
 #include "herkulex.h"
-
+//------------------------------------------------------------------------------
+#include <cstdint>
+#include <algorithm>
 #include "Tools.h"
 
 #include <stm32f4xx.h>
@@ -35,6 +37,63 @@ volatile bool waitingForData = false;
 
 }
 
+using std::size_t;
+
+struct msgPacket_base
+{
+    static
+    uint16_t calcCheckSum(uint8_t const *const buf, std::size_t len)
+    {
+        uint8_t chksum1 = 0, chksum2;
+        for (size_t i= 0; i < len; ++i)
+        {
+            chksum1 ^= buf[i];
+        }
+        chksum2 = ~chksum1;
+        return (chksum1 << 8 | chksum2) & 0xFEFE;
+    }
+    static
+    uint16_t calcCheckSum(uint8_t *const buf, std::size_t len, uint8_t *res)
+    {
+        auto r = calcCheckSum(buf, len);
+        *res++ = (r >> 8) & 0xFF;
+        *res   = r & 0xFF;
+        return r;
+    }
+    static
+    bool verifyCheckSum(uint8_t const *const buf, std::size_t len)
+    {
+        return (buf[idx::checksum1] & 0xFE) == (~buf[idx::checksum2] & 0xFE)
+            && (calcCheckSum(buf, len) & 0xFE) == buf[idx::checksum1];
+    }
+    enum idx {
+           header_packet_1, header_packet_2,
+           packet_size,
+           motor_id,
+           command,
+           checksum1, checksum2,
+           data };
+};
+
+template <size_t L>
+ struct msgPacket : msgPacket_base
+{
+    static_assert(L >= MIN_PACKET_SIZE, "Packet size is too small.");
+    typedef msgPacket_base Parent;
+    uint8_t buffer[L] = {HEADER, HEADER};
+    msgPacket(uint8_t id, uint8_t cmd)
+    {
+        buffer[idx::packet_size] = L;
+        buffer[idx::motor_id]    = id;
+        buffer[idx::command]     = cmd;
+    }
+    void calcCheckSum()
+    {
+        std::fill_n(buffer + idx::checksum1, 2, 0);
+        Parent::calcCheckSum(buffer, L, buffer + idx::checksum1);
+    }
+};
+
 Herkulex* Herkulex::instance = new Herkulex();
 
 //------------------------------------------------------------------------------
@@ -46,7 +105,7 @@ Herkulex::Herkulex(/*PinName tx, PinName rx, uint32_t baudRate*/)
 Herkulex::~Herkulex()
 {
 }
-
+//------------------------------------------------------------------------------
 Herkulex* Herkulex::GetInstance()
 {
     return instance;
@@ -55,81 +114,48 @@ Herkulex* Herkulex::GetInstance()
 //------------------------------------------------------------------------------
 void Herkulex::clear(uint8_t id)
 {
-    uint8_t txBuf[11];
+    msgPacket<11> txBuf(id, CMD_RAM_WRITE);
 
-    txBuf[0] = HEADER;              // Packet Header (0xFF)
-    txBuf[1] = HEADER;              // Packet Header (0xFF)
-    txBuf[2] = MIN_PACKET_SIZE + 4; // Packet Size
-    txBuf[3] = id;                  // Servo ID
-    txBuf[4] = CMD_RAM_WRITE;       // Command Ram Write (0x03)
-    txBuf[5] = 0;                   // Checksum1
-    txBuf[6] = 0;                   // Checksum2
-    txBuf[7] = RAM_STATUS_ERROR;    // Address 48DEBUG
-    txBuf[8] = BYTE2;               // Length
-    txBuf[9] = 0;                   // Clear RAM_STATUS_ERROR
-    txBuf[10]= 0;                   // Clear RAM_STATUS_DETAIL
+    txBuf.buffer[7] = RAM_STATUS_ERROR;    // Address 48DEBUG
+    txBuf.buffer[8] = BYTE2;               // Length
+    txBuf.buffer[9] = 0;                   // Clear RAM_STATUS_ERROR
+    txBuf.buffer[10]= 0;                   // Clear RAM_STATUS_DETAIL
 
-    // Checksum1 = (PacketSize ^ pID ^ CMD ^ Data[0] ^ Data[1] ^ ... ^ Data[n]) & 0xFE
-    // Checksum2 = (~Checksum1)&0xFE
-    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]^txBuf[9]^txBuf[10]) & 0xFE;
-    txBuf[6] = (~txBuf[5])&0xFE;
-
-    txPacket(11, txBuf);
+    txPacket(txBuf.buffer);
 }
-
 //------------------------------------------------------------------------------
-void Herkulex::setTorque(uint8_t id, uint8_t cmdTorue)
+void Herkulex::reboot(uint8_t id)
 {
-    uint8_t txBuf[10];
+    msgPacket<MIN_PACKET_SIZE> txBuf(id, CMD_REBOOT);
+    txPacket(txBuf.buffer);
+}
+//------------------------------------------------------------------------------
+void Herkulex::setTorque(uint8_t id, uint8_t cmdTorque)
+{
+    msgPacket<10> txBuf(id, CMD_RAM_WRITE);
 
-    txBuf[0] = HEADER;              // Packet Header (0xFF)
-    txBuf[1] = HEADER;              // Packet Header (0xFF)
-    txBuf[2] = MIN_PACKET_SIZE + 3; // Packet Size
-    txBuf[3] = id;                  // Servo ID
-    txBuf[4] = CMD_RAM_WRITE;       // Command Ram Write (0x03)
-    txBuf[5] = 0;                   // Checksum1
-    txBuf[6] = 0;                   // Checksum2
-    txBuf[7] = RAM_TORQUE_CONTROL;  // Address 52
-    txBuf[8] = BYTE1;               // Length
-    txBuf[9] = cmdTorue;            // Torque ON
+    txBuf.buffer[7] = RAM_TORQUE_CONTROL;  // Address 52
+    txBuf.buffer[8] = BYTE1;               // Length
+    txBuf.buffer[9] = cmdTorque;           // Torque ON
 
-    // Checksum1 = (PacketSize ^ pID ^ CMD ^ Data[0] ^ Data[1] ^ ... ^ Data[n]) & 0xFE
-    // Checksum2 = (~Checksum1)&0xFE
-    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]^txBuf[9]) & 0xFE;
-    txBuf[6] = (~txBuf[5])&0xFE;
-
-    // send packet (mbed -> herkulex)
-    txPacket(10, txBuf);
+    txPacket(txBuf.buffer);
 }
 
 //------------------------------------------------------------------------------
-void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime, uint8_t setLED)
+void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime,
+                                                                uint8_t setLED)
 {
     if (position > 1023) return;
-    if (playtime > 255) return;
 
-    uint8_t txBuf[12];
+    msgPacket<12> txBuf(id, CMD_S_JOG);
 
-    txBuf[0]  = HEADER;                 // Packet Header (0xFF)
-    txBuf[1]  = HEADER;                 // Packet Header (0xFF)
-    txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
-    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
-    txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
-    txBuf[5]  = 0;                      // Checksum1
-    txBuf[6]  = 0;                      // Checksum2
-    txBuf[7]  = playtime;               // Playtime
-    txBuf[8]  = position & 0x00FF;      // Position (LSB, Least Significant Bit)
-    txBuf[9]  =(position & 0xFF00) >> 8;// position (MSB, Most Significanct Bit)
-    txBuf[10] = POS_MODE | setLED;      // Pos Mode and LED on/off
-    txBuf[11] = id;                     // Servo ID
+    txBuf.buffer[7]  = playtime;               // Playtime
+    txBuf.buffer[8]  = position & 0x00FF;      // Position (LSB, Least Significant Bit)
+    txBuf.buffer[9]  =(position & 0xFF00) >> 8;// position (MSB, Most Significanct Bit)
+    txBuf.buffer[10] = POS_MODE | setLED;      // Pos Mode and LED on/off
+    txBuf.buffer[11] = id;                     // Servo ID
 
-    // Checksum1 = (PacketSize ^ pID ^ CMD ^ Data[0] ^ Data[1] ^ ... ^ Data[n]) & 0xFE
-    // Checksum2 = (~Checksum1)&0xFE
-    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]^txBuf[9]^txBuf[10]^txBuf[11]) & 0xFE;
-    txBuf[6] = (~txBuf[5])&0xFE;
-
-    // send packet (mbed -> herkulex)
-    txPacket(12, txBuf);
+    txPacket(txBuf.buffer);
 }
 
 //------------------------------------------------------------------------------
@@ -137,48 +163,24 @@ void Herkulex::velocityControl(uint8_t id, int16_t speed, uint8_t setLED)
 {
     if (speed > 1023 || speed < -1023) return;
 
-    uint8_t txBuf[12];
+    msgPacket<12> txBuf(id, CMD_S_JOG);
 
-    txBuf[0]  = HEADER;                 // Packet Header (0xFF)
-    txBuf[1]  = HEADER;                 // Packet Header (0xFF)
-    txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
-    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
-    txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
-    txBuf[5]  = 0;                      // Checksum1
-    txBuf[6]  = 0;                      // Checksum2
-    txBuf[7]  = 0;                      // Playtime, unmeaningful in turn mode
-    txBuf[8]  = speed & 0x00FF;         // Speed (LSB, Least Significant Bit)
-    txBuf[9]  =(speed & 0xFF00) >> 8;   // Speed (MSB, Most Significanct Bit)
-    txBuf[10] = TURN_MODE | setLED;     // Turn Mode and LED on/off
-    txBuf[11] = id;                     // Servo ID
+    txBuf.buffer[7]  = 0;                      // Playtime, unmeaningful in turn mode
+    txBuf.buffer[8]  = speed & 0x00FF;         // Speed (LSB, Least Significant Bit)
+    txBuf.buffer[9]  =(speed & 0xFF00) >> 8;   // Speed (MSB, Most Significanct Bit)
+    txBuf.buffer[10] = TURN_MODE | setLED;     // Turn Mode and LED on/off
+    txBuf.buffer[11] = id;                     // Servo ID
 
-    // Checksum1 = (PacketSize ^ pID ^ CMD ^ Data[0] ^ Data[1] ^ ... ^ Data[n]) & 0xFE
-    // Checksum2 = (~Checksum1)&0xFE
-    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]^txBuf[9]^txBuf[10]^txBuf[11]) & 0xFE;
-    txBuf[6] = (~txBuf[5])&0xFE;
-
-    // send packet (mbed -> herkulex)
-    txPacket(12, txBuf);
+    txPacket(txBuf.buffer);
 }
 
 //------------------------------------------------------------------------------
 int8_t Herkulex::getStatus(uint8_t id)
 {
     uint8_t status;
-    uint8_t txBuf[7];
+    msgPacket<7> txBuf(id, CMD_STAT);
 
-    txBuf[0] = HEADER;                  // Packet Header (0xFF)
-    txBuf[1] = HEADER;                  // Packet Header (0xFF)
-    txBuf[2] = MIN_PACKET_SIZE;         // Packet Size
-    txBuf[3] = id;                      // Servo ID
-    txBuf[4] = CMD_STAT;                // Status Error, Status Detail request
-
-    // Check Sum1 and Check Sum2
-    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]) & 0xFE;
-    txBuf[6] = (~txBuf[5])&0xFE;
-
-    // send packet (mbed -> herkulex)
-    txPacket(7, txBuf);
+    txPacket(txBuf.buffer);
 
     uint8_t rxBuf[9];
     if( !rxPacket(9, rxBuf) ) return -1;
@@ -209,24 +211,12 @@ int16_t Herkulex::getPos(uint8_t id)
 {
     uint16_t position = 0;
 
-    uint8_t txBuf[9];
+    msgPacket<9> txBuf(id, CMD_RAM_READ);
 
-    txBuf[0] = HEADER;                  // Packet Header (0xFF)
-    txBuf[1] = HEADER;                  // Packet Header (0xFF)
-    txBuf[2] = MIN_PACKET_SIZE + 2;     // Packet Size
-    txBuf[3] = id;                      // Servo ID
-    txBuf[4] = CMD_RAM_READ;            // Status Error, Status Detail request
-    txBuf[5] = 0;                       // Checksum1
-    txBuf[6] = 0;                       // Checksum2
-    txBuf[7] = RAM_CALIBRATED_POSITION; // Address 52
-    txBuf[8] = BYTE2;                   // Address 52 and 53
+    txBuf.buffer[7] = RAM_CALIBRATED_POSITION; // Address 52
+    txBuf.buffer[8] = BYTE2;                   // Address 52 and 53
 
-    // Check Sum1 and Check Sum2
-    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]) & 0xFE;
-    txBuf[6] = (~txBuf[5])&0xFE;
-
-    // send packet (mbed -> herkulex)
-    txPacket(9, txBuf);
+    txPacket(txBuf.buffer);
 
     uint8_t rxBuf[13];
     if( !rxPacket(13, rxBuf) ) return -1;
@@ -251,84 +241,15 @@ int16_t Herkulex::getPos(uint8_t id)
 }
 
 //------------------------------------------------------------------------------
-void Herkulex::writeRAM1(uint8_t id, uint8_t adress, uint8_t value)
-{
-    uint8_t txBuf[10];
-
-    txBuf[0] = HEADER;              // Packet Header (0xFF)
-    txBuf[1] = HEADER;              // Packet Header (0xFF)
-    txBuf[2] = MIN_PACKET_SIZE + 3; // Packet Size
-    txBuf[3] = id;                  // Servo ID
-    txBuf[4] = CMD_RAM_WRITE;       // Command Ram Write (0x03)
-    txBuf[5] = 0;                   // Checksum1
-    txBuf[6] = 0;                   // Checksum2
-    txBuf[7] = adress;              // Address
-    txBuf[8] = BYTE1;               // Length
-    txBuf[9] = value;               // Torque ON
-
-    // Checksum1 = (PacketSize ^ pID ^ CMD ^ Data[0] ^ Data[1] ^ ... ^ Data[n]) & 0xFE
-    // Checksum2 = (~Checksum1)&0xFE
-    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]^txBuf[9]) & 0xFE;
-    txBuf[6] = (~txBuf[5])&0xFE;
-
-    // send packet (mbed -> herkulex)
-    txPacket(10, txBuf);
-}
-
-//------------------------------------------------------------------------------
-uint8_t Herkulex::readRAM1(uint8_t id, uint8_t adress)
-{
-    uint8_t value = 0;
-
-    uint8_t txBuf[9];
-
-    txBuf[0] = HEADER;                  // Packet Header (0xFF)
-    txBuf[1] = HEADER;                  // Packet Header (0xFF)
-    txBuf[2] = MIN_PACKET_SIZE + 2;     // Packet Size
-    txBuf[3] = id;                      // Servo ID
-    txBuf[4] = CMD_RAM_READ;            // Status Error, Status Detail request
-    txBuf[5] = 0;                       // Checksum1
-    txBuf[6] = 0;                       // Checksum2
-    txBuf[7] = adress;                  // Address
-    txBuf[8] = BYTE1;                   // Address
-
-    // Check Sum1 and Check Sum2
-    txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]) & 0xFE;
-    txBuf[6] = (~txBuf[5])&0xFE;
-
-    // send packet (mbed -> herkulex)
-    txPacket(9, txBuf);
-
-    uint8_t rxBuf[13];
-    if( !rxPacket(13, rxBuf) ) return -1;
-
-    // Checksum1
-    uint8_t chksum1 = (rxBuf[2]^rxBuf[3]^rxBuf[4]^rxBuf[7]^rxBuf[8]^rxBuf[9]^rxBuf[10]^rxBuf[11]^rxBuf[12]) & 0xFE;
-    if (chksum1 != rxBuf[5])
-    {
-        return -1;
-    }
-
-    // Checksum2
-    uint8_t chksum2 = (~rxBuf[5]&0xFE);
-    if (chksum2 != rxBuf[6])
-    {
-        return -1;
-    }
-
-    value = rxBuf[9];
-
-    return value;
-}
-
-//------------------------------------------------------------------------------
 void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
 {
+    // To change.
+    //txBuf.calcCheckSum();
+
     for(uint8_t i = 0; i < packetSize ; i++)
     {
-        while( !(USART3->SR & 0x00000040) );
-            USART_SendData(USART3, *data);
-		data++;
+        while ( !USART_GetFlagStatus(USART3, USART_FLAG_TC) );
+        USART_SendData(USART3, *data++);
     }
 }
 
@@ -342,17 +263,13 @@ bool Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
     {
         return false;
     }
+    std::copy_n(receivedMsg, packetSize, data);
 
-    for (uint8_t i=0; i < packetSize; i++)
-    {
-        data[i] = receivedMsg[i];
-    }
     return true;
 }
 
-//------------------------------------------------------------------------------
 
-namespace{
+//------------------------------------------------------------------------------
 
 // This is the interrupt request handler (IRQ) for ALL USART3 interrupts
 extern "C" void USART3_IRQHandler(void){
@@ -398,6 +315,4 @@ extern "C" void USART3_IRQHandler(void){
 			waitingForData = false;
 		}
 	}
-}
-
 }

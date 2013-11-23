@@ -24,8 +24,7 @@
 
 
 //------------------------------------------------------------------------------
-//#include "mbed.h"
-#include "stdint.h"
+#include <cstdint>
 
 //------------------------------------------------------------------------------
 //#define HERKULEX_DEBUG
@@ -279,12 +278,18 @@ public:
      */
      void clear(uint8_t id);
 
+    /**@brief Reboot servos
+     *
+     * @param id The herkulex servo ID.
+     */
+    void reboot(uint8_t id);
+
     /**@brief Set torque setting
      *
      * @param id The herkulex servo ID.
      * @param cmdTorue The Command for setting of torque (TORQUE_FREE 0x00, BREAK_ON 0x40, TORQUE_ON 0x60)
      */
-    void setTorque(uint8_t id, uint8_t cmdTorue);
+    void setTorque(uint8_t id, uint8_t cmdTorque);
 
     /**@brief Position Control
      *
@@ -299,14 +304,14 @@ public:
      *
      * @param id The herkulex servo ID.
      * @param speed The goal position of herkulex servo.
-     * @param setLED Select LED and on/off controll (GLED_ON 0x00,BLED_ON 0x08, RLED_ON 0x10)
+     * @param setLED Select LED and on/off control (GLED_ON 0x00,BLED_ON 0x08, RLED_ON 0x10)
      */
     void velocityControl(uint8_t id, int16_t speed,uint8_t setLED);
 
     /**@brief Get Status
      *
      * @param id The herkulex servo ID.
-     * @return -1 is getStatus failed. other is servo`s status error value.
+     * @return -1 is getStatus failed. other is servo's status error value.
      */
     int8_t getStatus(uint8_t id);
 
@@ -317,24 +322,9 @@ public:
      */
     int16_t getPos(uint8_t id);
 
-    /**@brief Write on RAM
-     *
-     * @param id The herkulex servo ID.
-     *      adress Where to write
-     *      value What to write
-     */
-    void writeRAM1(uint8_t id, uint8_t adress, uint8_t value);
-
-     /**@brief Read on RAM
-     *
-     * @param id The herkulex servo ID.
-     *      adress Where to write
-     */
-    uint8_t readRAM1(uint8_t id, uint8_t adress);
-
 private :
 
-    /**@brief Create an Herkulex servo object connected to the serial pins and baudrate
+    /**@brief Create an Herkulex servo object
      *
      * @param tx Transmit pin.
      * @param rx Receive pin.
@@ -351,7 +341,12 @@ private :
      */
     void txPacket(uint8_t packetSize, uint8_t* data);
 
-    /** Receive packet datas with UART
+    template <std::size_t L>
+    void txPacket(uint8_t (&arr)[L])
+    {
+        return txPacket(L, arr);
+    }
+    /** Receive packet data with UART
      *
      * @param packetSize The packet size.
      * @param data The receive packet data array.
