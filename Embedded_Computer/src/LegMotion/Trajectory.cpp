@@ -16,6 +16,8 @@
 
 #include "../../ThirdParty/Eigen/Dense"
 
+using namespace std;
+
 
 /** \brief Constructor
  *
@@ -46,7 +48,8 @@ Trajectory::~Trajectory()
  * \param stepHeight float: Height at which the foot is raised when performing a step (optional)
  *
  */
-Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goalPoint, Eigen::Vector2f goalAngle, Eigen::Vector2f startingAngle, float stepTime, float stepHeight)
+Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goalPoint, Eigen::Vector2f goalAngle,
+		Eigen::Vector2f startingAngle, float stepTime, float stepHeight)
 {
 	m_singleStepTime = stepTime;
 	m_stepHeight = stepHeight;
@@ -92,9 +95,46 @@ Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::V
 /** \brief Generates a matrix which contains the necessary information to perform a kick
  *
  */
-void Trajectory::GenerateKick()
+Eigen::MatrixXf Trajectory::GenerateKick( float kickSpeedRatio, float movementTime )
 {
+	//Clamp 0.1 to 1
+	kickSpeedRatio = min(max(kickSpeedRatio, 0.1f), 1.0f);
 
+	Eigen::Vector4f startingPointR(0.037f, 0.0f, 0.0f, 0.0f);
+	Eigen::Vector4f startingPointL(-0.037f, 0.0f, 0.0f, 0.0f);
+	Eigen::Vector4f startingPointP(0.0f, 0.0f, 0.29672f, 0.0f);
+	Eigen::Vector4f zmpOverFixedFootP(0.05f, 0.0f, 0.29672f, 0.0f);
+	Eigen::Vector4f leftFootRaisedL(-0.037f, 0.0f, 0.04f, 0.0f);
+	Eigen::Vector4f kickingFootBackL(-0.037f, -0.08f, 0.04f, 0.0f);
+	Eigen::Vector4f kickingFootForwardL(-0.037f, 0.1f, 0.04f, 0.0f);
+
+	int matrixSize = 5*movementTime/m_dTime + kickSpeedRatio*movementTime/m_dTime;
+	Eigen::MatrixXf finalMatrix(matrixSize, 13);
+
+	Eigen::MatrixXf zmpOverFootMatrix;
+	Eigen::MatrixXf raisedFootMatrix;
+	Eigen::MatrixXf footBackMatrix;
+	Eigen::MatrixXf footFrontMatrix;
+	Eigen::MatrixXf footBackToNormalMatrix;
+	Eigen::MatrixXf zmpBackToNormalMatrix;
+
+
+	//Bring zmp over fixed foot
+	zmpOverFootMatrix = GenerateMovement(startingPointR, startingPointR, startingPointL, startingPointL, startingPointP, zmpOverFixedFootP, movementTime);
+	//Raise foot
+	raisedFootMatrix = GenerateMovement(startingPointR, startingPointR, startingPointL, leftFootRaisedL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime);
+	//Bring foot back
+	footBackMatrix = GenerateMovement(startingPointR, startingPointR, leftFootRaisedL, kickingFootBackL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime);
+	//Bring foot front to kick
+	footFrontMatrix = GenerateMovement(startingPointR, startingPointR, kickingFootBackL, kickingFootForwardL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime*kickSpeedRatio);
+	//Bring foot back in normal position
+	footBackToNormalMatrix = GenerateMovement(startingPointR, startingPointR, kickingFootForwardL, startingPointL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime);
+	//Bring zmp back to normal position
+	zmpBackToNormalMatrix = GenerateMovement(startingPointR, startingPointR, startingPointL, startingPointL, zmpOverFixedFootP, startingPointP, movementTime);
+
+	finalMatrix << zmpOverFootMatrix, raisedFootMatrix, footBackMatrix, footFrontMatrix, footBackToNormalMatrix, zmpBackToNormalMatrix;
+
+	return finalMatrix;
 }
 
 Eigen::MatrixXf Trajectory::GenerateMovement(Eigen::Vector4f& rightFootInitialPos, Eigen::Vector4f& rightFootFinalPos, Eigen::Vector4f& leftFootInitialPos,

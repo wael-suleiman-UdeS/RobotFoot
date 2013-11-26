@@ -33,6 +33,7 @@ namespace XmlPath
 	const path Threshold = "Threshold";
 
 	const path DISTANCETHRESHOLD = "DISTANCETHRESHOLD";
+	const path StepHeight = "StepHeight";
 	const path R_HIP_YAW = "R_HIP_YAW";
 	const path L_HIP_YAW = "L_HIP_YAW";
 	const path R_HIP_ROLL = "R_HIP_ROLL";

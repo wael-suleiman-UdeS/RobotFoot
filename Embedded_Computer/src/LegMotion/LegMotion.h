@@ -59,11 +59,12 @@ private:
     // Activated stand alone mode without multithreading
     bool m_bIsStandAlone;
 
+    float m_stepHeight;
+
     // Contains motor position from the text file
     std::vector<std::vector<double>> m_vPosition;
     std::vector<std::vector<double>>::iterator m_itrPos;
     std::vector<std::vector<double>>::iterator m_itrEnd;
-    //std::vector<float> m_vInitialPosition;
     std::vector<double> m_vInitialPosition;
 
     std::shared_ptr<ThreadManager> m_threadManager;

@@ -20,8 +20,10 @@ int main(int argc, char* argv[]) {
 
 
 	Trajectory* traj = new Trajectory();
-	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
-			endAngle, startAngle, 1.0f);
+	/*Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
+			endAngle, startAngle, 1.0f);*/
+
+	Eigen::MatrixXf matrix = traj->GenerateKick();
 /*
 	Eigen::Vector4f rightInit(0.037, 0.0436, 0, 0);
 	Eigen::Vector4f rightFinal(0.037, 0.0436, 0, 0);
@@ -34,9 +36,9 @@ int main(int argc, char* argv[]) {
 
 	Eigen::MatrixXf matrix = traj->GenerateMovement(rightInit, rightFinal, leftInit, leftFinal, pelvisInit, pelvisFinal, 1);
 */
-	MotionControl* motion = new MotionControl();
+	//MotionControl* motion = new MotionControl();
 	//motion->Move(matrix);
-
+/*
 	std::vector<double> initialPos = motion->GetInitialQPosition();
 
 	std::vector<double> q;
@@ -45,7 +47,7 @@ int main(int argc, char* argv[]) {
 		q = motion->UpdateQ((Eigen::VectorXf)matrix.row(i));
 	}
 
-
+*/
 
 	ofstream myfiletraj;
 	myfiletraj.open ("matrixTraj.txt");

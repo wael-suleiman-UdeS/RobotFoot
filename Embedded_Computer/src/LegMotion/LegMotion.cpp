@@ -27,6 +27,8 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 {
 	float distanceThreshold = config.getIntValue(XmlPath::LegsMotors / XmlPath::DISTANCETHRESHOLD);
 	m_motionControl = new MotionControl(distanceThreshold);
+
+	m_stepHeight = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepHeight);
 }
 
 LegMotion::~LegMotion()
@@ -43,7 +45,7 @@ void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFe
 
 	Trajectory* traj = new Trajectory();
 	m_trajectoryMatrix = traj->GenerateWalk(Eigen::Vector2f(0, 0), destination,
-			destinationFeetAngles, startingFeetAngles, stepTime);
+			destinationFeetAngles, startingFeetAngles, stepTime, m_stepHeight);
 
 	m_vInitialPosition = m_motionControl->GetInitialQPosition();
 
@@ -57,12 +59,11 @@ void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, c
 	m_bIsUsingAlgorithm = true;
 	m_bIsStandAlone = isStandAlone;
 
-	/*Trajectory* traj = new Trajectory();
+	Trajectory* traj = new Trajectory();
 
-	m_trajectoryMatrix = traj->GenerateKick(Eigen::Vector2f(0, 0), destination,
-			destinationFeetAngles, startingFeetAngles, stepTime);*/
+	m_trajectoryMatrix = traj->GenerateKick(0.5f);
 
-    //m_vInitialPosition = motioncontrol->getInitialQPosition();
+    m_vInitialPosition = m_motionControl->GetInitialQPosition();
 
 	//Set the initial position
 	InitPosition(msInitializationTime);

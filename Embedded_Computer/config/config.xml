@@ -125,7 +125,8 @@
         </PID>
       </Head>
       <Legs>
-		 <DISTANCETHRESHOLD value = "0.002"/>
+	 <DISTANCETHRESHOLD value = "0.002"/>
+	 <StepHeight value = "0.02"/>
 	    <R_HIP_YAW>
 		  <MotorID value="1"/>
 		  <Offset value="547"/>

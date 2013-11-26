@@ -47,6 +47,7 @@ namespace XmlPath
     extern const fs::path KI;
 
     extern const fs::path DISTANCETHRESHOLD;
+    extern const fs::path StepHeight;
 	extern const fs::path R_HIP_YAW;
 	extern const fs::path L_HIP_YAW;
 	extern const fs::path R_HIP_ROLL;
