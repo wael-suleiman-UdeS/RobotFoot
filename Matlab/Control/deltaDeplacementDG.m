@@ -1,4 +1,4 @@
-function [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i,L4,L5,LTX,LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, Td1, Td2)
+function [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i,L4,L5,LTX,LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, TPelvisTraj, TLeftTraj)
 
 
 M_RP_1 = [0 -1 0 -LTX ; 0 0 -1 0 ; 1 0 0 LTZ ; 0 0 0 1];
@@ -6,6 +6,10 @@ M_PR_1 = [0 0 1 -LTZ ; -1 0 0 -LTX ; 0 -1 0 0 ; 0 0 0 1];
 M_PR_2_fin = [1 0 0 LTX ; 0 1 0 0 ; 0 0 1 LTZ ; 0 0 0 1];
 
 Pe0p = RightFootTraj(i,:);
+Td1(1,:) = TPelvisTraj(i,3);
+Td1(2,:) = -TPelvisTraj(i,1);
+Td1(3,:) = -TPelvisTraj(i,2);
+Td2 = TLeftTraj(i,:)';
 
 % Update DH
     DH1 = UpdateDH_DP(L4,L5,q(1:6));
