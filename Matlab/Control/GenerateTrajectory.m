@@ -145,33 +145,8 @@ PelvisPos =   [  0.0,0,0.29672 ;
                  -0.04,0.05,0.29672
                  -0.04,0.05,0.29672 ];
 
-% Test with angle
-Tf = [1;1];
-FixedFoot = [0;0];
 
-RightFootPos = [ 0.037,0,0 ;
-                 0.037,0,0
-                 0.037,0,0 ];
-
-LeftFootPos = [ -0.037,0,0 ;
-                -0.037,0,0
-                -0.037,0,0 ];
-
-PelvisPos =   [  0.0,0,0.29672 ;
-                 0.0,0,0.29672
-                 0.0,0,0.29672 ];
-
-TRightPos = [   0,0,0 
-                0,0,0
-                0,0,0 ];
-
-TLeftPos = [    0,0,0 
-                0,0,0
-                0,0,0 ];
-
-TPelvisPos = [   0,0,0 
-                 0,0,0
-                 0,0,0 ];
+[Tf, FixedFoot, RightFootPos, LeftFootPos, PelvisPos, TRightPos, TLeftPos, TPelvisPos] = MouvementKickRightLeg();
 
 for i = 1:size(Tf,1)
    RightFootParams(:,(i-1)*3+1) = FunctionParameter(RightFootPos(i,1),RightFootPos(i+1,1),Tf(i));

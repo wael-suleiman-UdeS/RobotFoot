@@ -6,7 +6,7 @@ M_PR_1 = [0 0 1 -LTZ ; 1 0 0 -LTX ; 0 1 0 0 ; 0 0 0 1];
 M_PR_2_fin = [1 0 0 -LTX ; 0 1 0 0 ; 0 0 1 LTZ ; 0 0 0 1];
 
 Pe0p = LeftFootTraj(i,:);
-Td1(1,:) = TPelvisTraj(i,3);
+Td1(1,:) = -TPelvisTraj(i,3);
 Td1(2,:) = TPelvisTraj(i,1);
 Td1(3,:) = TPelvisTraj(i,2);
 Td2 = TRightTraj(i,:)';
