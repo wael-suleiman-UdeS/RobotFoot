@@ -19,7 +19,9 @@ public:
 
 	enum PelvisTrajectoryType {ZMP, COM};
 
-	Trajectory();
+	Trajectory(Eigen::Vector3f rightFootPosOffset, Eigen::Vector3f rightFootAngleOffset,
+			Eigen::Vector3f leftFootPosOffset, Eigen::Vector3f leftFootAngleOffset,
+			Eigen::Vector3f pelvisPosOffset, Eigen::Vector3f pelvisAngleOffset);
 	~Trajectory();
 
 	Eigen::MatrixXf GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goalPoint, Eigen::Vector2f goalAngle,
@@ -49,6 +51,13 @@ private:
 
 	Eigen::MatrixXf GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps);
 	Eigen::MatrixXf GenerateCOM(Eigen::MatrixXf zmpMatrix);
+
+	Eigen::Vector3f m_vRightFootPosOffset;
+	Eigen::Vector3f m_vRightFootAngleOffset;
+	Eigen::Vector3f m_vLeftFootPosOffset;
+	Eigen::Vector3f m_vLeftFootAngleOffset;
+	Eigen::Vector3f m_vPelvisPosOffset;
+	Eigen::Vector3f m_vPelvisAngleOffset;
 
 	float m_singleStepTime;
 	float m_dLeg;

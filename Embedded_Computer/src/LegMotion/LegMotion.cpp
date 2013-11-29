@@ -29,6 +29,33 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 	m_motionControl = new MotionControl(distanceThreshold);
 
 	m_stepHeight = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepHeight);
+
+	//Compensation offsets
+	float PelvisPitchCompensationOffset = config.getIntValue(XmlPath::PelvisPitchCompensationOffset);
+	float PelvisRollCompensationOffset = config.getIntValue(XmlPath::PelvisRollCompensationOffset);
+	float PelvisYawCompensationOffset = config.getIntValue(XmlPath::PelvisYawCompensationOffset);
+	float PelvisxCompensationOffset = config.getIntValue(XmlPath::PelvisxCompensationOffset);
+	float PelvisyCompensationOffset = config.getIntValue(XmlPath::PelvisyCompensationOffset);
+	float PelviszCompensationOffset = config.getIntValue(XmlPath::PelviszCompensationOffset);
+	float RightFootPitchCompensationOffset = config.getIntValue(XmlPath::RightFootPitchCompensationOffset);
+	float RightFootRollCompensationOffset = config.getIntValue(XmlPath::RightFootRollCompensationOffset);
+	float RightFootYawCompensationOffset = config.getIntValue(XmlPath::RightFootYawCompensationOffset);
+	float RightFootxCompensationOffset = config.getIntValue(XmlPath::RightFootxCompensationOffset);
+	float RightFootyCompensationOffset = config.getIntValue(XmlPath::RightFootyCompensationOffset);
+	float RightFootzCompensationOffset = config.getIntValue(XmlPath::RightFootzCompensationOffset);
+	float LeftFootPitchCompensationOffset = config.getIntValue(XmlPath::LeftFootPitchCompensationOffset);
+	float LeftFootRollCompensationOffset = config.getIntValue(XmlPath::LeftFootRollCompensationOffset);
+	float LeftFootYawCompensationOffset = config.getIntValue(XmlPath::LeftFootYawCompensationOffset);
+	float LeftFootxCompensationOffset = config.getIntValue(XmlPath::LeftFootxCompensationOffset);
+	float LeftFootyCompensationOffset = config.getIntValue(XmlPath::LeftFootyCompensationOffset);
+	float LeftFootzCompensationOffset = config.getIntValue(XmlPath::LeftFootzCompensationOffset);
+
+	m_vRightFootPosOffset = Eigen::Vector3f(RightFootxCompensationOffset, RightFootyCompensationOffset, RightFootzCompensationOffset);
+	m_vRightFootAngleOffset = Eigen::Vector3f(RightFootPitchCompensationOffset, RightFootRollCompensationOffset, RightFootYawCompensationOffset);
+	m_vLeftFootPosOffset = Eigen::Vector3f(LeftFootxCompensationOffset, LeftFootyCompensationOffset, LeftFootzCompensationOffset);
+	m_vLeftFootAngleOffset = Eigen::Vector3f(LeftFootPitchCompensationOffset, LeftFootRollCompensationOffset, LeftFootYawCompensationOffset);
+	m_vPelvisPosOffset = Eigen::Vector3f(PelvisxCompensationOffset, PelvisyCompensationOffset, PelviszCompensationOffset);
+	m_vPelvisAngleOffset = Eigen::Vector3f(PelvisPitchCompensationOffset, PelvisRollCompensationOffset, PelvisYawCompensationOffset);
 }
 
 LegMotion::~LegMotion()
@@ -43,9 +70,10 @@ void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFe
 	m_bIsUsingAlgorithm = true;
 	m_bIsStandAlone = isStandAlone;
 
-	Trajectory* traj = new Trajectory();
+	Trajectory* traj = new Trajectory(m_vRightFootPosOffset, m_vRightFootAngleOffset,
+			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vPelvisPosOffset, m_vPelvisAngleOffset);
 	m_trajectoryMatrix = traj->GenerateWalk(Eigen::Vector2f(0, 0), destination,
-			destinationFeetAngles, startingFeetAngles, stepTime, m_stepHeight);
+			destinationFeetAngles, startingFeetAngles, Trajectory::ZMP, stepTime, m_stepHeight);
 
 	m_vInitialPosition = m_motionControl->GetInitialQPosition();
 
@@ -59,7 +87,8 @@ void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, c
 	m_bIsUsingAlgorithm = true;
 	m_bIsStandAlone = isStandAlone;
 
-	Trajectory* traj = new Trajectory();
+	Trajectory* traj = new Trajectory(m_vRightFootPosOffset, m_vRightFootAngleOffset,
+			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vPelvisPosOffset, m_vPelvisAngleOffset);
 
 	m_trajectoryMatrix = traj->GenerateKick(0.5f);
 

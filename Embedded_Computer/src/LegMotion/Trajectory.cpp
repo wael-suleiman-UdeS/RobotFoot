@@ -26,8 +26,15 @@ using namespace std;
  *
  *
  */
-Trajectory::Trajectory()
-: m_dLeg(0.037f)
+Trajectory::Trajectory(Eigen::Vector3f rightFootPosOffset, Eigen::Vector3f rightFootAngleOffset,
+		Eigen::Vector3f leftFootPosOffset, Eigen::Vector3f leftFootAngleOffset, Eigen::Vector3f pelvisPosOffset, Eigen::Vector3f pelvisAngleOffset)
+: m_vRightFootPosOffset(rightFootPosOffset)
+, m_vRightFootAngleOffset(rightFootAngleOffset)
+, m_vLeftFootPosOffset(leftFootPosOffset)
+, m_vLeftFootAngleOffset(leftFootAngleOffset)
+, m_vPelvisPosOffset(pelvisPosOffset)
+, m_vPelvisAngleOffset(pelvisAngleOffset)
+, m_dLeg(0.037f)
 , m_dStep(0.03f)
 , m_dTime(0.01f)
 , m_nbTrajectoryPoints(101)
