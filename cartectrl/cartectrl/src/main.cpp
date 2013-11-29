@@ -94,7 +94,7 @@ void init_USART1(uint32_t baudrate){
 
 void initialize()
 {
-    init_USART1(115200);
+    init_USART1(666666);
     LED2.set();
     EmergencyStop::install();
 
