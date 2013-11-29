@@ -12,14 +12,6 @@
 #include "Trajectory.h"
 #include "EigenUtils.h"
 
-/*
-#define Debug
-#ifdef Debug
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#endif
-*/
 using namespace std;
 
 namespace

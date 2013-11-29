@@ -20,10 +20,10 @@ int main(int argc, char* argv[]) {
 
 
 	Trajectory* traj = new Trajectory();
-	/*Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
-			endAngle, startAngle, 1.0f);*/
+	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
+			endAngle, startAngle, Trajectory::ZMP, 0.5f);
 
-	Eigen::MatrixXf matrix = traj->GenerateKick();
+	//Eigen::MatrixXf matrix = traj->GenerateKick(0.5);
 /*
 	Eigen::Vector4f rightInit(0.037, 0.0436, 0, 0);
 	Eigen::Vector4f rightFinal(0.037, 0.0436, 0, 0);
