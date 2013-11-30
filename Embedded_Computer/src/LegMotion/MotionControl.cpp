@@ -288,17 +288,11 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 {
 	//Fixed foot position
 	Eigen::Vector3f Pe0p;
-	//pelvis angle offset
-	Eigen::Vector3f pelvisDesiredAngle = m_TdToPelvis;
-	pelvisDesiredAngle(0) = -pelvisDesiredAngle(0);
 	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
 		Pe0p = Eigen::Vector3f(currentTrajectoryMatrixLine(leftFootPosX), currentTrajectoryMatrixLine(leftFootPosY), currentTrajectoryMatrixLine(leftFootPosZ));
 	else
-	{
 		Pe0p = Eigen::Vector3f(currentTrajectoryMatrixLine(rightFootPosX), currentTrajectoryMatrixLine(rightFootPosY), currentTrajectoryMatrixLine(rightFootPosZ));
-		pelvisDesiredAngle(1) = -pelvisDesiredAngle(1);
-		pelvisDesiredAngle(2) = -pelvisDesiredAngle(2);
-	}
+
 	/////////////////////////////////////////////////////////////////
 	//Ground foot to pelvis
 	/////////////////////////////////////////////////////////////////

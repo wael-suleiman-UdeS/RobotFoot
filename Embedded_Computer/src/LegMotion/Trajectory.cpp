@@ -740,15 +740,20 @@ Eigen::VectorXf Trajectory::GenerateParabollicTrajectory(Eigen::MatrixXf params,
  */
 Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize)
 {
+	Eigen::Vector3f pelvisAngleOffset;
+	pelvisAngleOffset(0) = -m_vPelvisAngleOffset(2);
+	pelvisAngleOffset(1) = m_vPelvisAngleOffset(0);
+	pelvisAngleOffset(2) = m_vPelvisAngleOffset(1);
+
 	Eigen::MatrixXf trajectory(finalMatrixSize, 6);
 
 	rightSteps.conservativeResize(Eigen::NoChange, 2);
 	leftSteps.conservativeResize(Eigen::NoChange, 2);
 
 	Eigen::VectorXf initialPoint(6);
-	initialPoint << ((leftSteps.row(0) + rightSteps.row(0))/2).transpose(), m_ZMPHeight, m_vPelvisAngleOffset;
+	initialPoint << ((leftSteps.row(0) + rightSteps.row(0))/2).transpose(), m_ZMPHeight, Eigen::Vector3f(0.0f, 0.0f, 0.0f);
 	Eigen::VectorXf finalPoint(6);
-	finalPoint << (leftSteps.row(0)).transpose(), m_ZMPHeight, m_vPelvisAngleOffset;
+	finalPoint << (leftSteps.row(0)).transpose(), m_ZMPHeight, pelvisAngleOffset;
 
 	//Trajectory from point A to left footprint
 	GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, 0);
@@ -761,6 +766,8 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
     	initialPoint(1) = leftSteps(i, 1);
     	finalPoint(0) = rightSteps(j, 0);
     	finalPoint(1) = rightSteps(j, 1);
+    	finalPoint(4) = -finalPoint(4);
+    	finalPoint(5) = -finalPoint(5);
     	GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, stepIndex);
     	stepIndex+=2;
     	if(leftSteps.rows() > i + 1)
@@ -768,6 +775,8 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
     		initialPoint = finalPoint;
         	finalPoint(0) = leftSteps(i+1, 0);
         	finalPoint(1) = leftSteps(i+1, 1);
+        	finalPoint(4) = -finalPoint(4);
+        	finalPoint(5) = -finalPoint(5);
     		GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, stepIndex);
     		stepIndex+=2;
     	}
@@ -776,7 +785,7 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 
     //Append the last step (left foot) to pointD
     Eigen::VectorXf pointD(6);
-    pointD << ((leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2).transpose(), m_ZMPHeight, m_vPelvisAngleOffset;
+    pointD << ((leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2).transpose(), m_ZMPHeight, Eigen::Vector3f(0.0f, 0.0f, 0.0f);
     initialPoint(0) = leftSteps(leftSteps.rows()-1, 0);
     initialPoint(1) = leftSteps(leftSteps.rows()-1, 1);
     GenerateZMPStepTransfer(trajectory, initialPoint, pointD, stepIndex);
