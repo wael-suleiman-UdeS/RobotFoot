@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 	Eigen::Vector3f leftFootPosOffset(0, 0, 0);
 	Eigen::Vector3f leftFootAngleOffset(0, 0, 0);
 	Eigen::Vector3f pelvisFootPosOffset(0, 0, 0);
-	Eigen::Vector3f pelvisFootAngleOffset(0, 0, 0);
+	Eigen::Vector3f pelvisFootAngleOffset(-0.03, -0.17, 0);
 
 
 	Trajectory* traj = new Trajectory(rightFootPosOffset, rightFootAngleOffset, leftFootPosOffset,
