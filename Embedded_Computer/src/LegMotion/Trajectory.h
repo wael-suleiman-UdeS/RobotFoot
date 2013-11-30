@@ -44,12 +44,13 @@ private:
 
 	Eigen::MatrixXf GenerateParabollicStepsTrajectories(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize);
 	void GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int stepCount,
-			Eigen::Vector4f& startingStepPos, Eigen::Vector4f& endingStepPos, Eigen::Vector4f& groundedFootPos,
+			Eigen::VectorXf& startingStepPos, Eigen::VectorXf& endingStepPos, Eigen::VectorXf& groundedFootPos,
 			float singleStepTime, int startTime, int endTime, int groundedFoot);
-	Eigen::MatrixXf GenerateParabollicTrajParams(Eigen::Vector4f initialPos, Eigen::Vector4f finalPos, float stepTimeLapse);
-	Eigen::Vector3f GenerateParabollicTrajectory(Eigen::MatrixXf params, float currentTime);
+	Eigen::MatrixXf GenerateParabollicTrajParams(Eigen::VectorXf initialPos, Eigen::VectorXf finalPos, float stepTimeLapse);
+	Eigen::VectorXf GenerateParabollicTrajectory(Eigen::MatrixXf params, float currentTime);
 
-	Eigen::MatrixXf GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps);
+	Eigen::MatrixXf GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize);
+	void GenerateZMPStepTransfer(Eigen::MatrixXf& trajectoryMatrix, Eigen::VectorXf startingPos, Eigen::VectorXf endingPost, int stepIndex);
 	Eigen::MatrixXf GenerateCOM(Eigen::MatrixXf zmpMatrix);
 
 	Eigen::Vector3f m_vRightFootPosOffset;

@@ -97,7 +97,7 @@ Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::V
 
 	//Calculate ZMP
 	int finalMatrixSize = (m_singleStepTime/m_dTime)*(rightSteps.rows() + leftSteps.rows() - 2)*2 + (m_singleStepTime/m_dTime);
-	Eigen::MatrixXf zmp = GenerateZMP(rightSteps, leftSteps);
+	Eigen::MatrixXf zmp = GenerateZMP(rightSteps, leftSteps, finalMatrixSize);
 
 	Eigen::MatrixXf pelvisTraj;
 	//If we're using the Center of Mass (Riccati technique) instead of the zmp
@@ -505,9 +505,9 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 	Eigen::MatrixXf finalMatrix(finalMatrixSize, 9);
 	finalMatrix = Eigen::MatrixXf::Zero(finalMatrixSize, 9);
 
-	Eigen::Vector4f groundedFoot;
-	Eigen::Vector4f startingStepPos;
-	Eigen::Vector4f endStepPos;
+	Eigen::VectorXf groundedFoot(4);
+	Eigen::VectorXf startingStepPos(4);
+	Eigen::VectorXf endStepPos(4);
 
 	int nbSteppingTimeStamps (m_singleStepTime/m_dTime);
 
@@ -597,7 +597,7 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
  *
  */
 void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int stepCount,
-		Eigen::Vector4f& startingStepPos, Eigen::Vector4f& endingStepPos, Eigen::Vector4f& groundedFootPos,
+		Eigen::VectorXf& startingStepPos, Eigen::VectorXf& endingStepPos, Eigen::VectorXf& groundedFootPos,
 		float singleStepTime, int startTime, int endTime, int groundedFoot)
 {
 	Eigen::MatrixXf params(4,3);
@@ -611,7 +611,13 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 		timeMultiplier *= 2;
 	}
 
-	params = GenerateParabollicTrajParams(startingStepPos, endingStepPos, singleStepTime);
+	//Debug
+	Eigen::Vector3f startingStepPosCut;
+	startingStepPosCut << startingStepPos(0), startingStepPos(1), startingStepPos(2);
+	Eigen::Vector3f endingStepPosCut;
+	endingStepPosCut << endingStepPos(0), endingStepPos(1), endingStepPos(2);
+
+	params = GenerateParabollicTrajParams(startingStepPosCut, endingStepPosCut, singleStepTime);
 
 	float parabolicTrajTime = 0.0f;
 
@@ -666,12 +672,12 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
  * \param stepTimeLapse float: The time required to perform a step
  *
  */
-Eigen::MatrixXf Trajectory::GenerateParabollicTrajParams(Eigen::Vector4f initialPos, Eigen::Vector4f finalPos, float stepTimeLapse)
+Eigen::MatrixXf Trajectory::GenerateParabollicTrajParams(Eigen::VectorXf initialPos, Eigen::VectorXf finalPos, float stepTimeLapse)
 {
-	Eigen::MatrixXf params(4,3);
+	Eigen::MatrixXf params(4,initialPos.rows());
 
 	//Calculate params for x,y,z
-	for(int i = 0; i < initialPos.rows()-1; i++)
+	for(int i = 0; i < initialPos.rows(); i++)
 	{
 		params(0, i) = 2*(initialPos(i)-finalPos(i))/(pow(stepTimeLapse,3));
 		params(1, i) = -(1.5f)*stepTimeLapse*params(0,i);
@@ -689,9 +695,9 @@ Eigen::MatrixXf Trajectory::GenerateParabollicTrajParams(Eigen::Vector4f initial
  * \param currentTime float: A given time
  *
  */
-Eigen::Vector3f Trajectory::GenerateParabollicTrajectory(Eigen::MatrixXf params, float currentTime)
+Eigen::VectorXf Trajectory::GenerateParabollicTrajectory(Eigen::MatrixXf params, float currentTime)
 {
-	Eigen::Vector3f trajectory;
+	Eigen::VectorXf trajectory(params.cols());
 
 	for(int i = 0; i < params.cols(); i++)
 	{
@@ -707,48 +713,70 @@ Eigen::Vector3f Trajectory::GenerateParabollicTrajectory(Eigen::MatrixXf params,
  * \param leftSteps Eigen::MatrixXf: The left foot steps
  *
  */
-Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps)
+Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize)
 {
+	Eigen::MatrixXf trajectory(finalMatrixSize, 3);
+
 	rightSteps.conservativeResize(Eigen::NoChange, 2);
 	leftSteps.conservativeResize(Eigen::NoChange, 2);
 
-	Eigen::Vector2f initialPoint = (leftSteps.row(0) + rightSteps.row(0))/2;
+	Eigen::Vector3f initialPoint;
+	initialPoint << ((leftSteps.row(0) + rightSteps.row(0))/2).transpose(), m_ZMPHeight;
+	Eigen::Vector3f finalPoint;
+	finalPoint << (leftSteps.row(0)).transpose(), m_ZMPHeight;
 
 	//Trajectory from point A to left footprint
-    Eigen::MatrixXf trajectory = EigenUtils::MXB(initialPoint, leftSteps.row(0), m_dTime/m_singleStepTime);
+	GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, 0);
 
-	Eigen::MatrixXf noZMPMovement(trajectory.rows(), trajectory.cols());
-	for(int i = 0; i < trajectory.rows(); i++)
-	{
-		noZMPMovement.row(i) = trajectory.bottomRows(1);
-	}
-
-    Eigen::MatrixXf tempMatrix(trajectory.rows()+noZMPMovement.rows(), trajectory.cols());
-    tempMatrix << trajectory, noZMPMovement;
-    trajectory.swap(tempMatrix);
-
+	int stepIndex = 2;
     for(int i =0, j = 1; i < leftSteps.rows() - 1; ++i, ++j)
     {
 		//Trajectory from left to right to left foot steps
-		Eigen::MatrixXf mxbMatrix = EigenUtils::CreateCombinedMXBMatrix(leftSteps, rightSteps, m_dTime/m_singleStepTime, i, j);
-		Eigen::MatrixXf noZMPMovement(mxbMatrix.rows(), mxbMatrix.cols());
+    	initialPoint(0) = leftSteps(i, 0);
+    	initialPoint(1) = leftSteps(i, 1);
+    	finalPoint(0) = rightSteps(j, 0);
+    	finalPoint(1) = rightSteps(j, 1);
+    	GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, stepIndex);
+    	stepIndex+=2;
+    	if(leftSteps.rows() > i + 1)
+    	{
+    		initialPoint = finalPoint;
+        	finalPoint(0) = leftSteps(i+1, 0);
+        	finalPoint(1) = leftSteps(i+1, 1);
+    		GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, stepIndex);
+    		stepIndex+=2;
+    	}
 
-        Eigen::MatrixXf tempMatrix2(trajectory.rows()+mxbMatrix.rows(), trajectory.cols());
-        tempMatrix2 << trajectory, mxbMatrix;
-        trajectory.swap(tempMatrix2);
     }
 
     //Append the last step (left foot) to pointD
-    Eigen::Vector2f finalPoint = (leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2;
-    Eigen::MatrixXf finalStepTraj = EigenUtils::MXB(leftSteps.row(leftSteps.rows()-1), finalPoint, m_dTime/m_singleStepTime);
-
-    //m_ZMPHeight is overwrite by the generate COM, is kept here for testing purpose
-    Eigen::MatrixXf tempMatrix3(trajectory.rows()+finalStepTraj.rows(), trajectory.cols() + 1);
-    tempMatrix3 << trajectory, Eigen::VectorXf::Constant(trajectory.rows(), m_ZMPHeight), finalStepTraj, Eigen::VectorXf::Constant(finalStepTraj.rows(), m_ZMPHeight);
-
-    trajectory.swap(tempMatrix3);
+    Eigen::Vector3f pointD;
+    pointD << ((leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2).transpose(), m_ZMPHeight;
+    initialPoint(0) = leftSteps(leftSteps.rows()-1, 0);
+    initialPoint(1) = leftSteps(leftSteps.rows()-1, 1);
+    GenerateZMPStepTransfer(trajectory, initialPoint, pointD, stepIndex);
 
     return trajectory;
+}
+
+void Trajectory::GenerateZMPStepTransfer(Eigen::MatrixXf& trajectoryMatrix, Eigen::VectorXf startingPos, Eigen::VectorXf endingPos, int stepIndex)
+{
+	Eigen::MatrixXf params(4,3);
+	float stepTime = m_singleStepTime/m_dTime;
+	params = GenerateParabollicTrajParams(startingPos, endingPos, m_singleStepTime);
+	for(int time = 0; time < stepTime; time ++)
+	{
+		trajectoryMatrix.row(time + stepIndex*stepTime) = (GenerateParabollicTrajectory(params, time*m_dTime)).transpose();
+	}
+
+	if(stepTime + stepTime*stepIndex < trajectoryMatrix.rows())
+	{
+		//Add a "step" where there is no zmp movement to allow the foot to move freely
+		for(int time = stepTime + stepTime*stepIndex; time < stepTime*stepIndex + stepTime*2; time++)
+		{
+			trajectoryMatrix.row(time) = trajectoryMatrix.row(time-1);
+		}
+	}
 }
 
 /** \brief Generates the center of mass position to follow the steps

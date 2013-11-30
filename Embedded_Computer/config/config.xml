@@ -128,8 +128,8 @@
 	  <DISTANCETHRESHOLD value = "0.002"/>
 	  <COMPENSATION_OFFSET>
 			<Pelvis>
-				<Pitch value = "0.0" />
-				<Roll value = "0.0" />
+				<Pitch value = "-0.03" />
+				<Roll value = "-0.17" />
 				<Yaw value = "0.0" />
 				<x value = "0.0" />
 				<y value = "0.0" />
@@ -137,7 +137,7 @@
 			<Pelvis/>
 			<RightFoot>
 				<Pitch value = "0.0" />
-				<Roll value = "0.0" />
+				<Roll value = "-0.06" />
 				<Yaw value = "0.0" />
 				<x value = "0.0" />
 				<y value = "0.0" />
@@ -145,7 +145,7 @@
 			<RightFoot/>
 			<LeftFoot>
 				<Pitch value = "0.0" />
-				<Roll value = "0.0" />
+				<Roll value = "-0.06" />
 				<Yaw value = "0.0" />
 				<x value = "0.0" />
 				<y value = "0.0" />
