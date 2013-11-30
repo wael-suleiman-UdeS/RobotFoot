@@ -129,7 +129,7 @@ Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::V
 	Eigen::VectorXf time = Eigen::VectorXf::LinSpaced(finalMatrixSize, 0, finalMatrixSize*m_dTime);
 
 	//Append ZMP to final matrix
-	Eigen::MatrixXf finalMatrix(finalMatrixSize, 16);
+	Eigen::MatrixXf finalMatrix(finalMatrixSize, 20);
 	finalMatrix << time, trajectoryMatrix, pelvisTraj;
 
 	return finalMatrix;
@@ -498,16 +498,14 @@ void Trajectory::GenerateSteps(Eigen::MatrixXf &rightSteps, Eigen::MatrixXf &lef
  */
 Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize)
 {
-	Eigen::Vector3f stepPosition;
-
 	//Final matrix:
 	//rightStepX, rightStepY, rightStepZ, rightStepAngle, leftStepX, leftStepY, leftStepZ, leftStepAngle, GroundedFoot(0 = right, 1 = left)
-	Eigen::MatrixXf finalMatrix(finalMatrixSize, 9);
-	finalMatrix = Eigen::MatrixXf::Zero(finalMatrixSize, 9);
+	Eigen::MatrixXf finalMatrix(finalMatrixSize, 13);
+	finalMatrix = Eigen::MatrixXf::Zero(finalMatrixSize, 13);
 
-	Eigen::VectorXf groundedFoot(4);
-	Eigen::VectorXf startingStepPos(4);
-	Eigen::VectorXf endStepPos(4);
+	Eigen::VectorXf groundedFoot(6);
+	Eigen::VectorXf startingStepPos(6);
+	Eigen::VectorXf endStepPos(6);
 
 	int nbSteppingTimeStamps (m_singleStepTime/m_dTime);
 
@@ -516,17 +514,27 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 	{
 		//*******right foot**********//
 		//Rise the right foot
-		groundedFoot << leftSteps(i, 0), leftSteps(i, 1), 0.0f, leftSteps(i, 2);
-		startingStepPos << rightSteps(i, 0), rightSteps(i, 1), 0.0f, rightSteps(i, 2);
+		Eigen::Vector3f groundedFootAngle = m_vLeftFootAngleOffset;
+		groundedFootAngle(2) += leftSteps(i, 2);
+		groundedFoot << leftSteps(i, 0), leftSteps(i, 1), 0.0f, groundedFootAngle;
+
+		Eigen::Vector3f startingStepFootAngle = m_vRightFootAngleOffset;
+		startingStepFootAngle(2) += rightSteps(i, 2);
+		startingStepPos << rightSteps(i, 0), rightSteps(i, 1), 0.0f, startingStepFootAngle;
+
+		Eigen::Vector3f endStepFootAngle = m_vRightFootAngleOffset;
+		endStepFootAngle(2) += (rightSteps(i + 1, 2) - rightSteps(i, 2))/2 + rightSteps(i, 2);
 		endStepPos << ((rightSteps(i + 1, 0) - rightSteps(i, 0))/2) + rightSteps(i, 0),
-				((rightSteps(i + 1, 1) - rightSteps(i, 1))/2) + rightSteps(i, 1), m_stepHeight, (rightSteps(i + 1, 2) - rightSteps(i, 2))/2 + rightSteps(i, 2);
+				((rightSteps(i + 1, 1) - rightSteps(i, 1))/2) + rightSteps(i, 1), m_stepHeight, endStepFootAngle;
 
 		GenerateFinalMatrixForOneStep(finalMatrix, stepCount, startingStepPos, endStepPos, groundedFoot,
 				m_singleStepTime/2, 0, nbSteppingTimeStamps/2, 1);
 
 		//Lower the right foot
 		startingStepPos = endStepPos;
-		endStepPos << rightSteps(i + 1, 0), rightSteps(i + 1, 1), 0.0f, rightSteps(i + 1, 2);
+		endStepFootAngle = m_vRightFootAngleOffset;
+		endStepFootAngle(2) += rightSteps(i + 1, 2);
+		endStepPos << rightSteps(i + 1, 0), rightSteps(i + 1, 1), 0.0f, endStepFootAngle;
 		GenerateFinalMatrixForOneStep(finalMatrix, stepCount, startingStepPos, endStepPos, groundedFoot,
 				m_singleStepTime/2, nbSteppingTimeStamps/2, nbSteppingTimeStamps, 1);
 
@@ -547,15 +555,22 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 		{
 			//Rise the left foot
 			groundedFoot << endStepPos;
-			startingStepPos << leftSteps(i, 0), leftSteps(i, 1), 0.0f, leftSteps(i, 2);
+			startingStepFootAngle = m_vLeftFootAngleOffset;
+			startingStepFootAngle(2) += leftSteps(i, 2);
+			startingStepPos << leftSteps(i, 0), leftSteps(i, 1), 0.0f, startingStepFootAngle;
+
+			endStepFootAngle = m_vLeftFootAngleOffset;
+			endStepFootAngle(2) += (leftSteps(i + 1, 2) - leftSteps(i, 2))/2 + leftSteps(i, 2);
 			endStepPos << ((leftSteps(i + 1, 0) - leftSteps(i, 0))/2) + leftSteps(i, 0),
-					((leftSteps(i + 1, 1) - leftSteps(i, 1))/2) + leftSteps(i, 1), m_stepHeight, (leftSteps(i + 1, 2) - leftSteps(i, 2))/2 + leftSteps(i, 2);
+					((leftSteps(i + 1, 1) - leftSteps(i, 1))/2) + leftSteps(i, 1), m_stepHeight, endStepFootAngle;
 			GenerateFinalMatrixForOneStep(finalMatrix, stepCount, startingStepPos, endStepPos, groundedFoot,
 					m_singleStepTime/2, 0, nbSteppingTimeStamps/2, 0);
 
 			//Lower the left foot
 			startingStepPos = endStepPos;
-			endStepPos << leftSteps(i + 1, 0), leftSteps(i + 1, 1), 0.0f, leftSteps(i + 1, 2);
+			endStepFootAngle = m_vLeftFootAngleOffset;
+			endStepFootAngle(2) += leftSteps(i + 1, 2);
+			endStepPos << leftSteps(i + 1, 0), leftSteps(i + 1, 1), 0.0f, endStepFootAngle;
 			GenerateFinalMatrixForOneStep(finalMatrix, stepCount, startingStepPos, endStepPos, groundedFoot,
 					m_singleStepTime/2, nbSteppingTimeStamps/2, nbSteppingTimeStamps, 0);
 
@@ -600,8 +615,8 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 		Eigen::VectorXf& startingStepPos, Eigen::VectorXf& endingStepPos, Eigen::VectorXf& groundedFootPos,
 		float singleStepTime, int startTime, int endTime, int groundedFoot)
 {
-	Eigen::MatrixXf params(4,3);
-	Eigen::Vector3f currentFootPos;
+	Eigen::MatrixXf params(4,6);
+	Eigen::VectorXf currentFootPos(6);
 
 	//A timestamp going across all steps
 	int timeMultiplier = endTime*stepCount;
@@ -611,13 +626,15 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 		timeMultiplier *= 2;
 	}
 
+	/*
 	//Debug
 	Eigen::Vector3f startingStepPosCut;
 	startingStepPosCut << startingStepPos(0), startingStepPos(1), startingStepPos(2);
 	Eigen::Vector3f endingStepPosCut;
 	endingStepPosCut << endingStepPos(0), endingStepPos(1), endingStepPos(2);
+*/
 
-	params = GenerateParabollicTrajParams(startingStepPosCut, endingStepPosCut, singleStepTime);
+	params = GenerateParabollicTrajParams(startingStepPos, endingStepPos, singleStepTime);
 
 	float parabolicTrajTime = 0.0f;
 
@@ -641,11 +658,15 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 			finalMatrix(offset, 1) = currentFootPos(1);	//y
 			finalMatrix(offset, 2) = currentFootPos(2);	//z
 			finalMatrix(offset, 3) = startingStepPos(3) + ((endingStepPos(3) - startingStepPos(3))/((endTime - startTime)))*(time-startTime);		//angle
+			finalMatrix(offset, 4) = startingStepPos(4) + ((endingStepPos(4) - startingStepPos(4))/((endTime - startTime)))*(time-startTime);		//angle
+			finalMatrix(offset, 5) = startingStepPos(5) + ((endingStepPos(5) - startingStepPos(5))/((endTime - startTime)))*(time-startTime);		//angle
 			//Left foot position on the ground
-			finalMatrix(offset, 4) = groundedFootPos(0);	//x
-			finalMatrix(offset, 5) = groundedFootPos(1);	//y
-			finalMatrix(offset, 6) = groundedFootPos(2);	//z
-			finalMatrix(offset, 7) = groundedFootPos(3);	//angle
+			finalMatrix(offset, 6) = groundedFootPos(0);	//x
+			finalMatrix(offset, 7) = groundedFootPos(1);	//y
+			finalMatrix(offset, 8) = groundedFootPos(2);	//z
+			finalMatrix(offset, 9) = groundedFootPos(3);	//angle
+			finalMatrix(offset, 10) = groundedFootPos(4);	//angle
+			finalMatrix(offset, 11) = groundedFootPos(5);	//angle
 		}
 		else	//Right foot is 0, left foot is moving
 		{
@@ -654,14 +675,18 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 			finalMatrix(offset, 1) = groundedFootPos(1);	//y
 			finalMatrix(offset, 2) = groundedFootPos(2);	//z
 			finalMatrix(offset, 3) = groundedFootPos(3);	//angle
+			finalMatrix(offset, 4) = groundedFootPos(4);	//angle
+			finalMatrix(offset, 5) = groundedFootPos(5);	//angle
 			//Left foot moving
-			finalMatrix(offset, 4) = currentFootPos(0);	//x
-			finalMatrix(offset, 5) = currentFootPos(1);	//y
-			finalMatrix(offset, 6) = currentFootPos(2);	//z
-			finalMatrix(offset, 7) = startingStepPos(3) + ((endingStepPos(3) - startingStepPos(3))/((endTime - startTime)))*(time-startTime);		//angle
+			finalMatrix(offset, 6) = currentFootPos(0);	//x
+			finalMatrix(offset, 7) = currentFootPos(1);	//y
+			finalMatrix(offset, 8) = currentFootPos(2);	//z
+			finalMatrix(offset, 9) = startingStepPos(3) + ((endingStepPos(3) - startingStepPos(3))/((endTime - startTime)))*(time-startTime);		//angle
+			finalMatrix(offset, 10) = startingStepPos(4) + ((endingStepPos(4) - startingStepPos(4))/((endTime - startTime)))*(time-startTime);		//angle
+			finalMatrix(offset, 11) = startingStepPos(5) + ((endingStepPos(5) - startingStepPos(5))/((endTime - startTime)))*(time-startTime);		//angle
 		}
 
-		finalMatrix(offset, 8) = groundedFoot;	// 0 = right, 1 = left foot
+		finalMatrix(offset, 12) = groundedFoot;	// 0 = right, 1 = left foot
 	}
 }
 

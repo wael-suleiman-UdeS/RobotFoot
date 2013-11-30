@@ -199,7 +199,7 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 		bool calculationDone = false;
 		int NbIterations = 0;
 
-		if(trajectoryMatrix(i, 9) == DenavitHartenberg::Leg::GroundLeft) //1 is left foot fixed
+		if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft) //1 is left foot fixed
 			m_DH = &m_DH_LeftToRight;
 		else
 			m_DH = &m_DH_RightToLeft;
@@ -231,7 +231,7 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 			Eigen::VectorXf tachePriorite3 = J3inv * ePosToFoot; 														//Position en mouvement
 			Eigen::VectorXf tachePriorite4 = J4inv * (eThetaToFoot - (jacobienne2.bottomRows(3) * tachePriorite3)); 	//Angle en mouvement
 
-			if(trajectoryMatrix(i, 9) == DenavitHartenberg::Leg::GroundLeft)
+			if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
 			{
 				m_q.reverseInPlace();
 				m_q.head(6) = m_q.head(6) + m_damping * (tachePriorite1 + tachePriorite2);
