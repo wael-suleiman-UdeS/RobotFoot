@@ -71,6 +71,11 @@ std::vector<double> MotionControl::GetInitialQPosition()
 
 std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatrixLine, std::vector<double> currentMotorsPosition)
 {
+	//pelvis angle offset
+	m_TdToPelvis(0) = currentTrajectoryMatrixLine(pelvisAnglePitch);
+	m_TdToPelvis(1) = currentTrajectoryMatrixLine(pelvisAngleRoll);
+	m_TdToPelvis(2) = currentTrajectoryMatrixLine(pelvisAngleYaw);
+
 	Eigen::VectorXf qMotors(12);
 	Eigen::VectorXf qToDisplay(12);
 
@@ -186,6 +191,11 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 
 	for(int i = 0; i < trajectoryMatrix.rows(); ++i)
 	{
+		//pelvis angle offset
+		m_TdToPelvis(0) = trajectoryMatrix(i, pelvisAnglePitch);
+		m_TdToPelvis(1) = trajectoryMatrix(i, pelvisAngleRoll);
+		m_TdToPelvis(2) = trajectoryMatrix(i, pelvisAngleYaw);
+
 		bool calculationDone = false;
 		int NbIterations = 0;
 

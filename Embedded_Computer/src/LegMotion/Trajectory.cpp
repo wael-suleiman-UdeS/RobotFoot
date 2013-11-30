@@ -129,7 +129,7 @@ Eigen::MatrixXf Trajectory::GenerateWalk(Eigen::Vector2f startingPoint, Eigen::V
 	Eigen::VectorXf time = Eigen::VectorXf::LinSpaced(finalMatrixSize, 0, finalMatrixSize*m_dTime);
 
 	//Append ZMP to final matrix
-	Eigen::MatrixXf finalMatrix(finalMatrixSize, 13);
+	Eigen::MatrixXf finalMatrix(finalMatrixSize, 16);
 	finalMatrix << time, trajectoryMatrix, pelvisTraj;
 
 	return finalMatrix;
@@ -715,15 +715,15 @@ Eigen::VectorXf Trajectory::GenerateParabollicTrajectory(Eigen::MatrixXf params,
  */
 Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize)
 {
-	Eigen::MatrixXf trajectory(finalMatrixSize, 3);
+	Eigen::MatrixXf trajectory(finalMatrixSize, 6);
 
 	rightSteps.conservativeResize(Eigen::NoChange, 2);
 	leftSteps.conservativeResize(Eigen::NoChange, 2);
 
-	Eigen::Vector3f initialPoint;
-	initialPoint << ((leftSteps.row(0) + rightSteps.row(0))/2).transpose(), m_ZMPHeight;
-	Eigen::Vector3f finalPoint;
-	finalPoint << (leftSteps.row(0)).transpose(), m_ZMPHeight;
+	Eigen::VectorXf initialPoint(6);
+	initialPoint << ((leftSteps.row(0) + rightSteps.row(0))/2).transpose(), m_ZMPHeight, m_vPelvisAngleOffset;
+	Eigen::VectorXf finalPoint(6);
+	finalPoint << (leftSteps.row(0)).transpose(), m_ZMPHeight, m_vPelvisAngleOffset;
 
 	//Trajectory from point A to left footprint
 	GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, 0);
@@ -750,8 +750,8 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
     }
 
     //Append the last step (left foot) to pointD
-    Eigen::Vector3f pointD;
-    pointD << ((leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2).transpose(), m_ZMPHeight;
+    Eigen::VectorXf pointD(6);
+    pointD << ((leftSteps.row(leftSteps.rows() - 1) + rightSteps.row(rightSteps.rows() - 1))/2).transpose(), m_ZMPHeight, m_vPelvisAngleOffset;
     initialPoint(0) = leftSteps(leftSteps.rows()-1, 0);
     initialPoint(1) = leftSteps(leftSteps.rows()-1, 1);
     GenerateZMPStepTransfer(trajectory, initialPoint, pointD, stepIndex);
@@ -761,7 +761,7 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 
 void Trajectory::GenerateZMPStepTransfer(Eigen::MatrixXf& trajectoryMatrix, Eigen::VectorXf startingPos, Eigen::VectorXf endingPos, int stepIndex)
 {
-	Eigen::MatrixXf params(4,3);
+	Eigen::MatrixXf params(4,6);
 	float stepTime = m_singleStepTime/m_dTime;
 	params = GenerateParabollicTrajParams(startingPos, endingPos, m_singleStepTime);
 	for(int time = 0; time < stepTime; time ++)

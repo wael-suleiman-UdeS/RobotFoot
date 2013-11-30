@@ -23,13 +23,16 @@ int main(int argc, char* argv[]) {
 	Eigen::Vector3f leftFootPosOffset(0, 0, 0);
 	Eigen::Vector3f leftFootAngleOffset(0, 0, 0);
 	Eigen::Vector3f pelvisFootPosOffset(0, 0, 0);
-	Eigen::Vector3f pelvisFootAngleOffset(0, 0, 0);
+	Eigen::Vector3f pelvisFootAngleOffset(-0.03, -0.17, 0);
 
 
 	Trajectory* traj = new Trajectory(rightFootPosOffset, rightFootAngleOffset, leftFootPosOffset,
 			leftFootAngleOffset, pelvisFootPosOffset, pelvisFootAngleOffset);
 	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
 			endAngle, startAngle, Trajectory::ZMP, 1.0f);
+
+	MotionControl* motion = new MotionControl(0.002f);
+	motion->Move(matrix);
 
 	//Eigen::MatrixXf matrix = traj->GenerateKick(0.5);
 /*

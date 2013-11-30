@@ -50,7 +50,10 @@ private:
 		groundedFoot,
 		pelvisPosX,
 		pelvisPosY,
-		pelvisPosZ
+		pelvisPosZ,
+		pelvisAnglePitch,
+		pelvisAngleRoll,
+		pelvisAngleYaw
 	};
 
 	void InitRotationMatrices();
