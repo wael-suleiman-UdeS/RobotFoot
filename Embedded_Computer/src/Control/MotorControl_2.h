@@ -25,6 +25,13 @@ public:
       NUM_TEST
    };
 
+   enum class Button {
+      BUTTON_1 = 0,
+      BUTTON_2,
+      BUTTON_3,
+      BUTTON_4
+   };
+
    MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io);
    ~MotorControl();
 
@@ -35,8 +42,9 @@ public:
                       const double msTotalTime = 10000.0,
                       const double msDt = 16);
   
-   void UpdateStatus(const std::vector<char>& msg);
-   void GetStatus(std::vector<Protocol::MotorStruct> &status, const Config config);
+   void UpdateMotorStatus(const std::vector<char>& msg);
+   void GetMotorStatus(std::vector<Protocol::MotorStruct> &status, const Config config);
+   bool GetButtonStatus(const Button button_enum);
 
    bool SetTorque(bool value, const Config config);
 
@@ -59,6 +67,8 @@ public:
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
+
+   std::vector<bool> _buttonStatus;
 
    std::shared_ptr<STM32F4> _stm32f4;
    std::shared_ptr<ThreadManager> _threadManager;

@@ -15,6 +15,7 @@
 using boost::filesystem::path;
 
 MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io) :
+ _buttonStatus(4, false),
  _threadManager(threadManager_ptr),
  _rawPackets(20)
 {
@@ -23,7 +24,7 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
         // Init USB interface with STM32F4
         Logger::getInstance() << "Initializing USB interface..." << std::endl;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
-        _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateStatus(a); });
+        _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateMotorStatus(a); });
     }
     catch (std::exception& e)
     {
@@ -121,17 +122,18 @@ void MotorControl::InitializeConfigurations(const XmlParser &config)
 }
 
 // Update motors status 
-void MotorControl::UpdateStatus(const std::vector<char>& msg)
+void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
 {
     auto header_it = msg.cbegin();
-    while (header_it != msg.cend())
+    uint16le header = 0;
+    while (Protocol::FindMsgHeader(header_it, msg, header))
     {
-        std::uint16_t header = Protocol::FindMsgHeader(header_it, msg);
         if (header_it < msg.cend() - 4)
         {
             auto size_it = header_it + 2;
-            std::uint16_t msgSize = 0;
-            Protocol::Unify2Bytes(msgSize, *size_it, *(size_it+1)); 
+            uint16le msgSize = 0;
+            msgSize.bytes[0] = *size_it;
+            msgSize.bytes[2] = *(size_it+1);
            
             auto data_start = header_it + 4;
             auto data_end   = size_it + msgSize;
@@ -157,9 +159,15 @@ void MotorControl::UpdateStatus(const std::vector<char>& msg)
             else if (header == Protocol::ButtonHeader)
             {
                 // TODO
-                //Protocol::ButtonStruct buttonStruct;
-                //size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::ButtonStruct));
-                //memcpy(&buttonStruct, &*data_it, size);
+                Protocol::ButtonStruct buttonStruct;
+                size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::ButtonStruct));
+                memcpy(&buttonStruct, &*data_start, size);
+
+                if (buttonStruct.id >= 0 && buttonStruct.id < _buttonStatus.size())
+                {
+                    _buttonStatus[buttonStruct.id] = buttonStruct.value;
+                    Logger::getInstance(Logger::LogLvl::INFO) << "Button " <<(int) buttonStruct.id << " value = " <<(int) buttonStruct.value << std::endl;
+                }
             }
             else if (header == Protocol::PowerHeader)
             {
@@ -175,13 +183,12 @@ void MotorControl::UpdateStatus(const std::vector<char>& msg)
                     _rawPackets.push_back(std::vector<char>(data_start, data_end)); 
                 }                
             }
-            else
-                header_it++;
         }
+        header_it++;
     }
 }
 
-void MotorControl::GetStatus(std::vector<Protocol::MotorStruct> &status, const Config config)
+void MotorControl::GetMotorStatus(std::vector<Protocol::MotorStruct> &status, const Config config)
 { 
    if (_configurations.find(config) == _configurations.end())
    {
@@ -194,6 +201,11 @@ void MotorControl::GetStatus(std::vector<Protocol::MotorStruct> &status, const C
    {
        status.push_back((*it)->getStatus());
    }
+}
+
+bool MotorControl::GetButtonStatus(const Button button_enum)
+{
+   return _buttonStatus[(int)button_enum];
 }
 
 bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Config config,
@@ -221,8 +233,7 @@ bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Co
    Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
 #endif   
 
-   //ReadAll();
-
+   boost::this_thread::sleep(boost::posix_time::milliseconds(20)); // wait for motors to update
    std::vector<double> pos;
    if (!ReadPositions(pos, config))
    {

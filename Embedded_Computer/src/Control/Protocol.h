@@ -1,5 +1,6 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
+#include "Utilities/miscutils.h"
 
 #include <cstdint>
 #include <vector>
@@ -30,22 +31,22 @@ namespace Protocol
 
     // Protocol Tags
     // TODO Hardcode
-    const std::uint16_t MsgHeader = 0xffff; // Main header tag. 
+    const uint16le MsgHeader = 0xffff; // Main header tag. 
 
-    const std::uint16_t MotorHeader    = 0x4f4d; // "MO" => Motor status and pos command
-    const std::uint16_t GyroAccHeader  = 0x4147; // "GA" => Gyro/Acc Values
-    const std::uint16_t ButtonHeader   = 0x5542; // "BU" => Button Status
-    const std::uint16_t PowerHeader    = 0x4F50; // "PO" => Battery Power Status
-    const std::uint16_t TorqueHeader   = 0x4F54; // "TO" => Motor Torque
-    const std::uint16_t MotorRawHeader = 0x534D; // "MR" => Motor Raw commands. Those commands are transmitted directly to the motors.
+    const uint16le MotorHeader    = 0x4f4d; // "MO" => Motor status and pos command
+    const uint16le GyroAccHeader  = 0x4147; // "GA" => Gyro/Acc Values
+    const uint16le ButtonHeader   = 0x5542; // "BU" => Button Status
+    const uint16le PowerHeader    = 0x4F50; // "PO" => Battery Power Status
+    const uint16le TorqueHeader   = 0x4F54; // "TO" => Motor Torque
+    const uint16le MotorRawHeader = 0x534D; // "MR" => Motor Raw commands. Those commands are transmitted directly to the motors.
     
     void Separate2Bytes(const std::uint16_t value, std::uint8_t& valueLSB, std::uint8_t& valueMSB);
     void Unify2Bytes(std::uint16_t& value, const std::uint8_t valueLSB, const std::uint8_t valueMSB);
-    std::uint16_t FindMsgHeader(std::vector<char>::const_iterator &start, const std::vector<char> &msg);
+    bool FindMsgHeader(std::vector<char>::const_iterator &start, const std::vector<char> &msg, uint16le& header);
     
     char CalculCheckSum(const std::vector<char>& msg);
-    std::vector<char> GenerateDataMsg(std::uint16_t header, const std::vector<char>& data);
-    bool isTag(std::uint16_t header);
+    std::vector<char> GenerateDataMsg(uint16le header, const std::vector<char>& data);
+    bool isTag(uint16le header);
 
     void ReadPacket(std::uint16_t header,
                     std::vector<char>::const_iterator& mainItr, 
@@ -55,10 +56,10 @@ namespace Protocol
     struct MotorStruct
     {
         std::uint8_t  id;
-        std::uint16_t pos;
+        uint16le pos;
         std::uint8_t  dt;
-        std::uint16_t status;
-        std::uint16_t PWM;
+        uint16le status;
+        uint16le PWM;
         std::uint8_t  volt;
         std::uint8_t  temp;
     };

@@ -1,6 +1,7 @@
 #include "Control/Protocol.h"
 #include "Control/Motor.h"
 #include "Utilities/logger.h"
+#include "Utilities/miscutils.h"
 
 #include <boost/algorithm/clamp.hpp>
 #include <vector>
@@ -38,10 +39,9 @@ void Motor::setPos(double pos)
         std::vector<char> data;
         data.push_back(_id);
 
-        std::uint8_t posLSB, posMSB;
-        Protocol::Separate2Bytes(Angle2Value(pos), posLSB, posMSB);
-        data.push_back(posLSB);
-        data.push_back(posMSB);
+        uint16le posValue = Angle2Value(pos);
+        data.push_back(posValue.bytes[0]);
+        data.push_back(posValue.bytes[2]);
         data.push_back(_playTime); 
 
         _stm32f4->AddMsg(Protocol::GenerateDataMsg(Protocol::MotorHeader,data));

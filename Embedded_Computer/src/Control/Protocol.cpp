@@ -1,5 +1,6 @@
 #include "Control/Protocol.h"
 
+
 void Protocol::Separate2Bytes(const std::uint16_t value, std::uint8_t& valueLSB, std::uint8_t& valueMSB)
 {
     valueMSB = value >> 8;
@@ -26,38 +27,35 @@ char Protocol::CalculCheckSum(const std::vector<char>& msg)
     return checkSum;
 }
 
-std::vector<char> Protocol::GenerateDataMsg(std::uint16_t header, const std::vector<char>& data)
+std::vector<char> Protocol::GenerateDataMsg(uint16le header, const std::vector<char>& data)
 {
-    std::uint8_t headerMSB, headerLSB, sizeMSB, sizeLSB;
     std::vector<char> result;
-    const std::uint16_t size = data.size() + sizeof(std::uint16_t);
+    const uint16le size = data.size() + sizeof(uint16le);
 
-    Separate2Bytes(header, headerLSB, headerMSB);
-    Separate2Bytes(size, sizeLSB, sizeMSB);
-
-    result.push_back(headerLSB);
-    result.push_back(headerMSB);
-    result.push_back(sizeLSB);
-    result.push_back(sizeMSB);
+    result.push_back(header.bytes[0]);
+    result.push_back(header.bytes[1]);
+    result.push_back(size.bytes[0]);
+    result.push_back(size.bytes[1]);
 
     result.insert(result.end(), data.begin(), data.end());
     return result;
 }
 
 // Find first tag in vector and return iterator to the start of this tag
-std::uint16_t Protocol::FindMsgHeader(std::vector<char>::const_iterator &iterator, const std::vector<char> &msg)
+bool Protocol::FindMsgHeader(std::vector<char>::const_iterator &iterator, const std::vector<char> &msg, uint16le& header)
 {
-    std::uint16_t header = 0;
-    for (; iterator != msg.end() - 1; ++iterator)
+    auto end = msg.end() - 1;
+    for (; iterator <= end; ++iterator)
     {
-       Unify2Bytes(header, *iterator, *(iterator+1));
+       header.bytes[0] = *iterator;
+       header.bytes[1] = *(iterator+1);
        if (isTag(header))
-           break;         
+           return true;         
     }
-    return header;
+    return false;
 }
 
-bool Protocol::isTag(std::uint16_t header)
+bool Protocol::isTag(uint16le header)
 {
     // TODO Sry for who ever read this
     // Put headers in map and search with the map?
