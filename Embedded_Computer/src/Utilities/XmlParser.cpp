@@ -22,6 +22,7 @@ namespace XmlPath
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";
+	const path ActivateMotor = "ActivateMotor";
     const path IterationTimeMs = "IterationTimeMs";
     const path Configurations = "Configurations";
 	const path Head = "Head";
@@ -32,12 +33,18 @@ namespace XmlPath
 
 	const path Threshold = "Threshold";
 
-	const path PelvisPitchCompensationOffset = "COMPENSATION_OFFSET/Pelvis/Pitch";
-	const path PelvisRollCompensationOffset = "COMPENSATION_OFFSET/Pelvis/Roll";
-	const path PelvisYawCompensationOffset = "COMPENSATION_OFFSET/Pelvis/Yaw";
-	const path PelvisxCompensationOffset = "COMPENSATION_OFFSET/Pelvis/x";
-	const path PelvisyCompensationOffset = "COMPENSATION_OFFSET/Pelvis/y";
-	const path PelviszCompensationOffset = "COMPENSATION_OFFSET/Pelvis/z";
+	const path RightPelvisPitchCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Pitch";
+	const path RightPelvisRollCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Roll";
+	const path RightPelvisYawCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Yaw";
+	const path RightPelvisxCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/x";
+	const path RightPelvisyCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/y";
+	const path RightPelviszCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/z";
+	const path LeftPelvisPitchCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/Pitch";
+	const path LeftPelvisRollCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/Roll";
+	const path LeftPelvisYawCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/Yaw";
+	const path LeftPelvisxCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/x";
+	const path LeftPelvisyCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/y";
+	const path LeftPelviszCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/z";
 	const path RightFootPitchCompensationOffset = "COMPENSATION_OFFSET/RightFoot/Pitch";
 	const path RightFootRollCompensationOffset = "COMPENSATION_OFFSET/RightFoot/Roll";
 	const path RightFootYawCompensationOffset = "COMPENSATION_OFFSET/RightFoot/Yaw";

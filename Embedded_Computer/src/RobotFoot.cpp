@@ -20,7 +20,7 @@
 #include "Utilities/ThreadManager.h"
 #include "Control/MotorControl_2.h"
 #include "ImageProcessing/HeadControlTask.h"
-#include "Demo/StaticWalking/StaticWalk.h"
+//#include "Demo/StaticWalking/StaticWalk.h"
 #include "LegMotion/LegMotion.h"
 
 /*!
@@ -117,7 +117,10 @@ int main(int argc, char * argv[])
         	Eigen::Vector2f startAngle(0, 0);
         	Eigen::Vector2f endAngle(0, 0);
 
-        	legMotion.InitWalk(pointD, startAngle, endAngle, true, true, 7000, 1.0f);
+        	bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
+
+ //       	legMotion.Init("config/input.txt", activatedMotor, true, 3000);
+            legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000, 1.0f);
 
            	threadManager_ptr->attach(threadManager_ptr->create(90, boost::bind(&LegMotion::Run, &legMotion,
                                           config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),

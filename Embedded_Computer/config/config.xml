@@ -75,7 +75,8 @@
     <TTY value="/dev/ttyACM0" />
   </USB_Interface>
   <Motion value="1">
-    <IterationTimeMs value="20"/>
+  	<ActivateMotor value="1" />
+    <IterationTimeMs value="50"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
@@ -127,39 +128,47 @@
       <Legs>
 	  <DISTANCETHRESHOLD value = "0.002"/>
 	  <COMPENSATION_OFFSET>
-			<Pelvis>
-				<Pitch value = "-0.03" />
-				<Roll value = "-0.17" />
+			<RightPelvis>
+				<Pitch value = "0" />
+				<Roll value = "0" />
 				<Yaw value = "0.0" />
 				<x value = "0.0" />
 				<y value = "0.0" />
 				<z value = "0.0" />
-			<Pelvis/>
+			</RightPelvis>
+			<LeftPelvis>
+				<Pitch value = "0" />
+				<Roll value = "0" />
+				<Yaw value = "0.0" />
+				<x value = "0.0" />
+				<y value = "0.0" />
+				<z value = "0.0" />
+			</LeftPelvis>
 			<RightFoot>
 				<Pitch value = "0.0" />
-				<Roll value = "-0.06" />
+				<Roll value = "0" />
 				<Yaw value = "0.0" />
 				<x value = "0.0" />
 				<y value = "0.0" />
 				<z value = "0.0" />
-			<RightFoot/>
+			</RightFoot>
 			<LeftFoot>
 				<Pitch value = "0.0" />
-				<Roll value = "-0.06" />
+				<Roll value = "0" />
 				<Yaw value = "0.0" />
 				<x value = "0.0" />
 				<y value = "0.0" />
 				<z value = "0.0" />
-			<LeftFoot/>
-	  <COMPENSATION_OFFSET/>
-	  <StepHeight value = "0.02"/>
+			</LeftFoot>
+	  </COMPENSATION_OFFSET>
+	  <StepHeight value = "0.04"/>
 	    <R_HIP_YAW>
 		  <MotorID value="1"/>
 		  <Offset value="547"/>
 		  <LimitMin value="473"/>
 		  <LimitMax value="592"/>
           <PlayTime value="0"/>
-          <IsInversed value="0"/>
+          <IsInversed value="1"/>
 	    </R_HIP_YAW>
 	    <L_HIP_YAW>
 		  <MotorID value="2"/>

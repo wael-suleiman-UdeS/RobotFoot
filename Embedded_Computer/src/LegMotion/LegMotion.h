@@ -65,8 +65,10 @@ private:
 	Eigen::Vector3f m_vRightFootAngleOffset;
 	Eigen::Vector3f m_vLeftFootPosOffset;
 	Eigen::Vector3f m_vLeftFootAngleOffset;
-	Eigen::Vector3f m_vPelvisPosOffset;
-	Eigen::Vector3f m_vPelvisAngleOffset;
+	Eigen::Vector3f m_vRightPelvisPosOffset;
+	Eigen::Vector3f m_vRightPelvisAngleOffset;
+	Eigen::Vector3f m_vLeftPelvisPosOffset;
+	Eigen::Vector3f m_vLeftPelvisAngleOffset;
 
     // Contains motor position from the text file
     std::vector<std::vector<double>> m_vPosition;

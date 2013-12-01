@@ -37,6 +37,7 @@ namespace XmlPath
 
 	extern const fs::path Motion;
 	extern const fs::path Motors;
+	extern const fs::path ActivateMotor;
     extern const fs::path IterationTimeMs;
     extern const fs::path Configurations;
 	extern const fs::path Head;
@@ -46,12 +47,18 @@ namespace XmlPath
     extern const fs::path KD;
     extern const fs::path KI;
 
-    extern const fs::path PelvisPitchCompensationOffset;
-    extern const fs::path PelvisRollCompensationOffset;
-    extern const fs::path PelvisYawCompensationOffset;
-    extern const fs::path PelvisxCompensationOffset;
-    extern const fs::path PelvisyCompensationOffset;
-    extern const fs::path PelviszCompensationOffset;
+    extern const fs::path RightPelvisPitchCompensationOffset;
+    extern const fs::path RightPelvisRollCompensationOffset;
+    extern const fs::path RightPelvisYawCompensationOffset;
+    extern const fs::path RightPelvisxCompensationOffset;
+    extern const fs::path RightPelvisyCompensationOffset;
+    extern const fs::path RightPelviszCompensationOffset;
+    extern const fs::path LeftPelvisPitchCompensationOffset;
+    extern const fs::path LeftPelvisRollCompensationOffset;
+    extern const fs::path LeftPelvisYawCompensationOffset;
+    extern const fs::path LeftPelvisxCompensationOffset;
+    extern const fs::path LeftPelvisyCompensationOffset;
+    extern const fs::path LeftPelviszCompensationOffset;
     extern const fs::path RightFootPitchCompensationOffset;
     extern const fs::path RightFootRollCompensationOffset;
     extern const fs::path RightFootYawCompensationOffset;
