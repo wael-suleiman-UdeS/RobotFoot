@@ -945,7 +945,7 @@ Eigen::MatrixXf Trajectory::GenerateCOM(Eigen::MatrixXf zmpMatrix)
 	Eigen::VectorXf YCom = ykVector.row(0);
 
 	Eigen::MatrixXf COM(XCom.size(), 3);
-	COM << XCom, YCom, Eigen::VectorXf::Constant(XCom.size(), m_ZMPHeight);
+	COM << XCom, YCom, Eigen::VectorXf::Constant(XCom.size(), m_ZMPHeight), zmpMatrix.col(3), zmpMatrix.col(4), zmpMatrix.col(5);
 
 	return COM;
 }

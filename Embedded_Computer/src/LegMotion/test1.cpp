@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 
 
 	Trajectory* traj = new Trajectory(rightFootPosOffset, rightFootAngleOffset, leftFootPosOffset,
-			leftFootAngleOffset, pelvisFootPosOffset, pelvisFootAngleOffset);
+			leftFootAngleOffset, pelvisFootPosOffset, pelvisFootAngleOffset, pelvisFootPosOffset, pelvisFootAngleOffset);
 	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
 			endAngle, startAngle, Trajectory::ZMP, 1.0f);
 
