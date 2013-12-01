@@ -52,7 +52,7 @@ class ThreadManager
         boost::asio::deadline_timer _timer;
             
         std::map<boost::thread::id, boost::thread*> _threads;
-        std::map<boost::thread::id, boost::condition_variable*> _cond_variables;
+        std::map<boost::thread::id, std::pair<bool, boost::condition_variable*>> _cond_variables;
         std::map<Task, boost::thread::id> _tasks; 
 };
 #endif

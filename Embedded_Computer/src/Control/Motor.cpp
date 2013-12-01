@@ -1,4 +1,5 @@
 #include "Control/Protocol.h"
+#include "Control/Motor.h"
 #include "Utilities/logger.h"
 
 #include <boost/algorithm/clamp.hpp>
@@ -12,16 +13,17 @@ namespace
 	const double dInvAngleConvertion = 1/dAngleConvertion;
 }
 
-Motor::Motor(std::shared_ptr<STM32F4> stm32f4, std::string name, int id, int offset, int min, int max, int playTime)
+Motor::Motor(std::shared_ptr<STM32F4> stm32f4, std::string name, int id, int offset, int minValue, int maxValue, int playTime)
 :
 _stm32f4(stm32f4),
 _name(name),
 _id(id),
 _offset(offset),
-_min(min),
-_max(max),
+_minValue(minValue),
+_maxValue(maxValue),
 _playTime(playTime),
-_angle(0.0)
+_angle(0.0),
+_torque(0)
 {    
 }
 
@@ -31,48 +33,88 @@ Motor::~Motor()
 
 void Motor::setPos(double pos)
 {
-    if(_angle != pos)
+    if(_angle != pos && _torque)
     {
-        _angle = pos;
         std::vector<char> data;
         data.push_back(_id);
 
-        char posLSB, posMSB;
-        int pos = Angle2Value(_posToWrite);
-        Protocol::Separate2Bytes(pos, posLSB, posMSB);
+        std::uint8_t posLSB, posMSB;
+        Protocol::Separate2Bytes(Angle2Value(pos), posLSB, posMSB);
         data.push_back(posLSB);
         data.push_back(posMSB);
         data.push_back(_playTime); 
 
-        std::vector<char> msg;
-        Protocol::GenerateDataMsg(Protocol::MotorHeader,data,msg);
-        _stm32f4->AddMsg(msg);
+        _stm32f4->AddMsg(Protocol::GenerateDataMsg(Protocol::MotorHeader,data));
     }    
+}
+
+void Motor::sendRawPacket(const std::uint8_t& cmd, const std::vector<char>& data)
+{
+    std::vector<char> msg;
+    msg.push_back(_id);
+    msg.push_back(cmd);
+    msg.insert(msg.end(), data.begin(), data.end());
+
+    _stm32f4->AddMsg(Protocol::GenerateDataMsg(Protocol::MotorRawHeader, msg));
+}
+
+void Motor::setTorque(bool value)
+{
+    if (_torque != value)
+    {
+        _torque = value;
+        std::vector<char> data;
+        data.push_back(_id);
+        data.push_back(value);
+
+        _stm32f4->AddMsg(Protocol::GenerateDataMsg(Protocol::TorqueHeader, data));
+    }
+}
+
+void Motor::update(const Protocol::MotorStruct &motorStruct)
+{
+    _angle = Value2Angle(motorStruct.pos);
+    _status = motorStruct.status;
+    _PWM = motorStruct.PWM;
+    _volt = motorStruct.volt;
+    _temp = motorStruct.temp;
+}
+
+const Protocol::MotorStruct Motor::getStatus()
+{
+    Protocol::MotorStruct motorInfo;
+    motorInfo.id = _id;
+    motorInfo.pos = Angle2Value(_angle);
+    motorInfo.status = _status;
+    motorInfo.PWM = _PWM;
+    motorInfo.volt = _volt;
+    motorInfo.temp = _temp;
+    return motorInfo;
 }
 
 const double Motor::getPos()
 {
-    return _posToRead;
+    return _angle;
 }
 
-int Motor::Angle2Value(const double angle)
+std::uint16_t Motor::Angle2Value(const double angle)
 {
-    int value = (angle*dInvAngleConvertion) + _offset;
-	return clamp(value, _min, _max);
+    std::uint16_t value = (angle*dInvAngleConvertion) + _offset;
+	return clamp(value, _minValue, _maxValue);
 }
 
-double Motor::Value2Angle(const int value)
+double Motor::Value2Angle(const std::uint16_t value)
 {
-	int clampedValue = clamp(value, _min, _max);
+    std::uint16_t clampedValue = clamp(value, _minValue, _maxValue);
 	return double(clampedValue - _offset)*dAngleConvertion;
 }
 
 const double Motor::getMinAngle()
 {
-	return Value2Angle(_min);
+	return Value2Angle(_minValue);
 }
 
 const double Motor::getMaxAngle()
 {
-	return Value2Angle(_max);
+	return Value2Angle(_maxValue);
 }

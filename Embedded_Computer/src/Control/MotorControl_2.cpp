@@ -1,5 +1,6 @@
 #include "Control/MotorControl_2.h"
 #include "Control/Protocol.h"
+#include "Control/Motor.h"
 #include "Utilities/logger.h"
 
 #include <iostream>
@@ -13,20 +14,16 @@
 
 using boost::filesystem::path;
 
-MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config ) :
- _threadManager(threadManager_ptr)
+MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io) :
+ _threadManager(threadManager_ptr),
+ _rawPackets(20)
 {
     try
     {
         // Init USB interface with STM32F4
         Logger::getInstance() << "Initializing USB interface..." << std::endl;
-        boost::asio::io_service boost_io;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
-        _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io);
-
-        // Set Callback function for async read
-        _stm32f4->RegisterRead(boost::bind(&MotorControl::Update, this));
-        _threadManager->create(90, boost::bind(&boost::asio::io_service::run, &boost_io));
+        _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateStatus(a); });
     }
     catch (std::exception& e)
     {
@@ -41,32 +38,25 @@ MotorControl::~MotorControl()
 
 }
 
-void MotorControl::run()
+// This method resume the LegMotion thread each X ms
+void MotorControl::run(int ms_sleepTime)
 {
     try
     {
-
-        boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
         while(1)
         {
-            boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-            Logger::getInstance(Logger::LogLvl::DEBUG) << "ALL took " << sec.count() << " seconds" << std::endl;
-            start = boost::chrono::system_clock::now();
+			boost::this_thread::interruption_point();
+            boost::this_thread::sleep(boost::posix_time::milliseconds(ms_sleepTime));
 
-            // Main task reading and sending data
-            //ReadAll();
             if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
             {
-                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : wait for StaticWalk" << std::endl;
-                _threadManager->wait();
+                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl run() : Resuming LEGS_CONTROL thread" << std::endl; 
             }
             else
             {
-                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl : Resume LEGS_CONTROL fail" << std::endl;
+                Logger::getInstance(Logger::LogLvl::ERROR) << "MotorControl run() : LEGS_CONTROL thread too slow for packet sending frequence." << std::endl;
+                std::exit(1);
             }
-
-            _stm32f4->SendMsg();
-            _threadManager->wait(); 
         }
     }
     catch(boost::thread_interrupted const &e)
@@ -130,26 +120,80 @@ void MotorControl::InitializeConfigurations(const XmlParser &config)
     }
 }
 
-void MotorControl::Update(const std::vector<char>& msg)
+// Update motors status 
+void MotorControl::UpdateStatus(const std::vector<char>& msg)
 {
-   int msgSize = msg.size();
-   switch(msgSize)
+    auto header_it = msg.cbegin();
+    while (header_it != msg.cend())
+    {
+        std::uint16_t header = Protocol::FindMsgHeader(header_it, msg);
+        if (header_it < msg.cend() - 4)
+        {
+            auto size_it = header_it + 2;
+            std::uint16_t msgSize = 0;
+            Protocol::Unify2Bytes(msgSize, *size_it, *(size_it+1)); 
+           
+            auto data_start = header_it + 4;
+            auto data_end   = size_it + msgSize;
+            if (header == Protocol::MotorHeader)
+            {
+                Protocol::MotorStruct motorStruct;
+                size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::MotorStruct));
+                memcpy(&motorStruct, &*data_start, size);
+
+                auto motor = _mapIdMotors.find(motorStruct.id);
+                if (motor != _mapIdMotors.end())
+                {
+                    motor->second->update(motorStruct);
+                }
+            }
+            else if (header == Protocol::GyroAccHeader)
+            {
+               // TODO
+               // Protocol::GyroAccStruct gyroAccStruct;
+               // size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::GyroAccStruct));
+               // memcpy(&gyroAccStruct, &*data_it, size);
+            }
+            else if (header == Protocol::ButtonHeader)
+            {
+                // TODO
+                //Protocol::ButtonStruct buttonStruct;
+                //size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::ButtonStruct));
+                //memcpy(&buttonStruct, &*data_it, size);
+            }
+            else if (header == Protocol::PowerHeader)
+            {
+                // TODO
+                //Protocol::PowerStruct powerStruct;
+                //size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::PowerStruct));
+                //memcpy(&powerStruct, &*data_it, size);
+            }
+            else if (header == Protocol::MotorRawHeader)
+            {
+                if (msgSize > 4)
+                {
+                    _rawPackets.push_back(std::vector<char>(data_start, data_end)); 
+                }                
+            }
+            else
+                header_it++;
+        }
+    }
+}
+
+void MotorControl::GetStatus(std::vector<Protocol::MotorStruct> &status, const Config config)
+{ 
+   if (_configurations.find(config) == _configurations.end())
    {
-      case 3:
-      case 6:
-         Logger::getInstance(Logger::LogLvl::Error) << __FILE__ << " Motor::Read : Invalid msg size " << std::endl;
-         return;
-      default:
-         break;
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"GetStatus\" : Configuration is invalid." << std::endl;
    }
 
-   size_t size = std::min(msgSize*sizeof(char),sizeof(ReadData));
-   memcpy(&_readData,msg.data(),size);
-
-   if (_readData.pos > 0)
-      _posToRead = Value2Angle(_readData.pos);
-   else
-      Logger::getInstance(Logger::LogLvl::Error) << __FILE__ << " Motor::Read : Read position error " << _id << std::endl;
+   auto it = _configurations[config].begin();
+   const auto end = _configurations[config].end();
+   for ( ; it != end; it++ )
+   {
+       status.push_back((*it)->getStatus());
+   }
 }
 
 bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Config config,
@@ -203,8 +247,11 @@ bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Co
    {
       std::transform(pos.begin(), pos.end(), posDt.begin(), pos.begin(), std::plus<double>());
 
+      Logger::getInstance(Logger::LogLvl::DEBUG) << "";
+      std::copy(pos.begin(), pos.end(), std::ostream_iterator<double>(std::cout, " "));
+      Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
       SetPositions(pos, config);
-      _stm32f4->SendMsg();
+      WriteAll();
       usleep(msDt*1000);
    }
    return true;
@@ -238,7 +285,7 @@ bool MotorControl::SetPositions(const std::vector<double>& pos, const Config con
        return false;
    }
 
-   bool status = true;
+   bool status = true; //TODO Do something with status of motors
 
 #ifdef DANGER_TEST_MOTION   
    auto itrJoint = _configurations[config].begin();
@@ -258,6 +305,97 @@ bool MotorControl::SetPositions(const std::vector<double>& pos, const Config con
       Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
 #endif
    return status;
+}
+
+bool MotorControl::SetTorque(bool value, const Config config)
+{
+   if (_configurations.find(config) == _configurations.end())
+   {
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SetTorque\" : Configuration is invalid." << std::endl;
+       return false;
+   }
+   auto itrJoint = _configurations[config].begin();
+   const auto endJoint = _configurations[config].end();
+   
+   for ( ; itrJoint != endJoint; itrJoint++)
+   {
+       (*itrJoint)->setTorque(value);
+   }
+   return true;
+}
+
+const double MotorControl::ReadPosition(std::string name)
+{
+    if (_mapStrMotors.find(name) == _mapStrMotors.end())
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"ReadPosition\" : Motor " << name << " invalid." << std::endl;
+        return -1;
+    }
+    return _mapStrMotors[name]->getPos();
+}
+
+bool MotorControl::ReadPositions(std::vector<double>& pos, const Config config)
+{
+   if (_configurations.find(config) == _configurations.end())
+   {
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"ReadPositions\" : Configuration is invalid." << std::endl;
+       return false;
+   }
+
+   bool status = true; //TODO Do something with status of motors
+   auto itr = _configurations[config].begin();
+   const auto end = _configurations[config].end();
+
+   for ( ; itr != end && status ; itr++ )
+   {
+       pos.push_back((*itr)->getPos());
+   }
+   return status;
+}
+
+void MotorControl::SendRawPacket(const std::uint8_t& cmd, const std::vector<char>& data, std::string name)
+{
+    if (_mapStrMotors.find(name) == _mapStrMotors.end())
+    {
+        Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SendRawPacket\" : Motor " << name << " invalid." << std::endl;
+        return;
+    }
+    _mapStrMotors[name]->sendRawPacket(cmd, data);
+}
+
+void MotorControl::SendRawPackets(const std::vector<std::uint8_t>& cmds, const std::vector<std::vector<char>>& data, const Config config) 
+{
+   if (_configurations.find(config) == _configurations.end())
+   {
+       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"SendRawPackets\" : Configuration is invalid." << std::endl;
+       return;
+   }
+
+   auto config_it = _configurations[config].begin();
+   auto cmd_it = cmds.cbegin();
+   auto data_it = data.cbegin();
+   const auto end = _configurations[config].end();
+
+   for ( ; config_it != end; ++config_it, ++cmd_it, ++data_it)
+   {
+       (*config_it)->sendRawPacket(*cmd_it, *data_it);
+   }
+}
+
+std::vector<char> MotorControl::GetRawPacket()
+{
+    std::vector<char> packet;
+    if (!_rawPackets.empty())
+    {
+        packet = _rawPackets.back();
+        _rawPackets.pop_back();
+    }
+    return packet;
+}
+
+void MotorControl::WriteAll()
+{
+    _stm32f4->SendMsg();
 }
 
 void MotorControl::HardSet(const std::vector<double>& pos, const Config config)
@@ -324,55 +462,3 @@ void MotorControl::HardGetMinAngles(std::vector<double>& angles, const Config co
     	angles.push_back((*itrJoint)->getMinAngle());
     }
 }
-
-const double MotorControl::ReadPosition(std::string name)
-{
-    if (_mapStrMotors.find(name) == _mapStrMotors.end())
-    {
-        Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"ReadPosition\" : Motor " << name << " invalid." << std::endl;
-        return -1;
-    }
-    return _mapStrMotors[name]->getPos();
-}
-
-bool MotorControl::ReadPositions(std::vector<double>& pos, const Config config)
-{
-   if (_configurations.find(config) == _configurations.end())
-   {
-       Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"ReadPositions\" : Configuration is invalid." << std::endl;
-       return false;
-   }
-
-   bool status = true;
-   auto itr = _configurations[config].begin();
-   const auto end = _configurations[config].end();
-
-   for ( ; itr != end && status ; itr++ )
-   {
-       pos.push_back((*itr)->getPos());
-   }
-   return status;
-}
-
-void MotorControl::Read(const std::vector<char>& msg)
-{
-    std::vector<char> packet;
-    std::vector<char>::const_iterator itr = msg.begin();
-    const std::vector<char>::const_iterator end = msg.end();
-
-    while (itr!=end)
-    {
-        Protocol::ReadPacket(Protocol::MotorHeader,itr,end,packet); 
-        if(packet.size() >= 1)
-        {
-            int id = packet[0];
-            if (_mapIdMotors.find(id) == _mapIdMotors.end())
-            {
-                Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"MotorControl::Read\" : Motor " << id << " invalid." << std::endl;
-                continue;
-            }
-            _mapIdMotors[id]->Read(packet);
-        }
-    }
-}
-

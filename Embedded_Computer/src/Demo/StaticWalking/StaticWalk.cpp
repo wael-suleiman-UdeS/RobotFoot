@@ -104,9 +104,9 @@ void StaticWalk::run(double msDt)
                 {
                     if (bIsStandAlone)
                     {
-                        Logger::getInstance() << "StaticWalk : HardSet" << std::endl;
-                        _motion->HardSet( *itrPos, MotorControl::Config::ALL_LEGS );
-                        Logger::getInstance() << "StaticWalk : After HardSet" << std::endl;
+                        //_motion->HardSet( *itrPos, MotorControl::Config::ALL_LEGS );
+                        _motion->SetPositions( *itrPos, MotorControl::Config::ALL_LEGS );
+                        _motion->WriteAll();
                     }                    
                     else
                     {    
@@ -131,7 +131,7 @@ void StaticWalk::run(double msDt)
                     Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : Iteration done" << std::endl;
                     _threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
                 }
-                            } 
+            }
         }
         else
         { 

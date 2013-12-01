@@ -1,13 +1,12 @@
 #include "Control/Protocol.h"
 
-
-void Protocol::Separate2Bytes(const std::int16_t value, char& valueLSB, char& valueMSB)
+void Protocol::Separate2Bytes(const std::uint16_t value, std::uint8_t& valueLSB, std::uint8_t& valueMSB)
 {
     valueMSB = value >> 8;
     valueLSB = value;
 }
 
-void Protocol::Unify2Bytes(std::int16_t& value, const char valueLSB, const char valueMSB)
+void Protocol::Unify2Bytes(std::uint16_t& value, const std::uint8_t valueLSB, const std::uint8_t valueMSB)
 {
     value = 0;
     value = valueMSB << 8;
@@ -16,18 +15,10 @@ void Protocol::Unify2Bytes(std::int16_t& value, const char valueLSB, const char 
 
 char Protocol::CalculCheckSum(const std::vector<char>& msg)
 {
-    uint8_t checkSum(0);
+    std::uint8_t checkSum(0);
+    auto itr = msg.begin() + 2;
 
-    auto itr = msg.begin();
-    auto itrSecond = itr+2;
-    auto end = msg.end();
-
-    while(itr != itrSecond && itr != end)
-    {
-        ++itr;
-    }
-
-    for(;itr != end ;++itr)
+    for(; itr != msg.end()-1; ++itr)
     {
         checkSum += *(itr); 
     }
@@ -35,11 +26,11 @@ char Protocol::CalculCheckSum(const std::vector<char>& msg)
     return checkSum;
 }
 
-void Protocol::GenerateDataMsg(std::int16_t header, const std::vector<char>& data, std::vector<char>& result)
+std::vector<char> Protocol::GenerateDataMsg(std::uint16_t header, const std::vector<char>& data)
 {
-    char headerMSB, headerLSB, sizeMSB, sizeLSB;
-
-    const std::int16_t size = data.size();
+    std::uint8_t headerMSB, headerLSB, sizeMSB, sizeLSB;
+    std::vector<char> result;
+    const std::uint16_t size = data.size() + sizeof(std::uint16_t);
 
     Separate2Bytes(header, headerLSB, headerMSB);
     Separate2Bytes(size, sizeLSB, sizeMSB);
@@ -50,15 +41,42 @@ void Protocol::GenerateDataMsg(std::int16_t header, const std::vector<char>& dat
     result.push_back(sizeMSB);
 
     result.insert(result.end(), data.begin(), data.end());
+    return result;
 }
 
-bool Protocol::ReadPacket(std::int16_t header,
+// Find first tag in vector and return iterator to the start of this tag
+std::uint16_t Protocol::FindMsgHeader(std::vector<char>::const_iterator &iterator, const std::vector<char> &msg)
+{
+    std::uint16_t header = 0;
+    for (; iterator != msg.end() - 1; ++iterator)
+    {
+       Unify2Bytes(header, *iterator, *(iterator+1));
+       if (isTag(header))
+           break;         
+    }
+    return header;
+}
+
+bool Protocol::isTag(std::uint16_t header)
+{
+    // TODO Sry for who ever read this
+    // Put headers in map and search with the map?
+    return (header == MsgHeader     ||
+            header == MotorHeader   ||
+            header == GyroAccHeader ||
+            header == ButtonHeader  ||
+            header == PowerHeader   ||
+            header == TorqueHeader  ||
+            header == MotorRawHeader);
+}
+
+void Protocol::ReadPacket(std::uint16_t header,
         std::vector<char>::const_iterator& mainItr, 
         const std::vector<char>::const_iterator& mainEnd,
         std::vector<char>& result)
 {
-    char headerMSB, headerLSB;
-    std::int16_t size(0);
+    std::uint8_t headerMSB, headerLSB;
+    std::uint16_t size(0);
     Separate2Bytes(header,headerLSB,headerMSB);
 
     for(;mainItr != mainEnd && mainItr+1 != mainEnd; ++mainItr)

@@ -18,6 +18,7 @@ SRC += ImageProcessing/HeadControlTask.cpp
 SRC += Control/STM32F4_2.cpp
 SRC += Control/MotorControl_2.cpp
 SRC += Control/Protocol.cpp
+SRC += Control/Motor.cpp
 SRC += Demo/StaticWalking/StaticWalk.cpp
 SRC += Demo/StaticWalking/WalkStatus.cpp
 SRC += Demo/StaticWalking/matrixpinv.cpp
