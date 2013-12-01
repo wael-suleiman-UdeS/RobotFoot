@@ -72,7 +72,7 @@
     </Colors>
   </ImageProcessing>
   <USB_Interface>
-    <TTY value="/dev/ttyACM0" />
+    <TTY value="/dev/ttyACM2" />
   </USB_Interface>
   <Motion value="1">
   	<ActivateMotor value="1" />
@@ -132,33 +132,33 @@
 				<Pitch value = "0" />
 				<Roll value = "0" />
 				<Yaw value = "0.0" />
-				<x value = "0.0" />
-				<y value = "0.0" />
-				<z value = "0.0" />
+				<x value = "0" />
+				<y value = "0" />
+				<z value = "0" />
 			</RightPelvis>
 			<LeftPelvis>
 				<Pitch value = "0" />
 				<Roll value = "0" />
 				<Yaw value = "0.0" />
-				<x value = "0.0" />
-				<y value = "0.0" />
-				<z value = "0.0" />
+				<x value = "0" />
+				<y value = "0" />
+				<z value = "0" />
 			</LeftPelvis>
 			<RightFoot>
 				<Pitch value = "0.0" />
 				<Roll value = "0" />
-				<Yaw value = "0.0" />
-				<x value = "0.0" />
-				<y value = "0.0" />
-				<z value = "0.0" />
+				<Yaw value = "0" />
+				<x value = "0" />
+				<y value = "0" />
+				<z value = "0" />
 			</RightFoot>
 			<LeftFoot>
 				<Pitch value = "0.0" />
 				<Roll value = "0" />
 				<Yaw value = "0.0" />
-				<x value = "0.0" />
-				<y value = "0.0" />
-				<z value = "0.0" />
+				<x value = "0" />
+				<y value = "0" />
+				<z value = "0" />
 			</LeftFoot>
 	  </COMPENSATION_OFFSET>
 	  <StepHeight value = "0.04"/>

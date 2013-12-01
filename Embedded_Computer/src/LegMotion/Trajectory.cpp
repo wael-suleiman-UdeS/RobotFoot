@@ -539,8 +539,8 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 
 		Eigen::Vector3f endStepFootAngle = m_vRightFootAngleOffset;
 		endStepFootAngle(2) += (rightSteps(i + 1, 2) - rightSteps(i, 2))/2 + rightSteps(i, 2);
-		endStepPos << ((rightSteps(i + 1, 0) - rightSteps(i, 0))/2) + rightSteps(i, 0),
-				((rightSteps(i + 1, 1) - rightSteps(i, 1))/2) + rightSteps(i, 1), m_stepHeight, endStepFootAngle;
+		endStepPos << ((rightSteps(i + 1, 0) - rightSteps(i, 0))/2) + rightSteps(i, 0) + m_vRightFootPosOffset(0),
+				((rightSteps(i + 1, 1) - rightSteps(i, 1))/2) + rightSteps(i, 1) + m_vRightFootPosOffset(1), m_stepHeight + m_vRightFootPosOffset(2), endStepFootAngle;
 
 		GenerateFinalMatrixForOneStep(finalMatrix, stepCount, startingStepPos, endStepPos, groundedFoot,
 				m_singleStepTime/2, 0, nbSteppingTimeStamps/2, 1);
@@ -576,8 +576,8 @@ Eigen::MatrixXf Trajectory::GenerateParabollicStepsTrajectories(Eigen::MatrixXf 
 
 			endStepFootAngle = m_vLeftFootAngleOffset;
 			endStepFootAngle(2) += (leftSteps(i + 1, 2) - leftSteps(i, 2))/2 + leftSteps(i, 2);
-			endStepPos << ((leftSteps(i + 1, 0) - leftSteps(i, 0))/2) + leftSteps(i, 0),
-					((leftSteps(i + 1, 1) - leftSteps(i, 1))/2) + leftSteps(i, 1), m_stepHeight, endStepFootAngle;
+			endStepPos << ((leftSteps(i + 1, 0) - leftSteps(i, 0))/2) + leftSteps(i, 0) + m_vLeftFootPosOffset(0),
+					((leftSteps(i + 1, 1) - leftSteps(i, 1))/2) + leftSteps(i, 1) + m_vLeftFootPosOffset(1), m_stepHeight + m_vLeftFootPosOffset(2), endStepFootAngle;
 			GenerateFinalMatrixForOneStep(finalMatrix, stepCount, startingStepPos, endStepPos, groundedFoot,
 					m_singleStepTime/2, 0, nbSteppingTimeStamps/2, 0);
 
@@ -774,6 +774,9 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 	initialPoint << ((leftSteps.row(0) + rightSteps.row(0))/2).transpose(), m_ZMPHeight, Eigen::Vector3f(0.0f, 0.0f, 0.0f);
 	Eigen::VectorXf finalPoint(6);
 	finalPoint << (leftSteps.row(0)).transpose(), m_ZMPHeight, Eigen::Vector3f(0.0f, 0.0f, 0.0f);
+	finalPoint(0) = finalPoint(0) + m_vRightPelvisPosOffset(0);
+	finalPoint(1) = finalPoint(1) + m_vRightPelvisPosOffset(1);
+	finalPoint(2) = finalPoint(2) + m_vRightPelvisPosOffset(2);
 
 	//Trajectory from point A to left footprint
 	GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, 0, rightPelvisAngleOffset);
@@ -784,15 +787,15 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 		//Trajectory from left to right to left foot steps
     	initialPoint(0) = leftSteps(i, 0);
     	initialPoint(1) = leftSteps(i, 1);
-    	finalPoint(0) = rightSteps(j, 0);
-    	finalPoint(1) = rightSteps(j, 1);
+    	finalPoint(0) = rightSteps(j, 0) + m_vLeftPelvisPosOffset(0);
+    	finalPoint(1) = rightSteps(j, 1) + m_vLeftPelvisPosOffset(1);
     	GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, stepIndex, leftPelvisAngleOffset);
     	stepIndex+=2;
     	if(leftSteps.rows() > i + 1)
     	{
     		initialPoint = finalPoint;
-        	finalPoint(0) = leftSteps(i+1, 0);
-        	finalPoint(1) = leftSteps(i+1, 1);
+        	finalPoint(0) = leftSteps(i+1, 0) + m_vRightPelvisPosOffset(0);
+        	finalPoint(1) = leftSteps(i+1, 1) + m_vRightPelvisPosOffset(1);
     		GenerateZMPStepTransfer(trajectory, initialPoint, finalPoint, stepIndex, rightPelvisAngleOffset);
     		stepIndex+=2;
     	}
