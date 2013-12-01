@@ -60,6 +60,7 @@ private:
     bool m_bIsStandAlone;
 
     float m_stepHeight;
+    float m_pelvisPermanentPitch;
 
 	Eigen::Vector3f m_vRightFootPosOffset;
 	Eigen::Vector3f m_vRightFootAngleOffset;

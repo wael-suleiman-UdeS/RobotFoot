@@ -21,7 +21,7 @@ public:
 
 	Trajectory(Eigen::Vector3f rightFootPosOffset, Eigen::Vector3f rightFootAngleOffset,
 			Eigen::Vector3f leftFootPosOffset, Eigen::Vector3f leftFootAngleOffset, Eigen::Vector3f rightPelvisPosOffset,
-			Eigen::Vector3f rightPelvisAngleOffset, Eigen::Vector3f leftPelvisPosOffset, Eigen::Vector3f leftPelvisAngleOffset);
+			Eigen::Vector3f rightPelvisAngleOffset, Eigen::Vector3f leftPelvisPosOffset, Eigen::Vector3f leftPelvisAngleOffset, float permanentPelvisPitch);
 	~Trajectory();
 
 	Eigen::MatrixXf GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goalPoint, Eigen::Vector2f goalAngle,
@@ -62,6 +62,7 @@ private:
 	Eigen::Vector3f m_vLeftPelvisPosOffset;
 	Eigen::Vector3f m_vLeftPelvisAngleOffset;
 
+	float m_permanentPelvisPitch;
 	float m_singleStepTime;
 	float m_dLeg;
 	float m_dStep;

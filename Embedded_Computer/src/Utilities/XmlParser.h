@@ -47,6 +47,7 @@ namespace XmlPath
     extern const fs::path KD;
     extern const fs::path KI;
 
+    extern const fs::path PermanentPelvisPitch;
     extern const fs::path RightPelvisPitchCompensationOffset;
     extern const fs::path RightPelvisRollCompensationOffset;
     extern const fs::path RightPelvisYawCompensationOffset;
@@ -73,6 +74,8 @@ namespace XmlPath
     extern const fs::path LeftFootzCompensationOffset;
 
     extern const fs::path DISTANCETHRESHOLD;
+    extern const fs::path ANGLETHRESHOLD;
+    extern const fs::path ITERATIONMAX;
     extern const fs::path StepHeight;
 	extern const fs::path R_HIP_YAW;
 	extern const fs::path L_HIP_YAW;

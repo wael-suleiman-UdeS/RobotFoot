@@ -26,7 +26,7 @@ class MotionControl
 {
 public:
 
-	MotionControl(float distanceThreshold);
+	MotionControl(float distanceThreshold, float angleThreshold, int iterationMax);
 	~MotionControl();
 
 	void Move(Eigen::MatrixXf trajectoryMatrix);
@@ -71,7 +71,7 @@ private:
 
 	float m_distanceThreshold;
 	float m_damping;
-	int m_angleThreshold;
+	float m_angleThreshold;
 	int m_nbIterationMax;
 
 	DenavitHartenberg m_DH_RightToLeft;

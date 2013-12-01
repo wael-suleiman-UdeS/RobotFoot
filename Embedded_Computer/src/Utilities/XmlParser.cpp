@@ -33,6 +33,7 @@ namespace XmlPath
 
 	const path Threshold = "Threshold";
 
+	const path PermanentPelvisPitch = "COMPENSATION_OFFSET/PermanentPelvisPitch";
 	const path RightPelvisPitchCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Pitch";
 	const path RightPelvisRollCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Roll";
 	const path RightPelvisYawCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Yaw";
@@ -58,7 +59,10 @@ namespace XmlPath
 	const path LeftFootyCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/y";
 	const path LeftFootzCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/z";
 
+
 	const path DISTANCETHRESHOLD = "DISTANCETHRESHOLD";
+	const path ANGLETHRESHOLD = "ANGLETHRESHOLD";
+	const path ITERATIONMAX = "ITERATIONMAX";
 	const path StepHeight = "StepHeight";
 	const path R_HIP_YAW = "R_HIP_YAW";
 	const path L_HIP_YAW = "L_HIP_YAW";

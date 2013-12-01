@@ -16,14 +16,17 @@ using namespace std;
 
 namespace
 {
-	const float ANGLE1 = 0.35;
-	const float ANGLE2 = -0.7;
+	//const float ANGLE1 = 0.35;
+	//const float ANGLE2 = -0.7;
+
+const float ANGLE1 = 0.6;
+const float ANGLE2 = -1.2;
 }
 
-MotionControl::MotionControl(float distanceThreshold)
+MotionControl::MotionControl(float distanceThreshold, float angleThreshold, int iterationMax)
 : m_distanceThreshold(distanceThreshold)
-, m_angleThreshold(1)
-, m_nbIterationMax(1)
+, m_angleThreshold(angleThreshold)
+, m_nbIterationMax(iterationMax)
 {
 	m_TdToPelvis = Eigen::Vector3f(0,0,0);
 	m_TdToFoot = Eigen::Vector3f(0,0,0);
@@ -84,7 +87,7 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 	qMotors*=M_PI/180;
 
 	bool calculationDone = false;
-	int NbIterations = 5;
+	int NbIterations = 0;
 
 	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft) //1 is left foot fixed
 		m_DH = &m_DH_LeftToRight;

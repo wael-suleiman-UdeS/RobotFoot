@@ -27,7 +27,9 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
     m_motion(mc_ptr)
 {
 	float distanceThreshold = config.getIntValue(XmlPath::LegsMotors / XmlPath::DISTANCETHRESHOLD);
-	m_motionControl = new MotionControl(distanceThreshold);
+	float angleThreshold = config.getIntValue(XmlPath::LegsMotors / XmlPath::ANGLETHRESHOLD);
+	int iterationMax = config.getIntValue(XmlPath::LegsMotors / XmlPath::ITERATIONMAX);
+	m_motionControl = new MotionControl(distanceThreshold, angleThreshold, iterationMax);
 
 	m_stepHeight = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepHeight);
 
@@ -65,6 +67,8 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 	m_vRightPelvisAngleOffset = Eigen::Vector3f(RightPelvisPitchCompensationOffset, RightPelvisRollCompensationOffset, RightPelvisYawCompensationOffset);
 	m_vLeftPelvisPosOffset = Eigen::Vector3f(LeftPelvisxCompensationOffset, LeftPelvisyCompensationOffset, LeftPelviszCompensationOffset);
 	m_vLeftPelvisAngleOffset = Eigen::Vector3f(LeftPelvisPitchCompensationOffset, LeftPelvisRollCompensationOffset, LeftPelvisYawCompensationOffset);
+
+	m_pelvisPermanentPitch = config.getIntValue(XmlPath::LegsMotors / XmlPath::PermanentPelvisPitch);
 }
 
 LegMotion::~LegMotion()
@@ -81,7 +85,7 @@ void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFe
 
     std::unique_ptr<Trajectory> traj( new Trajectory(m_vRightFootPosOffset, m_vRightFootAngleOffset,
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
-			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset) );
+			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch) );
 	m_trajectoryMatrix = traj->GenerateWalk(Eigen::Vector2f(0, 0), destination,
 			destinationFeetAngles, startingFeetAngles, Trajectory::ZMP, stepTime, m_stepHeight);
 
@@ -99,7 +103,7 @@ void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, c
 
     std::unique_ptr<Trajectory> traj( new Trajectory(m_vRightFootPosOffset, m_vRightFootAngleOffset,
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
-			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset) );
+			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch) );
 
 	m_trajectoryMatrix = traj->GenerateKick(0.5f);
 
