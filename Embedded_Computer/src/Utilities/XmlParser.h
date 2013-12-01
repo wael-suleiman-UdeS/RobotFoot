@@ -46,6 +46,25 @@ namespace XmlPath
     extern const fs::path KD;
     extern const fs::path KI;
 
+    extern const fs::path PelvisPitchCompensationOffset;
+    extern const fs::path PelvisRollCompensationOffset;
+    extern const fs::path PelvisYawCompensationOffset;
+    extern const fs::path PelvisxCompensationOffset;
+    extern const fs::path PelvisyCompensationOffset;
+    extern const fs::path PelviszCompensationOffset;
+    extern const fs::path RightFootPitchCompensationOffset;
+    extern const fs::path RightFootRollCompensationOffset;
+    extern const fs::path RightFootYawCompensationOffset;
+    extern const fs::path RightFootxCompensationOffset;
+    extern const fs::path RightFootyCompensationOffset;
+    extern const fs::path RightFootzCompensationOffset;
+    extern const fs::path LeftFootPitchCompensationOffset;
+    extern const fs::path LeftFootRollCompensationOffset;
+    extern const fs::path LeftFootYawCompensationOffset;
+    extern const fs::path LeftFootxCompensationOffset;
+    extern const fs::path LeftFootyCompensationOffset;
+    extern const fs::path LeftFootzCompensationOffset;
+
     extern const fs::path DISTANCETHRESHOLD;
     extern const fs::path StepHeight;
 	extern const fs::path R_HIP_YAW;

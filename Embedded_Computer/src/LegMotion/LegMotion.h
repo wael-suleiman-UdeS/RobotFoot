@@ -61,6 +61,13 @@ private:
 
     float m_stepHeight;
 
+	Eigen::Vector3f m_vRightFootPosOffset;
+	Eigen::Vector3f m_vRightFootAngleOffset;
+	Eigen::Vector3f m_vLeftFootPosOffset;
+	Eigen::Vector3f m_vLeftFootAngleOffset;
+	Eigen::Vector3f m_vPelvisPosOffset;
+	Eigen::Vector3f m_vPelvisAngleOffset;
+
     // Contains motor position from the text file
     std::vector<std::vector<double>> m_vPosition;
     std::vector<std::vector<double>>::iterator m_itrPos;

@@ -12,14 +12,6 @@
 #include "Trajectory.h"
 #include "EigenUtils.h"
 
-/*
-#define Debug
-#ifdef Debug
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#endif
-*/
 using namespace std;
 
 namespace
@@ -79,6 +71,11 @@ std::vector<double> MotionControl::GetInitialQPosition()
 
 std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatrixLine, std::vector<double> currentMotorsPosition)
 {
+	//pelvis angle offset
+	m_TdToPelvis(0) = currentTrajectoryMatrixLine(pelvisAnglePitch);
+	m_TdToPelvis(1) = currentTrajectoryMatrixLine(pelvisAngleRoll);
+	m_TdToPelvis(2) = currentTrajectoryMatrixLine(pelvisAngleYaw);
+
 	Eigen::VectorXf qMotors(12);
 	Eigen::VectorXf qToDisplay(12);
 
@@ -194,10 +191,15 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 
 	for(int i = 0; i < trajectoryMatrix.rows(); ++i)
 	{
+		//pelvis angle offset
+		m_TdToPelvis(0) = trajectoryMatrix(i, pelvisAnglePitch);
+		m_TdToPelvis(1) = trajectoryMatrix(i, pelvisAngleRoll);
+		m_TdToPelvis(2) = trajectoryMatrix(i, pelvisAngleYaw);
+
 		bool calculationDone = false;
 		int NbIterations = 0;
 
-		if(trajectoryMatrix(i, 9) == DenavitHartenberg::Leg::GroundLeft) //1 is left foot fixed
+		if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft) //1 is left foot fixed
 			m_DH = &m_DH_LeftToRight;
 		else
 			m_DH = &m_DH_RightToLeft;
@@ -229,7 +231,7 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 			Eigen::VectorXf tachePriorite3 = J3inv * ePosToFoot; 														//Position en mouvement
 			Eigen::VectorXf tachePriorite4 = J4inv * (eThetaToFoot - (jacobienne2.bottomRows(3) * tachePriorite3)); 	//Angle en mouvement
 
-			if(trajectoryMatrix(i, 9) == DenavitHartenberg::Leg::GroundLeft)
+			if(trajectoryMatrix(i, groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
 			{
 				m_q.reverseInPlace();
 				m_q.head(6) = m_q.head(6) + m_damping * (tachePriorite1 + tachePriorite2);

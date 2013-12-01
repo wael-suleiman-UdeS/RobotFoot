@@ -42,15 +42,22 @@ private:
 		rightFootPosX,
 		rightFootPosY,
 		rightFootPosZ,
-		rightFootAngle,
+		rightFootAnglePitch,
+		rightFootAngleRoll,
+		rightFootAngleYaw,
 		leftFootPosX,
 		leftFootPosY,
 		leftFootPosZ,
-		leftFootAngle,
+		leftFootAnglePitch,
+		leftFootAngleRoll,
+		leftFootAngleYaw,
 		groundedFoot,
 		pelvisPosX,
 		pelvisPosY,
-		pelvisPosZ
+		pelvisPosZ,
+		pelvisAnglePitch,
+		pelvisAngleRoll,
+		pelvisAngleYaw
 	};
 
 	void InitRotationMatrices();
@@ -73,13 +80,14 @@ private:
 	DenavitHartenberg* m_DH;
 
 
+#ifdef Debug
 	std::ofstream myfile;
 	std::ofstream myfileQ;
 	std::ofstream myfileEPOS1;
 	std::ofstream myfileEPOS2;
 	std::ofstream myfileETHETA1;
 	std::ofstream myfileETHETA2;
-
+#endif
 };
 
 #endif  //MOTIONCONTROL_H
