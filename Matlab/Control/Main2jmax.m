@@ -5,10 +5,12 @@ clear all
 % Error Threshold
 DistanceThreshold = 0.002;
 AngleThreshold = 1;
-NbIterationMax = 1;
+NbIterationMax = 4;
 % Angle
-Angle1 = 0.35;
-Angle2 = -0.7;
+%Angle1 = 0.35;
+%Angle2 = -0.7;
+Angle1 = 0.6;
+Angle2 = -1.2;
 % Longueur
 L4 = 0.093;
 L5 = 0.093; 
@@ -26,6 +28,7 @@ Td2 = [0; 0; 0];
 file_id = fopen('input.txt', 'w');
 
 [Size,dt,T,RightFootTraj,LeftFootTraj,PelvisTraj,FixedFoot,TRightTraj,TLeftTraj,TPelvisTraj] = GenerateTrajectory();
+
 %FixedFoot = 0 ;  
 % If FixedFoot = 0 then the right foot is fixed,
 % If FixedFoot = 1 then the left foot is fixed.
@@ -49,9 +52,9 @@ for i = 1:Size
     while ~CalculDone
         NbIteration = NbIteration + 1;
         if  FixedFoot(i) == 0 
-            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, TPelvisTraj, TLeftTraj);
+            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, TPelvisTraj, TLeftTraj, TRightTraj);
         elseif FixedFoot(i) == 1
-            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, TPelvisTraj, TRightTraj);
+            [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, TPelvisTraj, TRightTraj, TLeftTraj);
         end 
             % Cacul Jacobian
             k = 0.9;
@@ -85,9 +88,9 @@ for i = 1:Size
             q = TempQ(end:-1:1) ;
         end 
              if  FixedFoot(i) == 0 
-                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, TPelvisTraj, TLeftTraj);
+                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, TPelvisTraj, TLeftTraj, TRightTraj);
              elseif FixedFoot(i) == 1
-                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, TPelvisTraj, TLeftTraj);
+                 [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, TPelvisTraj, TRightTraj, TLeftTraj);
              end
              
              CalculDone = VerifyError(DistanceThreshold,ePos1,DistanceThreshold,ePos2,AngleThreshold,eTheta1(1),AngleThreshold,eTheta1(2),AngleThreshold,eTheta1(3),AngleThreshold,eTheta2(1),AngleThreshold,eTheta2(2),AngleThreshold,eTheta2(3));

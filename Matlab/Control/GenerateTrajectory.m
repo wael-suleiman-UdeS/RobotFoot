@@ -147,6 +147,7 @@ PelvisPos =   [  0.0,0,0.29672 ;
 
 
 [Tf, FixedFoot, RightFootPos, LeftFootPos, PelvisPos, TRightPos, TLeftPos, TPelvisPos] = MouvementKickRightLeg();
+[Tf, FixedFoot, RightFootPos, LeftFootPos, PelvisPos, TRightPos, TLeftPos, TPelvisPos] = MouvementWalk();
 
 for i = 1:size(Tf,1)
    RightFootParams(:,(i-1)*3+1) = FunctionParameter(RightFootPos(i,1),RightFootPos(i+1,1),Tf(i));
