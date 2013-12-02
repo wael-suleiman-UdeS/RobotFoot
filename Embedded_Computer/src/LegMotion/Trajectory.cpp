@@ -845,7 +845,7 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 void Trajectory::GenerateZMPStepTransfer(Eigen::MatrixXf& trajectoryMatrix, Eigen::VectorXf startingPos, Eigen::VectorXf endingPos, int stepIndex, Eigen::Vector3f pelvisAngleOffset)
 {
 	Eigen::MatrixXf params(4,6);
-	float stepTime = m_singleStepTime/m_dTime;
+	int stepTime = m_singleStepTime/m_dTime;
 	params = GenerateParabollicTrajParams(startingPos, endingPos, m_singleStepTime);
 	//Move zmp over next footstep
 	for(int time = 0; time < stepTime; time ++)
