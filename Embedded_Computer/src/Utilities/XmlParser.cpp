@@ -63,6 +63,7 @@ namespace XmlPath
 	const path DISTANCETHRESHOLD = "DISTANCETHRESHOLD";
 	const path ANGLETHRESHOLD = "ANGLETHRESHOLD";
 	const path ITERATIONMAX = "ITERATIONMAX";
+	const path StepTime = "StepTime";
 	const path StepHeight = "StepHeight";
 	const path StepLength = "StepLength";
 	const path R_HIP_YAW = "R_HIP_YAW";

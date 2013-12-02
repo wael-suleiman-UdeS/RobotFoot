@@ -120,7 +120,7 @@ int main(int argc, char * argv[])
         	bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
 
  //       	legMotion.Init("config/input.txt", activatedMotor, true, 3000);
-            legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000, 1.0f);
+            legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
 
            	threadManager_ptr->attach(threadManager_ptr->create(90, boost::bind(&LegMotion::Run, &legMotion,
                                           config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),

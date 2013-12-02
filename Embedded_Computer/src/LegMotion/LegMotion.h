@@ -38,7 +38,7 @@ public:
 
     // Initialize configuration of mouvement
     void InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles,
-    		const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime, float stepTime);
+    		const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime);
     void InitKick(const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime, float kickTime);
     void Init(const std::string filename, const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime);
 
@@ -61,6 +61,7 @@ private:
 
     float m_stepHeight;
     float m_stepLength;
+    float m_stepTime;
     float m_pelvisPermanentPitch;
 
 	Eigen::Vector3f m_vRightFootPosOffset;

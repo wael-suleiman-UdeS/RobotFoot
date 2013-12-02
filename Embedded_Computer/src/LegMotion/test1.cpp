@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 	Trajectory* traj = new Trajectory(rightFootPosOffset, rightFootAngleOffset, leftFootPosOffset,
 			leftFootAngleOffset, pelvisFootPosOffset, pelvisFootAngleOffset, pelvisFootPosOffset, pelvisFootAngleOffset, 0.03, 0.04);
 	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
-			endAngle, startAngle, Trajectory::COM, 0.3f);
+			endAngle, startAngle, Trajectory::COM, 1.0f);
 
 	//Eigen::MatrixXf matrix = traj->GenerateKick(0.5);
 

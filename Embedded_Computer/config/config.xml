@@ -129,6 +129,7 @@
 	  <DISTANCETHRESHOLD value = "0.002"/>
 	  <ANGLETHRESHOLD value = "0.02"/>
 	  <ITERATIONMAX value = "5"/>
+	<StepTime value = "1.0" />
 	  <COMPENSATION_OFFSET>
 	  		<PermanentPelvisPitch value = "0"/>
 			<RightPelvis>
