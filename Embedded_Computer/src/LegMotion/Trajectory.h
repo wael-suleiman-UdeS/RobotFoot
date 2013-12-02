@@ -27,8 +27,8 @@ public:
 	Eigen::MatrixXf GenerateWalk(Eigen::Vector2f startingPoint, Eigen::Vector2f goalPoint, Eigen::Vector2f goalAngle,
 			Eigen::Vector2f startingAngle, PelvisTrajectoryType pelvisTrajType, float stepTime = 3.0f, float stepHeight = 0.02f);
 	Eigen::MatrixXf GenerateKick(float kickSpeedRatio, float movementTime = 1.0f);
-	Eigen::MatrixXf GenerateMovement(Eigen::Vector4f& rightFootInitialPos, Eigen::Vector4f& rightFootFinalPos, Eigen::Vector4f& leftFootInitialPos,
-			Eigen::Vector4f& leftFootFinalPos, Eigen::Vector4f& pelvisInitialPos, Eigen::Vector4f& pelvisFinalPos, float timeLapse);
+	Eigen::MatrixXf GenerateMovement(Eigen::VectorXf& rightFootInitialPos, Eigen::VectorXf& rightFootFinalPos, Eigen::VectorXf& leftFootInitialPos,
+			Eigen::VectorXf& leftFootFinalPos, Eigen::VectorXf& pelvisInitialPos, Eigen::VectorXf& pelvisFinalPos, float timeLapse);
 
 private:
 

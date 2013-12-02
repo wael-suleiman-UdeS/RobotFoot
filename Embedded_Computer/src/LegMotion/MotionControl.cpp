@@ -264,6 +264,7 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 			m_q.reverseInPlace();
 			qToDisplay*=180/M_PI;
 
+		}
 #ifdef Debug
 			myfileQ << qToDisplay.transpose() << endl;
 			myfileEPOS1 << ePosToPelvis << endl;
@@ -271,7 +272,6 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 			myfileETHETA1 << eThetaToPelvis << endl;
 			myfileETHETA2 << eThetaToFoot << endl;
 #endif
-		}
 	}
 
 #ifdef Debug
