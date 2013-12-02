@@ -2,7 +2,7 @@
 #define IMAGEPROCESSING_H
 
 #include <opencv/cvaux.h>
-
+#include <opencv/highgui.h>
 /** @addtogroup Image Processing
  * @{
  */

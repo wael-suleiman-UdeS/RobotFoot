@@ -91,13 +91,15 @@ void StaticWalk::run(double msDt)
 {
     try
     {
+            std::vector<double> dummy;
 			if(!bIsUsingAlgorithm)
 			{
-				_threadManager->wait();
+				//_threadManager->wait();
 				boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 				// Process mouvement with file as input
 				for(;itrPos != itrEnd; ++itrPos)
 				{
+                    //_motion->HardGet( dummy, MotorControl::Config::ALL_LEGS );
 					if (!bIsStandAlone)
 					{
 						boost::this_thread::interruption_point();
@@ -229,6 +231,11 @@ void StaticWalk::run(double msDt)
 				}
 			//}
 			}
+            while(1)
+            {
+            
+                _motion->HardGet( dummy, MotorControl::Config::ALL_LEGS );
+            }
     }
     catch(boost::thread_interrupted const &e)
     {
