@@ -72,11 +72,11 @@
     </Colors>
   </ImageProcessing>
   <USB_Interface>
-    <TTY value="/dev/ttyACM0" />
+    <TTY value="/dev/ttyACM1" />
   </USB_Interface>
   <Motion value="1">
   	<ActivateMotor value="1" />
-    <IterationTimeMs value="20"/>
+    <IterationTimeMs value="50"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
@@ -149,7 +149,7 @@
 			</LeftPelvis>
 			<RightFoot>
 				<Pitch value = "0.0" />
-				<Roll value = "-0.2" />
+				<Roll value = "-0.02" />
 				<Yaw value = "0" />
 				<x value = "0.01" />
 				<y value = "0" />
@@ -157,7 +157,7 @@
 			</RightFoot>
 			<LeftFoot>
 				<Pitch value = "0.0" />
-				<Roll value = "0.2" />
+				<Roll value = "0.02" />
 				<Yaw value = "0.0" />
 				<x value = "-0.01" />
 				<y value = "0" />
