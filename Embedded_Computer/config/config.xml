@@ -9,8 +9,10 @@
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
-    <ActiveColor value="red" />
     <Colors>
+      <BallColor value="red">
+      <GoalColor value="pink">
+      
 	  <Color name="red">
 		<HSVcolor>
 		  <Hue value="215" />

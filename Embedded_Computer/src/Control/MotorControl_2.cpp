@@ -37,7 +37,7 @@ _playTime(playTime),
 _lastPos(0),
 _currentPos(0),
 _isInversed(isInversed)
-{    
+{
 }
 
 Motor::~Motor()
@@ -508,7 +508,35 @@ void MotorControl::WriteAll()
     }
 }
 
-Position MotorControl::getObjectDistance()
+string MotorControl::GetColorToTrack()
+{
+	//string ballColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::BallColor);
+	//string goalColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::GoalColor);
+
+	return "red";
+}
+
+void MotorControl::TestCalculFun() {
+	_goalPosition = GetObjectDistance();
+	_ballPosition = GetObjectDistance();
+
+	ObjectPosition distance;
+	distance.x = _goalPosition.x - _ballPosition.x;
+	distance.y = _goalPosition.y - _ballPosition.y;
+
+	if (_ballPosition.x) {
+		// Fuck off
+	}
+	else if (_ballPosition.y < 0) {
+		// 180 - std::atan(std::abs(distance.y / distance.x));
+	}
+	else {
+		// 180 - std::atan(std::abs(distance.x / distance.y));
+	}
+
+}
+
+ObjectPosition MotorControl::GetObjectDistance()
 {
 
 	// todo: replace hard gets
@@ -521,11 +549,12 @@ Position MotorControl::getObjectDistance()
 	angles[1] = std::abs(angles[1] * M_PI/180);
 
 	double euclidianDistance = _robotHeight * std::tan((M_PI/2)-angles[1]);
-	_objectDistance.x = euclidianDistance * std::sin(angles[0]);
-	_objectDistance.y = euclidianDistance * std::cos(angles[0]);
+	ObjectPosition objectPosition;
+	objectDistance.x = euclidianDistance * std::sin(angles[0]);
+	objectDistance.y = euclidianDistance * std::cos(angles[0]);
 
 	Logger::getInstance() << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
 
 
-	return _objectDistance;
+	return objectDistance;
 }

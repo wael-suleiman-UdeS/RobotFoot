@@ -18,12 +18,14 @@ using boost::filesystem::path;
  * \param colorName : The string of the color of the ball
  * \param mc : An instance of the micro controller
  */
-HeadControlTask::HeadControlTask(std::shared_ptr<ThreadManager> threadManager_ptr, XmlParser &config, std::shared_ptr<MotorControl> mc_ptr) : 
-_threadManager(threadManager_ptr)
+HeadControlTask::HeadControlTask(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, std::shared_ptr<MotorControl> mc_ptr) :
+_threadManager(threadManager_ptr),
+_config(config),
+_mc(mc_ptr)
 {
 	// Initialize capture
 	Logger::getInstance() << "Initializing capture device..." << std::endl;
-	if (!Camera::getInstance().initialize(config))
+	if (!Camera::getInstance().initialize(_config))
 	{
 		Logger::getInstance() << "Error while initializing capture device." << std::endl;
 		std::exit(1);
@@ -33,16 +35,13 @@ _threadManager(threadManager_ptr)
 	_durationIndex = 0;
 	_guiEnabled = true;
 
-	string colorName = config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::ActiveColor);
+	string ballColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::BallColor);
+	string goalColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::GoalColor);
 
-    std::shared_ptr<HSVcolor> color(new HSVcolor(config, colorName));
-	_circle = std::make_shared<CircleSpec>(config, colorName);
-	_finder = std::make_shared<ColorFinder>(color);
 	_tracker = std::make_shared<ObjectTracker>(_threadManager, mc_ptr, Camera::getInstance().getCenter());	
-    _tracker->initializeHack(config); // todo: holy hack
-	_tracker->initializeHackPID(config);
-
-
+    _tracker->initializeHack(_config); // todo: holy hack
+	_tracker->initializeHackPID(_config);
+	_lastColorName = "";
 }
 
 HeadControlTask::~HeadControlTask()
@@ -52,6 +51,7 @@ HeadControlTask::~HeadControlTask()
 
 void HeadControlTask::run()
 {
+	setColor();
 	Logger::getInstance() << "Tracking process started" << std::endl;
 	try
 	{
@@ -85,23 +85,24 @@ void HeadControlTask::run()
 			_tracker->track(_ballPosition);
 
             cvWaitKey(10);
-
-			//boost::this_thread::sleep(boost::posix_time::millisec(10));
-			/*
-			 boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-			_durationMean += sec.count();
-			_durationIndex++;
-			if(!(_durationIndex <= 99))
-			{
-				Logger::getInstance(Logger::LogLvl::INFO) << "took " << _durationMean/100 << " seconds\n";
-				_durationMean = 0;
-				_durationIndex = 0;
-			}
-			*/
 		}
 	}
 	catch(const boost::thread_interrupted& e)
 	{
 		Logger::getInstance() << "Catch an exeption in HeadControlTask.run()" << std::endl;
+	}
+}
+
+void HeadControlTask::setColor()
+{
+	string colorName = _mc->GetColorToTrack();
+
+
+	if (colorName != _lastColorName)
+	{
+		_lastColorName = colorName;
+		std::shared_ptr<HSVcolor> color(new HSVcolor(_config, colorName));
+		_circle = std::make_shared<CircleSpec>(_config, colorName);
+		_finder = std::make_shared<ColorFinder>(color);
 	}
 }

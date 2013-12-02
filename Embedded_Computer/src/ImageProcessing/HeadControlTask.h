@@ -21,7 +21,7 @@
 class HeadControlTask
 {
 public:
-   HeadControlTask(std::shared_ptr<ThreadManager> threadManager_ptr, XmlParser &config, std::shared_ptr<MotorControl> mc_ptr);
+   HeadControlTask(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, std::shared_ptr<MotorControl> mc_ptr);
    ~HeadControlTask();
 
    void run();
@@ -35,6 +35,12 @@ private:
 	bool _guiEnabled;
 	double _durationMean;
 	int _durationIndex;
+	std::string _lastColorName;
+
+	const XmlParser &_config;
+    std::shared_ptr<MotorControl> _mc;
+
+	void setColor();
 };
 
 #endif  //HEAD_CONTROL_TASK_H

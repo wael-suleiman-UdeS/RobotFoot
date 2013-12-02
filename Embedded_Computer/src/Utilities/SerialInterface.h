@@ -30,7 +30,6 @@ class SerialInterface
       void read_asyc(std::vector<char> command);
 
     private:
-      boost::asio::io_service  _io_service;
       boost::asio::serial_port _serialPort;
 };
 #endif

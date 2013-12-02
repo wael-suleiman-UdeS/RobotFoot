@@ -14,11 +14,13 @@ namespace XmlPath
 	const path Sizes = "Sizes";
 	const path ImageProcessing = "ImageProcessing";
 	const path Camera = "Camera";
-	const path ActiveColor = "ActiveColor";
 	const path Colors = "Colors";
 	const path Color = "Color";
 	const path HSVcolor = "HSVcolor";
 	const path CircleSpec = "CircleSpec";
+
+	const path BallColor = "BallColor";
+	const path GoalColor = "GoalColor";
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";
