@@ -1,3 +1,13 @@
+/**
+******************************************************************************^M
+* @file    EigenUtils.cpp
+* @authors  Camille Hébert & Antoine Rioux
+* @date    2013-11-19
+* @brief   Utility class to calculate some trajectories
+******************************************************************************^M
+*/
+
+
 #include "EigenUtils.h"
 
 namespace EigenUtils

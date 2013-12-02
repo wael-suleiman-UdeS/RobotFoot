@@ -1,6 +1,6 @@
 #include "STM32F4.h"
 #include <boost/ref.hpp>
-
+#include "../Utilities/logger.h"
 using std::string;
 using boost::asio::io_service;
 
@@ -67,8 +67,12 @@ int STM32F4::read(uint8_t id)
 	msg.push_back(id);
 
 	msg = _usb.read_sync(msg);
-
 	if (msg.size() < 4) { return 0; }
+    
+    if(msg[1]!=id)
+    {
+        Logger::getInstance() << __FILE__ << " Reading motor " << int(msg[1]) << "instead of " << int(id) << std::endl;
+    }
 
 	return ((msg[2] & 0xFF) << 8) | (msg[3] & 0xFF);  
 }

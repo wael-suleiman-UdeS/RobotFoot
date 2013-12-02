@@ -20,7 +20,8 @@
 #include "Utilities/ThreadManager.h"
 #include "Control/MotorControl_2.h"
 #include "ImageProcessing/HeadControlTask.h"
-#include "Demo/StaticWalking/StaticWalk.h"
+//#include "Demo/StaticWalking/StaticWalk.h"
+#include "LegMotion/LegMotion.h"
 
 /*!
  * \brief Use for the demo
@@ -108,9 +109,24 @@ int main(int argc, char * argv[])
         	//headControlTask.run();
         }
 
-        StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
+        //StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
+        LegMotion legMotion(threadManager_ptr, motorControl_ptr, config);
         if (isKicking)
         {
+        	Eigen::Vector2f pointD(1, 0);
+        	Eigen::Vector2f startAngle(0, 0);
+        	Eigen::Vector2f endAngle(0, 0);
+
+        	bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
+
+ //       	legMotion.Init("config/input.txt", activatedMotor, true, 3000);
+            legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
+
+           	threadManager_ptr->attach(threadManager_ptr->create(90, boost::bind(&LegMotion::Run, &legMotion,
+                                          config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
+                                          ThreadManager::Task::LEGS_CONTROL));
+
+        	/*
         	// Init Walk task
         	staticWalk.init("config/input.txt", false, true, true);
         
@@ -120,6 +136,7 @@ int main(int argc, char * argv[])
         	threadManager_ptr->attach(threadManager_ptr->create(90, boost::bind(&StaticWalk::run, &staticWalk,
                                       config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
                                       ThreadManager::Task::LEGS_CONTROL));
+		     */
         }
 
         if (isTracking)

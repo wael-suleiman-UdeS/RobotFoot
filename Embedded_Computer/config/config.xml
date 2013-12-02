@@ -3,9 +3,10 @@
     <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <Sizes>
-  	<RobotHeight value="36" />
+  	<RobotHeight value="40" />
+  	<XOffset value="2.5" />
   </Sizes>
-  <ImageProcessing value="1">
+  <ImageProcessing value="0">
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
@@ -73,12 +74,13 @@
     </Colors>
   </ImageProcessing>
   <USB_Interface>
-    <TTY value="/dev/ttyACM0" />
+    <TTY value="/dev/ttyACM1" />
   </USB_Interface>
   <Motion value="1">
-    <IterationTimeMs value="30"/>
-    <KP value="1000"/>
-    <KD value="16000"/>
+  	<ActivateMotor value="1" />
+    <IterationTimeMs value="50"/>
+    <KP value="440"/>
+    <KD value="8000"/>
     <KI value="0"/>
     <Motors>
       <Head>
@@ -117,22 +119,64 @@
         <ScanningError value="300" />
         
         <PID>
-          <P value="0.03" />0.130909093
-          <I value="0" />0.009818182
-          <D value="0" />0.006545455
+          <P value="0.130909093" />
+          <I value="0.009818182" />
+          <D value="0.006545455" />
           <dt value="0.2" />
           
           <Epsilon value="0" />
         </PID>
       </Head>
       <Legs>
+	  <DISTANCETHRESHOLD value = "0.002"/>
+	  <ANGLETHRESHOLD value = "0.02"/>
+	  <ITERATIONMAX value = "5"/>
+	<StepTime value = "1.0" />
+	<UseCOM value = "0" />
+	  <COMPENSATION_OFFSET>
+	  		<PermanentPelvisPitch value = "0"/>
+			<RightPelvis>
+				<Pitch value = "0" />
+				<Roll value = "-0.2" />
+				<Yaw value = "0.0" />
+				<x value = "-0.02" />
+				<y value = "0.02" />
+				<z value = "0" />
+			</RightPelvis>
+			<LeftPelvis>
+				<Pitch value = "0" />
+				<Roll value = "0.35" />
+				<Yaw value = "0.0" />
+				<x value = "0.02" />
+				<y value = "0.02" />
+				<z value = "0" />
+			</LeftPelvis>
+			<RightFoot>
+				<Pitch value = "0.0" />
+				<Roll value = "-0.02" />
+				<Yaw value = "0" />
+				<x value = "0.01" />
+				<y value = "0" />
+				<z value = "0" />
+			</RightFoot>
+			<LeftFoot>
+				<Pitch value = "0.0" />
+				<Roll value = "0.02" />
+				<Yaw value = "0.0" />
+				<x value = "-0.01" />
+				<y value = "0" />
+				<z value = "0" />
+			</LeftFoot>
+	  </COMPENSATION_OFFSET>
+	  <StepHeight value = "0.04"/>
+	  <StepLength value = "0.04"/>
 	    <R_HIP_YAW>
 		  <MotorID value="1"/>
 		  <Offset value="547"/>
 		  <LimitMin value="473"/>
 		  <LimitMax value="592"/>
           <PlayTime value="0"/>
-          <IsInversed value="0"/>
+          <IsInversed value="1"/>
 	    </R_HIP_YAW>
 	    <L_HIP_YAW>
 		  <MotorID value="2"/>

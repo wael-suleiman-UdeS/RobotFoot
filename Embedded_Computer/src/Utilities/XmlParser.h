@@ -39,6 +39,7 @@ namespace XmlPath
 
 	extern const fs::path Motion;
 	extern const fs::path Motors;
+	extern const fs::path ActivateMotor;
     extern const fs::path IterationTimeMs;
     extern const fs::path Configurations;
 	extern const fs::path Head;
@@ -48,6 +49,39 @@ namespace XmlPath
     extern const fs::path KD;
     extern const fs::path KI;
 
+    extern const fs::path PermanentPelvisPitch;
+    extern const fs::path RightPelvisPitchCompensationOffset;
+    extern const fs::path RightPelvisRollCompensationOffset;
+    extern const fs::path RightPelvisYawCompensationOffset;
+    extern const fs::path RightPelvisxCompensationOffset;
+    extern const fs::path RightPelvisyCompensationOffset;
+    extern const fs::path RightPelviszCompensationOffset;
+    extern const fs::path LeftPelvisPitchCompensationOffset;
+    extern const fs::path LeftPelvisRollCompensationOffset;
+    extern const fs::path LeftPelvisYawCompensationOffset;
+    extern const fs::path LeftPelvisxCompensationOffset;
+    extern const fs::path LeftPelvisyCompensationOffset;
+    extern const fs::path LeftPelviszCompensationOffset;
+    extern const fs::path RightFootPitchCompensationOffset;
+    extern const fs::path RightFootRollCompensationOffset;
+    extern const fs::path RightFootYawCompensationOffset;
+    extern const fs::path RightFootxCompensationOffset;
+    extern const fs::path RightFootyCompensationOffset;
+    extern const fs::path RightFootzCompensationOffset;
+    extern const fs::path LeftFootPitchCompensationOffset;
+    extern const fs::path LeftFootRollCompensationOffset;
+    extern const fs::path LeftFootYawCompensationOffset;
+    extern const fs::path LeftFootxCompensationOffset;
+    extern const fs::path LeftFootyCompensationOffset;
+    extern const fs::path LeftFootzCompensationOffset;
+
+    extern const fs::path UseCOM;
+    extern const fs::path DISTANCETHRESHOLD;
+    extern const fs::path ANGLETHRESHOLD;
+    extern const fs::path ITERATIONMAX;
+    extern const fs::path StepTime;
+    extern const fs::path StepHeight;
+    extern const fs::path StepLength;
 	extern const fs::path R_HIP_YAW;
 	extern const fs::path L_HIP_YAW;
 	extern const fs::path R_HIP_ROLL;

@@ -1,3 +1,12 @@
+/**
+******************************************************************************^M
+* @file    EigenUtils.h
+* @authors  Camille Hébert & Antoine Rioux
+* @date    2013-11-19
+* @brief   Utility class to calculate some trajectories
+******************************************************************************^M
+*/
+
 #ifndef EIGENUTILS_H
 #define EIGENUTILS_H
 

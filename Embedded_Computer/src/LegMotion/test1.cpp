@@ -18,10 +18,25 @@ int main(int argc, char* argv[]) {
 	//Eigen::Vector2f startAngle(90, 90);
 	Eigen::Vector2f endAngle(0, 0);
 
+	Eigen::Vector3f rightFootPosOffset(0, 0, 0);
+	Eigen::Vector3f rightFootAngleOffset(0, 0, 0);
+	Eigen::Vector3f leftFootPosOffset(0, 0, 0);
+	Eigen::Vector3f leftFootAngleOffset(0, 0, 0);
+	Eigen::Vector3f pelvisFootPosOffset(0, 0, 0);
+	Eigen::Vector3f pelvisFootAngleOffset(0, 0, 0);
 
-	Trajectory* traj = new Trajectory();
+
+	Trajectory* traj = new Trajectory(rightFootPosOffset, rightFootAngleOffset, leftFootPosOffset,
+			leftFootAngleOffset, pelvisFootPosOffset, pelvisFootAngleOffset, pelvisFootPosOffset, pelvisFootAngleOffset, 0.03, 0.04);
 	Eigen::MatrixXf matrix = traj->GenerateWalk(pointA, pointD,
-			endAngle, startAngle, 1.0f);
+			endAngle, startAngle, Trajectory::COM, 1.0f);
+
+	//Eigen::MatrixXf matrix = traj->GenerateKick(0.5);
+
+	MotionControl* motion = new MotionControl(0.002f, 0.02f, 5);
+	motion->Move(matrix);
+
+	//Eigen::MatrixXf matrix = traj->GenerateKick(0.5);
 /*
 	Eigen::Vector4f rightInit(0.037, 0.0436, 0, 0);
 	Eigen::Vector4f rightFinal(0.037, 0.0436, 0, 0);
@@ -34,9 +49,18 @@ int main(int argc, char* argv[]) {
 
 	Eigen::MatrixXf matrix = traj->GenerateMovement(rightInit, rightFinal, leftInit, leftFinal, pelvisInit, pelvisFinal, 1);
 */
-	MotionControl* motion = new MotionControl();
-	motion->Move(matrix);
+	//MotionControl* motion = new MotionControl();
+	//motion->Move(matrix);
+/*
+	std::vector<double> initialPos = motion->GetInitialQPosition();
 
+	std::vector<double> q;
+	for(int i = 0; i < matrix.rows(); ++i)
+	{
+		q = motion->UpdateQ((Eigen::VectorXf)matrix.row(i));
+	}
+
+*/
 
 	ofstream myfiletraj;
 	myfiletraj.open ("matrixTraj.txt");

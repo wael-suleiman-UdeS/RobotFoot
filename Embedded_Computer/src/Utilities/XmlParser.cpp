@@ -24,6 +24,7 @@ namespace XmlPath
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";
+	const path ActivateMotor = "ActivateMotor";
     const path IterationTimeMs = "IterationTimeMs";
     const path Configurations = "Configurations";
 	const path Head = "Head";
@@ -34,6 +35,40 @@ namespace XmlPath
 
 	const path Threshold = "Threshold";
 
+	const path PermanentPelvisPitch = "COMPENSATION_OFFSET/PermanentPelvisPitch";
+	const path RightPelvisPitchCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Pitch";
+	const path RightPelvisRollCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Roll";
+	const path RightPelvisYawCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Yaw";
+	const path RightPelvisxCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/x";
+	const path RightPelvisyCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/y";
+	const path RightPelviszCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/z";
+	const path LeftPelvisPitchCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/Pitch";
+	const path LeftPelvisRollCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/Roll";
+	const path LeftPelvisYawCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/Yaw";
+	const path LeftPelvisxCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/x";
+	const path LeftPelvisyCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/y";
+	const path LeftPelviszCompensationOffset = "COMPENSATION_OFFSET/LeftPelvis/z";
+	const path RightFootPitchCompensationOffset = "COMPENSATION_OFFSET/RightFoot/Pitch";
+	const path RightFootRollCompensationOffset = "COMPENSATION_OFFSET/RightFoot/Roll";
+	const path RightFootYawCompensationOffset = "COMPENSATION_OFFSET/RightFoot/Yaw";
+	const path RightFootxCompensationOffset = "COMPENSATION_OFFSET/RightFoot/x";
+	const path RightFootyCompensationOffset = "COMPENSATION_OFFSET/RightFoot/y";
+	const path RightFootzCompensationOffset = "COMPENSATION_OFFSET/RightFoot/z";
+	const path LeftFootPitchCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/Pitch";
+	const path LeftFootRollCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/Roll";
+	const path LeftFootYawCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/Yaw";
+	const path LeftFootxCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/x";
+	const path LeftFootyCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/y";
+	const path LeftFootzCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/z";
+
+
+	const path UseCOM = "UseCOM";
+	const path DISTANCETHRESHOLD = "DISTANCETHRESHOLD";
+	const path ANGLETHRESHOLD = "ANGLETHRESHOLD";
+	const path ITERATIONMAX = "ITERATIONMAX";
+	const path StepTime = "StepTime";
+	const path StepHeight = "StepHeight";
+	const path StepLength = "StepLength";
 	const path R_HIP_YAW = "R_HIP_YAW";
 	const path L_HIP_YAW = "L_HIP_YAW";
 	const path R_HIP_ROLL = "R_HIP_ROLL";

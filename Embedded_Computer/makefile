@@ -20,6 +20,12 @@ SRC += Control/MotorControl_2.cpp
 SRC += Demo/StaticWalking/StaticWalk.cpp
 SRC += Demo/StaticWalking/WalkStatus.cpp
 SRC += Demo/StaticWalking/matrixpinv.cpp
+SRC += LegMotion/Trajectory.cpp
+SRC += LegMotion/DenavitHartenberg.cpp
+SRC += LegMotion/MotionControl.cpp
+SRC += LegMotion/EigenUtils.cpp
+SRC += LegMotion/LegMotion.cpp
+
 
 # Libs directories
 LIBDIR_ARM =  -LThirdParty/boost_1_54_0/stage/arm_lib/

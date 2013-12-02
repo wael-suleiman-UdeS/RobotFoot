@@ -1,0 +1,3 @@
+ST $1 2;
+sleep .5;
+while true; do SP $1 712 100; sleep 1.12; SP $1 312 100; sleep 1.12; done
