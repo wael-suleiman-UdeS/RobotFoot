@@ -700,9 +700,9 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 			finalMatrix(offset, 0) = currentFootPos(0);	//x
 			finalMatrix(offset, 1) = currentFootPos(1);	//y
 			finalMatrix(offset, 2) = currentFootPos(2);	//z
-			finalMatrix(offset, 3) = startingStepPos(3) + ((endingStepPos(3) - startingStepPos(3))/((endTime - startTime)))*(time-startTime);		//angle
-			finalMatrix(offset, 4) = startingStepPos(4) + ((endingStepPos(4) - startingStepPos(4))/((endTime - startTime)))*(time-startTime);		//angle
-			finalMatrix(offset, 5) = startingStepPos(5) + ((endingStepPos(5) - startingStepPos(5))/((endTime - startTime)))*(time-startTime);		//angle
+			finalMatrix(offset, 3) = currentFootPos(3);	//angle
+			finalMatrix(offset, 4) = currentFootPos(4);	//angle
+			finalMatrix(offset, 5) = currentFootPos(5);	//angle
 			//Left foot position on the ground
 			finalMatrix(offset, 6) = groundedFootPos(0);	//x
 			finalMatrix(offset, 7) = groundedFootPos(1);	//y
@@ -724,9 +724,9 @@ void Trajectory::GenerateFinalMatrixForOneStep(Eigen::MatrixXf& finalMatrix, int
 			finalMatrix(offset, 6) = currentFootPos(0);	//x
 			finalMatrix(offset, 7) = currentFootPos(1);	//y
 			finalMatrix(offset, 8) = currentFootPos(2);	//z
-			finalMatrix(offset, 9) = startingStepPos(3) + ((endingStepPos(3) - startingStepPos(3))/((endTime - startTime)))*(time-startTime);		//angle
-			finalMatrix(offset, 10) = startingStepPos(4) + ((endingStepPos(4) - startingStepPos(4))/((endTime - startTime)))*(time-startTime);		//angle
-			finalMatrix(offset, 11) = startingStepPos(5) + ((endingStepPos(5) - startingStepPos(5))/((endTime - startTime)))*(time-startTime);		//angle
+			finalMatrix(offset, 9) = currentFootPos(3);	//angle
+			finalMatrix(offset, 10) = currentFootPos(4);	//angle
+			finalMatrix(offset, 11) = currentFootPos(5);	//angle
 		}
 
 		finalMatrix(offset, 12) = groundedFoot;	// 0 = right, 1 = left foot
