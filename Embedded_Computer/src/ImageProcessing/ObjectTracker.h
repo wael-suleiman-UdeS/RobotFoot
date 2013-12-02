@@ -37,6 +37,7 @@ private:
 	void scan();
 	void readHeadAngles();
 	void setHeadAngles();
+	void processObjectDistance();
 
     std::shared_ptr<ThreadManager> _threadManager;
     std::shared_ptr<MotorControl> _mc;
@@ -62,6 +63,9 @@ private:
 	float _dt;
 	float _epsilon;
 	std::map<std::string, PID> _pids;
+
+	// todo: Should I not know that?
+	double _robotHeight;
 };
 
 #endif // OBJECTTRACKER_H

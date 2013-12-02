@@ -29,6 +29,8 @@ void ObjectTracker::initializeHack(const XmlParser& config)
 
 	_noObjectMaxCount = config.getIntValue(headPath / "NoObjectMaxCount");
 
+    _robotHeight = config.getIntValue(XmlPath::Root / XmlPath::Sizes / "RobotHeight");
+
 	_mc->SetTorque(true, MotorControl::Config::HEAD);
 }
 
@@ -76,7 +78,6 @@ void ObjectTracker::track(Point objectPosition)
     if ( objectPosition.x > 0 && objectPosition.y > 0) {
 		_objectError = _centerPosition - objectPosition;
 		_noObjectCount = 0;
-
     }
     else if(_noObjectCount > _noObjectMaxCount) {
 		scan();
@@ -107,7 +108,10 @@ void ObjectTracker::track(Point objectPosition)
 	if (_newAngle.x < _minPan || _newAngle.x > _maxPan) { _pids["Pan"].reset(); }
 	if (_newAngle.y < _minTilt || _newAngle.y > _maxTilt) { _pids["Tilt"].reset(); }
 
-	setHeadAngles();
+	if (abs(_objectError.x) > _threshold && abs(_objectError.y) > _threshold)
+	{
+		processObjectDistance();
+	}
 
     Logger::getInstance() << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
     Logger::getInstance() << "Current angle: " << _currentAngle.x << ", " << _currentAngle.y << std::endl;
@@ -118,8 +122,8 @@ void ObjectTracker::track(Point objectPosition)
 
 void ObjectTracker::readHeadAngles() {
 	std::vector<double> angles;
-	//_mc->ReadPositions(angles, MotorControl::Config::HEAD);
-	_mc->HardGet(angles, MotorControl::Config::HEAD);
+	_mc->ReadPositions(angles, MotorControl::Config::HEAD);
+	//_mc->HardGet(angles, MotorControl::Config::HEAD);
 
 	if (angles.size() >= 2)
 	{
@@ -134,8 +138,8 @@ void ObjectTracker::setHeadAngles() {
 	angles.push_back(_newAngle.x);
 	angles.push_back(_newAngle.y);
 
-	//_mc->SetPositions(angles, MotorControl::Config::HEAD);
-	_mc->HardSet(angles, MotorControl::Config::HEAD);
+	_mc->SetPositions(angles, MotorControl::Config::HEAD);
+	//_mc->HardSet(angles, MotorControl::Config::HEAD);
 }
 
 void ObjectTracker::scan() {
@@ -158,3 +162,19 @@ void ObjectTracker::scan() {
 
 }
 
+void ObjectTracker::processObjectDistance()
+{
+	cv::Point radianAngle;
+
+	radianAngle.x = _currentAngle.x * M_PI/180;
+	radianAngle.y = std::abs(_currentAngle.y * M_PI/180);
+
+	double euclidianDistance = _robotHeight * std::tan((M_PI/2)-radianAngle.y);
+	cv::Point objectDistance;
+	objectDistance.x = euclidianDistance * std::sin(radianAngle.x);
+	objectDistance.y = euclidianDistance * std::cos(radianAngle.x);
+
+	Logger::getInstance() << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
+
+	_mc->SetObjectDistance(objectDistance.x, objectDistance.y);
+}

@@ -89,6 +89,7 @@ public:
    void HardGetMaxAngles(std::vector<double>& angles, const Config config);
    void HardGetMinAngles(std::vector<double>& angles, const Config config);
 
+   void SetObjectDistance(double xDistance, double yDistance);
    ObjectPosition GetObjectDistance();
    void ResetObjectDistance();
    std::string GetColorToTrack();

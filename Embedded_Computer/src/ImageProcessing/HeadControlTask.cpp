@@ -99,7 +99,6 @@ void HeadControlTask::setColor()
 {
 	string colorName = _mc->GetColorToTrack();
 
-
 	if (colorName != _lastColorName)
 	{
 		_lastColorName = colorName;

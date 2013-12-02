@@ -27,7 +27,6 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
         // Init USB interface with STM32F4
         Logger::getInstance() << "Initializing USB interface..." << std::endl;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
-        _robotHeight = config.getIntValue(XmlPath::Root / XmlPath::Sizes / "RobotHeight");
         _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateMotorStatus(a); });
 
         _trackingColors = config.getChildrenStringValues(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Objects);
@@ -551,26 +550,22 @@ void MotorControl::TestCalculFun() {
 	}
 }
 
+void MotorControl::SetObjectDistance(double xDistance, double yDistance)
+{
+	//todo
+	ObjectPosition objectPosition;
+	objectPosition.x = xDistance;
+	objectPosition.y = yDistance;
+	// if enum = ball
+	_ballDistance = objectPosition;
+	// else if enum = goal
+	_goalDistance = objectPosition;
+}
+
 ObjectPosition MotorControl::GetObjectDistance()
 {
-	// todo: replace hard gets
-
-	std::vector<double> angles;
-	//_mc->ReadPositions(angles, MotorControl::Config::HEAD);
-	HardGet(angles, MotorControl::Config::HEAD);
-
-	angles[0] = angles[0] * M_PI/180;
-	angles[1] = std::abs(angles[1] * M_PI/180);
-
-	double euclidianDistance = _robotHeight * std::tan((M_PI/2)-angles[1]);
-	ObjectPosition objectDistance;
-	objectDistance.x = euclidianDistance * std::sin(angles[0]);
-	objectDistance.y = euclidianDistance * std::cos(angles[0]);
-
-	Logger::getInstance() << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
-
-
-	return objectDistance;
+	//todo
+	return _ballDistance;
 }
 
 void MotorControl::ResetObjectDistance()
