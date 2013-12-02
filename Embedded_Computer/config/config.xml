@@ -10,8 +10,10 @@
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
-    <ActiveColor value="red" />
     <Colors>
+      <BallColor value="red">
+      <GoalColor value="pink">
+      
 	  <Color name="red">
 		<HSVcolor>
 		  <Hue value="215" />
@@ -76,7 +78,7 @@
   </USB_Interface>
   <Motion value="1">
   	<ActivateMotor value="1" />
-    <IterationTimeMs value="20"/>
+    <IterationTimeMs value="50"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
@@ -131,6 +133,8 @@
 	  <DISTANCETHRESHOLD value = "0.002"/>
 	  <ANGLETHRESHOLD value = "0.02"/>
 	  <ITERATIONMAX value = "5"/>
+	<StepTime value = "1.0" />
+	<UseCOM value = "0" />
 	  <COMPENSATION_OFFSET>
 	  		<PermanentPelvisPitch value = "0"/>
 			<RightPelvis>
@@ -151,7 +155,7 @@
 			</LeftPelvis>
 			<RightFoot>
 				<Pitch value = "0.0" />
-				<Roll value = "-0.2" />
+				<Roll value = "-0.02" />
 				<Yaw value = "0" />
 				<x value = "0.01" />
 				<y value = "0" />
@@ -159,7 +163,7 @@
 			</RightFoot>
 			<LeftFoot>
 				<Pitch value = "0.0" />
-				<Roll value = "0.2" />
+				<Roll value = "0.02" />
 				<Yaw value = "0.0" />
 				<x value = "-0.01" />
 				<y value = "0" />

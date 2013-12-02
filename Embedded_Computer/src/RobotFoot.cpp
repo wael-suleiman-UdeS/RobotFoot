@@ -62,7 +62,7 @@ int main(int argc, char * argv[])
             int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
 
  //       	legMotion.Init("config/input.txt", activatedMotor, true, 3000);
-            legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000, 1.0f);
+            legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
             threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion.Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL); 
 
         	/*

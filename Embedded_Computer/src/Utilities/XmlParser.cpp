@@ -14,11 +14,13 @@ namespace XmlPath
 	const path Sizes = "Sizes";
 	const path ImageProcessing = "ImageProcessing";
 	const path Camera = "Camera";
-	const path ActiveColor = "ActiveColor";
 	const path Colors = "Colors";
 	const path Color = "Color";
 	const path HSVcolor = "HSVcolor";
 	const path CircleSpec = "CircleSpec";
+
+	const path BallColor = "BallColor";
+	const path GoalColor = "GoalColor";
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";
@@ -60,9 +62,11 @@ namespace XmlPath
 	const path LeftFootzCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/z";
 
 
+	const path UseCOM = "UseCOM";
 	const path DISTANCETHRESHOLD = "DISTANCETHRESHOLD";
 	const path ANGLETHRESHOLD = "ANGLETHRESHOLD";
 	const path ITERATIONMAX = "ITERATIONMAX";
+	const path StepTime = "StepTime";
 	const path StepHeight = "StepHeight";
 	const path StepLength = "StepLength";
 	const path R_HIP_YAW = "R_HIP_YAW";

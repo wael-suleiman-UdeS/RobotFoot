@@ -29,11 +29,13 @@ namespace XmlPath
 	extern const fs::path Sizes;
 	extern const fs::path ImageProcessing;
 	extern const fs::path Camera;
-	extern const fs::path ActiveColor;
 	extern const fs::path Colors;
 	extern const fs::path Color;
 	extern const fs::path HSVcolor;
 	extern const fs::path CircleSpec;
+
+	extern const fs::path BallColor;
+	extern const fs::path GoalColor;
 
 	extern const fs::path Motion;
 	extern const fs::path Motors;
@@ -73,9 +75,11 @@ namespace XmlPath
     extern const fs::path LeftFootyCompensationOffset;
     extern const fs::path LeftFootzCompensationOffset;
 
+    extern const fs::path UseCOM;
     extern const fs::path DISTANCETHRESHOLD;
     extern const fs::path ANGLETHRESHOLD;
     extern const fs::path ITERATIONMAX;
+    extern const fs::path StepTime;
     extern const fs::path StepHeight;
     extern const fs::path StepLength;
 	extern const fs::path R_HIP_YAW;

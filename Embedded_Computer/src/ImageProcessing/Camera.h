@@ -18,7 +18,7 @@ public:
 	enum class ColorSpace {BGR, HSV}; /**< Enumeration representing color spaces */
 
 	static Camera& getInstance();
-	bool initialize(XmlParser& config);
+	bool initialize(const XmlParser& config);
 	bool initialize(int deviceIndex);
 	void captureFrame();
 	cv::Mat& getFrame(ColorSpace colorSpace);

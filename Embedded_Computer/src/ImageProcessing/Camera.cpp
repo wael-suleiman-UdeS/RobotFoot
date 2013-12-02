@@ -22,7 +22,7 @@ Camera& Camera::getInstance()
  * \return bool: Success of the initialization
  *
  */
-bool Camera::initialize(XmlParser& config)
+bool Camera::initialize(const XmlParser& config)
 {
 	return initialize(config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing
 		/ XmlPath::Camera / "DeviceIndex"));

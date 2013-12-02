@@ -14,20 +14,21 @@
 #include <memory> // shared_ptr
 #include <ostream>
 
-struct Position
+struct ObjectPosition
 {
 public:
 	double x;
 	double y;
+	double angle;
 };
 
-inline std::ostream & operator<<(std::ostream &os, const Position &position)
+inline std::ostream & operator<<(std::ostream &os, const ObjectPosition &position)
 {
 	os << position.x << "," << position.y;
 	return os;
 }
 
-inline std::ostream & operator<<(std::ostream &&os, const Position &position)
+inline std::ostream & operator<<(std::ostream &&os, const ObjectPosition &position)
 {
 	return operator<<(os, position);
 }
@@ -83,15 +84,18 @@ public:
    void HardGetMaxAngles(std::vector<double>& angles, const Config config);
    void HardGetMinAngles(std::vector<double>& angles, const Config config);
 
-   Position getObjectDistance();
+   ObjectPosition GetObjectDistance();
 
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
    void InitPID(const XmlParser &config);
 
-   std::vector<bool> _buttonStatus;
+   std::string GetColorToTrack();
+   void TestCalculFun();
 
+
+   std::vector<bool> _buttonStatus;
    std::shared_ptr<STM32F4> _stm32f4;
    std::shared_ptr<ThreadManager> _threadManager;
    
@@ -104,5 +108,9 @@ private:
 
    double _robotHeight;
    Position _objectDistance;
+   ObjectPosition _ballDistance;
+   ObjectPosition _goalDistance;
+
+   boost::asio::io_service _boost_io;
 };
 #endif  //MOTOR_CONTROL_H
