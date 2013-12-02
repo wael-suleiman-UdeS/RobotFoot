@@ -77,6 +77,7 @@ namespace XmlPath
     extern const fs::path ANGLETHRESHOLD;
     extern const fs::path ITERATIONMAX;
     extern const fs::path StepHeight;
+    extern const fs::path StepLength;
 	extern const fs::path R_HIP_YAW;
 	extern const fs::path L_HIP_YAW;
 	extern const fs::path R_HIP_ROLL;

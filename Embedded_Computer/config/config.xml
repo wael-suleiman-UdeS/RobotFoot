@@ -165,6 +165,7 @@
 			</LeftFoot>
 	  </COMPENSATION_OFFSET>
 	  <StepHeight value = "0.04"/>
+	  <StepLength value = "0.04"/>
 	    <R_HIP_YAW>
 		  <MotorID value="1"/>
 		  <Offset value="547"/>

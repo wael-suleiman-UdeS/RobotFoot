@@ -28,7 +28,8 @@ using namespace std;
  */
 Trajectory::Trajectory(Eigen::Vector3f rightFootPosOffset, Eigen::Vector3f rightFootAngleOffset,
 		Eigen::Vector3f leftFootPosOffset, Eigen::Vector3f leftFootAngleOffset, Eigen::Vector3f rightPelvisPosOffset,
-		Eigen::Vector3f rightPelvisAngleOffset, Eigen::Vector3f leftPelvisPosOffset, Eigen::Vector3f leftPelvisAngleOffset, float permanentPelvisPitch)
+		Eigen::Vector3f rightPelvisAngleOffset, Eigen::Vector3f leftPelvisPosOffset, Eigen::Vector3f leftPelvisAngleOffset,
+		float permanentPelvisPitch, float stepLegth)
 : m_vRightFootPosOffset(rightFootPosOffset)
 , m_vRightFootAngleOffset(rightFootAngleOffset)
 , m_vLeftFootPosOffset(leftFootPosOffset)
@@ -39,7 +40,7 @@ Trajectory::Trajectory(Eigen::Vector3f rightFootPosOffset, Eigen::Vector3f right
 , m_vLeftPelvisAngleOffset(leftPelvisAngleOffset)
 , m_permanentPelvisPitch(permanentPelvisPitch)
 , m_dLeg(0.037f)
-, m_dStep(0.03f)
+, m_dStep(stepLegth)
 , m_dTime(0.01f)
 , m_nbTrajectoryPoints(101)
 {

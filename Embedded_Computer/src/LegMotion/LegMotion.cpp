@@ -32,6 +32,7 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 	m_motionControl = new MotionControl(distanceThreshold, angleThreshold, iterationMax);
 
 	m_stepHeight = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepHeight);
+	m_stepLength = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepLength);
 
 	//Compensation offsets
 	float RightPelvisPitchCompensationOffset = config.getIntValue(XmlPath::LegsMotors / XmlPath::RightPelvisPitchCompensationOffset);
@@ -85,7 +86,7 @@ void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFe
 
     std::unique_ptr<Trajectory> traj( new Trajectory(m_vRightFootPosOffset, m_vRightFootAngleOffset,
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
-			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch) );
+			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch, m_stepLength) );
 	m_trajectoryMatrix = traj->GenerateWalk(Eigen::Vector2f(0, 0), destination,
 			destinationFeetAngles, startingFeetAngles, Trajectory::ZMP, stepTime, m_stepHeight);
 
@@ -103,7 +104,7 @@ void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, c
 
     std::unique_ptr<Trajectory> traj( new Trajectory(m_vRightFootPosOffset, m_vRightFootAngleOffset,
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
-			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch) );
+			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch, m_stepLength) );
 
 	m_trajectoryMatrix = traj->GenerateKick(0.5f);
 
