@@ -524,7 +524,7 @@ void MotorControl::TestCalculFun() {
 	distance.x = _goalPosition.x - _ballPosition.x;
 	distance.y = _goalPosition.y - _ballPosition.y;
 
-	if (_ballPosition.x) {
+	if (_ballPosition.x < 0) {
 		// Fuck off
 	}
 	else if (_ballPosition.y < 0) {
