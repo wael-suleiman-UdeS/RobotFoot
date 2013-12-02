@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    usb_com.h
+  * @file    usb_com.hpp
   * @author  James-Adam Renquinha Henri (Jarhmander)
   * @version V1.0.0
   * @date    2013-04-10
@@ -9,8 +9,8 @@
   */
 
 //------------------------------------------------------------------------------
-#ifndef USB_COM_H
-#define USB_COM_H
+#ifndef USB_COM_HPP
+#define USB_COM_HPP
 //------------------------------------------------------------------------------
 #include <stdint.h>
 #include <vector>
@@ -133,6 +133,11 @@ template <typename T, size_t N>
     return read(arr.data(), N);
 }
 
+
+unsigned getSOFCount();
+
+bool enabled();
+
 #endif
 
 }
@@ -145,5 +150,5 @@ template <typename T, size_t N>
   * @}
   */
 //------------------------------------------------------------------------------
-#endif // USB_COM_H
+#endif // USB_COM_HPP
 

@@ -127,6 +127,8 @@ static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
 /** @defgroup usbd_cdc_Private_Variables
   * @{
   */
+
+unsigned SOFCount = 0;
 extern CDC_IF_Prop_TypeDef  APP_FOPS;
 extern uint8_t USBD_DeviceDesc   [USB_SIZ_DEVICE_DESC];
 
@@ -688,7 +690,7 @@ static uint8_t  usbd_cdc_SOF (void *pdev)
   static uint32_t FrameCount = 0;
 
   usb_resume_out_xfer();
-
+  SOFCount++;
   if (FrameCount++ == CDC_IN_FRAME_INTERVAL)
   {
     /* Reset the frame counter */

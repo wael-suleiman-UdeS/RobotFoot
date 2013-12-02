@@ -1,0 +1,12 @@
+set print pretty on
+
+alias -a -- pl = info locals
+
+
+b main
+run
+wh
+disp seg
+define pd 
+    x/32xb p->memblock.data
+end

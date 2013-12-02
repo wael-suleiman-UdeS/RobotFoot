@@ -191,6 +191,7 @@ SoundManager::SoundManager()
     DMA_Init(DMA1_Stream5, dma);
 
     // Configure DMA interrupts
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);
     NVIC_InitTypeDef nvic[1];
     nvic->NVIC_IRQChannel = DMA1_Stream5_IRQn;
     nvic->NVIC_IRQChannelPreemptionPriority = 7;

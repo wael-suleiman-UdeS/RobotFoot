@@ -25,9 +25,18 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc.h"
+#include "stm32f4xx_conf.h"
+#include "usb_core.h"
+#include "usbd_core.h"
+#include "usbd_cdc_core.h"
+
 #include <string.h>
 
 //------------------------------------------------------------------------------
+
+
+extern USB_OTG_CORE_HANDLE           USB_OTG_dev;
+extern uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev);
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -72,6 +81,8 @@ rx =
 {
     read_buffer
 };
+
+static unsigned usb_irq_counter;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -368,6 +379,19 @@ size_t usb_rx(uint8_t *buf, size_t len)
     return result;
 }
 
+
+/**
+  * @brief  This function handles OTG_FS Handler.
+  * @param  None
+  * @retval None
+  */
+
+void OTG_FS_IRQHandler(void)
+{
+    ++usb_irq_counter;
+    USBD_OTG_ISR_Handler (&USB_OTG_dev);
+}
+
 // PUT DOXYGEN COMMENT HERE
 void usb_resume_out_xfer(void)
 {
@@ -388,3 +412,19 @@ void usb_resume_out_xfer(void)
         }
     }
 }
+
+// PUT DOXYGEN COMMENT HERE
+void usb_reset_buffers(void)
+{
+    rx.ptr_in     = rx.ptr_out     = 0;
+    APP_Rx_ptr_in = APP_Rx_ptr_out = 0;
+}
+
+// PUT DOXYGEN COMMENT HERE
+unsigned usb_interrupt_cnt()
+{
+    return usb_irq_counter;
+}
+
+//------------------------------------------------------------------------------
+

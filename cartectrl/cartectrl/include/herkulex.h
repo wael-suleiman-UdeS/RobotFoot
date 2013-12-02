@@ -1,34 +1,52 @@
-//------------------------------------------------------------------------------
-/* herkulex servo library for mbed
- *
- * Copyright (c) 2012-2013 Yoonseok Pyo, MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
- * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+/**
+  ******************************************************************************
+  * @file    herkulex.h
+  * @author  Yoonseok Pyo
+  * @author  modifications by Mathieu Drapeau (mtiudaeu)
+  * @author  modifications by James-Adam Renquinha Henri (Jarhmander)
+  * @version 0.1
+  * @date    2013-10-24
+  * @brief   Low level control of Herkulex servo-motors
+  * @todo    More refactoring is needed
+  * @note    Here is the original copyright information about this file:
+  * @verbatim
+  * herkulex servo library for mbed
+  *
+  * Copyright (c) 2012-2013 Yoonseok Pyo, MIT License
+  *
+  * Permission is hereby granted, free of charge, to any person obtaining a
+  * copy of this software and associated documentation files (the "Software"),
+  * to deal in the Software without restriction, including without limitation
+  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  * and/or sell copies of the Software, and to permit persons to whom the
+  * Software is furnished to do so, subject to the following conditions:
+  *
+  * The above copyright notice and this permission notice shall be included in
+  * all copies or substantial portions of the Software.
+  *
+  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  * DEALINGS IN THE SOFTWARE.
+  * @endverbatim
+  ******************************************************************************
+  */
+
 //------------------------------------------------------------------------------
 #ifndef HERKULEX_H
 #define HERKULEX_H
-
-
 //------------------------------------------------------------------------------
-//#include "mbed.h"
-#include "stdint.h"
-
+#include <cstdint>
+#include <initializer_list>
+#include <new>
+#include "UARTinterface.hpp"
 //------------------------------------------------------------------------------
-//#define HERKULEX_DEBUG
+#include "herkulex/internals.hpp"
+//------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 // Herkulex ROM Register
@@ -133,18 +151,6 @@
 #define RAM_DESIRED_VELOCITY                72 // 2Byte
 
 //------------------------------------------------------------------------------
-// Request Packet [To Servo Module]
-#define CMD_ROM_WRITE  0x01    // Write Length number of values to EEP Register Address
-#define CMD_ROM_READ   0x02    // Request Length number of values from EEP Register Address
-#define CMD_RAM_WRITE  0x03    // Write Length number of values to RAM Register Address
-#define CMD_RAM_READ   0x04    // Request Lenght number of values from RAM Register Address
-#define CMD_I_JOG      0x05    // Able to send JOG command to maximum 43 servos (operate timing of individual Servo)
-#define CMD_S_JOG      0x06    // Able to send JOG command to maximum 53 servos (operate simultaneously at same time)
-#define CMD_STAT       0x07    // Status Error, Status Detail request
-#define CMD_ROLLBACK   0x08    // Change all EEP Regsters to Factory Default value
-#define CMD_REBOOT     0x09    // Request Reboot
-
-//------------------------------------------------------------------------------
 // ACK Packet [To Controller(ACK)]
 #define CMD_ACK_MASK   0x40 // ACK Packet CMD is Request Packet CMD + 0x40
 #define CMD_EEP_WRITE_ACK   (CMD_EEP_WRITE|CMD_ACK_MASK)
@@ -179,15 +185,7 @@
 #define MOTOR_ON_FLAG                   = 0x40;
 
 //------------------------------------------------------------------------------
-// Header
-#define HEADER                              0xFF
 
-// Size
-#define MIN_PACKET_SIZE                     7
-#define MIN_ACK_PACKET_SIZE                 9
-#define WRITE_PACKET_SIZE                   13
-#define MAX_PACKET_SIZE                     223
-#define MAX_DATA_SIZE                       (MAX_PACKET_SIZE-MIN_PACKET_SIZE)
 
 // ID
 #define MAX_PID                             0xFD
@@ -202,10 +200,6 @@
 #define TORQUE_FREE                         0x00
 #define BREAK_ON                            0x40
 #define TORQUE_ON                           0x60
-
-// Register Size
-#define BYTE1                               1
-#define BYTE2                               2
 
 // Jog Set CMD
 #define STOP                                0x01
@@ -244,34 +238,166 @@
  * @endcode
  */
 //------------------------------------------------------------------------------
-class Herkulex
+
+
+
+//------------------------------------------------------------------------------
+class Herkulex : private UART_Callback
 {
 public:
+    /**@brief Create an Herkulex servo object
+     *
+     * @param com UART pointer object.
+     */
+    Herkulex(UARTInterface *com);
 
-    enum
-    {
-            ID_R_HIP_YAW            = 1,
-            ID_L_HIP_YAW            = 2,
-            ID_R_HIP_ROLL           = 3,
-            ID_L_HIP_ROLL           = 4,
-            ID_R_HIP_PITCH          = 5,
-            ID_L_HIP_PITCH          = 6,
-            ID_R_KNEE               = 7,
-            ID_L_KNEE               = 8,
-            ID_R_ANKLE_PITCH        = 9,
-            ID_L_ANKLE_PITCH        = 10,
-            ID_R_ANKLE_ROLL         = 11,
-            ID_L_ANKLE_ROLL         = 12,
-            ID_HEAD_PAN             = 13,
-            ID_HEAD_TILT            = 14,
-            NUMBER_OF_JOINTS
-    };
-
-    /** Destroy an Herkulex servo object
+    /**
+    * @brief Destroy an Herkulex servo object
      */
     ~Herkulex();
 
-    static Herkulex* GetInstance() ;
+
+
+    /******** Very low level Herkulex manipulation *********/
+
+    template <typename MsgType>
+     struct wrapped_fifo_ptr : public fifo_ptr
+    {
+        wrapped_fifo_ptr(fifo_ptr &&fptr) : fifo_ptr(std::move(fptr)) {}
+
+        MsgType &operator*()  { return *static_cast<MsgType *>(this->get()); }
+        MsgType *operator->() { return &**this; };
+    };
+    template <servocmd scmd, typename ...Args>
+     wrapped_fifo_ptr<msgtype<scmd>> newMsg(uint8_t id, uint8_t len,
+                                                                Args ...args)
+    {
+        fifo_ptr p;
+        do {
+            p = com->alloc(msgtraits<scmd>::len(len));
+        } while (!p);
+        new (p.get()) msgtype<scmd>(id, len, args...);
+        return {std::move(p)};
+    }
+
+    void sendPacket(fifo_ptr &);
+
+    void sendPacket(fifo_ptr &&p)
+    {
+        return sendPacket(p);
+    }
+
+
+
+
+
+
+    /*********** Low level Herkulex manipulation ***********/
+
+    /**@brief Write into EEPROM
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_eep_write(uint8_t id, uint8_t addr, const uint8_t *beg,
+                                                  const uint8_t *end);
+
+    /**@brief Write into EPPROM (initializer list overload)
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_epp_write(uint8_t id, uint8_t addr,
+                                    std::initializer_list<uint8_t> il)
+    {
+        return send_eep_write(id, addr, il.begin(), il.end());
+    }
+
+    /**@brief Read from EEPROM
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_eep_read(uint8_t id, uint8_t addr, uint8_t len);
+
+    /**@brief Write into RAM
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_ram_write(uint8_t id, uint8_t addr, const uint8_t *beg,
+                                                  const uint8_t *end);
+
+    /**@brief Write into RAM (initializer list overload)
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_ram_write(uint8_t id, uint8_t addr,
+                                    std::initializer_list<uint8_t> il)
+    {
+        return send_ram_write(id, addr, il.begin(), il.end());
+    }
+
+    /**@brief Read from RAM
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_ram_read(uint8_t id, uint8_t addr, uint8_t len);
+
+    /**@brief Independent control of several servos
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_i_jog(uint8_t id, const i_jog_part *beg, const i_jog_part *end);
+
+    /**@brief Independent control of several servos (initializer list overload)
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_i_jog(uint8_t id, std::initializer_list<i_jog_part> il)
+    {
+        return send_i_jog(id, il.begin(), il.end());
+    }
+
+    /**@brief Synchronized control of several servos
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_s_jog(uint8_t id, uint8_t time,
+                                const s_jog_part *beg, const s_jog_part *end);
+
+    /**@brief Synchronized control of several servos (initializer list overload)
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_s_jog(uint8_t id, uint8_t time,
+                                std::initializer_list<s_jog_part> il)
+    {
+        return send_s_jog(id, time, il.begin(), il.end());
+    }
+
+    /**@brief Get status
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_stat(uint8_t id);
+
+    /**@brief Reset EEPROM settings
+     *
+     * @param id        The herkulex servo ID.
+     * @param keepID    Preserve ID in EEPROM.
+     * @param keepBaud  Preserve Baud rate in EEPROM.
+     */
+    void send_rollback(uint8_t id, bool keepID, bool keepBaud);
+
+    /**@brief Reboot servos
+     *
+     * @param id The herkulex servo ID.
+     */
+    void send_reboot(uint8_t id);
+
+
+
+
+
+
+    /*********** High level Herkulex manipulation **********/
 
     /**@brief Clear error status
      *
@@ -284,7 +410,7 @@ public:
      * @param id The herkulex servo ID.
      * @param cmdTorue The Command for setting of torque (TORQUE_FREE 0x00, BREAK_ON 0x40, TORQUE_ON 0x60)
      */
-    void setTorque(uint8_t id, uint8_t cmdTorue);
+    void setTorque(uint8_t id, uint8_t cmdTorque);
 
     /**@brief Position Control
      *
@@ -299,14 +425,14 @@ public:
      *
      * @param id The herkulex servo ID.
      * @param speed The goal position of herkulex servo.
-     * @param setLED Select LED and on/off controll (GLED_ON 0x00,BLED_ON 0x08, RLED_ON 0x10)
+     * @param setLED Select LED and on/off control (GLED_ON 0x00,BLED_ON 0x08, RLED_ON 0x10)
      */
     void velocityControl(uint8_t id, int16_t speed,uint8_t setLED);
 
     /**@brief Get Status
      *
      * @param id The herkulex servo ID.
-     * @return -1 is getStatus failed. other is servo`s status error value.
+     * @return -1 is getStatus failed. other is servo's status error value.
      */
     int8_t getStatus(uint8_t id);
 
@@ -317,50 +443,78 @@ public:
      */
     int16_t getPos(uint8_t id);
 
-    /**@brief Write on RAM
-     *
-     * @param id The herkulex servo ID.
-     *      adress Where to write
-     *      value What to write
-     */
-    void writeRAM1(uint8_t id, uint8_t adress, uint8_t value);
+    struct MsgHandler
+    {
+        virtual void err_header(msgPacket *)    {}
+        virtual void err_checksum(msgPacket *)  {}
 
-     /**@brief Read on RAM
-     *
-     * @param id The herkulex servo ID.
-     *      adress Where to write
-     */
-    uint8_t readRAM1(uint8_t id, uint8_t adress);
+        virtual void unknownPacket(msgPacket *) {}
+
+        virtual void stat    (msgStat *)     {}
+        virtual void eep_read(msgEEP_read *) {}
+        virtual void ram_read(msgRAM_read *) {}
+    };
+
+    class fwd_MsgHandler : public MsgHandler
+    {
+        MsgHandler *next;
+    public:
+        using base = MsgHandler;
+
+        fwd_MsgHandler(base *b) : next(b) {}
+
+        void err_header(msgPacket *m) override
+        {
+            return next->err_header(m);
+        }
+        void err_checksum(msgPacket *m) override
+        {
+            return next->err_checksum(m);
+        }
+
+        void unknownPacket(msgPacket *m) override
+        {
+            return next->unknownPacket(m);
+        }
+
+        void stat(msgStat *m) override
+        {
+            return next->stat(m);
+        }
+        void eep_read(msgEEP_read *m) override
+        {
+            return next->eep_read(m);
+        }
+        void ram_read(msgRAM_read *m) override
+        {
+            return next->ram_read(m);
+        }
+    };
+
+    void        handler(MsgHandler *h);
+    MsgHandler *handler() const        { return mhandler; }
+
+    void        resetHandler(MsgHandler *h = nullptr)
+    {
+        return handler(h);
+    }
 
 private :
+    using fifo_ptr = ::fifo_ptr;
 
-    /**@brief Create an Herkulex servo object connected to the serial pins and baudrate
-     *
-     * @param tx Transmit pin.
-     * @param rx Receive pin.
-     * @param baudRate The serial tx/rx speed.
-     */
-    Herkulex(/*PinNameint tx, PinNameint rx, uint32_t baudRate*/);
+    UARTInterface *com;
 
-    static Herkulex* instance;
+    MsgHandler *mhandler;
 
-    /**@brief Transmit packet datas with UART
-     *
-     * @param packetSize The packet size.
-     * @param data The transmit packet data array.
-     */
-    void txPacket(uint8_t packetSize, uint8_t* data);
+    // UART_Callback:
+    void rx(int) override;
 
-    /** Receive packet datas with UART
-     *
-     * @param packetSize The packet size.
-     * @param data The receive packet data array.
-     */
-    bool rxPacket(uint8_t packetSize, uint8_t* data);
-
+    size_t idx = 0;
+    uint8_t buffer[256];
 };
 
 //------------------------------------------------------------------------------
 #endif  // HERKULEX_H
+
 
 //------------------------------------------------------------------------------

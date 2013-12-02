@@ -37,6 +37,7 @@
         .global        _start
         .global        Reset_Handler
         .global        Default_Handler
+        .global        SVC_Handler
 
 // Import these symbols
         .extern     __data_start__
@@ -82,7 +83,7 @@ _start:
         .word       0
         .word       0
         .word       0
-        IRQ         SVC_Handler
+        .word       SVC_Handler
         IRQ         DebugMon_Handler
         .word       0
         IRQ         PendSV_Handler
@@ -176,10 +177,11 @@ _start:
 //=============================================================================
         .text
 
-// Default exception handler--does nothing but return
+// Default exception handler--does nothing but loop forever
 
         .section .text.Default_Handler,"ax",%progbits
-Default_Handler: bx        lr
+Default_Handler:
+                b  .
         .size Default_Handler, .-Default_Handler
 //=============================================================================
 
@@ -203,6 +205,15 @@ Reset_Handler:
                 isb
 // Call initClock
                 bl          initClock
+
+// DEBUG: Fill memory with value, to have an idea of memory usage.
+/*
+                ldr         r0, RAM_START
+                mov         r1, #0x55
+                ldr         r2, RAM_SIZE
+                bl          fill_bytes
+*/
+
 // Copy initialized data from flash to RAM
                 ldr         r0, DATA_START
                 ldr         r1, DATA_LOAD
@@ -219,12 +230,7 @@ Reset_Handler:
                 ldr         r0, BSS_START
                 mov         r1, #0
                 ldr         r2, BSS_SIZE
-                orrs        r2, r2, #0
-                beq         call_ctors
-
-zero_bss:       strb        r1, [r0], #1
-                subs        r2, r2, #1
-                bgt         zero_bss
+                bl          fill_bytes
 
 // Call C++ constructors.  The compiler and linker together populate the .ctors
 // code section with the addresses of the constructor functions.
@@ -260,6 +266,14 @@ copy_bytes_l:   ldrb        r3, [r1], #1
                 subs        r2, r2, #1
                 bgt         copy_bytes_l
 copy_bytes_x:   bx          lr
+
+fill_bytes:     orrs        r2, r2, #0
+                beq         fill_bytes_x
+fill_bytes_l:   strb        r1, [r0], #1
+                subs        r2, r2, #1
+                bgt         fill_bytes_l
+fill_bytes_x:   bx          lr
+
         .size Reset_Handler, .-Reset_Handler
 
 //=============================================================================
@@ -267,7 +281,10 @@ copy_bytes_x:   bx          lr
 // These are filled in by the linker
 
         .align        4
+
+
 DATA_LOAD:      .word       __data_load__
+RAM_START:
 DATA_START:     .word       __data_start__
 DATA_SIZE:      .word       __data_size__
 FASTC_LOAD:     .word       __fastcode_load__
@@ -277,6 +294,40 @@ BSS_START:      .word       __bss_start__
 BSS_SIZE:       .word       __bss_size__
 CTORS_START:    .word       __ctors_start__
 CTORS_END:      .word       __ctors_end__
+RAM_SIZE:       .word       __ram_size__
+
+
+//=============================================================================
+
+        .text
+        //.section .text.SVC_Handler,"ax",%progbits
+        //.weak SVC_Handler
+        .type SVC_Handler, %function
+SVC_Handler:
+
+        tst lr, #4          // Check EXC_RETURN[2] to know which stack is used
+        ite eq              // (Future-proof, however for the moment it is
+        mrseq r0, msp       // always the main stack that is used).
+        mrsne r0, psp
+
+        ldr   r1, [r0, #6]  // Load PC from stack...
+        ldrb  r2, [r1, #-2] // ...then load immediate value of SVC.
+        ldr   r3, =SVC_Handler_table
+        ldr   r1, [r3, r2]
+        bx    r1
+
+        .align        4
+SVC_Handler_table:
+        IRQ   SVC_Handler_0
+        IRQ   SVC_Handler_1
+        IRQ   SVC_Handler_2
+        IRQ   SVC_Handler_3
+        IRQ   SVC_Handler_4
+        IRQ   SVC_Handler_5
+        IRQ   SVC_Handler_6
+        IRQ   SVC_Handler_7
+
+        .size SVC_Handler, .-SVC_Handler
 
 //=============================================================================
 

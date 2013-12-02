@@ -31,9 +31,17 @@
 ENTRY(Reset_Handler)
 
 /* Memory blocks */
+/*
+ * flashv : vectors are there.
+ * flash1 : config sector, 16K
+ * flash  : .text, .rodata, etc. are there,
+ */
 MEMORY
 {
-  flash (rx)  : ORIGIN = 0x08000000, LENGTH = 1024K
+  /* flash (rx)  : ORIGIN = 0x08000000, LENGTH = 1024K */
+  flashv (rx) : ORIGIN = 0x08000000, LENGTH = 16K
+  flash1 (rw) : ORIGIN = 0x08004000, LENGTH = 16K
+  flash  (rw) : ORIGIN = 0x08008000, LENGTH = 1024K-32K
   ram (rwx)   : ORIGIN = 0x20000000, LENGTH = 128K
   ccm (rwx)   : ORIGIN = 0x10000000, LENGTH = 64K
 }
@@ -102,7 +110,14 @@ SECTIONS
         KEEP(*(.isr_vector)) /* Startup code */
         . = ALIGN(4);
         __vector_end__ = .;
-    } >flash
+    } >flashv
+
+    .config_sector :
+    {
+        . = ALIGN(4);
+        /* Config */
+        *(.configdata)
+    } >flash1
 
     .fastcode : {
         . = ALIGN (4);
