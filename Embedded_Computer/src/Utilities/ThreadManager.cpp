@@ -107,11 +107,13 @@ void ThreadManager::attach(Task task)
 
 bool ThreadManager::resume(boost::thread::id thread_id)
 {
-    //Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Resuming thread " << boost::lexical_cast<std::string>(thread_id) << std::endl;
     if (_cond_variables.find(thread_id) != _cond_variables.end())
     {
-        _cond_variables[thread_id]->notify_one();
-        return true;
+        if (!_cond_variables[thread_id].first)
+        {
+            _cond_variables[thread_id].second->notify_one();
+            return true;
+        }
     }
     return false; 
 }
@@ -127,10 +129,15 @@ bool ThreadManager::resume(Task task)
 
 void ThreadManager::wait()
 {
-    Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Pausing thread " << boost::lexical_cast<std::string>(boost::this_thread::get_id()) << std::endl;
-    boost::mutex mut;
-    boost::unique_lock<boost::mutex> lock(mut);
-    _cond_variables[boost::this_thread::get_id()]->wait(lock);     
+    if (_cond_variables.find(boost::this_thread::get_id()) != _cond_variables.end() &&
+        _cond_variables[boost::this_thread::get_id()].first)
+    {
+        Logger::getInstance(Logger::LogLvl::DEBUG) << "ThreadManager.cpp : Pausing thread " << boost::lexical_cast<std::string>(boost::this_thread::get_id()) << std::endl;
+        boost::mutex mut;
+        boost::unique_lock<boost::mutex> lock(mut);
+        _cond_variables[boost::this_thread::get_id()].first = false;
+        _cond_variables[boost::this_thread::get_id()].second->wait(lock);     
+    }
 }
 
 void ThreadManager::end()

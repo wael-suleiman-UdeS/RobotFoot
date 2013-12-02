@@ -15,7 +15,7 @@
 #include <boost/asio.hpp> 
 #include <boost/asio/serial_port.hpp> 
 
-const unsigned int MAX_SIZE = 512; 
+const unsigned int MAX_SIZE = 256; 
 
 class SerialInterface
 {
@@ -24,12 +24,16 @@ class SerialInterface
                    const std::string &port_name,
                    unsigned int baud);
       ~SerialInterface();
-
-      void write(std::vector<char> command);
-      std::vector<char> read_sync(std::vector<char> command);
-      void read_asyc(std::vector<char> command);
-
+      
+      void start_read(std::function<void(std::vector<char>)> function);
+      void write_async(std::vector<char>& command);
+      
+      void write(std::vector<char>& command); // Deprecated
+      std::vector<char> read_sync(std::vector<char>& command); // Deprecated
     private:
+      void read_async(std::function<void(std::vector<char>)> function);
+      
       boost::asio::serial_port _serialPort;
+      char _read_msg[MAX_SIZE];
 };
 #endif

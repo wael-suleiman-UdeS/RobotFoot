@@ -1,0 +1,11 @@
+define xxd
+    dump binary memory dump.bin $arg0 $arg0+$arg1
+    shell xxd dump.bin
+end
+
+define dc
+    xxd command._M_impl._M_start $arg0
+end
+
+#b SerialInterface::write(std::vector<char, std::allocator<char> >)
+

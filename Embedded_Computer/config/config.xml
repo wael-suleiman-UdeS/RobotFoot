@@ -2,10 +2,13 @@
   <Logging>
     <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
+<<<<<<< HEAD
   <Sizes>
   	<RobotHeight value="40" />
   	<XOffset value="2.5" />
   </Sizes>
+=======
+>>>>>>> usb_revisit
   <ImageProcessing value="0">
     <Camera>
       <DeviceIndex value="0" />
@@ -72,14 +75,19 @@
     </Colors>
   </ImageProcessing>
   <USB_Interface>
-    <TTY value="/dev/ttyACM0" />
+    <TTY value="/dev/ttyACM1" />
   </USB_Interface>
+<<<<<<< HEAD
   <Motion value="1">
   	<ActivateMotor value="1" />
     <IterationTimeMs value="20"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
+=======
+  <Motion value="0">
+    <IterationTimeMs value="100"/>
+>>>>>>> usb_revisit
     <Motors>
       <Head>
         <HEAD_PAN>
