@@ -21,6 +21,7 @@
 #include <memory> // shared_ptr
 
 #include "../../ThirdParty/Eigen/Dense"
+#include "Trajectory.h"
 
 class MotionControl;
 
@@ -58,6 +59,8 @@ private:
     bool m_bIsMotorActivated;
     // Activated stand alone mode without multithreading
     bool m_bIsStandAlone;
+    // Use COM instead of ZMP if true
+    Trajectory::PelvisTrajectoryType m_pelvisTrajectoryType;
 
     float m_stepHeight;
     float m_stepLength;

@@ -60,6 +60,7 @@ namespace XmlPath
 	const path LeftFootzCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/z";
 
 
+	const path UseCOM = "UseCOM";
 	const path DISTANCETHRESHOLD = "DISTANCETHRESHOLD";
 	const path ANGLETHRESHOLD = "ANGLETHRESHOLD";
 	const path ITERATIONMAX = "ITERATIONMAX";

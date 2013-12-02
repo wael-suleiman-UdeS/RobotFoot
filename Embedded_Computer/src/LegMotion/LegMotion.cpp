@@ -16,7 +16,7 @@
 #include <iterator>
 
 #include "MotionControl.h"
-#include "Trajectory.h"
+
 
 #include "../Utilities/XmlParser.h"
 
@@ -34,6 +34,8 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 	m_stepHeight = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepHeight);
 	m_stepLength = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepLength);
 	m_stepTime = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepTime);
+
+	m_pelvisTrajectoryType = config.getIntValue(XmlPath::LegsMotors / XmlPath::UseCOM) == 0 ? Trajectory::ZMP : Trajectory::COM;
 
 	//Compensation offsets
 	float RightPelvisPitchCompensationOffset = config.getIntValue(XmlPath::LegsMotors / XmlPath::RightPelvisPitchCompensationOffset);
@@ -89,7 +91,7 @@ void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFe
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
 			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch, m_stepLength) );
 	m_trajectoryMatrix = traj->GenerateWalk(Eigen::Vector2f(0, 0), destination,
-			destinationFeetAngles, startingFeetAngles, Trajectory::ZMP, m_stepTime, m_stepHeight);
+			destinationFeetAngles, startingFeetAngles, m_pelvisTrajectoryType, m_stepTime, m_stepHeight);
 
 	m_vInitialPosition = m_motionControl->GetInitialQPosition();
 

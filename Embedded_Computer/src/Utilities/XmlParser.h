@@ -73,6 +73,7 @@ namespace XmlPath
     extern const fs::path LeftFootyCompensationOffset;
     extern const fs::path LeftFootzCompensationOffset;
 
+    extern const fs::path UseCOM;
     extern const fs::path DISTANCETHRESHOLD;
     extern const fs::path ANGLETHRESHOLD;
     extern const fs::path ITERATIONMAX;
