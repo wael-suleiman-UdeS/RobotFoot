@@ -8,7 +8,8 @@
 class Motor
 {
     public:  
-        Motor(std::shared_ptr<STM32F4> stm32f4, std::string name, int id, int offset, int minValue, int maxValue, int playTime);
+        Motor(std::shared_ptr<STM32F4> stm32f4, std::string name, int id, int offset,
+              int minValue, int maxValue, int playTime, bool isInversed);
         ~Motor();
         void setPos(double pos);
         void setTorque(bool value);
@@ -34,6 +35,7 @@ class Motor
         int _playTime;
         double _angle;
         bool _torque;
+        bool _isInversed;
         std::uint16_t _status;
         std::uint16_t _PWM;
         std::uint16_t _volt;

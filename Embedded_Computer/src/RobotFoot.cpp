@@ -9,12 +9,6 @@
 #include <boost/chrono.hpp>
 #include <memory> // shared_ptr
 
-// TODO Remove from here
-#include "ImageProcessing/Camera.h"
-#include "ImageProcessing/ColorFinder.h"
-#include "ImageProcessing/ObjectTracker.h"
-// TODO to here
-
 #include "Utilities/XmlParser.h"
 #include "Utilities/logger.h"
 #include "Utilities/ThreadManager.h"
@@ -47,32 +41,29 @@ int main(int argc, char * argv[])
         std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager(boost_io, config));
         std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, boost_io));
 
-        
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
-        bool isKicking  = config.getIntValue(XmlPath::Root / XmlPath::Motion);
+        bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
         if (isTracking)
         {
             // Starting Head task
         	HeadControlTask headControlTask(threadManager_ptr, config, motorControl_ptr);
-        	threadManager_ptr->create(50, [headControlTask]() mutable {headControlTask.run();},ThreadManager::Task::HEAD_CONTROL);
+        	threadManager_ptr->create(50, [headControlTask]() mutable { headControlTask.run(); }, ThreadManager::Task::HEAD_CONTROL);
         }
 
-        //StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
-        LegMotion legMotion(threadManager_ptr, motorControl_ptr, config);
-        if (isKicking)
+        if (isMoving)
         {
+            //StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
+            LegMotion legMotion(threadManager_ptr, motorControl_ptr, config);
         	Eigen::Vector2f pointD(1, 0);
         	Eigen::Vector2f startAngle(0, 0);
         	Eigen::Vector2f endAngle(0, 0);
 
         	bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
+            int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
 
  //       	legMotion.Init("config/input.txt", activatedMotor, true, 3000);
             legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000, 1.0f);
-
-           	threadManager_ptr->attach(threadManager_ptr->create(90, boost::bind(&LegMotion::Run, &legMotion,
-                                          config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
-                                          ThreadManager::Task::LEGS_CONTROL));
+            threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion.Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL); 
 
         	/*
         	// Init Walk task

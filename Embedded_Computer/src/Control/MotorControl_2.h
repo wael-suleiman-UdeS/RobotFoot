@@ -54,7 +54,6 @@ public:
       BUTTON_4
    };
 
-
    void run(int ms_sleepTime);
    void WriteAll();
    bool InitPositions( const std::vector<double>& vPos,

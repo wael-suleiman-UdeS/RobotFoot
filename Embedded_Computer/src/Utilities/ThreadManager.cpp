@@ -39,7 +39,7 @@ boost::thread::id ThreadManager::create(unsigned int priority, const boost::func
         _threads.insert(std::make_pair(newThread->get_id(), newThread));
 
         std::shared_ptr<boost::condition_variable> cond(new boost::condition_variable()); 
-        _cond_variables.insert(std::make_pair(newThread->get_id(), cond));
+        _cond_variables.insert(std::make_pair(newThread->get_id(), std::make_pair(true, cond)));
 
         if (task != Task::UNKNOW)
             _tasks.insert(std::make_pair(task, newThread->get_id()));
@@ -52,7 +52,7 @@ boost::thread::id ThreadManager::create(unsigned int priority, const boost::func
         if ((retcode = pthread_getschedparam(threadID, &policy, &param)) != 0)
         {
             Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_getschedparam -- " << retcode << std::endl;
-            //exit(EXIT_FAILURE);
+            std::exit(1);
         }
 
         // SCHED_RR policy
@@ -64,7 +64,7 @@ boost::thread::id ThreadManager::create(unsigned int priority, const boost::func
         if ((retcode = pthread_setschedparam(threadID, policy, &param)) != 0)
         {
             Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_setschedparam -- " << retcode << std::endl;
-            //exit(EXIT_FAILURE);
+            std::exit(1);
         }
         return newThread->get_id();
     }

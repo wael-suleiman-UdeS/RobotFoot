@@ -9,7 +9,6 @@
 #include <functional>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
-#include <cmath>
 
 #define DANGER_TEST_MOTION
 
@@ -105,6 +104,7 @@ void MotorControl::InitializeMotors(const XmlParser &config)
 
 void MotorControl::InitPID(const XmlParser &config)
 {
+    /*
     int KP1 = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::KP);
     int KP2 = KP1 >> 8;
     int KD1 = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::KD);
@@ -121,12 +121,14 @@ void MotorControl::InitPID(const XmlParser &config)
 		_stm32f4->writeRAM(id,28,KI1);
 		_stm32f4->writeRAM(id,29,KI2);
 	}
+    
 	_stm32f4->writeRAM(253,24,KP1);
 	_stm32f4->writeRAM(253,25,KP2);
 	_stm32f4->writeRAM(253,26,KD1);
 	_stm32f4->writeRAM(253,27,KD2);
 	_stm32f4->writeRAM(253,28,KI1);
 	_stm32f4->writeRAM(253,29,KI2);
+    */
 }
 
 // Populate the configuration list
