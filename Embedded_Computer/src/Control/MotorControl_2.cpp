@@ -19,7 +19,6 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
  _buttonStatus(4, false),
  _threadManager(threadManager_ptr),
  _rawPackets(20)
->>>>>>> usb_revisit
 {
     try
     {
@@ -35,7 +34,6 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
     }
     InitializeMotors(config);
     InitializeConfigurations(config);
-
 }
 
 MotorControl::~MotorControl()
@@ -192,7 +190,6 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
             }
             else if (header == Protocol::ButtonHeader)
             {
-                //Logger::getInstance(Logger::LogLvl::DEBUG) << "Parsing BU ********************************************************************" << std::endl;
                 Protocol::ButtonStruct buttonStruct;
                 size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::ButtonStruct));
                 memcpy(&buttonStruct, &*data_start, size);
@@ -220,7 +217,6 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
         }
         header_it++;
     }
-    //Logger::getInstance(Logger::LogLvl::DEBUG) << "Done parsing packet" << std::endl;
 }
 
 void MotorControl::GetMotorStatus(std::vector<Protocol::MotorStruct> &status, const Config config)
