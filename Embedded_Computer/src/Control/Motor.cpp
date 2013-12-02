@@ -41,7 +41,7 @@ void Motor::setPos(double pos)
 
         uint16le posValue = Angle2Value(pos);
         data.push_back(posValue.bytes[0]);
-        data.push_back(posValue.bytes[2]);
+        data.push_back(posValue.bytes[1]);
         data.push_back(_playTime); 
 
         _stm32f4->AddMsg(Protocol::GenerateDataMsg(Protocol::MotorHeader,data));

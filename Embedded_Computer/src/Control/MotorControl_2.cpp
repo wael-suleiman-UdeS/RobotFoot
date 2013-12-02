@@ -124,7 +124,7 @@ void MotorControl::InitializeConfigurations(const XmlParser &config)
 // Update motors status 
 void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
 {
-    auto header_it = msg.cbegin();
+    auto header_it = msg.cbegin() + 1;
     uint16le header = 0;
     while (Protocol::FindMsgHeader(header_it, msg, header))
     {
@@ -133,12 +133,13 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
             auto size_it = header_it + 2;
             uint16le msgSize = 0;
             msgSize.bytes[0] = *size_it;
-            msgSize.bytes[2] = *(size_it+1);
+            msgSize.bytes[1] = *(size_it+1);
            
             auto data_start = header_it + 4;
             auto data_end   = size_it + msgSize;
             if (header == Protocol::MotorHeader)
             {
+                //Logger::getInstance(Logger::LogLvl::DEBUG) << "Parsing MO" << std::endl;
                 Protocol::MotorStruct motorStruct;
                 size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::MotorStruct));
                 memcpy(&motorStruct, &*data_start, size);
@@ -158,7 +159,7 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
             }
             else if (header == Protocol::ButtonHeader)
             {
-                // TODO
+                //Logger::getInstance(Logger::LogLvl::DEBUG) << "Parsing BU ********************************************************************" << std::endl;
                 Protocol::ButtonStruct buttonStruct;
                 size_t size = std::min(msgSize * sizeof(char), sizeof(Protocol::ButtonStruct));
                 memcpy(&buttonStruct, &*data_start, size);
@@ -186,6 +187,7 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
         }
         header_it++;
     }
+    //Logger::getInstance(Logger::LogLvl::DEBUG) << "Done parsing packet" << std::endl;
 }
 
 void MotorControl::GetMotorStatus(std::vector<Protocol::MotorStruct> &status, const Config config)

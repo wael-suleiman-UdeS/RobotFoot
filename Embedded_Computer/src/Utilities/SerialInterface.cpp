@@ -59,7 +59,7 @@ void SerialInterface::read_async(std::function<void(std::vector<char>)> function
         {
             if (!ec)
             {
-                function(std::vector<char>(_read_msg, _read_msg + sizeof(_read_msg)));
+                function(std::vector<char>(_read_msg, _read_msg + length));
                 read_async(function);  
             }
             else

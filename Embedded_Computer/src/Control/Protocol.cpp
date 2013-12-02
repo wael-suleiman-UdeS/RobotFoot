@@ -1,5 +1,5 @@
 #include "Control/Protocol.h"
-
+#include "Utilities/logger.h"
 
 void Protocol::Separate2Bytes(const std::uint16_t value, std::uint8_t& valueLSB, std::uint8_t& valueMSB)
 {
@@ -44,15 +44,25 @@ std::vector<char> Protocol::GenerateDataMsg(uint16le header, const std::vector<c
 // Find first tag in vector and return iterator to the start of this tag
 bool Protocol::FindMsgHeader(std::vector<char>::const_iterator &iterator, const std::vector<char> &msg, uint16le& header)
 {
-    auto end = msg.end() - 1;
-    for (; iterator <= end; ++iterator)
+    if (iterator < msg.cbegin() || iterator > msg.cend())
     {
-       header.bytes[0] = *iterator;
-       header.bytes[1] = *(iterator+1);
-       if (isTag(header))
-           return true;         
+        Logger::getInstance(Logger::LogLvl::ERROR) << "Protocol : FindMsgHeader error, iterator not valid" << std::endl;
+        iterator = msg.cend(); 
+        return false;
     }
-    return false;
+    else
+    {
+        auto end = msg.end() - 1;
+        for (; iterator <= end; ++iterator)
+        {
+            header.bytes[0] = *iterator;
+            header.bytes[1] = *(iterator+1);
+            if (isTag(header))
+                return true;         
+        }
+        iterator = msg.cend();
+        return false;
+    }
 }
 
 bool Protocol::isTag(uint16le header)
@@ -66,30 +76,5 @@ bool Protocol::isTag(uint16le header)
             header == PowerHeader   ||
             header == TorqueHeader  ||
             header == MotorRawHeader);
-}
-
-void Protocol::ReadPacket(std::uint16_t header,
-        std::vector<char>::const_iterator& mainItr, 
-        const std::vector<char>::const_iterator& mainEnd,
-        std::vector<char>& result)
-{
-    std::uint8_t headerMSB, headerLSB;
-    std::uint16_t size(0);
-    Separate2Bytes(header,headerLSB,headerMSB);
-
-    for(;mainItr != mainEnd && mainItr+1 != mainEnd; ++mainItr)
-    {
-        if(headerLSB == *(mainItr) && headerMSB == *(mainItr+1))
-        {
-            mainItr+=2;
-            char sizeLSB = *(mainItr);
-            char sizeMSB = *(++mainItr); 
-            Unify2Bytes(size, sizeLSB, sizeMSB);
-            break;
-        }
-    }
-    std::vector<char>::const_iterator packetBegin = ++mainItr;
-    mainItr += size;
-    result.assign(packetBegin,mainItr);
 }
 

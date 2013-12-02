@@ -18,7 +18,7 @@ class STM32F4
 
         void AddMsg(const std::vector<char>& msg);
         void SendMsg();
-        void ReceiveMsg(const std::vector<char>& msg);
+        void ReceiveMsg(const std::vector<char> msg);
 
     private:
         SerialInterface _usb;
@@ -27,7 +27,7 @@ class STM32F4
         std::vector<char> _outBuffer;
         std::vector<char> _inBuffer;
 
-        boost::mutex io_mutex;
+        boost::mutex _mutex;
 };
 
 #endif // STM32F4_H

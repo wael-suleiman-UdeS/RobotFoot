@@ -15,7 +15,7 @@
 #include <boost/asio.hpp> 
 #include <boost/asio/serial_port.hpp> 
 
-const unsigned int MAX_SIZE = 512; 
+const unsigned int MAX_SIZE = 256; 
 
 class SerialInterface
 {

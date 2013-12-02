@@ -48,11 +48,6 @@ namespace Protocol
     std::vector<char> GenerateDataMsg(uint16le header, const std::vector<char>& data);
     bool isTag(uint16le header);
 
-    void ReadPacket(std::uint16_t header,
-                    std::vector<char>::const_iterator& mainItr, 
-                    const std::vector<char>::const_iterator& mainEnd,
-                    std::vector<char>& result);
-
     struct MotorStruct
     {
         std::uint8_t  id;

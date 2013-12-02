@@ -34,45 +34,59 @@ void STM32F4::SendMsg()
 }
 
 // TODO Move to Protocol class???
-void STM32F4::ReceiveMsg(const std::vector<char> &msg)
+void STM32F4::ReceiveMsg(const std::vector<char> stream)
 {
-    boost::mutex::scoped_lock lock(io_mutex);
+    boost::mutex::scoped_lock lock(_mutex);
 
     // Add new data to input buffer
-    _inBuffer.insert(_inBuffer.end(), msg.begin(), msg.end());
+    _inBuffer.insert(_inBuffer.end(), stream.begin(), stream.end());
 
     auto header_it = _inBuffer.cbegin();
     uint16le header = 0;
-    while (Protocol::FindMsgHeader(header_it, _inBuffer, header) && header == 0xffff)
+    while (header_it < _inBuffer.cend() && Protocol::FindMsgHeader(header_it, _inBuffer, header))
     {
-        // Dump everything before header and validate msg
-        _inBuffer = std::vector<char>(header_it, _inBuffer.cend());
-        if (_inBuffer.size() > 4)
+        if (header == 0xffff)
         {
-            uint16le size = 0;
-            size.bytes[0] = _inBuffer[2];
-            size.bytes[1] = _inBuffer[3];
-
-            if (size <= _inBuffer.size() - 2)
+            //Logger::getInstance(Logger::LogLvl::DEBUG) << "Parsing 0xFFFF" << std::endl;
+            // Dump everything before header and validate msg
+            if (header_it + 4 < _inBuffer.cend())
             {
-                std::vector<char> msg(_inBuffer.begin(), _inBuffer.begin() + size + 3);
+                uint16le size = 0;
+                auto size_it = header_it + 2;
+                size.bytes[0] = *(size_it);
+                size.bytes[1] = *(size_it+1);
 
-                // Validate checksum
-                if (Protocol::CalculCheckSum(msg) == msg.back())
+                if ((size_it + size) < _inBuffer.cend())
                 {
-                    // Clear input buffer of the parsed msg
-                    _inBuffer = std::vector<char>(_inBuffer.begin() + msg.size(), _inBuffer.end());
-                    header_it = _inBuffer.begin() - 1; 
-                    _callBackFunction(msg);
-                    break; 
+                    std::vector<char> msg(header_it, size_it + size + 1);
+
+                    // Validate checksum
+                    if (Protocol::CalculCheckSum(msg) == msg.back())
+                    {
+                        // Clear input buffer of the parsed msg
+                        header_it = header_it + msg.size() - 1;
+                        _callBackFunction(msg);
+                    }
+                    else
+                    {
+                        Logger::getInstance(Logger::LogLvl::DEBUG) << "STM32F4: Checksum validation failed." << std::endl;
+                    }
                 }
                 else
-                {
-                    Logger::getInstance(Logger::LogLvl::DEBUG) << "STM32F4: Checksum validation failed." << std::endl;
-                }
+                    break;
             }
+            else
+                break;
         }
         header_it++;
     }
-    _inBuffer.clear();
+   
+    if (header_it < _inBuffer.cend())
+    {
+        _inBuffer = std::vector<char>(header_it, _inBuffer.cend());
+    }
+    else
+    {
+        _inBuffer.clear();
+    }
 }
