@@ -170,11 +170,11 @@ void ObjectTracker::processObjectDistance()
 	radianAngle.y = std::abs(_currentAngle.y * M_PI/180);
 
 	double euclidianDistance = _robotHeight * std::tan((M_PI/2)-radianAngle.y);
-	cv::Point objectDistance;
+	ObjectPosition objectDistance;
 	objectDistance.x = euclidianDistance * std::sin(radianAngle.x);
 	objectDistance.y = euclidianDistance * std::cos(radianAngle.x);
 
 	Logger::getInstance() << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
 
-	_mc->SetObjectDistance(objectDistance.x, objectDistance.y);
+	_mc->SetObjectDistance(objectDistance);
 }
