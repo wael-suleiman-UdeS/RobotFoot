@@ -87,7 +87,7 @@ private:
 
     Eigen::MatrixXf m_trajectoryMatrix;
 
-    MotionControl* m_motionControl;
+    std::shared_ptr<MotionControl> m_motionControl;
 };
 
 #endif  //LEGMOTION_H

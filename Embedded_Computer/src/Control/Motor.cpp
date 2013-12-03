@@ -25,7 +25,7 @@ _maxValue(maxValue),
 _playTime(playTime),
 _angle(0.0),
 _torque(0),
-_isInversed(0)
+_isInversed(isInversed)
 {    
 }
 
@@ -76,11 +76,13 @@ void Motor::setTorque(bool value)
 void Motor::update(const Protocol::MotorStruct &motorStruct)
 {
     // TODO PWM, volt and temp overwrite problem!
-    _angle = Value2Angle(motorStruct.pos);
+    _angle = _isInversed ? -Value2Angle(motorStruct.pos) : Value2Angle(motorStruct.pos);
     _status = motorStruct.status;
     _PWM = motorStruct.PWM;
     _volt = motorStruct.volt;
     _temp = motorStruct.temp;
+    //Logger::getInstance(Logger::LogLvl::DEBUG) << "Motor " << _id << " Update : " << _angle << std::endl;
+
 }
 
 const Protocol::MotorStruct Motor::getStatus()
@@ -103,11 +105,12 @@ const double Motor::getPos()
 std::uint16_t Motor::Angle2Value(const double angle)
 {
     std::uint16_t value = (angle*dInvAngleConvertion) + _offset;
+    std::uint16_t clampedValue = clamp(value, _minValue, _maxValue);
     if(value < _minValue || value > _maxValue)
     {
-        Logger::getInstance(Logger::LogLvl::DEBUG) << __FILE__ << " : Angle2Value : Value off limits.";
+        Logger::getInstance(Logger::LogLvl::DEBUG) << __FILE__ << " : Angle2Value : Value off limits " << _id << " " << value-clampedValue << std::endl;
     }
-	return clamp(value, _minValue, _maxValue);
+	return clampedValue;
 }
 
 double Motor::Value2Angle(const std::uint16_t value)
@@ -115,7 +118,7 @@ double Motor::Value2Angle(const std::uint16_t value)
     std::uint16_t clampedValue = clamp(value, _minValue, _maxValue);
     if(value < _minValue || value > _maxValue)
     {
-        Logger::getInstance(Logger::LogLvl::DEBUG) << __FILE__ << " : Angle2Value : Value off limits.";
+        Logger::getInstance(Logger::LogLvl::DEBUG) << __FILE__ << " : Value2Angle : Value off limits " << _id << " " << value-clampedValue << std::endl;
     }
 
 	return double(clampedValue - _offset)*dAngleConvertion;

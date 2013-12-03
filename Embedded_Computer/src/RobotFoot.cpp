@@ -40,6 +40,7 @@ int main(int argc, char * argv[])
         boost::asio::io_service boost_io;
         std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager(boost_io, config));
         std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, boost_io));
+        threadManager_ptr->create(80, [&boost_io]() mutable { boost_io.run(); }); 
 
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
         bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
@@ -53,7 +54,7 @@ int main(int argc, char * argv[])
         if (isMoving)
         {
             //StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
-            LegMotion legMotion(threadManager_ptr, motorControl_ptr, config);
+            std::shared_ptr<LegMotion> legMotion_ptr(new LegMotion(threadManager_ptr, motorControl_ptr, config));
         	Eigen::Vector2f pointD(1, 0);
         	Eigen::Vector2f startAngle(0, 0);
         	Eigen::Vector2f endAngle(0, 0);
@@ -61,9 +62,10 @@ int main(int argc, char * argv[])
         	bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
             int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
 
- //       	legMotion.Init("config/input.txt", activatedMotor, true, 3000);
-            legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
-            threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion.Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL); 
+           	legMotion_ptr->Init("config/input.txt", activatedMotor, true, 7000);
+            //legMotion_ptr->InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 7000);
+            threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion_ptr, itTimeMs]() mutable { legMotion_ptr->Run(itTimeMs); },
+                                      ThreadManager::Task::LEGS_CONTROL)); 
 
         	/*
         	// Init Walk task
@@ -78,7 +80,7 @@ int main(int argc, char * argv[])
 
         //threadManager_ptr->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);
         //threadManager_ptr->timer(); // Start timer
-        boost_io.run();
+        //boost_io.run();
         
         Logger::getInstance() << "END" << std::endl;
     }

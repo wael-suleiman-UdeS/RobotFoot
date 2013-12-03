@@ -11,7 +11,9 @@
 #include <boost/thread.hpp>
 
 #define DANGER_TEST_MOTION
+//#define DEBUG_TEST_MOTION
 
+using boost::filesystem::path;
 
 MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io) :
  _buttonStatus(4, false),
@@ -272,6 +274,12 @@ bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Co
        Logger::getInstance(Logger::LogLvl::ERROR) << "In function \"InitPosition\" : Error ready positions.";
        return false;
    }
+#ifdef DEBUG_TEST_MOTION
+   Logger::getInstance(Logger::LogLvl::DEBUG) << "";
+   std::copy(pos.begin(), pos.end(), std::ostream_iterator<double>(std::cout, " "));
+   Logger::getInstance(Logger::LogLvl::DEBUG) << std::endl;
+#endif   
+   
    std::vector<double> posDt;
 
    auto itrDesiredPos = desiredPos.begin();
@@ -510,17 +518,17 @@ string MotorControl::GetColorToTrack()
 }
 
 void MotorControl::TestCalculFun() {
-	_goalPosition = GetObjectDistance();
-	_ballPosition = GetObjectDistance();
+	_goalDistance = GetObjectDistance();
+	_ballDistance = GetObjectDistance();
 
 	ObjectPosition distance;
-	distance.x = _goalPosition.x - _ballPosition.x;
-	distance.y = _goalPosition.y - _ballPosition.y;
+	distance.x = _goalDistance.x - _ballDistance.x;
+	distance.y = _goalDistance.y - _ballDistance.y;
 
-	if (_ballPosition.x) {
+	if (_ballDistance.x) {
 		// Fuck off
 	}
-	else if (_ballPosition.y < 0) {
+	else if (_ballDistance.y < 0) {
 		// 180 - std::atan(std::abs(distance.y / distance.x));
 	}
 	else {
@@ -542,7 +550,7 @@ ObjectPosition MotorControl::GetObjectDistance()
 	angles[1] = std::abs(angles[1] * M_PI/180);
 
 	double euclidianDistance = _robotHeight * std::tan((M_PI/2)-angles[1]);
-	ObjectPosition objectPosition;
+	ObjectPosition objectDistance;
 	objectDistance.x = euclidianDistance * std::sin(angles[0]);
 	objectDistance.y = euclidianDistance * std::cos(angles[0]);
 
