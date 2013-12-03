@@ -7,10 +7,7 @@
 #include "logger.h"
 #include "ThreadManager.h"
 
-ThreadManager::ThreadManager(boost::asio::io_service &boost_io, XmlParser &config)
-:
-_timeoutMs(config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
-_timer(boost_io, _timeoutMs)
+ThreadManager::ThreadManager()
 {
 }
 

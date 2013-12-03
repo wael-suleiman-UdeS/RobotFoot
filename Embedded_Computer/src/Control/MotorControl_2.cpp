@@ -156,7 +156,7 @@ void MotorControl::InitializeConfigurations(const XmlParser &config)
 // Update motors status 
 void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
 {
-    auto header_it = msg.cbegin() + 1;
+    auto header_it = msg.cbegin() + 1; // +1 to skip 0xffff tag
     uint16le header = 0;
     while (Protocol::FindMsgHeader(header_it, msg, header))
     {

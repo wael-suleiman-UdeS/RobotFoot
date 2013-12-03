@@ -34,12 +34,15 @@ int main(int argc, char * argv[])
     // Set logging level  
     Logger::getInstance().setLogLvl(config.getStringValue(XmlPath::Root / "Logging" / "LogLvl"));
 
+    // Init IO_service for ThreadManager and MotorControl
+    boost::asio::io_service boost_io;
     try
     {
-        // Init IO_service for ThreadManager and MotorControl
-        boost::asio::io_service boost_io;
-        std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager(boost_io, config));
+        std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager());
         std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, boost_io));
+
+        // Start io task
+        threadManager_ptr->create(80, [&boost_io]() mutable { boost_io.run(); }, ThreadManager::Task::IO_CONTROL);
 
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
         bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
@@ -52,7 +55,7 @@ int main(int argc, char * argv[])
 
         if (isMoving)
         {
-            //StaticWalk staticWalk(threadManager_ptr, motorControl_ptr);
+            // Start Motion task
             LegMotion legMotion(threadManager_ptr, motorControl_ptr, config);
         	Eigen::Vector2f pointD(1, 0);
         	Eigen::Vector2f startAngle(0, 0);
@@ -64,21 +67,8 @@ int main(int argc, char * argv[])
  //       	legMotion.Init("config/input.txt", activatedMotor, true, 3000);
             legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
             threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion.Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL); 
-
-        	/*
-        	// Init Walk task
-        	staticWalk.init("config/input.txt", false, true, true);
-        	staticWalk.initPosition(7000);
-
-        	threadManager_ptr->attach(threadManager_ptr->create(90, boost::bind(&StaticWalk::run, &staticWalk,
-                                      config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs)),
-                                      ThreadManager::Task::LEGS_CONTROL));
-		     */
         }
-
-        //threadManager_ptr->create(90, boost::bind(&MotorControl::run, &motorControl), ThreadManager::Task::MOTOR_CONTROL);
-        //threadManager_ptr->timer(); // Start timer
-        boost_io.run();
+        threadManager->attach(ThreadManager::Task::IO_CONTROL);
         
         Logger::getInstance() << "END" << std::endl;
     }

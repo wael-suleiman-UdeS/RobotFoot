@@ -21,7 +21,7 @@
 class ThreadManager
 {
     public:
-        ThreadManager(boost::asio::io_service &boost_io, XmlParser &config);
+        ThreadManager();
         ~ThreadManager();
 
         enum Task
@@ -29,7 +29,8 @@ class ThreadManager
             UNKNOW = 0,
             LEGS_CONTROL,
             HEAD_CONTROL,
-            MOTOR_CONTROL
+            MOTOR_CONTROL,
+            IO_CONTROL
         };
 
         boost::thread::id create(unsigned int priority, const boost::function0<void>& thread_func, Task task = Task::UNKNOW);
