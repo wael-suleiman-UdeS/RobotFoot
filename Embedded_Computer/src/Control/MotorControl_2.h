@@ -94,7 +94,6 @@ private:
 
    void TestCalculFun();
 
-
    std::vector<bool> _buttonStatus;
    std::shared_ptr<STM32F4> _stm32f4;
    std::shared_ptr<ThreadManager> _threadManager;
@@ -102,9 +101,9 @@ private:
    boost::mutex _io_mutex;
    boost::circular_buffer<std::vector<char>> _rawPackets;
 
-   std::map<std::string, Motor*> _mapStrMotors;
-   std::map<int, Motor*> _mapIdMotors;
-   std::map<Config, std::vector<Motor*>> _configurations;
+   std::map<std::string, std::shared_ptr<Motor>> _mapStrMotors;
+   std::map<int, std::shared_ptr<Motor>> _mapIdMotors;
+   std::map<Config, std::vector<std::shared_ptr<Motor>>> _configurations;
 
    double _robotHeight;
    ObjectPosition _ballDistance;

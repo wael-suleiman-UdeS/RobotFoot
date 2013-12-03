@@ -95,7 +95,7 @@ void MotorControl::InitializeMotors(const XmlParser &config)
 		int max       = config.getIntValue(it->second / XmlPath::LimitMax);
         int playTime  = config.getIntValue(it->second / XmlPath::PlayTime);    
         bool isInversed = config.getIntValue(it->second / XmlPath::IsInversed);    
-        Motor *motor = new Motor(_stm32f4, it->first, id, offset, min, max, playTime, isInversed);
+        std::shared_ptr<Motor> motor(new Motor(_stm32f4, it->first, id, offset, min, max, playTime, isInversed));
 	    _mapStrMotors.insert(std::make_pair(it->first, motor));
         _mapIdMotors.insert(std::make_pair(id,motor));
     }
@@ -144,7 +144,7 @@ void MotorControl::InitializeConfigurations(const XmlParser &config)
 
     for (auto it = paths.begin(); it != paths.end(); ++it)
     {
-        std::vector<Motor*> motors;
+        std::vector<std::shared_ptr<Motor>> motors;
         std::vector<std::string> names = config.getChildrenStringValues(it->second);
         for (auto name = names.begin(); name != names.end(); ++name)
         {

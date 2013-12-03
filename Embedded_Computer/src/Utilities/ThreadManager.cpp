@@ -19,14 +19,6 @@ ThreadManager::~ThreadManager()
     }
 }
 
-void ThreadManager::timer()
-{
-    Logger::getInstance() << "ThreadManager timer()" << std::endl;
-    resume(Task::MOTOR_CONTROL);
-    _timer.expires_from_now(_timeoutMs);
-    _timer.async_wait(boost::bind(&ThreadManager::timer, this));
-}
-
 boost::thread::id ThreadManager::create(unsigned int priority, const boost::function0<void>& thread_func, Task task)
 {
     try
