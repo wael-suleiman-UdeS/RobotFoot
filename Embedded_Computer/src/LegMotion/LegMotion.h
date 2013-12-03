@@ -38,9 +38,9 @@ public:
     ~LegMotion();
 
     // Initialize configuration of mouvement
-    void InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles, const bool isStandAlone);
-    void InitKick(const bool isMotorActivated, float ratioKickSpeed, float kickTime);
-    void Init(const std::string filename, const bool isStandAlone);
+    void InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles);
+    void InitKick(float ratioKickSpeed, float kickTime);
+    void Init(const std::string filename);
 
     void SetTorque();
     // Move robot to initial position
@@ -57,8 +57,6 @@ private:
     bool m_bIsUsingAlgorithm;
     // Activated motor if true
     bool m_bIsMotorActivated;
-    // Activated stand alone mode without multithreading
-    bool m_bIsStandAlone;
     // Use COM instead of ZMP if true
     Trajectory::PelvisTrajectoryType m_pelvisTrajectoryType;
 

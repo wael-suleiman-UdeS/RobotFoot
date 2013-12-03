@@ -77,8 +77,8 @@
   </USB_Interface>
   <Motion value="1">
   	<ActivateMotor value="1"/>
-    <IterationTimeMs value="20"/>
-    <PerformInitPosition value="0"/>
+    <IterationTimeMs value="30"/>
+    <PerformInitPosition value="1"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
@@ -175,7 +175,7 @@
 		  <Offset value="547"/>
 		  <LimitMin value="473"/>
 		  <LimitMax value="592"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="1"/>
 	    </R_HIP_YAW>
 	    <L_HIP_YAW>
@@ -183,7 +183,7 @@
 		  <Offset value="518"/>
 		  <LimitMin value="469"/>
 		  <LimitMax value="582"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="1"/>
 	    </L_HIP_YAW>
 	    <R_HIP_ROLL>
@@ -191,7 +191,7 @@
 		  <Offset value="615"/>
 		  <LimitMin value="324"/>
 		  <LimitMax value="680"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="0"/>
 	    </R_HIP_ROLL>
 	    <L_HIP_ROLL>
@@ -199,7 +199,7 @@
 		  <Offset value="511"/>
 		  <LimitMin value="445"/>
 		  <LimitMax value="792"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="1"/>
 	    </L_HIP_ROLL>
 	    <R_HIP_PITCH>
@@ -207,7 +207,7 @@
 		  <Offset value="516"/>
 		  <LimitMin value="141"/>
 		  <LimitMax value="579"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="1"/>
 	    </R_HIP_PITCH>
 	    <L_HIP_PITCH>
@@ -215,7 +215,7 @@
 		  <Offset value="524"/>
 		  <LimitMin value="99"/>
 		  <LimitMax value="600"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="0"/>
 	    </L_HIP_PITCH>
 	    <R_KNEE>
@@ -223,7 +223,7 @@
 		  <Offset value="494"/>
 		  <LimitMin value="494"/>
 		  <LimitMax value="887"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="1"/>
 	    </R_KNEE>
 	    <L_KNEE>
@@ -231,7 +231,7 @@
 		  <Offset value="560"/>
 		  <LimitMin value="560"/>
 		  <LimitMax value="918"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="0"/>
 	    </L_KNEE>
 	      <R_ANKLE_PITCH>
@@ -239,7 +239,7 @@
 		  <Offset value="373"/>
 		  <LimitMin value="203"/>
 		  <LimitMax value="671"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="0"/>
 	    </R_ANKLE_PITCH>
 	    <L_ANKLE_PITCH>
@@ -247,7 +247,7 @@
 		  <Offset value="509"/>
 		  <LimitMin value="342"/>
 		  <LimitMax value="812"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="1"/>
 	    </L_ANKLE_PITCH>
 	    <R_ANKLE_ROLL>
@@ -255,7 +255,7 @@
 		  <Offset value="414"/>
 		  <LimitMin value="186"/>
 		  <LimitMax value="826"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="1"/>
 	    </R_ANKLE_ROLL>
 	    <L_ANKLE_ROLL>
@@ -263,7 +263,7 @@
 		  <Offset value="522"/>
 		  <LimitMin value="242"/>
 		  <LimitMax value="855"/>
-          <PlayTime value="0"/>
+          <PlayTime value="20"/>
           <IsInversed value="0"/>
 	    </L_ANKLE_ROLL>
       </Legs>
