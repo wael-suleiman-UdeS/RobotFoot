@@ -63,6 +63,11 @@ int main(int argc, char * argv[])
         Eigen::Vector2f pointD;
         Eigen::Vector2f startAngle;
         Eigen::Vector2f endAngle;
+
+        if (isMoving)
+        {
+            legMotion->InitPosition(3000);
+        }
         while (1) // main loop
         {
             if (isMoving)
@@ -83,10 +88,10 @@ int main(int argc, char * argv[])
                     endAngle = Eigen::Vector2f(0, 0);
                 }
                 // Start Motion task
-                // legMotion->Init("config/input.txt", activatedMotor, true, 3000);
-                legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
+                // legMotion->Init("config/input.txt", activatedMotor, true);
+                legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true);
                 threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL)); 
-                //legMotion->InitKick(activatedMotor, true, 3000, 2.0);
+                //legMotion->InitKick(activatedMotor, true, 2.0);
                 //threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL)); 
             while(1)
                 Logger::getInstance() << "END WALK" << std::endl;

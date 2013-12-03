@@ -73,6 +73,8 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 	m_vLeftPelvisAngleOffset = Eigen::Vector3f(LeftPelvisPitchCompensationOffset, LeftPelvisRollCompensationOffset, LeftPelvisYawCompensationOffset);
 
 	m_pelvisPermanentPitch = config.getIntValue(XmlPath::LegsMotors / XmlPath::PermanentPelvisPitch);
+
+	m_vInitialPosition = m_motionControl->GetInitialQPosition();
 }
 
 LegMotion::~LegMotion()
@@ -80,7 +82,7 @@ LegMotion::~LegMotion()
 }
 
 void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles,
-		const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime)
+		const bool isMotorActivated, const bool isStandAlone)
 {
 	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = true;
@@ -91,14 +93,9 @@ void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFe
 			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch, m_stepLength) );
 	m_trajectoryMatrix = traj->GenerateWalk(Eigen::Vector2f(0, 0), destination,
 			destinationFeetAngles, startingFeetAngles, m_pelvisTrajectoryType, m_stepTime, m_stepHeight);
-
-	m_vInitialPosition = m_motionControl->GetInitialQPosition();
-
-	//Set the initial position
-	InitPosition(msInitializationTime);
 }
 
-void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime, float kickTime)
+void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, float kickTime)
 {
 	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = true;
@@ -109,14 +106,9 @@ void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, c
 			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch, m_stepLength) );
 
 	m_trajectoryMatrix = traj->GenerateKick(0.5f);
-
-    m_vInitialPosition = m_motionControl->GetInitialQPosition();
-
-	//Set the initial position
-	InitPosition(msInitializationTime);
 }
 
-void LegMotion::Init(const std::string filename, const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime)
+void LegMotion::Init(const std::string filename, const bool isMotorActivated, const bool isStandAlone)
 {
 	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = false;
@@ -146,9 +138,6 @@ void LegMotion::Init(const std::string filename, const bool isMotorActivated, co
    // m_vInitialPosition = std::vector<float>(*m_vPosition.begin()); //Erreurs possible!!!
     m_vInitialPosition = (*m_vPosition.begin());
     m_itrEnd = m_vPosition.end();
-
-	//Set the initial position
-	InitPosition(msInitializationTime);
 }
 
 void LegMotion::InitPosition(const int msInitializationTime)
@@ -247,7 +236,7 @@ void LegMotion::Run(double msDt)
                 }
 
 				// Right Leg movement
-				if(m_bIsMotorActivated)
+				if(false && m_bIsMotorActivated)
 				{
 					motorsPosition.clear();
 		            m_motion->ReadPositions( motorsPosition, MotorControl::Config::ALL_LEGS );

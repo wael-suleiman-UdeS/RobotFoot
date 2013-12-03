@@ -39,19 +39,19 @@ public:
 
     // Initialize configuration of mouvement
     void InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles,
-    		const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime);
-    void InitKick(const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime, float kickTime);
-    void Init(const std::string filename, const bool isMotorActivated, const bool isStandAlone, const int msInitializationTime);
+    		const bool isMotorActivated, const bool isStandAlone);
+    void InitKick(const bool isMotorActivated, const bool isStandAlone, float kickTime);
+    void Init(const std::string filename, const bool isMotorActivated, const bool isStandAlone);
+
+    // Move robot to initial position
+    void InitPosition(const int msInitializationTime);
 
     // Start the mouvement
     void Run(double uDt);
 
 private:
 
-    // Move robot to initial position
-    void InitPosition(const int msInitializationTime);
     void ReorderQ(std::vector<double>& qVector);
-
 
     // Use Algorithm if true and text file input if false to generate mouvement
     bool m_bIsUsingAlgorithm;

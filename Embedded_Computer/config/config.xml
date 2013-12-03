@@ -1,6 +1,6 @@
 <RobotFoot>
   <Logging>
-    <LogLvl value="INFO" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
+    <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <Sizes>
   	<RobotHeight value="40" />
