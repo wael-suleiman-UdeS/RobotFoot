@@ -1,6 +1,6 @@
 <RobotFoot>
   <Logging>
-    <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
+    <LogLvl value="INFO" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <Sizes>
   	<RobotHeight value="40" />
@@ -77,7 +77,7 @@
   </USB_Interface>
   <Motion value="1">
   	<ActivateMotor value="1"/>
-    <IterationTimeMs value="100"/>
+    <IterationTimeMs value="50"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
@@ -144,7 +144,7 @@
 			</RightPelvis>
 			<LeftPelvis>
 				<Pitch value = "0" />
-				<Roll value = "0.35" />
+				<Roll value = "0.28" />
 				<Yaw value = "0.0" />
 				<x value = "0.02" />
 				<y value = "0.02" />
