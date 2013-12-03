@@ -49,6 +49,7 @@ namespace XmlPath
     extern const fs::path KD;
     extern const fs::path KI;
 
+    extern const fs::path PerformInitPosition;
     extern const fs::path PermanentPelvisPitch;
     extern const fs::path RightPelvisPitchCompensationOffset;
     extern const fs::path RightPelvisRollCompensationOffset;

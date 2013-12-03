@@ -22,7 +22,8 @@
 
 #include <memory>
 
-LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, XmlParser& config):
+LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, XmlParser& config, const bool isMotorActivated):
+	m_bIsMotorActivated(isMotorActivated),
     m_threadManager(threadManager_ptr),
     m_motion(mc_ptr)
 {
@@ -81,10 +82,8 @@ LegMotion::~LegMotion()
 {
 }
 
-void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles,
-		const bool isMotorActivated, const bool isStandAlone)
+void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles, const bool isStandAlone)
 {
-	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = true;
 	m_bIsStandAlone = isStandAlone;
 
@@ -95,9 +94,8 @@ void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFe
 			destinationFeetAngles, startingFeetAngles, m_pelvisTrajectoryType, m_stepTime, m_stepHeight);
 }
 
-void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, float kickTime)
+void LegMotion::InitKick(const bool isStandAlone, float ratioKickSpeed, float kickTime)
 {
-	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = true;
 	m_bIsStandAlone = isStandAlone;
 
@@ -105,12 +103,11 @@ void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, f
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
 			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch, m_stepLength) );
 
-	m_trajectoryMatrix = traj->GenerateKick(0.5f);
+	m_trajectoryMatrix = traj->GenerateKick(ratioKickSpeed, kickTime);
 }
 
-void LegMotion::Init(const std::string filename, const bool isMotorActivated, const bool isStandAlone)
+void LegMotion::Init(const std::string filename, const bool isStandAlone)
 {
-	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = false;
 	m_bIsStandAlone = isStandAlone;
 
@@ -140,7 +137,7 @@ void LegMotion::Init(const std::string filename, const bool isMotorActivated, co
     m_itrEnd = m_vPosition.end();
 }
 
-void LegMotion::InitPosition(const int msInitializationTime)
+void LegMotion::SetTorque()
 {
     // Enable Torque
     if( m_bIsMotorActivated && !m_motion->SetTorque(true, MotorControl::Config::ALL_LEGS ) )
@@ -148,8 +145,12 @@ void LegMotion::InitPosition(const int msInitializationTime)
         Logger::getInstance() << "SetTorque Failed\n";
         return;
     }
+    m_motion->WriteAll();
+}
 
-    if(m_bIsMotorActivated && !m_vInitialPosition.empty())
+void LegMotion::InitPosition(const int msInitializationTime)
+{
+     if(m_bIsMotorActivated && !m_vInitialPosition.empty())
     {
         if( !m_motion->InitPositions( m_vInitialPosition, MotorControl::Config::ALL_LEGS, msInitializationTime ) )
         {

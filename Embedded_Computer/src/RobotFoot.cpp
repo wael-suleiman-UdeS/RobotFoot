@@ -56,17 +56,24 @@ int main(int argc, char * argv[])
             threadManager_ptr->create(50, [headControlTask]() mutable { headControlTask.run(); }, ThreadManager::Task::HEAD_CONTROL);
         }
 
-        std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config));
         bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
+        bool performInitPos = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::PerformInitPosition);
+
         int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
-        
+
+        std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config, activatedMotor));
+
         Eigen::Vector2f pointD;
         Eigen::Vector2f startAngle;
         Eigen::Vector2f endAngle;
 
         if (isMoving)
         {
-            legMotion->InitPosition(3000);
+        	legMotion->SetTorque();
+        	if (performInitPos)
+        	{
+        		legMotion->InitPosition(3000);
+        	}
         }
         while (1) // main loop
         {
@@ -89,10 +96,11 @@ int main(int argc, char * argv[])
                 }
                 // Start Motion task
                 // legMotion->Init("config/input.txt", activatedMotor, true);
-                legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true);
+                //legMotion->InitWalk(pointD, startAngle, endAngle, true);
+                //threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL));
+
+                legMotion->InitKick(true, 0.4, 0.7);
                 threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL)); 
-                //legMotion->InitKick(activatedMotor, true, 2.0);
-                //threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL)); 
             while(1)
                 Logger::getInstance() << "END WALK" << std::endl;
             }

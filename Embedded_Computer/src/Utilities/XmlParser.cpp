@@ -35,6 +35,7 @@ namespace XmlPath
 
 	const path Threshold = "Threshold";
 
+	const path PerformInitPosition = "PerformInitPosition";
 	const path PermanentPelvisPitch = "COMPENSATION_OFFSET/PermanentPelvisPitch";
 	const path RightPelvisPitchCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Pitch";
 	const path RightPelvisRollCompensationOffset = "COMPENSATION_OFFSET/RightPelvis/Roll";

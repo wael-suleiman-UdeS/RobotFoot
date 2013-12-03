@@ -34,15 +34,15 @@ public:
 		Kick
 	};
 
-	LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, XmlParser& config);
+	LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, XmlParser& config, const bool isMotorActivated );
     ~LegMotion();
 
     // Initialize configuration of mouvement
-    void InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles,
-    		const bool isMotorActivated, const bool isStandAlone);
-    void InitKick(const bool isMotorActivated, const bool isStandAlone, float kickTime);
-    void Init(const std::string filename, const bool isMotorActivated, const bool isStandAlone);
+    void InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles, const bool isStandAlone);
+    void InitKick(const bool isMotorActivated, float ratioKickSpeed, float kickTime);
+    void Init(const std::string filename, const bool isStandAlone);
 
+    void SetTorque();
     // Move robot to initial position
     void InitPosition(const int msInitializationTime);
 

@@ -77,7 +77,8 @@
   </USB_Interface>
   <Motion value="1">
   	<ActivateMotor value="1"/>
-    <IterationTimeMs value="50"/>
+    <IterationTimeMs value="20"/>
+    <PerformInitPosition value="0"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
@@ -189,14 +190,14 @@
 		  <MotorID value="3"/>
 		  <Offset value="615"/>
 		  <LimitMin value="324"/>
-		  <LimitMax value="670"/>
+		  <LimitMax value="680"/>
           <PlayTime value="0"/>
           <IsInversed value="0"/>
 	    </R_HIP_ROLL>
 	    <L_HIP_ROLL>
 		  <MotorID value="4"/>
 		  <Offset value="511"/>
-		  <LimitMin value="450"/>
+		  <LimitMin value="445"/>
 		  <LimitMax value="792"/>
           <PlayTime value="0"/>
           <IsInversed value="1"/>
