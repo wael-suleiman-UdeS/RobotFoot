@@ -75,7 +75,7 @@ std::vector<double> MotionControl::GetInitialQPosition()
 std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatrixLine, std::vector<double> currentMotorsPosition)
 {
 	//pelvis angle offset
-	m_TdToPelvis(0) = currentTrajectoryMatrixLine(pelvisAnglePitch);
+	m_TdToPelvis(0) = currentTrajectoryMatrixLine(pelvisAngleYaw);
 	m_TdToPelvis(1) = currentTrajectoryMatrixLine(pelvisAngleRoll);
 	m_TdToPelvis(2) = currentTrajectoryMatrixLine(pelvisAngleYaw);
 
@@ -195,9 +195,9 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 	for(int i = 0; i < trajectoryMatrix.rows(); ++i)
 	{
 		//pelvis angle offset
-		m_TdToPelvis(0) = trajectoryMatrix(i, pelvisAnglePitch);
-		m_TdToPelvis(1) = trajectoryMatrix(i, pelvisAngleRoll);
-		m_TdToPelvis(2) = trajectoryMatrix(i, pelvisAngleYaw);
+		m_TdToPelvis(0) = trajectoryMatrix(i, pelvisAngleYaw);
+		m_TdToPelvis(1) = trajectoryMatrix(i, pelvisAnglePitch);
+		m_TdToPelvis(2) = trajectoryMatrix(i, pelvisAngleRoll);
 
 		bool calculationDone = false;
 		int NbIterations = 0;
@@ -284,16 +284,31 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 #endif
 }
 
-
-//Check right left*****************************************
 void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3f& eThetaToPelvis, Eigen::Vector3f& ePosToFoot,
 		Eigen::Vector3f& eThetaToFoot, Eigen::VectorXf& currentTrajectoryMatrixLine, Eigen::VectorXf qMotors)
 {
+	Eigen::Vector3f vRightFootPos;
+	vRightFootPos << currentTrajectoryMatrixLine(rightFootPosX), currentTrajectoryMatrixLine(rightFootPosY), currentTrajectoryMatrixLine(rightFootPosZ);
+	Eigen::Vector3f vLeftFootPos;
+	vLeftFootPos << currentTrajectoryMatrixLine(leftFootPosX), currentTrajectoryMatrixLine(leftFootPosY), currentTrajectoryMatrixLine(leftFootPosZ);
+	Eigen::Vector3f vPelvisPos;
+	vPelvisPos << currentTrajectoryMatrixLine(pelvisPosX), currentTrajectoryMatrixLine(pelvisPosY), currentTrajectoryMatrixLine(pelvisPosZ);
+
 	//Fixed foot position
 	Eigen::Vector3f Pe0p;
 	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
 	{
-		Pe0p = Eigen::Vector3f(currentTrajectoryMatrixLine(leftFootPosX), currentTrajectoryMatrixLine(leftFootPosY), currentTrajectoryMatrixLine(leftFootPosZ));
+		Eigen::Matrix3f baseChangeMatrix = EigenUtils::BaseChange(currentTrajectoryMatrixLine(leftFootAngleYaw));
+
+		vRightFootPos = vRightFootPos*baseChangeMatrix;
+		vLeftFootPos = vLeftFootPos*baseChangeMatrix;
+		vPelvisPos = vPelvisPos*baseChangeMatrix;
+
+		Pe0p = vLeftFootPos;
+
+		//Add the right foot yaw to the pelvis yaw
+		m_TdToPelvis(0) = m_TdToPelvis(0) + currentTrajectoryMatrixLine(leftFootAngleYaw);
+
 		//feet angle offset
 		m_TdToFoot(0) = currentTrajectoryMatrixLine(rightFootAnglePitch);
 		m_TdToFoot(1) = currentTrajectoryMatrixLine(rightFootAngleRoll);
@@ -301,11 +316,21 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	}
 	else
 	{
-		Pe0p = Eigen::Vector3f(currentTrajectoryMatrixLine(rightFootPosX), currentTrajectoryMatrixLine(rightFootPosY), currentTrajectoryMatrixLine(rightFootPosZ));
+		Eigen::Matrix3f baseChangeMatrix = EigenUtils::BaseChange(currentTrajectoryMatrixLine(rightFootAngleYaw));
+
+		vRightFootPos = vRightFootPos*baseChangeMatrix;
+		vLeftFootPos = vLeftFootPos*baseChangeMatrix;
+		vPelvisPos = vPelvisPos*baseChangeMatrix;
+
+		Pe0p = vRightFootPos;
+
+		//Add the right foot yaw to the pelvis yaw
+		m_TdToPelvis(0) = m_TdToPelvis(0) + currentTrajectoryMatrixLine(rightFootAngleYaw);
+
 		//feet angle offset
 		m_TdToFoot(0) = currentTrajectoryMatrixLine(leftFootAnglePitch);
 		m_TdToFoot(1) = currentTrajectoryMatrixLine(leftFootAngleRoll);
-		m_TdToFoot(2) = currentTrajectoryMatrixLine(leftFootAngleYaw);
+		m_TdToFoot(2) = currentTrajectoryMatrixLine(leftFootAngleYaw) - currentTrajectoryMatrixLine(pelvisAngleYaw);
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -314,7 +339,7 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	Eigen::Vector3f PeToPelvis = m_DH->MatrixHomogene(DenavitHartenberg::DHSection::ToPelvis).topRightCorner(3,1);//Position of End effector (pelvis) from ground foot
 
 	Eigen::Matrix4f tempPdToPelvis = Eigen::Matrix4f::Identity();
-	tempPdToPelvis.topRightCorner(3,1) = Eigen::Vector3f(currentTrajectoryMatrixLine(pelvisPosX), currentTrajectoryMatrixLine(pelvisPosY), currentTrajectoryMatrixLine(pelvisPosZ)) - Pe0p;
+	tempPdToPelvis.topRightCorner(3,1) = vPelvisPos - Pe0p;
 	tempPdToPelvis = m_DH->GetPR1() * tempPdToPelvis;
 	Eigen::Vector3f PdToPelvis =  tempPdToPelvis.topRightCorner(3,1);						//Position Desired for the end effector (pelvis) from ground foot
 
@@ -336,13 +361,13 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	Eigen::Matrix4f tempPdToFoot = Eigen::Matrix4f::Identity();
 	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
 	{
-		tempPdToFoot.col(3) = Eigen::Vector4f(currentTrajectoryMatrixLine(rightFootPosX)-PeToPelvisP(0),
-				currentTrajectoryMatrixLine(rightFootPosY)-PeToPelvisP(1), currentTrajectoryMatrixLine(rightFootPosZ)-PeToPelvisP(2), 1);
+		tempPdToFoot.col(3) = Eigen::Vector4f(vRightFootPos(0)-PeToPelvisP(0),
+				vRightFootPos(1)-PeToPelvisP(1), vRightFootPos(2)-PeToPelvisP(2), 1);
 	}
 	else
 	{
-		tempPdToFoot.col(3) = Eigen::Vector4f(currentTrajectoryMatrixLine(leftFootPosX)-PeToPelvisP(0),
-				currentTrajectoryMatrixLine(leftFootPosY)-PeToPelvisP(1), currentTrajectoryMatrixLine(leftFootPosZ)-PeToPelvisP(2), 1);
+		tempPdToFoot.col(3) = Eigen::Vector4f(vLeftFootPos(0)-PeToPelvisP(0),
+				vLeftFootPos(1)-PeToPelvisP(1), vLeftFootPos(2)-PeToPelvisP(2), 1);
 	}
 
 	tempPdToFoot = tempPdToFoot * m_DH->GetPR2Fin();
