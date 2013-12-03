@@ -68,7 +68,8 @@ setmetatable(Tags, { __index = function (self, idx)
     local v = rawget(self, idx);
     if v then return v; end
     
-    print('Unknown tag ' .. idx );
+    print([[
+********************Unknown tag ]] .. idx .. '********************');
     return function (s) 
                 return getlen(s); 
             end 
