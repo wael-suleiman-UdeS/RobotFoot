@@ -171,9 +171,9 @@ void LegMotion::Run(double msDt)
 			// Process mouvement with file as input
 			for(;m_itrPos != m_itrEnd; ++m_itrPos)
 			{
+		        boost::this_thread::interruption_point();
 				if (!m_bIsStandAlone)
 				{
-					boost::this_thread::interruption_point();
 					Logger::getInstance(Logger::LogLvl::DEBUG) << "LegMotion : wait for MotorControl" << std::endl;
 					m_threadManager->wait();
 				}
@@ -227,10 +227,10 @@ void LegMotion::Run(double msDt)
 			std::vector<double> motorsPosition = m_vInitialPosition;
 			for(int i = 0; i < m_trajectoryMatrix.rows(); ++i)
 			{
+			    boost::this_thread::interruption_point();
 				//boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();i
 				if (!m_bIsStandAlone)
 				{
-					boost::this_thread::interruption_point();
 					Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : wait for MotorControl" << std::endl;
 					m_threadManager->wait();
                 }
@@ -281,17 +281,12 @@ void LegMotion::Run(double msDt)
 				}
 			}
 		}
-        while(1)
-        {
-        
-                std::vector<double> dummy;
-                m_motion->HardGet(dummy, MotorControl::Config::ALL_LEGS);
-        }
     }
     catch(boost::thread_interrupted const &e)
     {
         Logger::getInstance() << "LEGS_CONTROL task Interrupted. " << std::endl;
     }
+    m_threadManager->end();
 }
 
 

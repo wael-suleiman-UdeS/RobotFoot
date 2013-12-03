@@ -60,6 +60,7 @@ int main(int argc, char * argv[])
         bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
         int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
         
+        ObjectPosition object;
         Eigen::Vector2f pointD;
         Eigen::Vector2f startAngle;
         Eigen::Vector2f endAngle;
@@ -77,24 +78,30 @@ int main(int argc, char * argv[])
                     motorControl_ptr->ResetObjectDistance();
                     while(motorControl_ptr->GetObjectDistance().x == 0);
                     
-                    pointD = Eigen::Vector2f(motorControl_ptr->GetObjectDistance().x, motorControl_ptr->GetObjectDistance().y);
-                    startAngle = Eigen::Vector2f(0, 0);
-                    endAngle = Eigen::Vector2f(0, 0);
+                    object = motorControl_ptr->GetObjectDistance();
                 }
                 else
                 {
-                    pointD = Eigen::Vector2f(0.2, 0);
-                    startAngle = Eigen::Vector2f(0, 0);
-                    endAngle = Eigen::Vector2f(0, 0);
+                    // Dummy object detected
+                    object.x = 0.1;
+                    object.y = 0;
+                    object.angle = 0;
                 }
-                // Start Motion task
-                // legMotion->Init("config/input.txt", activatedMotor, true);
-                legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true);
-                threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL)); 
-                //legMotion->InitKick(activatedMotor, true, 2.0);
-                //threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL)); 
-            while(1)
-                Logger::getInstance() << "END WALK" << std::endl;
+                pointD = Eigen::Vector2f(object.x, object.y);
+                startAngle = Eigen::Vector2f(0, 0);
+                endAngle = Eigen::Vector2f(0, 0);
+
+                // Choose kick or walk and start motion task
+                if (object.x <= 0.05)
+                {
+                    legMotion->InitKick(activatedMotor, true, 2.0);
+                }
+                else
+                {
+                    legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true);
+                }                    
+                threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL);
+                threadManager_ptr->attach(ThreadManager::Task::LEGS_CONTROL); 
             }
             else
             {
