@@ -49,10 +49,9 @@ public:
    ~MotorControl();
    
    enum class Button {
-      BUTTON_1 = 0,
-      BUTTON_2,
-      BUTTON_3,
-      BUTTON_4
+      BUTTON_1 = 0, // S2
+      BUTTON_2,     // S3
+      BUTTON_3      // S4
    };
 
    void run(int ms_sleepTime);
@@ -85,6 +84,7 @@ public:
    void HardGetMinAngles(std::vector<double>& angles, const Config config);
 
    ObjectPosition GetObjectDistance();
+   void ResetObjectDistance();
    std::string GetColorToTrack();
 
 private:
@@ -108,7 +108,5 @@ private:
    double _robotHeight;
    ObjectPosition _ballDistance;
    ObjectPosition _goalDistance;
-
-   boost::asio::io_service _boost_io;
 };
 #endif  //MOTOR_CONTROL_H

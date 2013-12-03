@@ -534,12 +534,10 @@ void MotorControl::TestCalculFun() {
 	else {
 		// 180 - std::atan(std::abs(distance.x / distance.y));
 	}
-
 }
 
 ObjectPosition MotorControl::GetObjectDistance()
 {
-
 	// todo: replace hard gets
 
 	std::vector<double> angles;
@@ -558,4 +556,11 @@ ObjectPosition MotorControl::GetObjectDistance()
 
 
 	return objectDistance;
+}
+
+void MotorControl::ResetObjectDistance()
+{
+    _ballDistance.x = 0;
+    _ballDistance.y = 0;
+    _ballDistance.angle = 0;
 }

@@ -14,7 +14,6 @@
 #include "Utilities/ThreadManager.h"
 #include "Control/MotorControl_2.h"
 #include "ImageProcessing/HeadControlTask.h"
-//#include "Demo/StaticWalking/StaticWalk.h"
 #include "LegMotion/LegMotion.h"
 
 int main(int argc, char * argv[])
@@ -44,32 +43,59 @@ int main(int argc, char * argv[])
         // Start io task
         threadManager_ptr->create(80, [&boost_io]() mutable { boost_io.run(); }, ThreadManager::Task::IO_CONTROL);
 
+        // Wait for button start event
+        while(!motorControl_ptr->GetButtonStatus(MotorControl::Button::BUTTON_3));
+
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
         bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
+        
         if (isTracking)
         {
             // Starting Head task
-        	HeadControlTask headControlTask(threadManager_ptr, config, motorControl_ptr);
-        	threadManager_ptr->create(50, [headControlTask]() mutable { headControlTask.run(); }, ThreadManager::Task::HEAD_CONTROL);
+            HeadControlTask headControlTask(threadManager_ptr, config, motorControl_ptr);
+            threadManager_ptr->create(50, [headControlTask]() mutable { headControlTask.run(); }, ThreadManager::Task::HEAD_CONTROL);
         }
 
-        if (isMoving)
-        {
-            // Start Motion task
-            std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config));
-        	Eigen::Vector2f pointD(1, 0);
-        	Eigen::Vector2f startAngle(0, 0);
-        	Eigen::Vector2f endAngle(0, 0);
-
-        	bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
-            int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
-
- //       	legMotion->Init("config/input.txt", activatedMotor, true, 3000);
-            legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
-            threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL); 
-        }
-        threadManager_ptr->attach(ThreadManager::Task::IO_CONTROL);
+        std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config));
+        bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
+        int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
         
+        Eigen::Vector2f pointD;
+        Eigen::Vector2f startAngle;
+        Eigen::Vector2f endAngle;
+        while (1) // main loop
+        {
+            if (isMoving)
+            {
+                if (isTracking)
+                {
+                    motorControl_ptr->ResetObjectDistance();
+                    while(motorControl_ptr->GetObjectDistance().x == 0);
+                    
+                    pointD = Eigen::Vector2f(motorControl_ptr->GetObjectDistance().x, motorControl_ptr->GetObjectDistance().y);
+                    startAngle = Eigen::Vector2f(0, 0);
+                    endAngle = Eigen::Vector2f(0, 0);
+                }
+                else
+                {
+                    pointD = Eigen::Vector2f(0.2, 0);
+                    startAngle = Eigen::Vector2f(0, 0);
+                    endAngle = Eigen::Vector2f(0, 0);
+                }
+                // Start Motion task
+                // legMotion->Init("config/input.txt", activatedMotor, true, 3000);
+                legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
+                threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL)); 
+                //legMotion->InitKick(activatedMotor, true, 3000, 2.0);
+                //threadManager_ptr->attach(threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL)); 
+            while(1)
+                Logger::getInstance() << "END WALK" << std::endl;
+            }
+            else
+            {
+                threadManager_ptr->attach(ThreadManager::Task::IO_CONTROL);
+            }
+        }
         Logger::getInstance() << "END" << std::endl;
     }
     catch (std::exception& e)
