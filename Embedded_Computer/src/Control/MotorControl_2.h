@@ -85,13 +85,13 @@ public:
    void HardGetMinAngles(std::vector<double>& angles, const Config config);
 
    ObjectPosition GetObjectDistance();
+   std::string GetColorToTrack();
 
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
    void InitPID(const XmlParser &config);
 
-   std::string GetColorToTrack();
    void TestCalculFun();
 
 
@@ -107,7 +107,6 @@ private:
    std::map<Config, std::vector<Motor*>> _configurations;
 
    double _robotHeight;
-   Position _objectDistance;
    ObjectPosition _ballDistance;
    ObjectPosition _goalDistance;
 

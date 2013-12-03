@@ -40,6 +40,7 @@ int main(int argc, char * argv[])
     {
         std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager());
         std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, boost_io));
+        threadManager_ptr->create(80, [&boost_io]() mutable { boost_io.run(); }); 
 
         // Start io task
         threadManager_ptr->create(80, [&boost_io]() mutable { boost_io.run(); }, ThreadManager::Task::IO_CONTROL);
@@ -56,7 +57,7 @@ int main(int argc, char * argv[])
         if (isMoving)
         {
             // Start Motion task
-            LegMotion legMotion(threadManager_ptr, motorControl_ptr, config);
+            std::shared_ptr<LegMotion> legMotion_ptr(new LegMotion(threadManager_ptr, motorControl_ptr, config));
         	Eigen::Vector2f pointD(1, 0);
         	Eigen::Vector2f startAngle(0, 0);
         	Eigen::Vector2f endAngle(0, 0);
@@ -66,9 +67,9 @@ int main(int argc, char * argv[])
 
  //       	legMotion.Init("config/input.txt", activatedMotor, true, 3000);
             legMotion.InitWalk(pointD, startAngle, endAngle, activatedMotor, true, 3000);
-            threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion.Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL); 
+            threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL); 
         }
-        threadManager->attach(ThreadManager::Task::IO_CONTROL);
+        threadManager_ptr->attach(ThreadManager::Task::IO_CONTROL);
         
         Logger::getInstance() << "END" << std::endl;
     }

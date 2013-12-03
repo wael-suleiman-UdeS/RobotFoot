@@ -1,6 +1,6 @@
 <RobotFoot>
   <Logging>
-    <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
+    <LogLvl value="INFO" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <Sizes>
   	<RobotHeight value="40" />
@@ -11,9 +11,8 @@
       <DeviceIndex value="0" />
     </Camera>
     <Colors>
-      <BallColor value="red">
-      <GoalColor value="pink">
-      
+      <BallColor value="red" />
+      <GoalColor value="pink" />
 	  <Color name="red">
 		<HSVcolor>
 		  <Hue value="215" />
@@ -74,16 +73,14 @@
     </Colors>
   </ImageProcessing>
   <USB_Interface>
-    <TTY value="/dev/ttyACM1" />
+    <TTY value="/dev/ttyACM0" />
   </USB_Interface>
   <Motion value="1">
-  	<ActivateMotor value="1" />
+  	<ActivateMotor value="1"/>
     <IterationTimeMs value="50"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
-  <Motion value="0">
-    <IterationTimeMs value="100"/>
     <Motors>
       <Head>
         <HEAD_PAN>
@@ -147,7 +144,7 @@
 			</RightPelvis>
 			<LeftPelvis>
 				<Pitch value = "0" />
-				<Roll value = "0.35" />
+				<Roll value = "0.28" />
 				<Yaw value = "0.0" />
 				<x value = "0.02" />
 				<y value = "0.02" />

@@ -29,7 +29,7 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 	float distanceThreshold = config.getIntValue(XmlPath::LegsMotors / XmlPath::DISTANCETHRESHOLD);
 	float angleThreshold = config.getIntValue(XmlPath::LegsMotors / XmlPath::ANGLETHRESHOLD);
 	int iterationMax = config.getIntValue(XmlPath::LegsMotors / XmlPath::ITERATIONMAX);
-	m_motionControl = new MotionControl(distanceThreshold, angleThreshold, iterationMax);
+	m_motionControl = std::make_shared<MotionControl>(distanceThreshold, angleThreshold, iterationMax);
 
 	m_stepHeight = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepHeight);
 	m_stepLength = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepLength);
@@ -77,7 +77,6 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 
 LegMotion::~LegMotion()
 {
-	delete m_motionControl;
 }
 
 void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles,
@@ -199,8 +198,13 @@ void LegMotion::Run(double msDt)
 				{
 					if (m_bIsStandAlone)
 					{
-						m_motion->HardSet( *m_itrPos, MotorControl::Config::ALL_LEGS );
-					}
+						//m_motion->HardSet( *m_itrPos, MotorControl::Config::ALL_LEGS );
+						if(!m_motion->SetPositions( *m_itrPos, MotorControl::Config::ALL_LEGS ) )
+						{
+							Logger::getInstance() << "SetPosition Failed\n";
+							break;
+						}
+                    }
 					else
 					{
 						if(!m_motion->SetPositions( *m_itrPos, MotorControl::Config::ALL_LEGS ) )
@@ -218,7 +222,8 @@ void LegMotion::Run(double msDt)
 
 				if (m_bIsStandAlone)
 				{
-					usleep(msDt*1000);
+					m_motion->WriteAll();
+                    usleep(msDt*1000);
 				}
 				else
 				{
@@ -242,10 +247,10 @@ void LegMotion::Run(double msDt)
                 }
 
 				// Right Leg movement
-				if(false && m_bIsMotorActivated)
+				if(m_bIsMotorActivated)
 				{
 					motorsPosition.clear();
-					m_motion->HardGet( motorsPosition, MotorControl::Config::ALL_LEGS );
+		            m_motion->ReadPositions( motorsPosition, MotorControl::Config::ALL_LEGS );
 				}
 
 				//Update Q
@@ -258,7 +263,11 @@ void LegMotion::Run(double msDt)
 				{
 					if (m_bIsStandAlone)
                     {
-                        m_motion->HardSet( motorsPosition, MotorControl::Config::ALL_LEGS );
+						if(!m_motion->SetPositions( motorsPosition, MotorControl::Config::ALL_LEGS ) )
+						{
+							Logger::getInstance() << "SetPosition Failed\n";
+							break;
+						}
                     }
 					else
 					{
@@ -272,6 +281,7 @@ void LegMotion::Run(double msDt)
 
 				if (m_bIsStandAlone)
 				{
+					m_motion->WriteAll();
 					usleep(msDt*1000);
 				}
 				else
