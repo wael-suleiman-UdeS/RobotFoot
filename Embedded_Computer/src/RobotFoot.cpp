@@ -37,19 +37,28 @@ int main(int argc, char * argv[])
     boost::asio::io_service boost_io;
     try
     {
-        bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
+        
         std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager());
         std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, boost_io));
-        std::shared_ptr<HeadControlTask> headControlTask(new HeadControlTask(threadManager_ptr, config, motorControl_ptr));
-        std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config, activatedMotor));
-        
+        std::shared_ptr<HeadControlTask> headControlTask;
+        std::shared_ptr<LegMotion> legMotion;
+       
+        bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
         bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
         bool performInitPos = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::PerformInitPosition);
 
         int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
+        if (isTracking)
+        {
+            headControlTask = std::make_shared<HeadControlTask>(threadManager_ptr, config, motorControl_ptr);
+        }
+        else if (isMoving)
+        {
+            legMotion = std::make_shared<LegMotion>(threadManager_ptr, motorControl_ptr, config, activatedMotor);
+        } 
 
-        ObjectPosition object;
+        ObjectPosition objectToTrack;
         Eigen::Vector2f pointD;
         Eigen::Vector2f startAngle;
         Eigen::Vector2f endAngle;
@@ -61,13 +70,13 @@ int main(int argc, char * argv[])
             // Wait for button start event
             while(motorControl_ptr->isPaused());
 
-            if (isTracking)
+            if (isTracking && headControlTask)
             {
                 // Starting Head task
                 threadManager_ptr->create(50, [headControlTask]() mutable { headControlTask->run(); }, ThreadManager::Task::HEAD_CONTROL);
             }
 
-            if (isMoving)
+            if (isMoving && legMotion)
             {
                 legMotion->SetTorque();
                 if (performInitPos)
@@ -81,29 +90,27 @@ int main(int argc, char * argv[])
                 {
                     if (isTracking)
                     {
-                        motorControl_ptr->ResetObjectDistance();
-                        while(motorControl_ptr->GetObjectDistance().x == 0);
-                        object = motorControl_ptr->GetObjectDistance();
-                        object.x /= 100;
-                        object.y /= 100;
-
+                        motorControl_ptr->SetObjectToTrack(MotorControl::Object::BALL);
+                        while(motorControl_ptr->GetObjectPosition().x == 0);
+                        objectToTrack = motorControl_ptr->GetObjectPosition();
+						objectToTrack.x /= 100;
+                        objectToTrack.y /= 100;
                     }
                     else
                     {
                         // Dummy object detected
-                        object.x = 0;
-                        object.y = 0.3;
-                        object.angle = 0;
+                        objectToTrack.x = 0.3;
+                        objectToTrack.y = 0;
+                        objectToTrack.angle = 0;
                     }
-                    Logger::getInstance(Logger::LogLvl::INFO) << "Object distance : " << object.y << std::endl;
-
-                    pointD = Eigen::Vector2f(object.y, 0);
+Logger::getInstance(Logger::LogLvl::INFO) << "Object distance : " << object.y << std::endl;
+                    pointD = Eigen::Vector2f(objectToTrack.y, 0);
                     startAngle = Eigen::Vector2f(0, 0);
                     endAngle = Eigen::Vector2f(0, 0);
                         
 
                     // Choose kick or walk and start motion task
-                    if (object.y <= 0.05)
+                    if (objectToTrack.y <= 0.05)
                     {          
                         legMotion->InitKick(0.4, 0.7);
                     }

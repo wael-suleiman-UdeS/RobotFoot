@@ -42,34 +42,6 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
 
 MotorControl::~MotorControl()
 {
-
-}
-
-// This method resume the LegMotion thread each X ms
-void MotorControl::run(int ms_sleepTime)
-{
-    try
-    {
-        while(1)
-        {
-			boost::this_thread::interruption_point();
-            boost::this_thread::sleep(boost::posix_time::milliseconds(ms_sleepTime));
-
-            if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
-            {
-                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl run() : Resuming LEGS_CONTROL thread" << std::endl; 
-            }
-            else
-            {
-                Logger::getInstance(Logger::LogLvl::ERROR) << "MotorControl run() : LEGS_CONTROL thread too slow for packet sending frequence." << std::endl;
-                std::exit(1);
-            }
-        }
-    }
-    catch(boost::thread_interrupted const &e)
-    {
-        Logger::getInstance() << "MOTOR_CONTROL task Interrupted. " << std::endl;
-    }  
 }
 
 // Populate the motor list
@@ -532,18 +504,16 @@ string MotorControl::GetColorToTrack()
    return _currentColor;
 }
 
-void MotorControl::TestCalculFun() {
-	_goalDistance = GetObjectDistance();
-	_ballDistance = GetObjectDistance();
-
+void MotorControl::ComputeAngle(ObjectPosition object_1, ObjectPosition object_2) 
+{
 	ObjectPosition distance;
-	distance.x = _goalDistance.x - _ballDistance.x;
-	distance.y = _goalDistance.y - _ballDistance.y;
+	distance.x = object_2.x - object_1.x;
+	distance.y = object_2.y - object_1.y;
 
-	if (_ballDistance.x < 0) {
+	if (object_1.x < 0) {
 		// Fuck off
 	}
-	else if (_ballDistance.y < 0) {
+	else if (object_1.y < 0) {
 		// 180 - std::atan(std::abs(distance.y / distance.x));
 	}
 	else {
@@ -551,31 +521,44 @@ void MotorControl::TestCalculFun() {
 	}
 }
 
-ObjectPosition MotorControl::GetObjectDistance()
+void MotorControl::SetObjectDistance(double xDistance, double yDistance)
 {
-	// todo: replace hard gets
-
-	std::vector<double> angles;
-	//_mc->ReadPositions(angles, MotorControl::Config::HEAD);
-	HardGet(angles, MotorControl::Config::HEAD);
-
-	angles[0] = angles[0] * M_PI/180;
-	angles[1] = std::abs(angles[1] * M_PI/180);
-
-	double euclidianDistance = _robotHeight * std::tan((M_PI/2)-angles[1]);
-	ObjectPosition objectDistance;
-	objectDistance.x = euclidianDistance * std::sin(angles[0]);
-	objectDistance.y = euclidianDistance * std::cos(angles[0]);
-
-	Logger::getInstance(Logger::LogLvl::DEBUG) << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
-
-
-	return objectDistance;
+	//todo
+	ObjectPosition objectPosition;
+	objectPosition.x = xDistance;
+	objectPosition.y = yDistance;
+	// if enum = ball
+	_ballDistance = objectPosition;
+	// else if enum = goal
+	_goalDistance = objectPosition;
 }
 
-void MotorControl::ResetObjectDistance()
+	return objectDistance;
+}*/
+
+void MotorControl::SetObjectToTrack(Object object)
 {
-    _ballDistance.x = 0;
-    _ballDistance.y = 0;
-    _ballDistance.angle = 0;
+    if (_trackingObjects.size() > (int) object)
+    {
+        _objectDistance.x = 0;
+        _objectDistance.y = 0;
+        _objectDistance.angle = 0;
+        _currentColor = _trackingObjects[(int)object];
+    }
+}
+   
+void MotorControl::SetObjectPosition(ObjectPosition object)
+{
+    _objectDistance = object;
+}
+
+ObjectPosition MotorControl::GetObjectPosition()
+{
+	//todo
+	return _objectDistance;
+}
+
+ObjectPosition MotorControl::GetObjectPosition()
+{
+    return _objectDistance;
 }
