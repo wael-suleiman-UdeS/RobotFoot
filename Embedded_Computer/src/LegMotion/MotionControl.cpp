@@ -11,6 +11,7 @@
 
 #include "Trajectory.h"
 #include "EigenUtils.h"
+#include "Utilities/logger.h"
 
 using namespace std;
 
@@ -23,9 +24,10 @@ const float ANGLE1 = 0.6;
 const float ANGLE2 = -1.2;
 }
 
-MotionControl::MotionControl(float distanceThreshold, float angleThreshold, int iterationMax)
+MotionControl::MotionControl(float distanceThreshold, float angleThreshold, float maxPosError, int iterationMax)
 : m_distanceThreshold(distanceThreshold)
 , m_angleThreshold(angleThreshold)
+, m_maxPosError(maxPosError)
 , m_nbIterationMax(iterationMax)
 {
 	m_TdToPelvis = Eigen::Vector3f(0,0,0);
@@ -132,6 +134,18 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 		m_DH->Update(qMotors);
 
 		CalculateError(ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot, currentTrajectoryMatrixLine, qMotors);
+
+		if(abs(ePosToPelvis.norm()) > m_maxPosError)
+		{
+
+			Logger::getInstance(Logger::LogLvl::ERROR) << "ePosToPelvis too big, value = " << ePosToPelvis.norm() << std::endl;
+			std::terminate();
+		}
+		if(abs(ePosToFoot.norm()) > m_maxPosError)
+		{
+			Logger::getInstance(Logger::LogLvl::ERROR) << "ePotToFoot too big, value = " << ePosToFoot.norm() << std::endl;
+			std::terminate();
+		}
 
 		calculationDone = ePosToPelvis.norm() < m_distanceThreshold && ePosToFoot.norm() < m_distanceThreshold &&
 				abs(eThetaToPelvis(0)) < m_angleThreshold && abs(eThetaToPelvis(1)) < m_angleThreshold && abs(eThetaToPelvis(2)) < m_angleThreshold &&
@@ -250,6 +264,11 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 			m_DH->Update(m_q);
 
 			CalculateError(ePosToPelvis, ePosToFoot, eThetaToPelvis, eThetaToFoot, matrixLine, m_q);
+
+			if(ePosToPelvis.norm() > m_maxPosError || ePosToFoot.norm() > m_maxPosError)
+			{
+				std::terminate();
+			}
 
 			calculationDone = ePosToPelvis.norm() < m_distanceThreshold && ePosToFoot.norm() < m_distanceThreshold &&
 					abs(eThetaToPelvis(0)) < m_angleThreshold && abs(eThetaToPelvis(1)) < m_angleThreshold && abs(eThetaToPelvis(2)) < m_angleThreshold &&

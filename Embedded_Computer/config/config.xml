@@ -80,7 +80,7 @@
   <Motion value="1">
   	<ActivateMotor value="1"/>
     <IterationTimeMs value="40"/>
-    <PerformInitPosition value="0"/>
+    <PerformInitPosition value="1"/>
     <KP value="440"/>
     <KD value="8000"/>
     <KI value="0"/>
@@ -133,6 +133,7 @@
 	  <DISTANCETHRESHOLD value = "0.002"/>
 	  <ANGLETHRESHOLD value = "0.02"/>
 	  <ITERATIONMAX value = "5"/>
+	  <MaxPosError value = "0.01"/>
 	<StepTime value = "0.6" />
 	<UseCOM value = "1" />
 	  <COMPENSATION_OFFSET>

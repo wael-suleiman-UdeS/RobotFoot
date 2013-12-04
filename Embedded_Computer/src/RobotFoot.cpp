@@ -102,6 +102,7 @@ int main(int argc, char * argv[])
                     pointD = Eigen::Vector2f(objectToTrack.x, 0);
                     startAngle = Eigen::Vector2f(0, 0);
                     endAngle = Eigen::Vector2f(0, 0);
+                        
 
                     // Choose kick or walk and start motion task
                     if (objectToTrack.x <= 0.05)
