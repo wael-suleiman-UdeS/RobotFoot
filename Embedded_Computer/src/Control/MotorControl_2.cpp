@@ -202,7 +202,7 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
 
                 if (buttonStruct.id >= 0 && buttonStruct.id < _buttonStatus.size())
                 {
-                    if (buttonStruct.id == 2 && buttonStruct.value)
+                    if (buttonStruct.id == 2 && buttonStruct.value >= 1)
                     {
                         _isPaused = !_isPaused;
                         if (_isPaused)
