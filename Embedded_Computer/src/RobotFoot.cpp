@@ -89,7 +89,7 @@ int main(int argc, char * argv[])
                     else
                     {
                         // Dummy object detected
-                        object.x = 0.1;
+                        object.x = 0.3;
                         object.y = 0;
                         object.angle = 0;
                     }
