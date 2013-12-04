@@ -66,6 +66,12 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 	float LeftFootxCompensationOffset = config.getIntValue(XmlPath::LegsMotors / XmlPath::LeftFootxCompensationOffset);
 	float LeftFootyCompensationOffset = config.getIntValue(XmlPath::LegsMotors / XmlPath::LeftFootyCompensationOffset);
 	float LeftFootzCompensationOffset = config.getIntValue(XmlPath::LegsMotors / XmlPath::LeftFootzCompensationOffset);
+    float PelvisKickOffsetRX = config.getIntValue(XmlPath::LegsMotors / XmlPath::PelvisKickOffsetRX);
+    float PelvisKickOffsetRY = config.getIntValue(XmlPath::LegsMotors / XmlPath::PelvisKickOffsetRY);
+    float KickBackOffsetRY = config.getIntValue(XmlPath::LegsMotors / XmlPath::KickBackOffsetRY);
+    float KickBackOffsetRZ = config.getIntValue(XmlPath::LegsMotors / XmlPath::KickBackOffsetRZ);
+    float KickForwardOffsetRY = config.getIntValue(XmlPath::LegsMotors / XmlPath::KickForwardOffsetRY);
+    float KickForwardOffsetRZ = config.getIntValue(XmlPath::LegsMotors / XmlPath::KickForwardOffsetRZ);
 
 	m_vRightFootPosOffset = Eigen::Vector3f(RightFootxCompensationOffset, RightFootyCompensationOffset, RightFootzCompensationOffset);
 	m_vRightFootAngleOffset = Eigen::Vector3f(RightFootPitchCompensationOffset, RightFootRollCompensationOffset, RightFootYawCompensationOffset);
@@ -75,6 +81,10 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 	m_vRightPelvisAngleOffset = Eigen::Vector3f(RightPelvisPitchCompensationOffset, RightPelvisRollCompensationOffset, RightPelvisYawCompensationOffset);
 	m_vLeftPelvisPosOffset = Eigen::Vector3f(LeftPelvisxCompensationOffset, LeftPelvisyCompensationOffset, LeftPelviszCompensationOffset);
 	m_vLeftPelvisAngleOffset = Eigen::Vector3f(LeftPelvisPitchCompensationOffset, LeftPelvisRollCompensationOffset, LeftPelvisYawCompensationOffset);
+
+    m_PelvisKickOffsetR = Eigen::Vector3f(PelvisKickOffsetRX, PelvisKickOffsetRY, 0);
+    m_KickBackOffsetR = Eigen::Vector3f(0, KickBackOffsetRY, KickBackOffsetRZ);
+    m_KickForwardOffsetR = Eigen::Vector3f(0, KickForwardOffsetRY, KickForwardOffsetRZ);
 
 	m_pelvisPermanentPitch = config.getIntValue(XmlPath::LegsMotors / XmlPath::PermanentPelvisPitch);
 
@@ -104,7 +114,7 @@ void LegMotion::InitKick(float ratioKickSpeed, float kickTime)
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
 			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch, m_stepLength) );
 
-	m_trajectoryMatrix = traj->GenerateKick(ratioKickSpeed, kickTime);
+	m_trajectoryMatrix = traj->GenerateKick(ratioKickSpeed, kickTime, m_PelvisKickOffsetR, m_KickBackOffsetR, m_KickForwardOffsetR);
 }
 
 void LegMotion::Init(const std::string filename)

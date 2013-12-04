@@ -155,7 +155,10 @@ myfiletraj.close();
 /** \brief Generates a matrix which contains the necessary information to perform a kick
  *
  */
-Eigen::MatrixXf Trajectory::GenerateKick( float kickSpeedRatio, float movementTime )
+Eigen::MatrixXf Trajectory::GenerateKick( float kickSpeedRatio, float movementTime,
+		const Eigen::Vector3f& pelvisKickOffsetR,
+		const Eigen::Vector3f& kickBackOffsetR,
+		const Eigen::Vector3f& kickForwardOffsetR )
 {
 	//Clamp 0.1 to 1
 	kickSpeedRatio = min(max(kickSpeedRatio, 0.1f), 1.0f);
@@ -168,13 +171,16 @@ Eigen::MatrixXf Trajectory::GenerateKick( float kickSpeedRatio, float movementTi
 	startingPointP << 0.0f, 0.0f, m_ZMPHeight, 0.0f, 0.0f, 0.0f;
 
 	Eigen::VectorXf zmpOverFixedFootP(6);
-	zmpOverFixedFootP << -0.06f, 0.02f, m_ZMPHeight, 0.0f, 0.0f, -0.2f;
+	//zmpOverFixedFootP << -0.06f, 0.02f, m_ZMPHeight, 0.0f, 0.0f, -0.2f;
+	zmpOverFixedFootP << pelvisKickOffsetR(0), pelvisKickOffsetR(1), m_ZMPHeight, 0.0f, 0.0f, -0.2f;
 
 	Eigen::VectorXf kickingFootBackR(6);
-	kickingFootBackR << m_dLeg, -0.08f, 0.04f, 0.0f, 0.0f, 0.0f;
+	//kickingFootBackR << m_dLeg, -0.08f, 0.04f, 0.0f, 0.0f, 0.0f;
+	kickingFootBackR << m_dLeg, kickBackOffsetR(1), kickBackOffsetR(2), 0.0f, 0.0f, 0.0f;
 
 	Eigen::VectorXf kickingFootForwardR(6);
-	kickingFootForwardR << m_dLeg, 0.1f, 0.03f, -0.2f, 0.0f, 0.0f;
+	//kickingFootForwardR << m_dLeg, 0.1f, 0.03f, -0.2f, 0.0f, 0.0f;
+	kickingFootForwardR << m_dLeg, kickForwardOffsetR(1), kickForwardOffsetR(2), -0.3f, 0.0f, 0.0f;
 
 	int matrixSize = 4*movementTime/m_dTime + kickSpeedRatio*movementTime/m_dTime;
 	Eigen::MatrixXf finalMatrix(matrixSize, 20);

@@ -76,6 +76,16 @@ namespace XmlPath
     extern const fs::path LeftFootyCompensationOffset;
     extern const fs::path LeftFootzCompensationOffset;
 
+    extern const fs::path PelvisKickOffsetRX;
+    extern const fs::path PelvisKickOffsetRY;
+    extern const fs::path KickBackOffsetRY;
+    extern const fs::path KickBackOffsetRZ;
+    extern const fs::path KickForwardOffsetRY;
+    extern const fs::path KickForwardOffsetRZ;
+    extern const fs::path KickSpeedRatio;
+    extern const fs::path MouvementTime;
+    extern const fs::path DistanceToKick;
+
     extern const fs::path UseCOM;
     extern const fs::path DISTANCETHRESHOLD;
     extern const fs::path ANGLETHRESHOLD;

@@ -48,6 +48,11 @@ int main(int argc, char * argv[])
         bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
         bool performInitPos = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::PerformInitPosition);
 
+        float distanceToKick = config.getIntValue(XmlPath::LegsMotors / XmlPath::DistanceToKick);
+        float KickSpeedRatio = config.getIntValue(XmlPath::LegsMotors / XmlPath::KickSpeedRatio);
+        float MouvementTime = config.getIntValue(XmlPath::LegsMotors / XmlPath::MouvementTime);
+
+
         int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
         if (isTracking)
         {
@@ -111,9 +116,9 @@ int main(int argc, char * argv[])
                         
 
                     // Choose kick or walk and start motion task
-                    if (objectToTrack.y <= 0.05)
+                    if (objectToTrack.y <= distanceToKick)
                     {          
-                        legMotion->InitKick(0.4, 0.7);
+                        legMotion->InitKick(KickSpeedRatio, MouvementTime);
                     }
                     else
                     {

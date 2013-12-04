@@ -171,6 +171,21 @@
 				<y value = "0" />
 				<z value = "0" />
 			</LeftFoot>
+			<PelvisKick>
+				<x value = "-0.06" />
+				<y value = "0.02" />
+			</PelvisKick>
+			<KickBackOffset>
+				<y value = "-0.11" />
+				<z value = "0.04" />
+			</KickBackOffset>
+			<KickForwardOffset>
+				<y value = "0.1" />
+				<z value = "0.03" />
+			</KickForwardOffset>
+			<KickSpeedRatio value = "0.2" />
+			<MouvementTime value = "0.7" />
+			<DistanceToKick value = "0.07" />
 	  </COMPENSATION_OFFSET>
 	  <StepHeight value = "0.04"/>
 	  <StepLength value = "0.05"/>

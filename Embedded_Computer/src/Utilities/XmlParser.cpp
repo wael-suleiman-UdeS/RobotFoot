@@ -62,6 +62,16 @@ namespace XmlPath
 	const path LeftFootyCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/y";
 	const path LeftFootzCompensationOffset = "COMPENSATION_OFFSET/LeftFoot/z";
 
+    const path PelvisKickOffsetRX = "COMPENSATION_OFFSET/PelvisKick/x";
+    const path PelvisKickOffsetRY = "COMPENSATION_OFFSET/PelvisKick/y";
+    const path KickBackOffsetRY = "COMPENSATION_OFFSET/KickBackOffset/y";
+    const path KickBackOffsetRZ = "COMPENSATION_OFFSET/KickBackOffset/z";
+    const path KickForwardOffsetRY = "COMPENSATION_OFFSET/KickForwardOffset/y";
+    const path KickForwardOffsetRZ = "COMPENSATION_OFFSET/KickForwardOffset/z";
+    const path KickSpeedRatio = "COMPENSATION_OFFSET/KickSpeedRatio";
+    const path MouvementTime = "COMPENSATION_OFFSET/MouvementTime";
+    const path DistanceToKick = "COMPENSATION_OFFSET/DistanceToKick";
+
 
 	const path UseCOM = "UseCOM";
 	const path DISTANCETHRESHOLD = "DISTANCETHRESHOLD";

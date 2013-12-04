@@ -113,7 +113,7 @@ void ObjectTracker::track(Point objectPosition)
 
 	if (abs(_objectError.x) > _threshold && abs(_objectError.y) > _threshold)
 	{
-		//processObjectDistance();
+		processObjectDistance();
 	}
 
     Logger::getInstance(Logger::LogLvl::DEBUG) << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
@@ -167,7 +167,7 @@ void ObjectTracker::scan() {
 
 void ObjectTracker::processObjectDistance()
 {
-	cv::Point radianAngle;
+	ObjectPosition radianAngle;
 
 	radianAngle.x = _currentAngle.x * M_PI/180;
 	radianAngle.y = std::abs(_currentAngle.y * M_PI/180);
