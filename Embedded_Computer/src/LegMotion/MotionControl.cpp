@@ -294,43 +294,48 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	Eigen::Vector3f vPelvisPos;
 	vPelvisPos << currentTrajectoryMatrixLine(pelvisPosX), currentTrajectoryMatrixLine(pelvisPosY), currentTrajectoryMatrixLine(pelvisPosZ);
 
+	Eigen::Vector3f vDesiredThetaToPelvis;
+	Eigen::Vector3f vDesiredThetaToFoot;
+
 	//Fixed foot position
 	Eigen::Vector3f Pe0p;
 	if(currentTrajectoryMatrixLine(groundedFoot) == DenavitHartenberg::Leg::GroundLeft)
 	{
 		Eigen::Matrix3f baseChangeMatrix = EigenUtils::BaseChange(currentTrajectoryMatrixLine(leftFootAngleYaw));
 
-		vRightFootPos = vRightFootPos*baseChangeMatrix;
-		vLeftFootPos = vLeftFootPos*baseChangeMatrix;
-		vPelvisPos = vPelvisPos*baseChangeMatrix;
+		vRightFootPos = vRightFootPos.transpose()*baseChangeMatrix;
+		vLeftFootPos = vLeftFootPos.transpose()*baseChangeMatrix;
+		vPelvisPos = vPelvisPos.transpose()*baseChangeMatrix;
 
 		Pe0p = vLeftFootPos;
 
 		//Add the right foot yaw to the pelvis yaw
-		m_TdToPelvis(0) = m_TdToPelvis(0) + currentTrajectoryMatrixLine(leftFootAngleYaw);
+		vDesiredThetaToPelvis = m_TdToPelvis;
+		vDesiredThetaToPelvis(0) = -m_TdToPelvis(0) + currentTrajectoryMatrixLine(leftFootAngleYaw);
 
 		//feet angle offset
-		m_TdToFoot(0) = currentTrajectoryMatrixLine(rightFootAnglePitch);
-		m_TdToFoot(1) = currentTrajectoryMatrixLine(rightFootAngleRoll);
-		m_TdToFoot(2) = currentTrajectoryMatrixLine(rightFootAngleYaw);
+		vDesiredThetaToFoot(0) = currentTrajectoryMatrixLine(rightFootAnglePitch);
+		vDesiredThetaToFoot(1) = currentTrajectoryMatrixLine(rightFootAngleRoll);
+		vDesiredThetaToFoot(2) = currentTrajectoryMatrixLine(rightFootAngleYaw) - currentTrajectoryMatrixLine(pelvisAngleYaw);
 	}
 	else
 	{
 		Eigen::Matrix3f baseChangeMatrix = EigenUtils::BaseChange(currentTrajectoryMatrixLine(rightFootAngleYaw));
 
-		vRightFootPos = vRightFootPos*baseChangeMatrix;
-		vLeftFootPos = vLeftFootPos*baseChangeMatrix;
-		vPelvisPos = vPelvisPos*baseChangeMatrix;
+		vRightFootPos = vRightFootPos.transpose()*baseChangeMatrix;
+		vLeftFootPos = vLeftFootPos.transpose()*baseChangeMatrix;
+		vPelvisPos = vPelvisPos.transpose()*baseChangeMatrix;
 
 		Pe0p = vRightFootPos;
 
 		//Add the right foot yaw to the pelvis yaw
-		m_TdToPelvis(0) = m_TdToPelvis(0) + currentTrajectoryMatrixLine(rightFootAngleYaw);
+		vDesiredThetaToPelvis = m_TdToPelvis;
+		vDesiredThetaToPelvis(0) = -m_TdToPelvis(0) + currentTrajectoryMatrixLine(rightFootAngleYaw);
 
 		//feet angle offset
-		m_TdToFoot(0) = currentTrajectoryMatrixLine(leftFootAnglePitch);
-		m_TdToFoot(1) = currentTrajectoryMatrixLine(leftFootAngleRoll);
-		m_TdToFoot(2) = currentTrajectoryMatrixLine(leftFootAngleYaw) - currentTrajectoryMatrixLine(pelvisAngleYaw);
+		vDesiredThetaToFoot(0) = currentTrajectoryMatrixLine(leftFootAnglePitch);
+		vDesiredThetaToFoot(1) = currentTrajectoryMatrixLine(leftFootAngleRoll);
+		vDesiredThetaToFoot(2) = currentTrajectoryMatrixLine(leftFootAngleYaw) - currentTrajectoryMatrixLine(pelvisAngleYaw);
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -346,7 +351,7 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	m_DH->UpdateTe(qMotors);
 
 	ePosToPelvis = PdToPelvis - PeToPelvis;															//Error on the Position (pelvis) from ground foot
-	eThetaToPelvis = m_TdToPelvis - m_DH->GetTeToPelvis();											//Error on the Angle (pelvis) from ground foot
+	eThetaToPelvis = vDesiredThetaToPelvis - m_DH->GetTeToPelvis();									//Error on the Angle (pelvis) from ground foot
 
 	/////////////////////////////////////////////////////////////////
 	//Pelvis to moving foot
@@ -374,6 +379,6 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 	Eigen::Vector3f PdToFoot =  tempPdToFoot.topRightCorner(3,1); 									//Position Desired for the end effector (foot) for moving foot
 
 	ePosToFoot = PdToFoot - PeToFoot;																//Error on the Position (foot) for moving foot
-	eThetaToFoot = m_TdToFoot - m_DH->GetTeToFoot();													//Error on the Angle (foot) for moving foot
+	eThetaToFoot = vDesiredThetaToFoot - m_DH->GetTeToFoot();										//Error on the Angle (foot) for moving foot
 }
 

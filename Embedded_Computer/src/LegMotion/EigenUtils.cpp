@@ -82,6 +82,7 @@ namespace EigenUtils
 	{
 		Eigen::Matrix3f matrix;
 		matrix << cos(angle), -sin(angle), 0.0f, sin(angle), cos(angle), 0.0f, 0.0f, 0.0f, 1.0f;
+		return matrix;
 	}
 
 }
