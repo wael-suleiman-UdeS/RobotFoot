@@ -671,6 +671,12 @@ static uint32_t DCD_WriteEmptyTxFifo(USB_OTG_CORE_HANDLE *pdev, uint32_t epnum)
   ep = &pdev->dev.in_ep[epnum];
 
   len = ep->xfer_len - ep->xfer_count;
+  if (!len)
+  {
+      const uint32_t fifoemptymsk = 1 << ep->num;
+      USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, fifoemptymsk, 0);
+      return 0;
+  }
 
   if (len > ep->maxpacket)
   {
