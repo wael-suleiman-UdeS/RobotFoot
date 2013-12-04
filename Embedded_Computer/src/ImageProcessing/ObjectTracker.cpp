@@ -67,7 +67,7 @@ ObjectTracker::ObjectTracker(std::shared_ptr<ThreadManager> threadManager_ptr, s
 
 void ObjectTracker::track(Point objectPosition)
 {
-	Logger::getInstance() << "Object distance: " << _mc->GetObjectDistance() << " cm" << std::endl;
+	Logger::getInstance() << "Object distance: " << _mc->GetObjectPosition() << " cm" << std::endl;
     Logger::getInstance() << "Object position: " << objectPosition.x << ", " << objectPosition.y << std::endl;
     Logger::getInstance() << "No object count: " << _noObjectCount << "/" << _noObjectMaxCount << std::endl;
 

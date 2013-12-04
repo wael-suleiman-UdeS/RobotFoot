@@ -19,7 +19,8 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
  _buttonStatus(3, false),
  _threadManager(threadManager_ptr),
  _rawPackets(20),
- _isPaused(true)
+ _isPaused(true),
+ _currentColor("red")
 {
     try
     {
@@ -29,7 +30,10 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
         _robotHeight = config.getIntValue(XmlPath::Root / XmlPath::Sizes / "RobotHeight");
         _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateMotorStatus(a); });
 
-        _trackingColors = config.getChildrenStringValues(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Objects);
+        _trackingObjects = config.getChildrenStringValues(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Objects);
+        _objectDistance.x = 0;
+        _objectDistance.y = 0;
+        _objectDistance.angle =0;
     }
     catch (std::exception& e)
     {
@@ -41,34 +45,6 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
 
 MotorControl::~MotorControl()
 {
-
-}
-
-// This method resume the LegMotion thread each X ms
-void MotorControl::run(int ms_sleepTime)
-{
-    try
-    {
-        while(1)
-        {
-			boost::this_thread::interruption_point();
-            boost::this_thread::sleep(boost::posix_time::milliseconds(ms_sleepTime));
-
-            if (_threadManager->resume(ThreadManager::Task::LEGS_CONTROL))
-            {
-                Logger::getInstance(Logger::LogLvl::DEBUG) << "MotorControl run() : Resuming LEGS_CONTROL thread" << std::endl; 
-            }
-            else
-            {
-                Logger::getInstance(Logger::LogLvl::ERROR) << "MotorControl run() : LEGS_CONTROL thread too slow for packet sending frequence." << std::endl;
-                std::exit(1);
-            }
-        }
-    }
-    catch(boost::thread_interrupted const &e)
-    {
-        Logger::getInstance() << "MOTOR_CONTROL task Interrupted. " << std::endl;
-    }  
 }
 
 // Populate the motor list
@@ -531,18 +507,16 @@ string MotorControl::GetColorToTrack()
    return _currentColor;
 }
 
-void MotorControl::TestCalculFun() {
-	_goalDistance = GetObjectDistance();
-	_ballDistance = GetObjectDistance();
-
+void MotorControl::ComputeAngle(ObjectPosition object_1, ObjectPosition object_2) 
+{
 	ObjectPosition distance;
-	distance.x = _goalDistance.x - _ballDistance.x;
-	distance.y = _goalDistance.y - _ballDistance.y;
+	distance.x = object_2.x - object_1.x;
+	distance.y = object_2.y - object_1.y;
 
-	if (_ballDistance.x < 0) {
+	if (object_1.x < 0) {
 		// Fuck off
 	}
-	else if (_ballDistance.y < 0) {
+	else if (object_1.y < 0) {
 		// 180 - std::atan(std::abs(distance.y / distance.x));
 	}
 	else {
@@ -550,6 +524,7 @@ void MotorControl::TestCalculFun() {
 	}
 }
 
+/*
 ObjectPosition MotorControl::GetObjectDistance()
 {
 	// todo: replace hard gets
@@ -570,11 +545,25 @@ ObjectPosition MotorControl::GetObjectDistance()
 
 
 	return objectDistance;
+}*/
+
+void MotorControl::SetObjectToTrack(Object object)
+{
+    if (_trackingObjects.size() > (int) object)
+    {
+        _objectDistance.x = 0;
+        _objectDistance.y = 0;
+        _objectDistance.angle = 0;
+        _currentColor = _trackingObjects[(int)object];
+    }
+}
+   
+void MotorControl::SetObjectPosition(ObjectPosition object)
+{
+    _objectDistance = object;
 }
 
-void MotorControl::ResetObjectDistance()
+ObjectPosition MotorControl::GetObjectPosition()
 {
-    _ballDistance.x = 0;
-    _ballDistance.y = 0;
-    _ballDistance.angle = 0;
+    return _objectDistance;
 }

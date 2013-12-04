@@ -59,7 +59,6 @@ public:
    MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io);
    ~MotorControl();
 
-   void run(int ms_sleepTime);
    void WriteAll();
    bool InitPositions( const std::vector<double>& vPos,
                        const Config config,
@@ -89,16 +88,17 @@ public:
    void HardGetMaxAngles(std::vector<double>& angles, const Config config);
    void HardGetMinAngles(std::vector<double>& angles, const Config config);
 
-   ObjectPosition GetObjectDistance();
-   void ResetObjectDistance();
    std::string GetColorToTrack();
+   void SetObjectPosition(ObjectPosition object); 
+   ObjectPosition GetObjectPosition();
+   void SetObjectToTrack(Object object);
 
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
    void InitPID(const XmlParser &config);
 
-   void TestCalculFun();
+   void ComputeAngle(ObjectPosition object_1, ObjectPosition object_2);
 
    std::vector<bool> _buttonStatus;
    std::shared_ptr<STM32F4> _stm32f4;
@@ -113,10 +113,9 @@ private:
 
    double _robotHeight;
    bool   _isPaused;
-   ObjectPosition _ballDistance;
-   ObjectPosition _goalDistance;
+   ObjectPosition _objectDistance;
    
-   std::vector<std::string> _trackingColors; 
+   std::vector<std::string> _trackingObjects; 
    std::string _currentColor;
 };
 #endif  //MOTOR_CONTROL_H
