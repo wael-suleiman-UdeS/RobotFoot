@@ -19,8 +19,7 @@ namespace XmlPath
 	const path HSVcolor = "HSVcolor";
 	const path CircleSpec = "CircleSpec";
 
-	const path BallColor = "BallColor";
-	const path GoalColor = "GoalColor";
+	const path Objects = "Objects";
 
 	const path Motion = "Motion";
 	const path Motors = "Motors";

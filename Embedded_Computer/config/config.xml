@@ -11,8 +11,6 @@
       <DeviceIndex value="0" />
     </Camera>
     <Colors>
-      <BallColor value="red" />
-      <GoalColor value="pink" />
 	  <Color name="red">
 		<HSVcolor>
 		  <Hue value="215" />
@@ -71,6 +69,10 @@
 		</CircleSpec>
 	  </Color>
     </Colors>
+    <Objects>
+        <BALL value="red" />
+        <GOAL value="pink" />
+    </Objects>
   </ImageProcessing>
   <USB_Interface>
     <TTY value="/dev/ttyACM0" />

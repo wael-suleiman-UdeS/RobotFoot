@@ -45,25 +45,31 @@ public:
       NUM_TEST
    };
 
-   MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io);
-   ~MotorControl();
-   
    enum class Button {
       BUTTON_1 = 0, // S2
       BUTTON_2,     // S3
       BUTTON_3      // S4
    };
 
+   enum class Object {
+      BALL = 0,
+      GOAL
+   };
+   
+   MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io);
+   ~MotorControl();
+
    void run(int ms_sleepTime);
    void WriteAll();
    bool InitPositions( const std::vector<double>& vPos,
-                      const Config config,
-                      const double msTotalTime = 10000.0,
-                      const double msDt = 16);
+                       const Config config,
+                       const double msTotalTime = 10000.0,
+                       const double msDt = 16);
   
    void UpdateMotorStatus(const std::vector<char>& msg);
    void GetMotorStatus(std::vector<Protocol::MotorStruct> &status, const Config config);
    bool GetButtonStatus(const Button button_enum);
+   bool isPaused();
 
    bool SetTorque(bool value, const Config config);
 
@@ -106,7 +112,11 @@ private:
    std::map<Config, std::vector<std::shared_ptr<Motor>>> _configurations;
 
    double _robotHeight;
+   bool   _isPaused;
    ObjectPosition _ballDistance;
    ObjectPosition _goalDistance;
+   
+   std::vector<std::string> _trackingColors; 
+   std::string _currentColor;
 };
 #endif  //MOTOR_CONTROL_H

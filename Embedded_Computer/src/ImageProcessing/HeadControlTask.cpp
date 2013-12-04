@@ -35,8 +35,8 @@ _mc(mc_ptr)
 	_durationIndex = 0;
 	_guiEnabled = true;
 
-	string ballColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::BallColor);
-	string goalColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::GoalColor);
+	//string ballColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::BallColor);
+	//string goalColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::GoalColor);
 
 	_tracker = std::make_shared<ObjectTracker>(_threadManager, mc_ptr, Camera::getInstance().getCenter());	
     _tracker->initializeHack(_config); // todo: holy hack
@@ -92,6 +92,7 @@ void HeadControlTask::run()
 	{
 		Logger::getInstance() << "Catch an exeption in HeadControlTask.run()" << std::endl;
 	}
+    _threadManager->end();
 }
 
 void HeadControlTask::setColor()

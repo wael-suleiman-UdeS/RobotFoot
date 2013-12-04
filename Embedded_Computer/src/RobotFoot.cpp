@@ -39,24 +39,11 @@ int main(int argc, char * argv[])
     {
         std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager());
         std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, boost_io));
-
-        // Start io task
-        threadManager_ptr->create(80, [&boost_io]() mutable { boost_io.run(); }, ThreadManager::Task::IO_CONTROL);
-
-        // Wait for button start event
-        while(!motorControl_ptr->GetButtonStatus(MotorControl::Button::BUTTON_3));
-
+        std::shared_ptr<HeadControlTask> headControlTask(new HeadControlTask(threadManager_ptr, config, motorControl_ptr));
+        std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config));
+        
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
         bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
-        
-        if (isTracking)
-        {
-            // Starting Head task
-            HeadControlTask headControlTask(threadManager_ptr, config, motorControl_ptr);
-            threadManager_ptr->create(50, [headControlTask]() mutable { headControlTask.run(); }, ThreadManager::Task::HEAD_CONTROL);
-        }
-
-        std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config));
         bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
         int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
         
@@ -65,47 +52,60 @@ int main(int argc, char * argv[])
         Eigen::Vector2f startAngle;
         Eigen::Vector2f endAngle;
 
-        if (isMoving)
+        // Start io task
+        threadManager_ptr->create(80, [&boost_io]() mutable { boost_io.run(); }, ThreadManager::Task::IO_CONTROL);
+        while (1)
         {
-            legMotion->InitPosition(3000);
-        }
-        while (1) // main loop
-        {
+            // Wait for button start event
+            while(motorControl_ptr->isPaused());
+
+            if (isTracking)
+            {
+                // Starting Head task
+                threadManager_ptr->create(50, [headControlTask]() mutable { headControlTask->run(); }, ThreadManager::Task::HEAD_CONTROL);
+            }
+
             if (isMoving)
             {
-                if (isTracking)
-                {
-                    motorControl_ptr->ResetObjectDistance();
-                    while(motorControl_ptr->GetObjectDistance().x == 0);
-                    
-                    object = motorControl_ptr->GetObjectDistance();
-                }
-                else
-                {
-                    // Dummy object detected
-                    object.x = 0.1;
-                    object.y = 0;
-                    object.angle = 0;
-                }
-                pointD = Eigen::Vector2f(object.x, object.y);
-                startAngle = Eigen::Vector2f(0, 0);
-                endAngle = Eigen::Vector2f(0, 0);
-
-                // Choose kick or walk and start motion task
-                if (object.x <= 0.05)
-                {
-                    legMotion->InitKick(activatedMotor, true, 2.0);
-                }
-                else
-                {
-                    legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true);
-                }                    
-                threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL);
-                threadManager_ptr->attach(ThreadManager::Task::LEGS_CONTROL); 
+                legMotion->InitPosition(3000);
             }
-            else
+            while (!motorControl_ptr->isPaused()) // main loop
             {
-                threadManager_ptr->attach(ThreadManager::Task::IO_CONTROL);
+                if (isMoving)
+                {
+                    if (isTracking)
+                    {
+                        motorControl_ptr->ResetObjectDistance();
+                        while(motorControl_ptr->GetObjectDistance().x == 0);
+                        object = motorControl_ptr->GetObjectDistance();
+                    }
+                    else
+                    {
+                        // Dummy object detected
+                        object.x = 0.1;
+                        object.y = 0;
+                        object.angle = 0;
+                    }
+                    pointD = Eigen::Vector2f(object.x, object.y);
+                    startAngle = Eigen::Vector2f(0, 0);
+                    endAngle = Eigen::Vector2f(0, 0);
+
+                    // Choose kick or walk and start motion task
+                    if (object.x <= 0.05)
+                    {
+                        legMotion->InitKick(activatedMotor, true, 2.0);
+                    }
+                    else
+                    {
+                        legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true);
+                    }                    
+                    threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL);
+                    threadManager_ptr->attach(ThreadManager::Task::LEGS_CONTROL); 
+                }
+                else
+                {
+                    threadManager_ptr->attach(ThreadManager::Task::HEAD_CONTROL);
+                }
             }
         }
         Logger::getInstance() << "END" << std::endl;

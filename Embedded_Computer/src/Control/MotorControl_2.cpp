@@ -16,9 +16,10 @@
 using boost::filesystem::path;
 
 MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, const XmlParser &config, boost::asio::io_service &boost_io) :
- _buttonStatus(4, false),
+ _buttonStatus(3, false),
  _threadManager(threadManager_ptr),
- _rawPackets(20)
+ _rawPackets(20),
+ _isPaused(true)
 {
     try
     {
@@ -27,6 +28,8 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
         _robotHeight = config.getIntValue(XmlPath::Root / XmlPath::Sizes / "RobotHeight");
         _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateMotorStatus(a); });
+
+        _trackingColors = config.getChildrenStringValues(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Objects);
     }
     catch (std::exception& e)
     {
@@ -199,6 +202,15 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
 
                 if (buttonStruct.id >= 0 && buttonStruct.id < _buttonStatus.size())
                 {
+                    if (buttonStruct.id == 2 && buttonStruct.value)
+                    {
+                        _isPaused = !_isPaused;
+                        if (_isPaused)
+                        {
+                            _threadManager->stop(ThreadManager::Task::HEAD_CONTROL);
+                            _threadManager->stop(ThreadManager::Task::LEGS_CONTROL);
+                        }
+                    }
                     _buttonStatus[buttonStruct.id] = buttonStruct.value;
                     Logger::getInstance(Logger::LogLvl::INFO) << "Button " <<(int) buttonStruct.id << " value = " <<(int) buttonStruct.value << std::endl;
                 }
@@ -240,6 +252,11 @@ void MotorControl::GetMotorStatus(std::vector<Protocol::MotorStruct> &status, co
 bool MotorControl::GetButtonStatus(const Button button_enum)
 {
    return _buttonStatus[(int)button_enum];
+}
+   
+bool MotorControl::isPaused()
+{
+   return _isPaused; 
 }
 
 bool MotorControl::InitPositions(const std::vector<double>& desiredPos, const Config config,
@@ -511,10 +528,7 @@ void MotorControl::HardGetMinAngles(std::vector<double>& angles, const Config co
 
 string MotorControl::GetColorToTrack()
 {
-	//string ballColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::BallColor);
-	//string goalColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::GoalColor);
-
-	return "red";
+   return _currentColor;
 }
 
 void MotorControl::TestCalculFun() {
@@ -525,7 +539,7 @@ void MotorControl::TestCalculFun() {
 	distance.x = _goalDistance.x - _ballDistance.x;
 	distance.y = _goalDistance.y - _ballDistance.y;
 
-	if (_ballDistance.x) {
+	if (_ballDistance.x < 0) {
 		// Fuck off
 	}
 	else if (_ballDistance.y < 0) {
