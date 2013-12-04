@@ -33,6 +33,7 @@ namespace XmlPath
 	extern const fs::path Color;
 	extern const fs::path HSVcolor;
 	extern const fs::path CircleSpec;
+	extern const fs::path ActivatedGUI;
 
 	extern const fs::path Objects;
 

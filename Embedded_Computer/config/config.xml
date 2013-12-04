@@ -7,6 +7,7 @@
   	<XOffset value="2.5" />
   </Sizes>
   <ImageProcessing value="1">
+  	<ActivatedGUI value="0"/>
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
@@ -78,7 +79,7 @@
   </USB_Interface>
   <Motion value="1">
   	<ActivateMotor value="1"/>
-    <IterationTimeMs value="100"/>
+    <IterationTimeMs value="40"/>
     <PerformInitPosition value="1"/>
     <KP value="440"/>
     <KD value="8000"/>
@@ -132,7 +133,7 @@
 	  <DISTANCETHRESHOLD value = "0.002"/>
 	  <ANGLETHRESHOLD value = "0.02"/>
 	  <ITERATIONMAX value = "5"/>
-	  <MaxPosError value = "0.01"/>
+	  <MaxPosError value = "0.13"/>
 	<StepTime value = "0.6" />
 	<UseCOM value = "1" />
 	  <COMPENSATION_OFFSET>

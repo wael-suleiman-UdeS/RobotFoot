@@ -27,12 +27,10 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
         // Init USB interface with STM32F4
         Logger::getInstance() << "Initializing USB interface..." << std::endl;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
+        _robotHeight = config.getIntValue(XmlPath::Root / XmlPath::Sizes / "RobotHeight");
         _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateMotorStatus(a); });
 
         _trackingObjects = config.getChildrenStringValues(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Objects);
-        _objectDistance.x = 0;
-        _objectDistance.y = 0;
-        _objectDistance.angle =0;
     }
     catch (std::exception& e)
     {
@@ -524,10 +522,7 @@ void MotorControl::ComputeAngle(ObjectPosition object_1, ObjectPosition object_2
 }
 
 /*
-ObjectPosition MotorControl::GetObjectDistance()
-=======
 void MotorControl::SetObjectDistance(double xDistance, double yDistance)
->>>>>>> 7bf196ba9a97aa3ddc62758048b417784665ab46
 {
 	//todo
 	ObjectPosition objectPosition;
@@ -556,12 +551,6 @@ void MotorControl::SetObjectToTrack(Object object)
 void MotorControl::SetObjectPosition(ObjectPosition object)
 {
     _objectDistance = object;
-}
-
-ObjectPosition MotorControl::GetObjectPosition()
-{
-	//todo
-	return _objectDistance;
 }
 
 ObjectPosition MotorControl::GetObjectPosition()

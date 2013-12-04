@@ -37,6 +37,7 @@ int main(int argc, char * argv[])
     boost::asio::io_service boost_io;
     try
     {
+        
         std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager());
         std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, boost_io));
         std::shared_ptr<HeadControlTask> headControlTask;
@@ -46,12 +47,14 @@ int main(int argc, char * argv[])
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
         bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
         bool performInitPos = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::PerformInitPosition);
+
         int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
         if (isTracking)
         {
             headControlTask = std::make_shared<HeadControlTask>(threadManager_ptr, config, motorControl_ptr);
         }
-        else if (isMoving)
+
+        if (isMoving)
         {
             legMotion = std::make_shared<LegMotion>(threadManager_ptr, motorControl_ptr, config, activatedMotor);
         } 
@@ -79,7 +82,7 @@ int main(int argc, char * argv[])
                 legMotion->SetTorque();
                 if (performInitPos)
                 {
-                    legMotion->InitPosition(3000);
+                    legMotion->InitPosition(4000);
                 }
             }
             while (!motorControl_ptr->isPaused()) // main loop
@@ -89,23 +92,26 @@ int main(int argc, char * argv[])
                     if (isTracking)
                     {
                         motorControl_ptr->SetObjectToTrack(MotorControl::Object::BALL);
-                        while(motorControl_ptr->GetObjectPosition().x == 0);
+                        while(motorControl_ptr->GetObjectPosition().y == 0);
                         objectToTrack = motorControl_ptr->GetObjectPosition();
+						objectToTrack.x /= 100;
+                        objectToTrack.y /= 100;
                     }
                     else
                     {
                         // Dummy object detected
-                        objectToTrack.x = 0.3;
-                        objectToTrack.y = 0;
+                        objectToTrack.y = 0.3;
+                        objectToTrack.x = 0;
                         objectToTrack.angle = 0;
                     }
-                    pointD = Eigen::Vector2f(objectToTrack.x, 0);
+                    Logger::getInstance(Logger::LogLvl::INFO) << "Object distance : " << objectToTrack.y << std::endl;
+                    pointD = Eigen::Vector2f(objectToTrack.y, 0);
                     startAngle = Eigen::Vector2f(0, 0);
                     endAngle = Eigen::Vector2f(0, 0);
                         
 
                     // Choose kick or walk and start motion task
-                    if (objectToTrack.x <= 0.05)
+                    if (objectToTrack.y <= 0.05)
                     {          
                         legMotion->InitKick(0.4, 0.7);
                     }
