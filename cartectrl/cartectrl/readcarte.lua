@@ -12,6 +12,30 @@ function getlen(s)
     return lsb + msb * 256 + 2;
 end
 -------------------------------------------------------------------------------
+function CSI(cmd)
+    return io.stdout:write("\x1B[" .. cmd);
+end
+-------------------------------------------------------------------------------
+function SavePos()
+    return CSI 's';
+end
+-------------------------------------------------------------------------------
+function RecallPos()
+    return CSI 'u';
+end
+-------------------------------------------------------------------------------
+function SetPos(row, col)
+    row = row or 1;
+    col = col or 1;
+    return CSI(string.format('%d;%dH',row,col));
+end
+-------------------------------------------------------------------------------
+function ClearLine(row);
+    SetPos(row,1);
+    io.stdout:write(string.rep(' ',80));
+    SetPos(row,1);
+end
+-------------------------------------------------------------------------------
 local Tags = 
 {
     MO = function(str, len)
@@ -19,9 +43,13 @@ local Tags =
         if l < 4   then return 4; end
         if l > len then return len; end
         ---[[
+        local id = str:byte(5);
+        local line = id > 15 and 16 or id;
+        ClearLine(line);
         io.stdout:write(
-            string.format('Motor %3d: pos = %6d, stat = %3d, %3d',
-                str:byte(5),
+            string.format('%010d : Motor %3d: pos = %6d, stat = %3d, %3d',
+                os.time(),
+                id,
                 str:byte(6) + str:byte(7) * 256,
                 str:byte(9,10))
               );
@@ -41,9 +69,14 @@ local Tags =
         local l = getlen(str);
         if l < 4   then return 4; end
         if l > len then return len; end
+
+        local id = str:byte(5);
+        local line = 18 + id;
+        ClearLine(line);
         io.stdout:write(
-            string.format('Button %3d : val = %3d\n',
-                str:byte(5),
+            string.format('%010d : Button %3d : val = %3d\n',
+                os.time(),
+                id,
                 str:byte(6))
               );
         return l;
@@ -52,8 +85,10 @@ local Tags =
         local l = getlen(str);
         if l < 4   then return 4; end
         if l > len then return len; end
+        ClearLine(22);
         io.stdout:write(
-            string.format('Motor %3d: cmd: 0x%02X, data = [',
+            string.format('%010d : Motor %3d: cmd: 0x%02X, data = [',
+                os.time(),
                 str:byte(5),
                 str:byte(6))
               ); 
@@ -61,13 +96,26 @@ local Tags =
         io.stdout:write(table.concat(data,', '));
         io.stdout:write(']\n');
         return l;
+    end,
+    PO = function (str, len)
+        local l = getlen(str);
+        if l < 4   then return 4; end
+        if l > len then return len; end
+        ClearLine(24);
+        local v = str:byte(5) / 16;
+        io.stdout:write(
+            string.format('%010d : Voltage: %g\n',
+                os.time(),
+                v)
+              ); 
+        return l;
     end
 };
 -------------------------------------------------------------------------------
 setmetatable(Tags, { __index = function (self, idx)
     local v = rawget(self, idx);
     if v then return v; end
-    
+    ClearLine(24); 
     print([[
 ********************Unknown tag ]] .. idx .. '********************');
     return function (s) 
@@ -93,7 +141,9 @@ local readPort = assert(io.open('/dev/ttyACM0','r'));
 --local readPort = assert(io.open('tmp.bin','r'));
 readPort:setvbuf 'no';
 
+exec 'clear';
 local s = readPort:read(4);
+
 while true do
     local packetlen = s:match('^\xFF\xFF(..)');
     if packetlen then

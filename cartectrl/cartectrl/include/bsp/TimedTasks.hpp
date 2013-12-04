@@ -58,6 +58,22 @@ public:
     virtual void remove(basic_task &) = 0;
 };
 
+class CPUclockdiff
+{
+public:
+    static unsigned val();
+
+    unsigned cpudiff() const { return (cnt - val()); }
+
+    enum { cycle2us = 84 };
+
+    void upd() { cnt = val(); }
+
+    CPUclockdiff() { upd(); }
+private:
+    unsigned cnt = val();
+};
+
 
 } // namespace bsp
 

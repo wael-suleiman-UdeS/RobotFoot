@@ -10,6 +10,7 @@
 
 //------------------------------------------------------------------------------
 #include "bsp/TimedTasks.hpp"
+#include <stm32f4xx_tim.h>
 #include "misc.h"
 //------------------------------------------------------------------------------
 
@@ -36,6 +37,20 @@ public:
         nvic->NVIC_IRQChannelSubPriority = 1;
         nvic->NVIC_IRQChannelCmd = ENABLE;
         NVIC_Init(nvic);
+
+        // Enable timer 2 for the CPUclockdiff.
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+        TIM_DeInit(TIM2);
+        TIM_TimeBaseInitTypeDef    tim[1];
+        TIM_TimeBaseStructInit(tim);
+        tim->TIM_Period = 0xFFFFFFFF; // Free running
+        tim->TIM_Prescaler = 0;
+        tim->TIM_ClockDivision = 0;
+        tim->TIM_CounterMode = TIM_CounterMode_Down;
+        TIM_TimeBaseInit(TIM2, tim);
+
+        TIM_Cmd(TIM2, ENABLE);
     }
 
     void call()
@@ -82,6 +97,11 @@ TimedTasks *TimedTasks::GetInstance()
 {
     static TimedTasks_imp timp[1];
     return timp;
+}
+//------------------------------------------------------------------------------
+unsigned CPUclockdiff::val()
+{
+    return TIM2->CNT;
 }
 //------------------------------------------------------------------------------
 

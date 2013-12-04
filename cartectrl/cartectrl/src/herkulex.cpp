@@ -130,7 +130,15 @@ Herkulex::~Herkulex()
 //---------------------------------------------------------------------------
 void Herkulex::sendPacket(fifo_ptr &ptr)
 {
+    enum { min_delay_us = 580 };
     static_cast<msgPacket *>(ptr.get())->setCheckSum();
+
+    // It seems those motors doesn't like back-to-back packets, they error out.
+    // So, if the last time we sent a command is too near from now, wait some
+    // time.
+    while (cpuc.cpudiff() < min_delay_us * cpuc.cycle2us) {}
+    cpuc.upd();
+
     com->push(ptr);
 }
 //------------------------------------------------------------------------------

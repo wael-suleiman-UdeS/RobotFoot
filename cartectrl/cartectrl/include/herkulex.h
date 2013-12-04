@@ -43,6 +43,7 @@
 #include <initializer_list>
 #include <new>
 #include "UARTinterface.hpp"
+#include "bsp/TimedTasks.hpp"
 //------------------------------------------------------------------------------
 #include "herkulex/internals.hpp"
 //------------------------------------------------------------------------------
@@ -500,8 +501,9 @@ public:
     }
 
 private :
-    using fifo_ptr = ::fifo_ptr;
+    bsp::CPUclockdiff cpuc;
 
+    using fifo_ptr = ::fifo_ptr;
     UARTInterface *com;
 
     MsgHandler *mhandler;
