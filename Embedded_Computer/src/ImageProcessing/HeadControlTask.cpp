@@ -33,7 +33,7 @@ _mc(mc_ptr)
 
 	_durationMean = 0;
 	_durationIndex = 0;
-	_guiEnabled = true;
+	_guiEnabled = _config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::ActivatedGUI);
 
 	//string ballColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::BallColor);
 	//string goalColor = _config.getStringValue(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Color / XmlPath::GoalColor);
@@ -56,7 +56,7 @@ void HeadControlTask::run()
 	{
 		if (_guiEnabled)
 		{
-			cv::namedWindow("mask", CV_WINDOW_AUTOSIZE);
+			//cv::namedWindow("mask", CV_WINDOW_AUTOSIZE);
 			cv::namedWindow("HSV", CV_WINDOW_AUTOSIZE);
 			cv::namedWindow("BGR", CV_WINDOW_AUTOSIZE);
 		}

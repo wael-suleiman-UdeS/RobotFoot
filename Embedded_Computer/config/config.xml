@@ -1,12 +1,13 @@
 <RobotFoot>
   <Logging>
-    <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
+    <LogLvl value="INFO" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <Sizes>
   	<RobotHeight value="40" />
   	<XOffset value="2.5" />
   </Sizes>
-  <ImageProcessing value="0">
+  <ImageProcessing value="1">
+  	<ActivatedGUI value="0"/>
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
@@ -133,7 +134,7 @@
 	  <DISTANCETHRESHOLD value = "0.002"/>
 	  <ANGLETHRESHOLD value = "0.02"/>
 	  <ITERATIONMAX value = "5"/>
-	  <MaxPosError value = "0.01"/>
+	  <MaxPosError value = "0.13"/>
 	<StepTime value = "0.6" />
 	<UseCOM value = "1" />
 	  <COMPENSATION_OFFSET>

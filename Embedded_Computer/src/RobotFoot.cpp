@@ -79,30 +79,31 @@ int main(int argc, char * argv[])
             {
                 if (isMoving)
                 {
-                    /*if (isTracking)
+                    if (isTracking)
                     {
                         motorControl_ptr->ResetObjectDistance();
                         while(motorControl_ptr->GetObjectDistance().x == 0);
                         object = motorControl_ptr->GetObjectDistance();
+                        object.x /= 100;
+                        object.y /= 100;
+
                     }
                     else
                     {
                         // Dummy object detected
-                        object.x = 0.3;
-                        object.y = 0;
+                        object.x = 0;
+                        object.y = 0.3;
                         object.angle = 0;
-                    }*/
-                    object.x = 0.3;
-                    object.y = 0;
-                    object.angle = 0;
+                    }
+                    Logger::getInstance(Logger::LogLvl::INFO) << "Object distance : " << object.y << std::endl;
 
-                    pointD = Eigen::Vector2f(object.x, object.y);
+                    pointD = Eigen::Vector2f(object.y, 0);
                     startAngle = Eigen::Vector2f(0, 0);
                     endAngle = Eigen::Vector2f(0, 0);
                         
 
                     // Choose kick or walk and start motion task
-                    if (false && object.x <= 0.05)
+                    if (object.y <= 0.05)
                     {          
                         legMotion->InitKick(0.4, 0.7);
                     }

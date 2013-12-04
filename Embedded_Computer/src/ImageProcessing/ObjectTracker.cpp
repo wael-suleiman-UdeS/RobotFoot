@@ -67,9 +67,9 @@ ObjectTracker::ObjectTracker(std::shared_ptr<ThreadManager> threadManager_ptr, s
 
 void ObjectTracker::track(Point objectPosition)
 {
-	Logger::getInstance() << "Object distance: " << _mc->GetObjectDistance() << " cm" << std::endl;
-    Logger::getInstance() << "Object position: " << objectPosition.x << ", " << objectPosition.y << std::endl;
-    Logger::getInstance() << "No object count: " << _noObjectCount << "/" << _noObjectMaxCount << std::endl;
+	Logger::getInstance(Logger::LogLvl::DEBUG) << "Object distance: " << _mc->GetObjectDistance() << " cm" << std::endl;
+    Logger::getInstance(Logger::LogLvl::DEBUG) << "Object position: " << objectPosition.x << ", " << objectPosition.y << std::endl;
+    Logger::getInstance(Logger::LogLvl::DEBUG) << "No object count: " << _noObjectCount << "/" << _noObjectMaxCount << std::endl;
 
     readHeadAngles();
 
@@ -89,7 +89,7 @@ void ObjectTracker::track(Point objectPosition)
 			if (_objectError.x <= 0) { _objectError.x = _scanningError; }
 			else if (_objectError.x > 0) { _objectError.x = -_scanningError; }
 		}
-	    Logger::getInstance() << "-------------------" << std::endl;
+	    Logger::getInstance(Logger::LogLvl::DEBUG) << "-------------------" << std::endl;
 		return;
 	}
 
@@ -109,10 +109,10 @@ void ObjectTracker::track(Point objectPosition)
 
 	setHeadAngles();
 
-    Logger::getInstance() << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
-    Logger::getInstance() << "Current angle: " << _currentAngle.x << ", " << _currentAngle.y << std::endl;
-    Logger::getInstance() << "New angle: " << _newAngle.x << ", " << _newAngle.y << std::endl;
-    Logger::getInstance() << "-------------------" << std::endl;
+    Logger::getInstance(Logger::LogLvl::DEBUG) << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
+    Logger::getInstance(Logger::LogLvl::DEBUG) << "Current angle: " << _currentAngle.x << ", " << _currentAngle.y << std::endl;
+    Logger::getInstance(Logger::LogLvl::DEBUG) << "New angle: " << _newAngle.x << ", " << _newAngle.y << std::endl;
+    Logger::getInstance(Logger::LogLvl::DEBUG) << "-------------------" << std::endl;
 
 }
 
@@ -140,20 +140,20 @@ void ObjectTracker::setHeadAngles() {
 
 void ObjectTracker::scan() {
 
-	Logger::getInstance() << "_minPan + _threshold: " << _minPan + _threshold << std::endl;
-	Logger::getInstance() << "_maxPan + _threshold: " << _maxPan + _threshold << std::endl;
+	Logger::getInstance(Logger::LogLvl::DEBUG) << "_minPan + _threshold: " << _minPan + _threshold << std::endl;
+	Logger::getInstance(Logger::LogLvl::DEBUG) << "_maxPan + _threshold: " << _maxPan + _threshold << std::endl;
 
 
 	if (_currentAngle.x < _minPan + _threshold) {
 		_pids["Pan"].reset();
 		_objectError.x = _scanningError;
 		_newAngle.y = -15; // todo: remove hack
-		Logger::getInstance() << "Start scanning to the right" << std::endl;
+		Logger::getInstance(Logger::LogLvl::DEBUG) << "Start scanning to the right" << std::endl;
 	} else if (_currentAngle.x > _maxPan - _threshold) {
 		_pids["Pan"].reset();
 		_objectError.x = -_scanningError;
 		_newAngle.y = -90; // todo: remove hack
-		Logger::getInstance() << "Start scanning to the left" << std::endl;
+		Logger::getInstance(Logger::LogLvl::DEBUG) << "Start scanning to the left" << std::endl;
 	}
 
 }

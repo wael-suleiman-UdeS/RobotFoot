@@ -567,7 +567,7 @@ ObjectPosition MotorControl::GetObjectDistance()
 	objectDistance.x = euclidianDistance * std::sin(angles[0]);
 	objectDistance.y = euclidianDistance * std::cos(angles[0]);
 
-	Logger::getInstance() << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
+	Logger::getInstance(Logger::LogLvl::DEBUG) << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
 
 
 	return objectDistance;
