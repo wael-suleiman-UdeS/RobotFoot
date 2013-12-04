@@ -50,25 +50,25 @@
 		  <MaxRadius value="400" />
 		</CircleSpec>
 	  </Color>
-	  <Color name="green">
-		<HSVcolor>
-		  <Hue value="65" />
-		  <HueTolerance value="9" />
-		  <Saturation value="172" />
-		  <Brightness value="71" />
-		</HSVcolor>
-		<CircleSpec>
-		  <ErosionIterations value="4" />
-		  <DilationIterations value="10" />
-		  <SmoothingApertureSize value="9" />
-		  <ResolutionDivisor value="2" />
-		  <MinDistance value="120" />
-		  <EdgeThreshold value="100" />
-		  <CenterThreshold value="10" />
-		  <MinRadius value="10" />
-		  <MaxRadius value="400" />
-		</CircleSpec>
-	  </Color>
+      <Color name="green">
+        <HSVcolor>
+            <Hue value="65" />
+            <HueTolerance value="9" />
+            <Saturation value="172" />
+            <Brightness value="71" />
+        </HSVcolor>
+        <CircleSpec>
+            <ErosionIterations value="4" />
+            <DilationIterations value="10" />
+            <SmoothingApertureSize value="9" />
+            <ResolutionDivisor value="2" />
+            <MinDistance value="120" />
+            <EdgeThreshold value="100" />
+            <CenterThreshold value="10" />
+            <MinRadius value="10" />
+            <MaxRadius value="400" />
+        </CircleSpec>
+      </Color>
     </Colors>
     <Objects>
         <BALL value="red" />

@@ -184,6 +184,10 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
                             _threadManager->stop(ThreadManager::Task::LEGS_CONTROL);
                         }
                     }
+                    else if (buttonStruct.id == 1 && buttonStruct.value >=1)
+                    {
+                        _currentColor = (_currentColor == "red") ? "green" : "red";
+                    }
                     _buttonStatus[buttonStruct.id] = buttonStruct.value;
                     Logger::getInstance(Logger::LogLvl::INFO) << "Button " <<(int) buttonStruct.id << " value = " <<(int) buttonStruct.value << std::endl;
                 }
