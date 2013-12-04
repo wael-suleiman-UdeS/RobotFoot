@@ -58,13 +58,12 @@ void STM32F4::ReceiveMsg(const std::vector<char> stream)
 
                 if ((size_it + size) < _inBuffer.cend())
                 {
-                    std::vector<char> msg(header_it, size_it + size + 1);
+                    std::vector<char> msg(header_it, size_it + size);
 
                     // Validate checksum
-                    if (Protocol::CalculCheckSum(msg) == msg.back())
+                    if (Protocol::CalculCheckSum(msg) == *(size_it + size))
                     {
-                        // Clear input buffer of the parsed msg
-                        header_it = header_it + msg.size() - 1;
+                        header_it = header_it + msg.size();
                         _callBackFunction(msg);
                     }
                     else

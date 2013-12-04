@@ -37,16 +37,19 @@ int main(int argc, char * argv[])
     boost::asio::io_service boost_io;
     try
     {
+        
+        bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
         std::shared_ptr<ThreadManager> threadManager_ptr(new ThreadManager());
         std::shared_ptr<MotorControl> motorControl_ptr(new MotorControl(threadManager_ptr, config, boost_io));
         std::shared_ptr<HeadControlTask> headControlTask(new HeadControlTask(threadManager_ptr, config, motorControl_ptr));
-        std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config));
+        std::shared_ptr<LegMotion> legMotion(new LegMotion(threadManager_ptr, motorControl_ptr, config, activatedMotor));
         
         bool isTracking = config.getIntValue(XmlPath::Root / XmlPath::ImageProcessing);
         bool isMoving   = config.getIntValue(XmlPath::Root / XmlPath::Motion);
-        bool activatedMotor = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::ActivateMotor);
+        bool performInitPos = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::PerformInitPosition);
+
         int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
-        
+
         ObjectPosition object;
         Eigen::Vector2f pointD;
         Eigen::Vector2f startAngle;
@@ -54,7 +57,7 @@ int main(int argc, char * argv[])
 
         // Start io task
         threadManager_ptr->create(80, [&boost_io]() mutable { boost_io.run(); }, ThreadManager::Task::IO_CONTROL);
-        while (1)
+        while (1) // main loop
         {
             // Wait for button start event
             while(motorControl_ptr->isPaused());
@@ -67,7 +70,11 @@ int main(int argc, char * argv[])
 
             if (isMoving)
             {
-                legMotion->InitPosition(3000);
+                legMotion->SetTorque();
+                if (performInitPos)
+                {
+                    legMotion->InitPosition(3000);
+                }
             }
             while (!motorControl_ptr->isPaused()) // main loop
             {
@@ -92,19 +99,19 @@ int main(int argc, char * argv[])
 
                     // Choose kick or walk and start motion task
                     if (object.x <= 0.05)
-                    {
-                        legMotion->InitKick(activatedMotor, true, 2.0);
+                    {          
+                        legMotion->InitKick(0.4, 0.7);
                     }
                     else
                     {
-                        legMotion->InitWalk(pointD, startAngle, endAngle, activatedMotor, true);
+                        legMotion->InitWalk(pointD, startAngle, endAngle);
                     }                    
                     threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL);
                     threadManager_ptr->attach(ThreadManager::Task::LEGS_CONTROL); 
                 }
                 else
                 {
-                    threadManager_ptr->attach(ThreadManager::Task::HEAD_CONTROL);
+                    threadManager_ptr->attach(ThreadManager::Task::IO_CONTROL);
                 }
             }
         }

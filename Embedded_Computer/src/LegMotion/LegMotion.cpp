@@ -22,7 +22,8 @@
 
 #include <memory>
 
-LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, XmlParser& config):
+LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shared_ptr<MotorControl> mc_ptr, XmlParser& config, const bool isMotorActivated):
+	m_bIsMotorActivated(isMotorActivated),
     m_threadManager(threadManager_ptr),
     m_motion(mc_ptr)
 {
@@ -81,12 +82,9 @@ LegMotion::~LegMotion()
 {
 }
 
-void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles,
-		const bool isMotorActivated, const bool isStandAlone)
+void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFeetAngles, Eigen::Vector2f destinationFeetAngles)
 {
-	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = true;
-	m_bIsStandAlone = isStandAlone;
 
     std::unique_ptr<Trajectory> traj( new Trajectory(m_vRightFootPosOffset, m_vRightFootAngleOffset,
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
@@ -95,24 +93,20 @@ void LegMotion::InitWalk(Eigen::Vector2f destination, Eigen::Vector2f startingFe
 			destinationFeetAngles, startingFeetAngles, m_pelvisTrajectoryType, m_stepTime, m_stepHeight);
 }
 
-void LegMotion::InitKick(const bool isMotorActivated, const bool isStandAlone, float kickTime)
+void LegMotion::InitKick(float ratioKickSpeed, float kickTime)
 {
-	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = true;
-	m_bIsStandAlone = isStandAlone;
 
     std::unique_ptr<Trajectory> traj( new Trajectory(m_vRightFootPosOffset, m_vRightFootAngleOffset,
 			m_vLeftFootPosOffset, m_vLeftFootAngleOffset, m_vRightPelvisPosOffset, m_vRightPelvisAngleOffset,
 			m_vLeftPelvisPosOffset, m_vLeftPelvisAngleOffset, m_pelvisPermanentPitch, m_stepLength) );
 
-	m_trajectoryMatrix = traj->GenerateKick(0.5f);
+	m_trajectoryMatrix = traj->GenerateKick(ratioKickSpeed, kickTime);
 }
 
-void LegMotion::Init(const std::string filename, const bool isMotorActivated, const bool isStandAlone)
+void LegMotion::Init(const std::string filename)
 {
-	m_bIsMotorActivated = isMotorActivated;
 	m_bIsUsingAlgorithm = false;
-	m_bIsStandAlone = isStandAlone;
 
     std::string strLine;
     std::ifstream file;
@@ -140,7 +134,7 @@ void LegMotion::Init(const std::string filename, const bool isMotorActivated, co
     m_itrEnd = m_vPosition.end();
 }
 
-void LegMotion::InitPosition(const int msInitializationTime)
+void LegMotion::SetTorque()
 {
     // Enable Torque
     if( m_bIsMotorActivated && !m_motion->SetTorque(true, MotorControl::Config::ALL_LEGS ) )
@@ -148,8 +142,12 @@ void LegMotion::InitPosition(const int msInitializationTime)
         Logger::getInstance() << "SetTorque Failed\n";
         return;
     }
+    m_motion->WriteAll();
+}
 
-    if(m_bIsMotorActivated && !m_vInitialPosition.empty())
+void LegMotion::InitPosition(const int msInitializationTime)
+{
+     if(m_bIsMotorActivated && !m_vInitialPosition.empty())
     {
         if( !m_motion->InitPositions( m_vInitialPosition, MotorControl::Config::ALL_LEGS, msInitializationTime ) )
         {
@@ -172,11 +170,6 @@ void LegMotion::Run(double msDt)
 			for(;m_itrPos != m_itrEnd; ++m_itrPos)
 			{
 		        boost::this_thread::interruption_point();
-				if (!m_bIsStandAlone)
-				{
-					Logger::getInstance(Logger::LogLvl::DEBUG) << "LegMotion : wait for MotorControl" << std::endl;
-					m_threadManager->wait();
-				}
 
 				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 				Logger::getInstance(Logger::LogLvl::DEBUG) << "took " << sec.count() << " seconds" << std::endl;
@@ -185,22 +178,11 @@ void LegMotion::Run(double msDt)
 
 				if (m_bIsMotorActivated)
 				{
-					if (m_bIsStandAlone)
+					//m_motion->HardSet( *m_itrPos, MotorControl::Config::ALL_LEGS );
+					if(!m_motion->SetPositions( *m_itrPos, MotorControl::Config::ALL_LEGS ) )
 					{
-						//m_motion->HardSet( *m_itrPos, MotorControl::Config::ALL_LEGS );
-						if(!m_motion->SetPositions( *m_itrPos, MotorControl::Config::ALL_LEGS ) )
-						{
-							Logger::getInstance() << "SetPosition Failed\n";
-							break;
-						}
-                    }
-					else
-					{
-						if(!m_motion->SetPositions( *m_itrPos, MotorControl::Config::ALL_LEGS ) )
-						{
-							Logger::getInstance() << "SetPosition Failed\n";
-							break;
-						}
+						Logger::getInstance() << "SetPosition Failed\n";
+						break;
 					}
 				}
 				//for(std::vector<double>::iterator it = m_itrPos->begin(); it != m_itrPos->end(); ++it)
@@ -209,17 +191,8 @@ void LegMotion::Run(double msDt)
 				//}
 				//Logger::getInstance() << std::endl;
 
-				if (m_bIsStandAlone)
-				{
-					m_motion->WriteAll();
-                    usleep(msDt*1000);
-				}
-				else
-				{
-					m_threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
-					Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : Iteration done" << std::endl;
-					m_threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
-				}
+				m_motion->WriteAll();
+                usleep(msDt*1000);
 			}
 		}
 		else
@@ -229,11 +202,6 @@ void LegMotion::Run(double msDt)
 			{
 			    boost::this_thread::interruption_point();
 				//boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();i
-				if (!m_bIsStandAlone)
-				{
-					Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : wait for MotorControl" << std::endl;
-					m_threadManager->wait();
-                }
 
 				// Right Leg movement
 				if(false && m_bIsMotorActivated)
@@ -250,35 +218,15 @@ void LegMotion::Run(double msDt)
 				//set motors
 				if(m_bIsMotorActivated)
 				{
-					if (m_bIsStandAlone)
-                    {
-						if(!m_motion->SetPositions( motorsPosition, MotorControl::Config::ALL_LEGS ) )
-						{
-							Logger::getInstance() << "SetPosition Failed\n";
-							break;
-						}
-                    }
-					else
+					if(!m_motion->SetPositions( motorsPosition, MotorControl::Config::ALL_LEGS ) )
 					{
-						if(!m_motion->SetPositions( motorsPosition, MotorControl::Config::ALL_LEGS ) )
-						{
-							Logger::getInstance() << "SetPosition Failed\n";
-							break;
-						}
+						Logger::getInstance() << "SetPosition Failed\n";
+						break;
 					}
 				}
 
-				if (m_bIsStandAlone)
-				{
-					m_motion->WriteAll();
-					usleep(msDt*1000);
-				}
-				else
-				{
-					m_threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
-					Logger::getInstance(Logger::LogLvl::DEBUG) << "StaticWalk : Iteration done" << std::endl;
-					m_threadManager->resume(ThreadManager::Task::MOTOR_CONTROL);
-				}
+				m_motion->WriteAll();
+				usleep(msDt*1000);
 			}
 		}
     }
