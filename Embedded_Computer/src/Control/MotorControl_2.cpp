@@ -19,7 +19,8 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
  _buttonStatus(3, false),
  _threadManager(threadManager_ptr),
  _rawPackets(20),
- _isPaused(true)
+ _isPaused(true),
+ _currentColor("red")
 {
     try
     {

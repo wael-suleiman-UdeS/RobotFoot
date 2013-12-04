@@ -29,8 +29,11 @@ LegMotion::LegMotion(std::shared_ptr<ThreadManager> threadManager_ptr, std::shar
 {
 	float distanceThreshold = config.getIntValue(XmlPath::LegsMotors / XmlPath::DISTANCETHRESHOLD);
 	float angleThreshold = config.getIntValue(XmlPath::LegsMotors / XmlPath::ANGLETHRESHOLD);
+	float maxPosError = config.getIntValue(XmlPath::LegsMotors / XmlPath::MaxPosError);
+
 	int iterationMax = config.getIntValue(XmlPath::LegsMotors / XmlPath::ITERATIONMAX);
-	m_motionControl = std::make_shared<MotionControl>(distanceThreshold, angleThreshold, iterationMax);
+
+	m_motionControl = std::make_shared<MotionControl>(distanceThreshold, angleThreshold, maxPosError, iterationMax);
 
 	m_stepHeight = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepHeight);
 	m_stepLength = config.getIntValue(XmlPath::LegsMotors / XmlPath::StepLength);

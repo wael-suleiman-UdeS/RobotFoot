@@ -51,7 +51,6 @@ HeadControlTask::~HeadControlTask()
 
 void HeadControlTask::run()
 {
-	setColor();
 	Logger::getInstance() << "Tracking process started" << std::endl;
 	try
 	{
@@ -65,6 +64,7 @@ void HeadControlTask::run()
 
 		while(true)
 		{
+			setColor();
 			boost::this_thread::interruption_point();
 	      	//boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 			Camera::getInstance().captureFrame();

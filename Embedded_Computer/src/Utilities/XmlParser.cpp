@@ -65,6 +65,7 @@ namespace XmlPath
 	const path UseCOM = "UseCOM";
 	const path DISTANCETHRESHOLD = "DISTANCETHRESHOLD";
 	const path ANGLETHRESHOLD = "ANGLETHRESHOLD";
+	const path MaxPosError = "MaxPosError";
 	const path ITERATIONMAX = "ITERATIONMAX";
 	const path StepTime = "StepTime";
 	const path StepHeight = "StepHeight";
