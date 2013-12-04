@@ -69,7 +69,7 @@ ObjectTracker::ObjectTracker(std::shared_ptr<ThreadManager> threadManager_ptr, s
 
 void ObjectTracker::track(Point objectPosition)
 {
-	Logger::getInstance(Logger::LogLvl::DEBUG) << "Object distance: " << _mc->GetObjectDistance() << " cm" << std::endl;
+	Logger::getInstance(Logger::LogLvl::DEBUG) << "Object distance: " << _mc->GetObjectPosition() << " cm" << std::endl;
     Logger::getInstance(Logger::LogLvl::DEBUG) << "Object position: " << objectPosition.x << ", " << objectPosition.y << std::endl;
     Logger::getInstance(Logger::LogLvl::DEBUG) << "No object count: " << _noObjectCount << "/" << _noObjectMaxCount << std::endl;
 
@@ -109,9 +109,11 @@ void ObjectTracker::track(Point objectPosition)
 	if (_newAngle.x < _minPan || _newAngle.x > _maxPan) { _pids["Pan"].reset(); }
 	if (_newAngle.y < _minTilt || _newAngle.y > _maxTilt) { _pids["Tilt"].reset(); }
 
+	setHeadAngles();
+
 	if (abs(_objectError.x) > _threshold && abs(_objectError.y) > _threshold)
 	{
-		processObjectDistance();
+		//processObjectDistance();
 	}
 
     Logger::getInstance(Logger::LogLvl::DEBUG) << "Object error: " << _objectError.x << ", " << _objectError.y << std::endl;
@@ -139,8 +141,8 @@ void ObjectTracker::setHeadAngles() {
 	angles.push_back(_newAngle.x);
 	angles.push_back(_newAngle.y);
 
-	_mc->SetPositions(angles, MotorControl::Config::HEAD);
-	//_mc->HardSet(angles, MotorControl::Config::HEAD);
+	_mc->HardSet(angles, MotorControl::Config::HEAD);
+	//_mc->SetPositions(angles, MotorControl::Config::HEAD);
 }
 
 void ObjectTracker::scan() {
@@ -175,7 +177,7 @@ void ObjectTracker::processObjectDistance()
 	objectDistance.x = euclidianDistance * std::sin(radianAngle.x);
 	objectDistance.y = euclidianDistance * std::cos(radianAngle.x);
 
-	Logger::getInstance() << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
+	Logger::getInstance(Logger::LogLvl::DEBUG) << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
 
-	_mc->SetObjectDistance(objectDistance);
+	_mc->SetObjectPosition(objectDistance);
 }

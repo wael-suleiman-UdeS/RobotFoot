@@ -30,7 +30,7 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
         _robotHeight = config.getIntValue(XmlPath::Root / XmlPath::Sizes / "RobotHeight");
         _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateMotorStatus(a); });
 
-        _trackingColors = config.getChildrenStringValues(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Objects);
+        _trackingObjects = config.getChildrenStringValues(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Objects);
     }
     catch (std::exception& e)
     {
@@ -521,6 +521,7 @@ void MotorControl::ComputeAngle(ObjectPosition object_1, ObjectPosition object_2
 	}
 }
 
+/*
 void MotorControl::SetObjectDistance(double xDistance, double yDistance)
 {
 	//todo
@@ -550,12 +551,6 @@ void MotorControl::SetObjectToTrack(Object object)
 void MotorControl::SetObjectPosition(ObjectPosition object)
 {
     _objectDistance = object;
-}
-
-ObjectPosition MotorControl::GetObjectPosition()
-{
-	//todo
-	return _objectDistance;
 }
 
 ObjectPosition MotorControl::GetObjectPosition()

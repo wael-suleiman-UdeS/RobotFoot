@@ -53,7 +53,8 @@ int main(int argc, char * argv[])
         {
             headControlTask = std::make_shared<HeadControlTask>(threadManager_ptr, config, motorControl_ptr);
         }
-        else if (isMoving)
+
+        if (isMoving)
         {
             legMotion = std::make_shared<LegMotion>(threadManager_ptr, motorControl_ptr, config, activatedMotor);
         } 
@@ -81,7 +82,7 @@ int main(int argc, char * argv[])
                 legMotion->SetTorque();
                 if (performInitPos)
                 {
-                    legMotion->InitPosition(3000);
+                    legMotion->InitPosition(4000);
                 }
             }
             while (!motorControl_ptr->isPaused()) // main loop
@@ -91,7 +92,7 @@ int main(int argc, char * argv[])
                     if (isTracking)
                     {
                         motorControl_ptr->SetObjectToTrack(MotorControl::Object::BALL);
-                        while(motorControl_ptr->GetObjectPosition().x == 0);
+                        while(motorControl_ptr->GetObjectPosition().y == 0);
                         objectToTrack = motorControl_ptr->GetObjectPosition();
 						objectToTrack.x /= 100;
                         objectToTrack.y /= 100;
@@ -99,11 +100,11 @@ int main(int argc, char * argv[])
                     else
                     {
                         // Dummy object detected
-                        objectToTrack.x = 0.3;
-                        objectToTrack.y = 0;
+                        objectToTrack.y = 0.3;
+                        objectToTrack.x = 0;
                         objectToTrack.angle = 0;
                     }
-Logger::getInstance(Logger::LogLvl::INFO) << "Object distance : " << object.y << std::endl;
+                    Logger::getInstance(Logger::LogLvl::INFO) << "Object distance : " << objectToTrack.y << std::endl;
                     pointD = Eigen::Vector2f(objectToTrack.y, 0);
                     startAngle = Eigen::Vector2f(0, 0);
                     endAngle = Eigen::Vector2f(0, 0);
