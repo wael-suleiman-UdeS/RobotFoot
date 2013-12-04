@@ -1,12 +1,12 @@
 <RobotFoot>
   <Logging>
-    <LogLvl value="DEBUG" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
+    <LogLvl value="INFO" /> <!-- DEBUG, INFO, WARN, ERROR, SHUTUP -->
   </Logging>
   <Sizes>
   	<RobotHeight value="40" />
   	<XOffset value="2.5" />
   </Sizes>
-  <ImageProcessing value="0">
+  <ImageProcessing value="1">
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
@@ -49,26 +49,25 @@
 		  <MaxRadius value="400" />
 		</CircleSpec>
 	  </Color>
-	  <Color name="green">
-		<HSVcolor>
-		  <Hue value="65" />
-		  <HueTolerance value="9" />
-		  <Saturation value="172" />
-		  <Brightness value="71" />
-		</HSVcolor>
-		<CircleSpec>
-		  <ErosionIterations value="4" />
-		  <DilationIterations value="10" />
-		  <SmoothingApertureSize value="9" />
-		  <ResolutionDivisor value="2" />
-		  <MinDistance value="120" />
-		  <EdgeThreshold value="100" />
-		  <CenterThreshold value="10" />
-		  <MinRadius value="10" />
-		  <MaxRadius value="400" />
-		</CircleSpec>
-	  </Color>
-    </Colors>
+      <Color name="green">
+        <HSVcolor>
+            <Hue value="65" />
+            <HueTolerance value="2" />
+            <Saturation value="200" />
+            <Brightness value="103" />
+        </HSVcolor>
+        <CircleSpec>
+            <ErosionIterations value="0" />
+            <DilationIterations value="2" />
+            <SmoothingApertureSize value="9" />
+            <ResolutionDivisor value="2" />
+            <MinDistance value="120" />
+            <EdgeThreshold value="15" />
+            <CenterThresh  value="10" />
+            <MinRadius value="10" />
+            <MaxRadius value="400" />
+        </CircleSpec>
+      </Color>
     <Objects>
         <BALL value="red" />
         <GOAL value="pink" />
@@ -79,7 +78,7 @@
   </USB_Interface>
   <Motion value="1">
   	<ActivateMotor value="1"/>
-    <IterationTimeMs value="40"/>
+    <IterationTimeMs value="100"/>
     <PerformInitPosition value="1"/>
     <KP value="440"/>
     <KD value="8000"/>
