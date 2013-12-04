@@ -204,7 +204,7 @@ void LegMotion::Run(double msDt)
 				//boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();i
 
 				// Right Leg movement
-				if(false && m_bIsMotorActivated)
+				if(m_bIsMotorActivated)
 				{
 					motorsPosition.clear();
 		            m_motion->ReadPositions( motorsPosition, MotorControl::Config::ALL_LEGS );

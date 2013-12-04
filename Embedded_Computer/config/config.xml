@@ -147,7 +147,7 @@
 			</RightPelvis>
 			<LeftPelvis>
 				<Pitch value = "0" />
-				<Roll value = "0.32" />
+				<Roll value = "0.28" />
 				<Yaw value = "0.0" />
 				<x value = "0.02" />
 				<y value = "0.03" />
