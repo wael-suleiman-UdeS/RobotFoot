@@ -19,7 +19,7 @@ char Protocol::CalculCheckSum(const std::vector<char>& msg)
     std::uint8_t checkSum(0);
     auto itr = msg.begin() + 2;
 
-    for(; itr != msg.end()-1; ++itr)
+    for(; itr != msg.end(); ++itr)
     {
         checkSum += *(itr); 
     }
