@@ -27,7 +27,8 @@ class STM32F4
         std::vector<char> _outBuffer;
         std::vector<char> _inBuffer;
 
-        boost::mutex _mutex;
+        boost::mutex _inMutex;
+        boost::mutex _outMutex;
 };
 
 #endif // STM32F4_H

@@ -19,13 +19,13 @@ STM32F4::~STM32F4()
 
 void STM32F4::AddMsg(const std::vector<char>& msg)
 {
-	boost::mutex::scoped_lock lock(_mutex);
+	boost::mutex::scoped_lock lock(_outMutex);
     _outBuffer.insert(_outBuffer.end(), msg.begin(), msg.end());
 }
 
 void STM32F4::SendMsg()
 {
-	boost::mutex::scoped_lock lock(_mutex);
+	boost::mutex::scoped_lock lock(_outMutex);
     std::vector<char> msg = Protocol::GenerateDataMsg(Protocol::MsgHeader, _outBuffer);
 
     const uint8_t checkSum = Protocol::CalculCheckSum(msg);
@@ -38,7 +38,7 @@ void STM32F4::SendMsg()
 // TODO Move to Protocol class???
 void STM32F4::ReceiveMsg(const std::vector<char> stream)
 {
-    boost::mutex::scoped_lock lock(_mutex);
+    boost::mutex::scoped_lock lock(_inMutex);
 
     // Add new data to input buffer
     _inBuffer.insert(_inBuffer.end(), stream.begin(), stream.end());

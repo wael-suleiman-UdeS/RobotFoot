@@ -93,12 +93,13 @@ public:
    ObjectPosition GetObjectPosition();
    void SetObjectToTrack(Object object);
 
+   bool isInterrupeted();
+   void resetInterrupeted() { _isInterrupeted = false;};
+   void isWalking(bool value);
 private:
    void InitializeMotors(const XmlParser &config);
    void InitializeConfigurations(const XmlParser &config);
    void InitPID(const XmlParser &config);
-
-   void ComputeAngle(ObjectPosition object_1, ObjectPosition object_2);
 
    std::vector<bool> _buttonStatus;
    std::shared_ptr<STM32F4> _stm32f4;
@@ -117,5 +118,7 @@ private:
    
    std::vector<std::string> _trackingObjects; 
    std::string _currentColor;
+   bool _isInterrupeted;
+   bool _isWalking;
 };
 #endif  //MOTOR_CONTROL_H

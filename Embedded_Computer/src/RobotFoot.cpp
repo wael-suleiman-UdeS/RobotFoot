@@ -52,7 +52,6 @@ int main(int argc, char * argv[])
         float KickSpeedRatio = config.getIntValue(XmlPath::LegsMotors / XmlPath::KickSpeedRatio);
         float MouvementTime = config.getIntValue(XmlPath::LegsMotors / XmlPath::MouvementTime);
 
-
         int itTimeMs = config.getIntValue(XmlPath::Root / XmlPath::Motion / XmlPath::IterationTimeMs);
         if (isTracking)
         {
@@ -65,6 +64,10 @@ int main(int argc, char * argv[])
         } 
 
         ObjectPosition objectToTrack;
+        objectToTrack.y = 0;
+        objectToTrack.x = 0;
+        objectToTrack.angle = 0;
+
         Eigen::Vector2f pointD;
         Eigen::Vector2f startAngle;
         Eigen::Vector2f endAngle;
@@ -96,9 +99,16 @@ int main(int argc, char * argv[])
                 {
                     if (isTracking)
                     {
+                        if (motorControl_ptr->isInterrupeted())
+                        {
+                            legMotion->InitPosition(4000);
+                            motorControl_ptr->resetInterrupeted();
+                        }
                         motorControl_ptr->SetObjectToTrack(MotorControl::Object::BALL);
-                        while(motorControl_ptr->GetObjectPosition().y == 0);
-                        objectToTrack = motorControl_ptr->GetObjectPosition();
+                        while(objectToTrack.y <= 0 || objectToTrack.y > 100)
+                        {
+                            objectToTrack = motorControl_ptr->GetObjectPosition();
+                        }
 						objectToTrack.x /= 100;
                         objectToTrack.y /= 100;
                     }
@@ -123,9 +133,15 @@ int main(int argc, char * argv[])
                     else
                     {
                         legMotion->InitWalk(pointD, startAngle, endAngle);
+                        motorControl_ptr->isWalking(true);
                     }                    
                     threadManager_ptr->create(90, [legMotion, itTimeMs]() mutable { legMotion->Run(itTimeMs); }, ThreadManager::Task::LEGS_CONTROL);
-                    threadManager_ptr->attach(ThreadManager::Task::LEGS_CONTROL); 
+                    threadManager_ptr->attach(ThreadManager::Task::LEGS_CONTROL);
+
+                    objectToTrack.y = 0;
+                    objectToTrack.x = 0;
+                    objectToTrack.angle = 0;
+                    motorControl_ptr->isWalking(false);
                 }
                 else
                 {

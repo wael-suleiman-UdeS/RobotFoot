@@ -20,19 +20,19 @@ MotorControl::MotorControl(std::shared_ptr<ThreadManager> threadManager_ptr, con
  _threadManager(threadManager_ptr),
  _rawPackets(20),
  _isPaused(true),
- _currentColor("red"),
- _isInterrupeted(false),
- _isWalking(false)
+ _currentColor("red")
 {
     try
     {
         // Init USB interface with STM32F4
         Logger::getInstance() << "Initializing USB interface..." << std::endl;
         std::string port_name = config.getStringValue(XmlPath::Root / "USB_Interface" / "TTY");
-        _robotHeight = config.getIntValue(XmlPath::Root / XmlPath::Sizes / "RobotHeight");
         _stm32f4 = std::make_shared<STM32F4>(port_name, boost_io, [this](std::vector<char> a) { return UpdateMotorStatus(a); });
 
         _trackingObjects = config.getChildrenStringValues(XmlPath::Root / XmlPath::ImageProcessing / XmlPath::Objects);
+        _objectDistance.x = 0;
+        _objectDistance.y = 0;
+        _objectDistance.angle =0;
     }
     catch (std::exception& e)
     {
@@ -185,10 +185,6 @@ void MotorControl::UpdateMotorStatus(const std::vector<char>& msg)
                             _threadManager->stop(ThreadManager::Task::HEAD_CONTROL);
                             _threadManager->stop(ThreadManager::Task::LEGS_CONTROL);
                         }
-                    }
-                    else if (buttonStruct.id == 1 && buttonStruct.value >=1)
-                    {
-                        _currentColor = (_currentColor == "red") ? "green" : "red";
                     }
                     _buttonStatus[buttonStruct.id] = buttonStruct.value;
                     Logger::getInstance(Logger::LogLvl::INFO) << "Button " <<(int) buttonStruct.id << " value = " <<(int) buttonStruct.value << std::endl;
@@ -510,6 +506,46 @@ string MotorControl::GetColorToTrack()
    return _currentColor;
 }
 
+void MotorControl::ComputeAngle(ObjectPosition object_1, ObjectPosition object_2) 
+{
+	ObjectPosition distance;
+	distance.x = object_2.x - object_1.x;
+	distance.y = object_2.y - object_1.y;
+
+	if (object_1.x < 0) {
+		// Fuck off
+	}
+	else if (object_1.y < 0) {
+		// 180 - std::atan(std::abs(distance.y / distance.x));
+	}
+	else {
+		// 180 - std::atan(std::abs(distance.x / distance.y));
+	}
+}
+
+/*
+ObjectPosition MotorControl::GetObjectDistance()
+=======
+void MotorControl::SetObjectDistance(double xDistance, double yDistance)
+>>>>>>> 7bf196ba9a97aa3ddc62758048b417784665ab46
+{
+	//todo
+	ObjectPosition objectPosition;
+	objectPosition.x = xDistance;
+	objectPosition.y = yDistance;
+	// if enum = ball
+	_ballDistance = objectPosition;
+	// else if enum = goal
+	_goalDistance = objectPosition;
+}
+
+<<<<<<< HEAD
+	Logger::getInstance(Logger::LogLvl::DEBUG) << "Euclidian distance: " << euclidianDistance << " cm" << std::endl;
+=======
+	return objectDistance;
+}*/
+>>>>>>> fc128b48cb6829a8f09a703f25176219bba8191b
+
 void MotorControl::SetObjectToTrack(Object object)
 {
     if (_trackingObjects.size() > (int) object)
@@ -523,25 +559,16 @@ void MotorControl::SetObjectToTrack(Object object)
    
 void MotorControl::SetObjectPosition(ObjectPosition object)
 {
-    if (_isWalking && object.y < 1)
-    {
-        _threadManager->stop(ThreadManager::Task::LEGS_CONTROL);
-        _isInterrupeted = true;
-    }
     _objectDistance = object;
 }
 
 ObjectPosition MotorControl::GetObjectPosition()
 {
-    return _objectDistance;
+	//todo
+	return _objectDistance;
 }
 
-void MotorControl::isWalking(bool value)
+ObjectPosition MotorControl::GetObjectPosition()
 {
-    _isWalking = value;
-}
-   
-bool MotorControl::isInterrupeted()
-{
-    return _isInterrupeted;
+    return _objectDistance;
 }
