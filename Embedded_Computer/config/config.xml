@@ -7,7 +7,7 @@
   	<XOffset value="2.5" />
   </Sizes>
   <ImageProcessing value="1">
-  	<ActivatedGUI value="0"/>
+  	<ActivatedGUI value="1"/>
     <Camera>
       <DeviceIndex value="0" />
     </Camera>
@@ -69,9 +69,28 @@
             <MaxRadius value="400" />
         </CircleSpec>
       </Color>
+      <Color name="test">
+        <HSVcolor>
+            <Hue value="65" />
+            <HueTolerance value="9" />
+            <Saturation value="172" />
+            <Brightness value="71" />
+        </HSVcolor>
+        <CircleSpec>
+            <ErosionIterations value="4" />
+            <DilationIterations value="10" />
+            <SmoothingApertureSize value="9" />
+            <ResolutionDivisor value="2" />
+            <MinDistance value="120" />
+            <EdgeThreshold value="100" />
+            <CenterThreshold value="10" />
+            <MinRadius value="10" />
+            <MaxRadius value="400" />
+        </CircleSpec>
+      </Color>
     </Colors>
     <Objects>
-        <BALL value="red" />
+        <BALL value="test" />
         <GOAL value="pink" />
     </Objects>
   </ImageProcessing>
@@ -134,7 +153,7 @@
 	  <DISTANCETHRESHOLD value = "0.002"/>
 	  <ANGLETHRESHOLD value = "0.02"/>
 	  <ITERATIONMAX value = "5"/>
-	  <MaxPosError value = "0.13"/>
+	  <MaxPosError value = "0.25"/>
 	<StepTime value = "0.6" />
 	<UseCOM value = "1" />
 	  <COMPENSATION_OFFSET>
@@ -177,7 +196,7 @@
 			</PelvisKick>
 			<KickBackOffset>
 				<y value = "-0.11" />
-				<z value = "0.04" />
+				<z value = "0.05" />
 			</KickBackOffset>
 			<KickForwardOffset>
 				<y value = "0.1" />
@@ -185,7 +204,7 @@
 			</KickForwardOffset>
 			<KickSpeedRatio value = "0.2" />
 			<MouvementTime value = "0.7" />
-			<DistanceToKick value = "0.07" />
+			<DistanceToKick value = "0.12" />
 	  </COMPENSATION_OFFSET>
 	  <StepHeight value = "0.04"/>
 	  <StepLength value = "0.05"/>

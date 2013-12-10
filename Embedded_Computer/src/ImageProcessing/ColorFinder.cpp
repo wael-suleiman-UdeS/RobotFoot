@@ -22,6 +22,9 @@ HSVcolor::HSVcolor(const XmlParser& config, string colorName)
 	path basePath = XmlPath::Root / XmlPath::ImageProcessing
 		/ XmlPath::Colors / XmlPath::Color + "[@name=\"" + colorName + "\"]" / XmlPath::HSVcolor;
 
+	// In OpenCv, the value of hue,saturation and brightness go between [0-255] when in reality HSV
+	// color go between [0-360] for the Hue valor and [0-100] for the Saturation and Brightness. The
+	// relation between openCV value and real value is linear.
 	hue = config.getIntValue(basePath / "Hue");
 	hueTolerance = config.getIntValue(basePath / "HueTolerance");
 	saturation = config.getIntValue(basePath / "Saturation");

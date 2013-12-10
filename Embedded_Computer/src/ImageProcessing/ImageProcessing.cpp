@@ -33,7 +33,7 @@ void ImageProcessing::filter(const Mat& sourceFrame, Mat& filteredFrame,
 	try
 	{
 		cv::inRange(sourceFrame, lowerBound, upperBound, filteredFrame);
-		//cv::imshow("mask", filteredFrame);
+		cv::imshow("mask", filteredFrame);
 	}
 	catch(cv::Exception& ex) {}
 }

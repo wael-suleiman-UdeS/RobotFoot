@@ -56,7 +56,7 @@ void HeadControlTask::run()
 	{
 		if (_guiEnabled)
 		{
-			//cv::namedWindow("mask", CV_WINDOW_AUTOSIZE);
+			cv::namedWindow("mask", CV_WINDOW_AUTOSIZE);
 			cv::namedWindow("HSV", CV_WINDOW_AUTOSIZE);
 			cv::namedWindow("BGR", CV_WINDOW_AUTOSIZE);
 		}

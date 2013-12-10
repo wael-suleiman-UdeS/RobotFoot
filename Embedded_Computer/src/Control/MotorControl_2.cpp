@@ -523,7 +523,7 @@ void MotorControl::SetObjectToTrack(Object object)
    
 void MotorControl::SetObjectPosition(ObjectPosition object)
 {
-    if (_isWalking && object.y < 1)
+    if (_isWalking && object.y < 1.5)
     {
         _threadManager->stop(ThreadManager::Task::LEGS_CONTROL);
         _isInterrupeted = true;

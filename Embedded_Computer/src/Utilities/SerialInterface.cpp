@@ -16,7 +16,8 @@ SerialInterface::SerialInterface(boost::asio::io_service &io_service,
 	catch (std::exception &ex)
 	{
       Logger::getInstance(Logger::LogLvl::ERROR) << "Error in SerialInterface.cpp : could not open port " << port_name << std::endl;
-      std::exit(1);
+      //std::exit(1);
+		return;
 	}
  
 	if(!_serialPort.is_open())
