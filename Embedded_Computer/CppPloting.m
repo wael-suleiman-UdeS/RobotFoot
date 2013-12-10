@@ -12,29 +12,33 @@ load eTheta2.txt
 
 dt = 0.01;
 
-figure
-plot(matrixQ)
+%figure
+%plot(matrixQ)
 
 Qdot = diff(matrixQ)/dt;
 
-figure
-plot(Qdot)
+%figure
+%plot(Qdot)
 
-figure
-plot(ePos1)
+%figure
+%plot(ePos1)
 
-figure
-plot(ePos2)
+%figure
+%plot(ePos2)
 
-figure
-plot(eTheta1)
+%figure
+%plot(eTheta1)
 
-figure
-plot(eTheta2)
+%figure
+%plot(eTheta2)
 
 figure
 plot(matrixTraj(:, 2), matrixTraj(:, 3))
 
-hold
+hold on
 plot(matrixTraj(:, 8), matrixTraj(:, 9))
+
+hold on
+plot(matrixTraj(:, 15), matrixTraj(:, 16))
+
 
