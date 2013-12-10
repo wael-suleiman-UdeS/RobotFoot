@@ -4,6 +4,7 @@ close all
 
 load matrixQ.txt
 %load matrixPositions.txt
+load matrixTraj.txt
 load ePos1.txt
 load ePos2.txt
 load eTheta1.txt
@@ -30,3 +31,10 @@ plot(eTheta1)
 
 figure
 plot(eTheta2)
+
+figure
+plot(matrixTraj(:, 2), matrixTraj(:, 3))
+
+hold
+plot(matrixTraj(:, 8), matrixTraj(:, 9))
+
