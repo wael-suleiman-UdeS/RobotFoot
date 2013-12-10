@@ -20,6 +20,8 @@
 #include <array>
 #include <numeric>
 #include "Input.hpp"
+#include "vsense.hpp"
+#include "bsp/TimedTasks.hpp"
 //------------------------------------------------------------------------------
 
 using std::array;
@@ -39,24 +41,11 @@ static const uint8_t MotorIDs[] =
     HerkulexMan::ID_HEAD_TILT
 };
 //------------------------------------------------------------------------------
-class CPUclockdiff
-{
-public:
-    static unsigned val() { return SysTick->VAL; }
-
-    unsigned diff() const { return (cnt - val()) & 0xFFFFFF; }
-
-    void upd() { cnt = val(); }
-    CPUclockdiff() { upd(); }
-private:
-    unsigned cnt = val();
-};
-//------------------------------------------------------------------------------
 static void wait(unsigned us)
 {
-    CPUclockdiff cpu;
+    bsp::CPUclockdiff cpu;
 
-    while (cpu.diff() < (168 * us)) {}
+    while (cpu.cpudiff() < (cpu.cycle2us * us)) {}
 }
 //------------------------------------------------------------------------------
 static ssize_t usb_writewait(const void *p, size_t len)
@@ -94,8 +83,10 @@ private:
         // This member is for alignment purposes.
         uint64_t dummy;
 
-        uint8_t  dataIn [MAX_LEN];
-        uint8_t  dataOut[MAX_LEN];
+        struct {
+            uint8_t  dataIn [MAX_LEN];
+            uint8_t  dataOut[MAX_LEN];
+        };
     };
 
     size_t  idx;
@@ -109,6 +100,10 @@ private:
 
     USBProtocol* prot;
 
+    enum { other_reads_reload = 50-1 };
+    unsigned timer_other_reads= other_reads_reload;
+    bool do_other_reads = false;
+
     array<usb_sub_message<usb_tag::MO>, 256> statusDatabase;
 
     unsigned numPackets() const volatile { return pushcnt - popdcnt; }
@@ -117,7 +112,21 @@ private:
 
     void notify() { ++pushcnt; }
     void ack()    { ++popdcnt; }
+
 public:
+    void updOtherReads()
+    {
+        do_other_reads = !timer_other_reads;
+        if (do_other_reads)
+        {
+            timer_other_reads = other_reads_reload;
+        }
+        else
+        {
+            --timer_other_reads;
+        }
+    }
+
     void Reset()
     {
         checkSum = 0;
@@ -313,11 +322,11 @@ public:
     {
         const auto h = prot->herkman->herkulex();
 
-        wait(300);
+        //wait(200);
         for (auto id : MotorIDs)
         {
             h->send_ram_read(id, RAM_CALIBRATED_POSITION, 2);
-            wait(300); // Wait entire xmit, plus a gap.
+            //wait(200);
             /*
             if (send_other_reads)
             {
@@ -379,6 +388,13 @@ public:
             }
         }
 
+        if (do_other_reads)
+        {
+            const float volt = bsp::vsense.getVoltage();
+            usb_message<usb_tag::PO> msg {};
+            msg.data.val = 16.f * volt;
+            *it++ = msg;
+        }
     }
 
     void dotimedTasks(unsigned timer)
@@ -596,6 +612,8 @@ void USBProtocol::loop()
             // inside
             while (timer <= 0)
                 timer += reload10ms;
+
+            dataBuff->updOtherReads();
         }
 
         if (timer != old_timer)
@@ -611,10 +629,13 @@ void USBProtocol::loop()
             buttonsdown += i.isDown();
         }
 
+
         if (anypressed and buttonsdown > 1)
         {
             herkman->herkulex()->setTorque(BROADCAST_ID, TORQUE_FREE);
         }
+
+
     }
 }
 //------------------------------------------------------------------------------

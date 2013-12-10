@@ -8,6 +8,7 @@ SRC += DenavitHartenberg.cpp
 SRC += MotionControl.cpp
 SRC += EigenUtils.cpp
 #SRC += LegMotion.cpp
+SRC += TestCourbe.cpp
 
 # Libs directories
 LIBDIR = -L/usr/local/lib/
