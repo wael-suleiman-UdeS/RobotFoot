@@ -784,6 +784,20 @@ Eigen::VectorXf Trajectory::GenerateParabollicTrajectory(Eigen::MatrixXf params,
 Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::MatrixXf leftSteps, int finalMatrixSize)
 {
 	Eigen::Vector3f rightPelvisAngleOffset;
+
+	//Changement de repère
+	rightPelvisAngleOffset(0) = m_vRightPelvisAngleOffset(0) + m_permanentPelvisPitch;
+	rightPelvisAngleOffset(1) = m_vRightPelvisAngleOffset(1);
+	rightPelvisAngleOffset(2) = m_vRightPelvisAngleOffset(2);
+
+	Eigen::Vector3f leftPelvisAngleOffset;
+	//Changement de repère
+	leftPelvisAngleOffset(0) = m_vLeftPelvisAngleOffset(0) - m_permanentPelvisPitch;
+	leftPelvisAngleOffset(1) = m_vLeftPelvisAngleOffset(1);
+	leftPelvisAngleOffset(2) = m_vLeftPelvisAngleOffset(2);
+
+
+	/*
 	//Changement de repère
 	rightPelvisAngleOffset(0) = -m_vRightPelvisAngleOffset(2);
 	rightPelvisAngleOffset(1) = m_vRightPelvisAngleOffset(0) + m_permanentPelvisPitch;
@@ -794,6 +808,7 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
 	leftPelvisAngleOffset(0) = -m_vLeftPelvisAngleOffset(2);
 	leftPelvisAngleOffset(1) = -m_vLeftPelvisAngleOffset(0) - m_permanentPelvisPitch;
 	leftPelvisAngleOffset(2) = -m_vLeftPelvisAngleOffset(1);
+	*/
 
 	Eigen::MatrixXf trajectory(finalMatrixSize, 6);
 

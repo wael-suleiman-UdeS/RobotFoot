@@ -22,9 +22,9 @@ namespace
 	const float LF = 0.037f;
 }
 
-DenavitHartenberg::DenavitHartenberg(Eigen::VectorXf& q, Leg grounedLeg)
+DenavitHartenberg::DenavitHartenberg(Eigen::VectorXf& q, Leg groundedLeg)
 {
-	m_groundedFoot = grounedLeg;
+	m_groundedFoot = groundedLeg;
 	Init(q);
 
 	positionMatrix.resize(3,7);

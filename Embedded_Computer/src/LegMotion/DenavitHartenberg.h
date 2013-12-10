@@ -19,7 +19,7 @@ public:
 	enum Leg {GroundRight, GroundLeft};
 	enum DHSection {ToPelvis, ToFoot};
 
-	DenavitHartenberg(Eigen::VectorXf& q, Leg grounedLeg);
+	DenavitHartenberg(Eigen::VectorXf& q, Leg groundedLeg);
 	DenavitHartenberg() {}
 	~DenavitHartenberg();
 
