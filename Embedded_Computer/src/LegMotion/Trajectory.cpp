@@ -161,61 +161,76 @@ Eigen::MatrixXf Trajectory::GenerateKick( float kickSpeedRatio, float movementTi
 		const Eigen::Vector3f& kickForwardOffsetR )
 {
 	//Clamp 0.1 to 1
-	kickSpeedRatio = min(max(kickSpeedRatio, 0.1f), 1.0f);
+		kickSpeedRatio = min(max(kickSpeedRatio, 0.1f), 1.0f);
 
-	Eigen::VectorXf startingPointR(6);
-	startingPointR << m_dLeg, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
-	Eigen::VectorXf startingPointL(6);
-	startingPointL << -m_dLeg, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
-	Eigen::VectorXf startingPointP(6);
-	startingPointP << 0.0f, 0.0f, m_ZMPHeight, 0.0f, 0.0f, 0.0f;
-	Eigen::VectorXf zmpOverFixedFootP(6);
+		Eigen::VectorXf startingPointL(6);
+		startingPointL << -m_dLeg, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
+		Eigen::VectorXf startingPointR(6);
+		startingPointR << m_dLeg, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
+		Eigen::VectorXf startingPointP(6);
+		startingPointP << 0.0f, 0.0f, m_ZMPHeight, 0.0f, 0.0f, 0.0f;
 
-	zmpOverFixedFootP << 0.05f + m_vLeftPelvisPosOffset(0), m_vLeftPelvisPosOffset(1), m_ZMPHeight,
-			m_vLeftPelvisAngleOffset(0), m_vLeftPelvisAngleOffset(1), m_vLeftPelvisAngleOffset(2);
-	Eigen::VectorXf leftFootRaisedL(6);
-	leftFootRaisedL << -m_dLeg + m_vLeftFootPosOffset(0), m_vLeftFootPosOffset(1), 0.04f + m_vLeftFootPosOffset(2), m_vLeftPelvisAngleOffset(0),
-			m_vLeftPelvisAngleOffset(1), m_vLeftPelvisAngleOffset(2);
-	Eigen::VectorXf kickingFootBackL(6);
-	kickingFootBackL << -m_dLeg + m_vLeftFootPosOffset(0), -0.08f + m_vLeftFootPosOffset(1), 0.04f + m_vLeftFootPosOffset(2),
-			m_vLeftPelvisAngleOffset(0), m_vLeftPelvisAngleOffset(1), m_vLeftPelvisAngleOffset(2);
-	Eigen::VectorXf kickingFootForwardL(6);
-	kickingFootForwardL << -m_dLeg + m_vLeftFootPosOffset(0), 0.1f + m_vLeftFootPosOffset(1), 0.04f + m_vLeftFootPosOffset(2),
-			m_vLeftPelvisAngleOffset(0), m_vLeftPelvisAngleOffset(1), m_vLeftPelvisAngleOffset(2);
+		Eigen::VectorXf zmpOverFixedFootP(6);
+		//zmpOverFixedFootP << -0.06f, 0.02f, m_ZMPHeight, 0.0f, 0.0f, -0.2f;
+		zmpOverFixedFootP << pelvisKickOffsetR(0), pelvisKickOffsetR(1), m_ZMPHeight, 0.0f, 0.0f, -0.2f;
 
-	int matrixSize = 5*movementTime/m_dTime + kickSpeedRatio*movementTime/m_dTime;
+		Eigen::VectorXf kickingFootRaisedR(6);
+		//kickingFootBackR << m_dLeg, -0.08f, 0.04f, 0.0f, 0.0f, 0.0f;
+		kickingFootRaisedR << m_dLeg, 0.0f, kickBackOffsetR(2), -0.2f, 0.0f, 0.0f;
 
-	Eigen::MatrixXf finalMatrix(matrixSize, 20);
+		Eigen::VectorXf kickingFootBackR(6);
+		//kickingFootBackR << m_dLeg, -0.08f, 0.04f, 0.0f, 0.0f, 0.0f;
+		kickingFootBackR << m_dLeg, kickBackOffsetR(1), kickBackOffsetR(2), -0.2f, 0.0f, 0.0f;
 
-	Eigen::MatrixXf zmpOverFootMatrix;
-	Eigen::MatrixXf raisedFootMatrix;
-	Eigen::MatrixXf footBackMatrix;
-	Eigen::MatrixXf footFrontMatrix;
-	Eigen::MatrixXf footBackToNormalMatrix;
-	Eigen::MatrixXf zmpBackToNormalMatrix;
+		Eigen::VectorXf kickingFootForwardR(6);
+		//kickingFootForwardR << m_dLeg, 0.1f, 0.03f, -0.2f, 0.0f, 0.0f;
+		kickingFootForwardR << m_dLeg, kickForwardOffsetR(1), kickForwardOffsetR(2), -0.3f, 0.0f, 0.0f;
 
-	//Bring zmp over fixed foot
-	zmpOverFootMatrix = GenerateMovement(startingPointR, startingPointR, startingPointL, startingPointL, startingPointP, zmpOverFixedFootP, movementTime, false);
-	//Raise foot
-	raisedFootMatrix = GenerateMovement(startingPointR, startingPointR, startingPointL, leftFootRaisedL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime, false);
-	//Bring foot back
-	footBackMatrix = GenerateMovement(startingPointR, startingPointR, leftFootRaisedL, kickingFootBackL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime, false);
-	//Bring foot front to kick
-	footFrontMatrix = GenerateMovement(startingPointR, startingPointR, kickingFootBackL, kickingFootForwardL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime*kickSpeedRatio, false);
-	//Bring foot back in normal position
-	footBackToNormalMatrix = GenerateMovement(startingPointR, startingPointR, kickingFootForwardL, startingPointL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime, false);
-	//Bring zmp back to normal position
-	zmpBackToNormalMatrix = GenerateMovement(startingPointR, startingPointR, startingPointL, startingPointL, zmpOverFixedFootP, startingPointP, movementTime, false);
+		int matrixSize = 5*movementTime/m_dTime + kickSpeedRatio*movementTime/m_dTime;
+		Eigen::MatrixXf finalMatrix(matrixSize, 20);
 
-	//time
-	Eigen::VectorXf timeVector(matrixSize);
-	timeVector = Eigen::VectorXf::LinSpaced(matrixSize, 0, matrixSize*m_dTime);
+		Eigen::MatrixXf zmpOverFootMatrix;
+		Eigen::MatrixXf raisedFootMatrix;
+		Eigen::MatrixXf footBackMatrix;
+		Eigen::MatrixXf footFrontMatrix;
+		Eigen::MatrixXf footBackToNormalMatrix;
+		Eigen::MatrixXf zmpBackToNormalMatrix;
 
-	Eigen::MatrixXf movementMatrix(matrixSize, 19);
-	movementMatrix << zmpOverFootMatrix, raisedFootMatrix, footBackMatrix, footFrontMatrix, footBackToNormalMatrix, zmpBackToNormalMatrix;
-	finalMatrix << timeVector, movementMatrix;
 
-	return finalMatrix;
+		//Bring zmp over fixed foot
+		zmpOverFootMatrix = GenerateMovement(startingPointR, startingPointR, startingPointL, startingPointL, startingPointP, zmpOverFixedFootP, movementTime, 1);
+		//Raise foot
+		raisedFootMatrix = GenerateMovement(startingPointR, kickingFootRaisedR, startingPointL, startingPointL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime, 1);
+		//Bring foot back
+		footBackMatrix = GenerateMovement(kickingFootRaisedR, kickingFootBackR, startingPointL, startingPointL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime, 1);
+		//Bring foot front to kick
+		footFrontMatrix = GenerateMovement(kickingFootBackR, kickingFootForwardR, startingPointL, startingPointL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime*kickSpeedRatio, 1);
+		//Bring foot back in normal position
+		footBackToNormalMatrix = GenerateMovement(kickingFootForwardR, startingPointR, startingPointL, startingPointL, zmpOverFixedFootP, zmpOverFixedFootP, movementTime, 1);
+		//Bring zmp back to normal position
+		zmpBackToNormalMatrix = GenerateMovement(startingPointR, startingPointR, startingPointL, startingPointL, zmpOverFixedFootP, startingPointP, movementTime, 1);
+
+		//time
+		Eigen::VectorXf timeVector(matrixSize);
+		timeVector = Eigen::VectorXf::LinSpaced(matrixSize, 0, matrixSize*m_dTime);
+
+		Eigen::MatrixXf movementMatrix(matrixSize, 19);
+		movementMatrix << zmpOverFootMatrix, raisedFootMatrix, footBackMatrix, footFrontMatrix, footBackToNormalMatrix, zmpBackToNormalMatrix;
+		finalMatrix << timeVector, movementMatrix;
+
+	#ifdef Debug
+	ofstream myfiletraj;
+	myfiletraj.open ("matrixTraj.txt");
+
+	for(int i = 0; i < finalMatrix.rows(); i++)
+	{
+		myfiletraj << finalMatrix.row(i) << endl;
+	}
+
+	myfiletraj.close();
+	#endif
+
+		return finalMatrix;
 }
 
 Eigen::MatrixXf Trajectory::GenerateMovement(Eigen::VectorXf& rightFootInitialPos, Eigen::VectorXf& rightFootFinalPos, Eigen::VectorXf& leftFootInitialPos,
