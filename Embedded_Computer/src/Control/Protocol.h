@@ -7,30 +7,104 @@
 
 namespace Protocol
 {
-    ////////////////////////// STM32F4 Protocol /////////////////////////////////////
+    ////////////////////////// RobotFoot USB Protocol /////////////////////////////////////
     //
-    // Each type of command is identified by a header tag.
-    // The main tag representing the start of a packet stream is 0xffff.
-    // Each tag are 2 bytes and are followed by a 2 bytes size. 
+    // The protocol between the embedded computer and the control board works 
+    // with tags idendification. Each tag is 2 bytes in size and is always followed
+    // by a 2 bytes size.
+    // 
+    // MAIN STRUCTURE ---------------------------------------------------------------------
+    // Each packet(stream) sent and received must be encapsulated
+    // by a header tag(0xffff). Each packet sent/received must
+    // follow this structure :
     //
-    // Here is the main packet stream representation :
-    //
-    //  0      1 2       3 4        n n+1    n+2
+    //  0      1 2       3 4      n+1 n+2    n+3
     //  -------- --------- ---------- ----------
     // | 0xffff | Size(n) |   Data   | Checksum |
     //  -------- --------- ---------- ----------
     //          |____________________|
-    //                     n
-    // Only the main packet stream has a checksum.
+    //                    n
+    // - The size is in byte and includes imself and the data section.
+    // - The "data" section hold the sub-tags for specific commands.
+    // - Only the header tag is ending with a checksum.
     // 
-    // The data segment is x command(s) each identified by tags.
-    // 
-    // TODO Completing Doc
+    // ------------------------------------------------------------------------------------
+    // The following are sub-tags of the main struture's "Data" section describing
+    // specific type of commands.
     //
-    /////////////////////////////////////////////////////////////////////////////////
+    //  ==> MOTOR TAG (read/write)---------------------------------------------------------
+    //      Various data specific to motors. Tag is "MO" in hex value. 
+    //      
+    //      0      1 2       3     4      5        6   7   8      9 10 11   12        13 
+    //      -------- --------- ---------- ---------- ----- -------- ----- ------ -------------
+    //     | 0x4f4d | Size(n) | Motor ID | Position | DT  | Status | PWM | Volt | Temperature |
+    //      -------- --------- ---------- ---------- ----- -------- ----- ------ -------------
+    //              |_________________________________________________________________________|
+    //                                               n
+    //       
+    //      -------------------------------------------------------------------------------
+    //      
+    //  ==> GYROSCOPE/ACCELEROMETER TAG (read only)----------------------------------------
+    //      Updated Gyro/Acc values. Tag is "GA" in hex value.
+    //     
+    //      0      1 2       3 4      5 6      7 8     9 10   11
+    //      -------- --------- -------- -------- ------- -------
+    //     | 0x4147 | Size(n) | Gyro x | Gyro y | Acc x | Acc y |
+    //      -------- --------- -------- -------- ------- -------
+    //              |___________________________________________|
+    //                                 n
+    //      -------------------------------------------------------------------------------
+    //      
+    //  ==> BUTTON TAG (read only)---------------------------------------------------------
+    //      Updated button status. Sent only when status change. Tag is "BU" in hex value.
+    //
+    //      0      1 2       3      4         5
+    //      -------- --------- ----------- -------
+    //     | 0x5542 | Size(n) | Button ID | Value |
+    //      -------- --------- ----------- -------
+    //              |_____________________________|
+    //                            n
+    //      -------------------------------------------------------------------------------
+    //
+    //  ==> POWER TAG (read only)----------------------------------------------------------
+    //      Updated battery level in volt. Value must be divided by 16.0
+    //      to give the volt representation. Tag is "PO" in hex value.
+    //
+    //      0      1 2       3    4     
+    //      -------- --------- -------
+    //     | 0x4f50 | Size(n) | Value |
+    //      -------- --------- -------
+    //              |_________________|
+    //                        n
+    //      -------------------------------------------------------------------------------
+    //   
+    //  ==> TORQUE TAG (write only)--------------------------------------------------------
+    //      Specific command to set (on/off) the motors torque. Tag is "TO" in hex value.
+    //
+    //      0      1 2       3      4        5
+    //      -------- --------- ---------- -------
+    //     | 0x4f54 | Size(n) | Motor ID | Value |
+    //      -------- --------- ---------- -------
+    //              |____________________________|
+    //                            n
+    //      -------------------------------------------------------------------------------
+    //
+    //  ==> MOTOR RAW TAG (read/write)-----------------------------------------------------
+    //      Direct command to the motors. The data of this command is sent directly to the
+    //      motors without validation. Answers to those commands are stacked
+    //      in a circular buffer.
+    // 
+    //      0      1 2       3      4     5   n+1
+    //      -------- --------- ---------- -------
+    //     | 0x534d | Size(n) | Motor ID | Data  |
+    //      -------- --------- ---------- -------
+    //              |____________________________|
+    //                            n
+    //      -------------------------------------------------------------------------------
+    ///////////////////////////////////////////////////////////////////////////////////////
 
     // Protocol Tags
-    // TODO Hardcode
+    // TODO Hardcode 
     const uint16le MsgHeader = 0xffff; // Main header tag. 
 
     const uint16le MotorHeader    = 0x4f4d; // "MO" => Motor status and pos command
@@ -50,23 +124,26 @@ namespace Protocol
 
     struct MotorStruct
     {
-        std::uint8_t  id;
-        uint16le pos;
-        std::uint8_t  dt;
-        uint16le status;
-        uint16le PWM;
+        std::uint8_t    id;
+        uint16le       pos;
+        std::uint8_t    dt;
+        uint16le    status;
+        uint16le       PWM;
         std::uint8_t  volt;
         std::uint8_t  temp;
     };
 
     struct GyroAccStruct
     {
-        // TODO
+        uint16le gyro_x;
+        uint16le gyro_y;
+        uint16le acc_x;
+        uint16le acc_y;
     };
 
     struct ButtonStruct
     {
-        std::uint8_t id;
+        std::uint8_t    id;
         std::uint8_t value;
     };
 
@@ -77,7 +154,7 @@ namespace Protocol
 
     struct TorqueStruct
     {
-        std::uint8_t id;
+        std::uint8_t    id;
         std::uint8_t value;
     };
 }
