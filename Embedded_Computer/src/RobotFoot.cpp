@@ -122,7 +122,7 @@ int main(int argc, char * argv[])
                     Logger::getInstance(Logger::LogLvl::INFO) << "Object distance : " << objectToTrack.y << std::endl;
                     pointD = Eigen::Vector2f(objectToTrack.y, 0);
                     startAngle = Eigen::Vector2f(0, 0);
-                    endAngle = Eigen::Vector2f(90, 90);
+                    endAngle = Eigen::Vector2f(0, 0);
                         
 
                     // Choose kick or walk and start motion task

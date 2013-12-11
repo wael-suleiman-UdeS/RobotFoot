@@ -81,7 +81,6 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 	m_TdToPelvis(1) = currentTrajectoryMatrixLine(pelvisAnglePitch);
 	m_TdToPelvis(2) = currentTrajectoryMatrixLine(pelvisAngleRoll);
 
-
 	Eigen::VectorXf qMotors(12);
 	Eigen::VectorXf qToDisplay(12);
 
