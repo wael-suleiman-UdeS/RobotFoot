@@ -25,7 +25,7 @@ public:
             ID_L_HIP_YAW            = 2,
             ID_R_HIP_ROLL           = 3,
             ID_L_HIP_ROLL           = 4,
-            ID_R_HIP_PITCH          = 253,
+            ID_R_HIP_PITCH          = 5,
             ID_L_HIP_PITCH          = 6,
             ID_R_KNEE               = 7,
             ID_L_KNEE               = 8,
