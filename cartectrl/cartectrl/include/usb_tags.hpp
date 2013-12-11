@@ -86,8 +86,8 @@ template <>
 template <>
  struct usb_sub_message<usb_tag::GA>
 {
-    int16le accelerometer[3];
     int16le gyroscope[3];
+    int16le accelerometer[3];
 };
 
 template <>
