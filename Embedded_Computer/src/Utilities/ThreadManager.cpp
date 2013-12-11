@@ -41,6 +41,7 @@ boost::thread::id ThreadManager::create(unsigned int priority, const boost::func
         if ((retcode = pthread_getschedparam(threadID, &policy, &param)) != 0)
         {
             Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_getschedparam -- " << retcode << std::endl;
+            Logger::getInstance(Logger::LogLvl::ERROR) << "ERROR : You must run the program in sudo." << std::endl;
             std::exit(1);
         }
 
@@ -53,6 +54,7 @@ boost::thread::id ThreadManager::create(unsigned int priority, const boost::func
         if ((retcode = pthread_setschedparam(threadID, policy, &param)) != 0)
         {
             Logger::getInstance(Logger::LogLvl::ERROR) << "ThreadManager.cpp : Error in function pthread_setschedparam -- " << retcode << std::endl;
+            Logger::getInstance(Logger::LogLvl::ERROR) << "ERROR : You must run the program in sudo." << std::endl;
             std::exit(1);
         }
         return newThread->get_id();
