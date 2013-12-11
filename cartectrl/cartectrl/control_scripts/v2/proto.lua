@@ -172,6 +172,24 @@ do local _ENV = env;
         sendPacket {{ tag = 'MR', id, cmd, ... }};
     end
 
+    function WB(id, addr, v)
+        MR(id, 3, addr, 1, v);
+    end
+
+    function WW(id, addr, v)
+        local lsb, msb = bytes(v);
+        MR(id, 3, addr, 2, lsb, msb);
+    end
+
+    function FB(id, addr, v)
+        MR(id, 1, addr, 1, v);
+    end
+
+    function FW(id, addr, v)
+        local lsb, msb = bytes(v);
+        MR(id, 1, addr, 2, lsb, msb);
+    end
+
 end
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
