@@ -77,9 +77,9 @@ std::vector<double> MotionControl::GetInitialQPosition()
 std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatrixLine, std::vector<double> currentMotorsPosition)
 {
 	//pelvis angle offset
-	m_TdToPelvis(0) = currentTrajectoryMatrixLine(pelvisAngleRoll);
-	m_TdToPelvis(1) = currentTrajectoryMatrixLine(pelvisAngleYaw);
-	m_TdToPelvis(2) = currentTrajectoryMatrixLine(pelvisAnglePitch);
+	m_TdToPelvis(0) = currentTrajectoryMatrixLine(pelvisAngleYaw);
+	m_TdToPelvis(1) = currentTrajectoryMatrixLine(pelvisAnglePitch);
+	m_TdToPelvis(2) = currentTrajectoryMatrixLine(pelvisAngleRoll);
 
 
 	Eigen::VectorXf qMotors(12);
@@ -342,7 +342,7 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 		//feet angle offset
 		vDesiredThetaToFoot(0) = currentTrajectoryMatrixLine(rightFootAnglePitch);
 		vDesiredThetaToFoot(1) = currentTrajectoryMatrixLine(rightFootAngleRoll);
-		vDesiredThetaToFoot(2) = currentTrajectoryMatrixLine(rightFootAngleYaw) - currentTrajectoryMatrixLine(pelvisAngleRoll);
+		vDesiredThetaToFoot(2) = currentTrajectoryMatrixLine(rightFootAngleYaw) - currentTrajectoryMatrixLine(pelvisAngleYaw);
 
 	}
 	else
@@ -364,7 +364,7 @@ void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3
 		//feet angle offset
 		vDesiredThetaToFoot(0) = currentTrajectoryMatrixLine(leftFootAnglePitch);
 		vDesiredThetaToFoot(1) = currentTrajectoryMatrixLine(leftFootAngleRoll);
-		vDesiredThetaToFoot(2) = currentTrajectoryMatrixLine(leftFootAngleYaw) - currentTrajectoryMatrixLine(pelvisAngleRoll);
+		vDesiredThetaToFoot(2) = currentTrajectoryMatrixLine(leftFootAngleYaw) - currentTrajectoryMatrixLine(pelvisAngleYaw);
 
 	}
 

@@ -120,7 +120,7 @@ int main(int argc, char * argv[])
                         objectToTrack.angle = 0;
                     }
                     Logger::getInstance(Logger::LogLvl::INFO) << "Object distance : " << objectToTrack.y << std::endl;
-                    pointD = Eigen::Vector2f(objectToTrack.y, 0.6);
+                    pointD = Eigen::Vector2f(objectToTrack.y, 0);
                     startAngle = Eigen::Vector2f(0, 0);
                     endAngle = Eigen::Vector2f(90, 90);
                         
