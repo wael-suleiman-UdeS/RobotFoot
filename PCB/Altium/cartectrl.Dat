@@ -1,0 +1,27 @@
+Field=Comment~String~Comment~100|Field=Description~String~Description~100|Field=Designator~String~Designator~100|Field=Footprint~String~Footprint~100|Field=LibRef~String~LibRef~100|Field=Quantity~Integer~Quantity~100|ReportField=Currency~<none>|ReportField=ProductionQuantity~1|ReportField=ProjectFileName~cartectrl.PrjPcb|ReportField=ProjectFullPath~C:\Users\RobotFoot\Documents\GitHub\RobotFoot\Altium\cartectrl.PrjPcb|ReportField=Title~Bill of Materials For Project [cartectrl.PrjPcb] (No PCB Document Selected)|ReportField=TotalQuantity~81|ReportField=ReportTime~17:00:42|ReportField=ReportDate~2013-04-03|ReportField=ReportDateTime~2013-04-03 17:00:42|ReportField=OutputName~Bill of Materials|ReportField=OutputType~BOM_PartType|ReportField=GeneratorName~BOM|ReportField=GeneratorDescription~Bill of Materials|ReportField=VariantName~None|ReportField=Address1~|ReportField=Address2~|ReportField=Address3~|ReportField=Address4~|ReportField=ApprovedBy~|ReportField=Author~|ReportField=CheckedBy~|ReportField=CompanyName~|ReportField=CurrentDate~2013-04-03|ReportField=CurrentTime~17:00:34|ReportField=Date~|ReportField=DocumentFullPathAndName~C:\Users\RobotFoot\Documents\GitHub\RobotFoot\Altium\main.SchDoc|ReportField=DocumentName~main.SchDoc|ReportField=DocumentNumber~|ReportField=DrawnBy~|ReportField=Engineer~|ReportField=ImagePath~|ReportField=ModifiedDate~2013-04-01|ReportField=Organization~|ReportField=ProjectName~cartectrl.PrjPcb|ReportField=Revision~|ReportField=Rule~|ReportField=SheetNumber~|ReportField=SheetTotal~|ReportField=Time~|ReportField=Title~Main|ReportField=DataSourceFileName~cartectrl.PrjPcb|ReportField=DataSourceFullPath~C:\Users\RobotFoot\Documents\GitHub\RobotFoot\Altium\cartectrl.PrjPcb
+Cap|Capacitor|C1, C3, C4, C5, C8, C9, C10, C11, C13, C18, C22, C24, C25, C26|RAD-0.3|Cap|14
+Cap2|Capacitor|C2, C6, C7, C12, C14, C15, C16, C17, C19, C21, C23, C27|CAPR5-4X5|Cap2|12
+Cap2|Capacitor|C20|C0805|Cap2|1
+LED0|Typical INFRARED GaAs LED|D1, D2, D3, D5, D8, D11|LED-0|LED0|6
+Diode 18TQ045|Schottky Rectifier|D4|TO-220AC|Diode 18TQ045|1
+Diode BAS16|Silicon Switching Diode for High-Speed Switching|D6, D7, D9, D10|SOT-23_L|Diode BAS16|4
+Fuse||F1|Fuseholder|Fuse|1
+Jack Audio|Stereo Jack 3.5mm|J1|Jack Audio|Jack Audio|1
+440247-1|USB 2.0, Right Angle, SMT, B Type, Receptacle, 5 Position, Black|J2|440247|440247-1|1
+Inductor Iron|Magnetic-Core Inductor|L1|AXIAL-0.9|Inductor Iron|1
+Speaker|Loudspeaker|LS1|PIN2|Speaker|1
+MHDR1X6|Header, 6-Pin|P1|MHDR1X6|MHDR1X6|1
+MHDR1X4|Header, 4-Pin|P2, P3, P4, P5|MHDR1X4|MHDR1X4|4
+Pwr Jack||P6, P7|PWR JACK|Pwr Jack|2
+Batt Header||P8|BATTFOOT|Batt Header|1
+RPot|Potentiometer|R1, R2|VR5|RPot|2
+Res1|Resistor|R3, R4, R5, R14, R18, R19|AXIAL-0.3|Res1|6
+Res1|Resistor|R6, R7, R8, R9, R10, R11, R12, R13, R15, R16, R17|J1-0603|Res1|11
+SW|Switch|S1, S2, S3, S4|Switch|SW|4
+SW-SPST|Single-Pole, Single-Throw Switch|S5|Switch on-off|SW-SPST|1
+LM386N-1|Low Voltage Audio Power Amplifier, 8-pin MDIP|U1|N08E|LM386N-1|1
+STM32F407VG|STM32 ARM-based 32-bit MCU with 64 Kbytes Flash, 100-pin LQFP, Industrial Temperature|U2|LQFP100_L|STM32F407VG|1
+LSM330DLC|3D Accelerometer/Gyroscope|U3|ACC/GYR|LSM330DLC|1
+LM2576S-5.0|SIMPLE SWITCHER® 3A Step-Down Voltage Regulator, 5-pin TO-263|U4|TS5B_L|LM2576S-5.0|1
+LM317T|3-Terminal Adjustable Regulator, 3-pin TO-220|U5|T03B|LM317T|1
+XTAL|Crystal Oscillator|Y1|Crystal|XTAL|1

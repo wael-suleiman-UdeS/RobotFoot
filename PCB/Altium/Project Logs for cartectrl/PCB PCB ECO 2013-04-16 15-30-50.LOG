@@ -1,0 +1,14 @@
+Removed Pin From Net: NetName=SCLK Pin=U2-30
+Removed Pin From Net: NetName=MISO Pin=U2-31
+Removed Pin From Net: NetName=MOSI Pin=U2-32
+Removed Pin From Net: NetName=UART_DBG_TX Pin=U2-47
+Removed Pin From Net: NetName=UART_DBG_RX Pin=U2-48
+Removed Pin From Net: NetName=UART_MOT_TX Pin=U2-92
+Removed Pin From Net: NetName=UART_MOT_RX Pin=U2-93
+Added Pin To Net: NetName=UART_DBG_TX Pin=U2-25
+Added Pin To Net: NetName=UART_DBG_RX Pin=U2-26
+Added Pin To Net: NetName=UART_MOT_TX Pin=U2-47
+Added Pin To Net: NetName=UART_MOT_RX Pin=U2-48
+Added Pin To Net: NetName=SCLK Pin=U2-78
+Added Pin To Net: NetName=MISO Pin=U2-79
+Added Pin To Net: NetName=MOSI Pin=U2-80

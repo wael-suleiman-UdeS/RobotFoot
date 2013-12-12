@@ -1,0 +1,68 @@
+*****************************************************************
+      SolidWorks Corporation - Compte-rendu d'état du Processeur IGES
+*****************************************************************
+=================================================================
+Informations générales
+=================================================================
+Envoi de l'identification du produit système en cours  : C:\Users\Knabe\Documents\Classes\8 Semester 8\DARwIn\Deliverables\DARwIn OP\DARwIn OP Part Files\OP 3D CAD Files\5_PR13_B01_FRM_PCB_MAIN_B.prt
+Réception de l'identification du produit système en cours: C:\Users\Knabe\Documents\Classes\8 Semester 8\DARwIn\Deliverables\DARwIn OP\DARwIn OP Part Files\OP 3D CAD Files\5_PR13_B01_FRM_PCB_MAIN_B.prt
+Nom de fichier                    : C:\Users\Knabe\Documents\Classes\8 Semester 8\DARwIn\Deliverables\DARwIn OP\DARwIn OP Part Files\OP 3D CAD Files\3D IGS\5_PR13_B01_FRM_PCB_MAIN_B.igs
+Envoi du système en cours               : NX V7.0
+Version du préprocesseur         : SIEMENS PLM Software NX 7.0
+Date de création du fichier           : 20110525.180155
+Date de création du modèle          : 20110327.133700
+Unités                        : MM
+Echelle de l'espace modèle            : 1
+Auteur                       : 
+Organisation                 : 
+
+
+=================================================================
+Informations sur le traitement des entités
+=================================================================
+
+
+=================================================================
+Analyse de précision d'un fichier IGES:
+=================================================================
+  Nombre le plus répandu de chiffres significatifs:               3
+  Nombre le plus grand de chiffres significatifs:                     14
+  Nombre moyen de chiffres significatifs :                5.22848
+  Distance maximale jusqu'à l'origine:                          101.015
+  Distance minimale jusqu'à l'origine:                            19.85
+  Nombre effectif de chiffres significatifs:              13.8271
+
+
+=================================================================
+Récapitulatif des entités
+=================================================================
+-----------------------------------------------------------------
+Nom de type                                         Nombre converti
+---- ----                                         ----- ---------
+100  Arc                                            968       968
+102  Composite curve                                782       782
+108  Plane                                           32        32
+110  Line                                           870       870
+124  Transformation matrix                           67        67
+126  Rational B-spline curve                       1838      1838
+128  Rational B-spline surface                      431       431
+142  Curve on a parametric surface                  391       391
+144  Trimmed parametric surface                     275       275
+314  Color definition                                 1         1
+406  Property                                         8         8
+410  View                                             8         0
+_________________________________________________________________
+
+
+=================================================================
+Récapitulatif des résultats
+=================================================================
+Type de fonction SolidWorks                Nombre
+-----------------------                -----
+Fonction(s) volumique(s)                       1
+Fonction(s) surfacique(s)                     0
+Fonction(s) de courbe/d'esquisse                0
+--------------------------------------------
+Heure de début: mercredi, février 06, 2013 17:26:54
+Heure de fin: mercredi, février 06, 2013 17:26:59
+Durée de traitement: 0 days, 00 hours, 00 mins, 05 secs

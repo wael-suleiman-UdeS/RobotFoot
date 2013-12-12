@@ -1,0 +1,7 @@
+Change Component Footprint: Designator=C2 Old Footprint=URS1V102 New Footprint=UWT1C471MNL1GS
+Added Member To Class: ClassName=LEDs Member=Component D3 LED0
+Added Member To Class: ClassName=LEDs Member=Component R13 Res1
+Added Room: Name=LEDs
+Added Room: Name=MCU
+Added Room: Name=V5
+Added Room: Name=Vbatt

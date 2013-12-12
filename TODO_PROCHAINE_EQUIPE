@@ -1,0 +1,13 @@
+Pour la marche:
+
+-Pour la marche dynamique avec le COM, dans la fonction GenerateCOM, il faut utiliser une trajectoire avec des transitions quasi-instantannées dans les déplacements du ZMP plutôt que d'utiliser la trajectoire du ZMP calculée avec GenerateZMP.
+
+-Pour la marche avec trajectoire courbe. Tout est implémenté dans la boucle de control (MotionControl.cpp), mais il semble y avoir une erreur dans la génération de trajectoire, car les jambes s'entrechoquent et se croisent légèrement.
+
+Pour la structure mécanique:
+
+-Pour une prochain prototype, considérer utiliser un alliage plus solide (acier), car le squelette en aluminium semble plier légèrement sous le poids du robot.
+
+Matlab:
+
+-Mettre ensemble toutes les parties individuelles de la marche de Matlab pour pouvoir faire l'algorithme de marche au complet dans Matlab pour aider à debugger
