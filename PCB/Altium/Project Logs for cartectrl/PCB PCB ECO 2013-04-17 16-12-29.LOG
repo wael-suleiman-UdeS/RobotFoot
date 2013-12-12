@@ -1,0 +1,19 @@
+Added Component: Designator=C28(C0805)
+Added Component: Designator=R20(AXIAL-0.3)
+Added Component: Designator=R21(AXIAL-0.3)
+Added Component: Designator=R22(AXIAL-0.3)
+Added Pin To Net: NetName=GND Pin=C28-1
+Added Pin To Net: NetName=VBATT Pin=R20-2
+Added Pin To Net: NetName=GND Pin=R22-1
+Added Pin To Net: NetName=NetR20_1 Pin=R20-1
+Added Pin To Net: NetName=NetR20_1 Pin=R21-2
+Added Net: Name=NetR20_1
+Added Pin To Net: NetName=VSENSE Pin=C28-2
+Added Pin To Net: NetName=VSENSE Pin=R21-1
+Added Pin To Net: NetName=VSENSE Pin=R22-2
+Added Pin To Net: NetName=VSENSE Pin=U2-23
+Added Net: Name=VSENSE
+Added Member To Class: ClassName=MCU Member=Component C28 Cap
+Added Member To Class: ClassName=MCU Member=Component R20 Res1
+Added Member To Class: ClassName=MCU Member=Component R21 Res1
+Added Member To Class: ClassName=MCU Member=Component R22 Res1

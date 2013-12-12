@@ -1,0 +1,7 @@
+Removed Pin From Net: NetName=VBATT Pin=F1-2
+Removed Pin From Net: NetName=NetD9_1 Pin=S5-1
+Added Pin To Net: NetName=NetD9_1 Pin=F1-1
+Added Pin To Net: NetName=VBATT Pin=S5-2
+Added Pin To Net: NetName=NetF1_2 Pin=F1-2
+Added Pin To Net: NetName=NetF1_2 Pin=S5-1
+Added Net: Name=NetF1_2
