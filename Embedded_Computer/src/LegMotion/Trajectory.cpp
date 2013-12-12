@@ -154,6 +154,11 @@ myfiletraj.close();
 
 /** \brief Generates a matrix which contains the necessary information to perform a kick
  *
+ * \param kickSpeedRatio float: The ratio between the time to perform a movement a the time to perform the forward kick movement (kick speed)
+  * \param movementTime float: The time required to perform a movement
+  * \param pelvisKickOffsetR Eigen::Vector3f: The offset of the pelvis when it is over the left foot
+  * \param kickBackOffsetR Eigen::Vector3f: The offset of the right foot when it is back
+  * \param kickBackOffsetR Eigen::Vector3f: GThe offset of the right foot when it is forward
  */
 Eigen::MatrixXf Trajectory::GenerateKick( float kickSpeedRatio, float movementTime,
 		const Eigen::Vector3f& pelvisKickOffsetR,
@@ -881,6 +886,15 @@ Eigen::MatrixXf Trajectory::GenerateZMP(Eigen::MatrixXf rightSteps, Eigen::Matri
     return trajectory;
 }
 
+/** \brief Generates the ZMP trajectory between step transfer
+ *
+ * \param trajectoryMatrix Eigen::MatrixXf&: The trajectory matrix
+ * \param startingPos Eigen::VectorXf: The starting position vector
+ * \param endingPos Eigen::VectorXf: The ending position vector
+ * \param stepIndex int: The step number
+ * \param pelvisAngleOffset Eigen::Vector3f: The offset to add to the pelvis angle
+ *
+ */
 void Trajectory::GenerateZMPStepTransfer(Eigen::MatrixXf& trajectoryMatrix, Eigen::VectorXf startingPos, Eigen::VectorXf endingPos, int stepIndex, Eigen::Vector3f pelvisAngleOffset)
 {
 	Eigen::MatrixXf params(4,6);
@@ -903,7 +917,6 @@ void Trajectory::GenerateZMPStepTransfer(Eigen::MatrixXf& trajectoryMatrix, Eige
 		if( stepIndex > 0)
 		{
 			startingPos(4) = -startingPos(4);
-			//endingPos(4) = -endingPos(4);
 		}
 		params = GenerateParabollicTrajParams(startingPos, endingPos, m_singleStepTime/2);
 		//While foot is rising
