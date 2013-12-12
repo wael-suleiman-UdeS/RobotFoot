@@ -7,3 +7,7 @@ Pour la marche:
 Pour la structure mécanique:
 
 -Pour une prochain prototype, considérer utiliser un alliage plus solide (acier), car le squelette en aluminium semble plier légèrement sous le poids du robot.
+
+Matlab:
+
+-Mettre ensemble toutes les parties individuelles de la marche de Matlab pour pouvoir faire l'algorithme de marche au complet dans Matlab

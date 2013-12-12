@@ -24,6 +24,13 @@ const float ANGLE1 = 0.6;
 const float ANGLE2 = -1.2;
 }
 
+/** \brief Constructor
+ *
+ * \param distanceThreshold float: A position error check, keep correcting until you reach it
+ * \param angleThreshold float: An angle error check, keep correcting until you reach it
+ * \param maxPosError float: The maximum error acceptable, the motors will stop if it is reached
+ * \param iterationMax int: The maximum number of iterations to try to correct angle and position errors
+ */
 MotionControl::MotionControl(float distanceThreshold, float angleThreshold, float maxPosError, int iterationMax)
 : m_distanceThreshold(distanceThreshold)
 , m_angleThreshold(angleThreshold)
@@ -65,6 +72,9 @@ MotionControl::~MotionControl()
 #endif
 }
 
+/** \brief GetInitialQPosition: Get the initial motors position
+ *
+ */
 std::vector<double> MotionControl::GetInitialQPosition()
 {
 	float dangle1 = ANGLE1*180/M_PI;
@@ -74,6 +84,11 @@ std::vector<double> MotionControl::GetInitialQPosition()
 	return initialQ;
 }
 
+/** \brief UpdateQ: Update the q values (motor angles) and return it to the motors (control loop)
+ *
+ * \param currentTrajectoryMatrixLine Eigen::VectorXf: The current line from the trajectory matrix
+ * \param currentMotorsPosition std::vector<double>: The current position of the motors
+ */
 std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatrixLine, std::vector<double> currentMotorsPosition)
 {
 	//pelvis angle offset
@@ -163,12 +178,8 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 		qToDisplay*=180/M_PI;
 	}
 
-	//std::vector<float> stdQToDisplay(12);
-	//Eigen::Map<Eigen::VectorXf>(stdQToDisplay.data(), 12) = qToDisplay;
-
 	std::vector<double> stdQToDisplay(12);
 	Eigen::Map<Eigen::VectorXd>(stdQToDisplay.data(), 12) = qToDisplay.cast<double>();
-
 
 #ifdef Debug
 			myfileQ << qToDisplay.transpose() << endl;
@@ -181,7 +192,11 @@ std::vector<double> MotionControl::UpdateQ(Eigen::VectorXf currentTrajectoryMatr
 	return stdQToDisplay;
 }
 
-
+/** \brief UpdateQ: Update the q values (motor angles) and return it to the motors (control loop)
+ * This is used for debug only
+ *
+ * \param currentTrajectoryMatrixLine Eigen::VectorXf: The current line from the trajectory matrix
+ */
 void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 {
 #ifdef Debug
@@ -307,6 +322,15 @@ void MotionControl::Move(Eigen::MatrixXf trajectoryMatrix)
 #endif
 }
 
+/** \brief CalculateError
+ *
+ * \param ePosToPelvis Eigen::Vector3f&: The calculated position error between standing foot and pelvis
+*  \param eThetaToPelvis Eigen::Vector3f&: The calculated angle error between standing foot and pelvis
+*  \param ePosToFoot Eigen::Vector3f&: The calculated position error between the pelvis and the moving foot
+*  \param eThetaToFoot Eigen::Vector3f&: The calculated angle error between the pelvis and the moving foot
+ * \param currentTrajectoryMatrixLine Eigen::VectorXf: The current line from the trajectory matrix
+ * \param currentMotorsPosition std::vector<double>: The current position of the motors
+ */
 void MotionControl::CalculateError(Eigen::Vector3f& ePosToPelvis, Eigen::Vector3f& eThetaToPelvis, Eigen::Vector3f& ePosToFoot,
 		Eigen::Vector3f& eThetaToFoot, Eigen::VectorXf& currentTrajectoryMatrixLine, Eigen::VectorXf qMotors)
 {
