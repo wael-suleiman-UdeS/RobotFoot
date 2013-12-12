@@ -55,9 +55,9 @@ private:
 		pelvisPosX,
 		pelvisPosY,
 		pelvisPosZ,
-		pelvisAngleYaw,
 		pelvisAnglePitch,
-		pelvisAngleRoll
+		pelvisAngleRoll,
+		pelvisAngleYaw
 	};
 
 	void InitRotationMatrices();

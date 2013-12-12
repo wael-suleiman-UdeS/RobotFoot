@@ -241,7 +241,7 @@
           <IsInversed value="1"/>
 	    </L_HIP_ROLL>
 	    <R_HIP_PITCH>
-		  <MotorID value="253"/>
+		  <MotorID value="5"/>
 		  <Offset value="516"/>
 		  <LimitMin value="141"/>
 		  <LimitMax value="579"/>
