@@ -27,6 +27,7 @@ Td2 = [0; 0; 0];
 
 file_id = fopen('input.txt', 'w');
 
+%Generer la trajectoire en position et en angle pour chaque "end-effector" du robot
 [Size,dt,T,RightFootTraj,LeftFootTraj,PelvisTraj,FixedFoot,TRightTraj,TLeftTraj,TPelvisTraj] = GenerateTrajectory();
 
 %FixedFoot = 0 ;  
@@ -51,6 +52,8 @@ for i = 1:Size
 
     while ~CalculDone
         NbIteration = NbIteration + 1;
+
+        %Calcul l'erreur de la trajectoire avec la position des moteurs actuelles
         if  FixedFoot(i) == 0 
             [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, TPelvisTraj, TLeftTraj, TRightTraj);
         elseif FixedFoot(i) == 1
@@ -87,12 +90,14 @@ for i = 1:Size
             TempQ(7:12)= TempQ(7:12)+ k*(priorite3' + priorite4') ;  
             q = TempQ(end:-1:1) ;
         end 
+        %Verify l'erreur avec la nouvelle position des moteurs trouve
              if  FixedFoot(i) == 0 
                  [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementDG(i, L4, L5, LTX, LTZ, q, LeftFootTraj, PelvisTraj, RightFootTraj, TPelvisTraj, TLeftTraj, TRightTraj);
              elseif FixedFoot(i) == 1
                  [ePos1, eTheta1, ePos2, eTheta2, DH1, DH2  ] = deltaDeplacementGD(i, L4, L5, LTX, LTZ, q, RightFootTraj, PelvisTraj, LeftFootTraj, TPelvisTraj, TRightTraj, TLeftTraj);
              end
-             
+
+             %Determine si l'erreur est assez petite et si on continue nos calcul pour cette iteration
              CalculDone = VerifyError(DistanceThreshold,ePos1,DistanceThreshold,ePos2,AngleThreshold,eTheta1(1),AngleThreshold,eTheta1(2),AngleThreshold,eTheta1(3),AngleThreshold,eTheta2(1),AngleThreshold,eTheta2(2),AngleThreshold,eTheta2(3));
             
             if NbIteration >= NbIterationMax
