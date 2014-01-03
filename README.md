@@ -1,4 +1,4 @@
 RobotFoot
 =========
 
-An humanoid robot soccer team.
+A humanoid robot soccer team.
